@@ -19,25 +19,25 @@ def analyze(days: int = 30) -> dict:
     if not logs:
         return {"total": 0, "message": "No feedback data yet"}
 
-    matches = [l for l in logs if l["type"] == "match"]
-    corrections = [l for l in logs if l["type"] == "correction"]
-    confirms = [l for l in logs if l["type"] == "confirm"]
+    matches = [l for l in logs if not l.get("corrected", False) and not l.get("confirmed", False)]
+    corrections = [l for l in logs if l.get("corrected", False)]
+    confirms = [l for l in logs if l.get("confirmed", False)]
 
     # 纠正率
     total_interactions = len(corrections) + len(confirms)
     correction_rate = len(corrections) / total_interactions if total_interactions > 0 else 0
 
     # 最常被纠正的查询
-    correction_queries = Counter(c["query"] for c in corrections)
+    correction_queries = Counter(c["input"] for c in corrections)
 
     # 匹配类型分布
     type_dist = Counter(m.get("match_type", "unknown") for m in matches)
 
     # 学习效果：纠正过的查询后来是否还被纠正
-    corrected_queries = set(c["query"] for c in corrections)
+    corrected_queries = set(c["input"] for c in corrections)
     re_corrections = 0
     for q in corrected_queries:
-        q_corrections = [c for c in corrections if c["query"] == q]
+        q_corrections = [c for c in corrections if c["input"] == q]
         if len(q_corrections) > 1:
             re_corrections += 1
 

@@ -137,12 +137,14 @@ def feedback(query: str, correct_champion_id: str, was_wrong: bool = True):
     correct_info = data.get(correct_champion_id, {})
     
     if was_wrong:
-        # 找之前匹配的错误 ID
         prev = match(query, top_n=1)
         wrong_id = prev[0]["champion_id"] if prev else ""
         rec = log_correction(query, wrong_id, correct_champion_id, correct_info.get("title", ""))
     else:
-        rec = log_confirm(query, correct_champion_id)
+        prev = match(query, top_n=1)
+        score = prev[0]["score"] if prev else 0
+        title = correct_info.get("title", "")
+        rec = log_confirm(query, correct_champion_id, title, score)
     
     return rec
 

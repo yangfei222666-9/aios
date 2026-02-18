@@ -19,8 +19,8 @@ BUILTIN_ALIASES_COUNT = 80  # 大约数量，用于统计
 def suggest(days: int = 30, min_count: int = 2) -> list:
     """生成别名建议列表"""
     logs = load_feedback(days)
-    corrections = [l for l in logs if l["type"] == "correction"]
-    matches = [l for l in logs if l["type"] == "match"]
+    corrections = [l for l in logs if l.get("corrected", False)]
+    matches = [l for l in logs if not l.get("corrected", False)]
     learned = load_learned()
 
     suggestions = []
@@ -28,7 +28,7 @@ def suggest(days: int = 30, min_count: int = 2) -> list:
     # 1. 多次纠正到同一英雄 → 建议固化为别名
     query_to_correct = defaultdict(list)
     for c in corrections:
-        query_to_correct[c["query"]].append(c["correct_id"])
+        query_to_correct[c["input"]].append(c["matched_id"])
 
     for query, ids in query_to_correct.items():
         if query in learned:
@@ -48,8 +48,8 @@ def suggest(days: int = 30, min_count: int = 2) -> list:
     # 2. 高频匹配但低分 → 建议添加别名
     low_score_queries = defaultdict(list)
     for m in matches:
-        if m.get("score", 1.0) < 0.8:
-            low_score_queries[m["query"]].append(m["matched_id"])
+        if m.get("score") is not None and m["score"] < 0.8:
+            low_score_queries[m["input"]].append(m["matched_id"])
 
     for query, ids in low_score_queries.items():
         if query in learned or len(ids) < min_count:

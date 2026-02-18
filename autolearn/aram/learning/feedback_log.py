@@ -11,16 +11,20 @@ FEEDBACK_FILE = DATA_DIR / "feedback_log.jsonl"
 LEARNED_FILE = DATA_DIR / "learned_aliases.json"
 
 
+def _ts_iso():
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+
+
 def log_match(query: str, matched_id: str, matched_title: str, score: float, match_type: str):
-    """记录一次匹配（不管对错）"""
+    """记录一次匹配（未纠正）"""
     rec = {
-        "ts": int(time.time()),
-        "type": "match",
-        "query": query,
+        "timestamp": _ts_iso(),
+        "input": query,
+        "matched": matched_title,
         "matched_id": matched_id,
-        "matched_title": matched_title,
         "score": score,
         "match_type": match_type,
+        "corrected": False,
     }
     _append(rec)
     return rec
@@ -29,12 +33,14 @@ def log_match(query: str, matched_id: str, matched_title: str, score: float, mat
 def log_correction(query: str, wrong_id: str, correct_id: str, correct_title: str):
     """记录一次用户纠正"""
     rec = {
-        "ts": int(time.time()),
-        "type": "correction",
-        "query": query,
+        "timestamp": _ts_iso(),
+        "input": query,
+        "matched": correct_title,
+        "matched_id": correct_id,
+        "score": None,
+        "match_type": "user_correction",
+        "corrected": True,
         "wrong_id": wrong_id,
-        "correct_id": correct_id,
-        "correct_title": correct_title,
     }
     _append(rec)
 
@@ -46,13 +52,16 @@ def log_correction(query: str, wrong_id: str, correct_id: str, correct_title: st
     return rec
 
 
-def log_confirm(query: str, matched_id: str):
+def log_confirm(query: str, matched_id: str, matched_title: str, score: float):
     """记录一次用户确认（匹配正确）"""
     rec = {
-        "ts": int(time.time()),
-        "type": "confirm",
-        "query": query,
+        "timestamp": _ts_iso(),
+        "input": query,
+        "matched": matched_title,
         "matched_id": matched_id,
+        "score": score,
+        "corrected": False,
+        "confirmed": True,
     }
     _append(rec)
     return rec
@@ -69,7 +78,11 @@ def load_feedback(days: int = 30) -> list:
             continue
         try:
             rec = json.loads(line)
-            if rec.get("ts", 0) >= cutoff:
+            # 兼容新旧格式
+            ts = rec.get("ts") or rec.get("timestamp")
+            if isinstance(ts, str):
+                ts = time.mktime(time.strptime(ts, "%Y-%m-%dT%H:%M:%S"))
+            if ts and ts >= cutoff:
                 out.append(rec)
         except Exception:
             continue
