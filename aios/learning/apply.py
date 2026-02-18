@@ -1,17 +1,14 @@
-# aios/scripts/apply_suggestions.py - 受控应用
+# aios/learning/apply.py - 受控应用
 """
-核心原则：系统可以进化，但不允许自毁。
-
-v0.1 安全规则（锁死）:
-  ✅ 允许自动应用: alias 追加（只 append，不覆盖、不删除）
-  ❌ 禁止自动应用: 阈值变更、模型路由变更、删除已有 alias、修改 config.yaml
+系统可以进化，但不允许自毁。
 """
 import json, sys, time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from scripts.log_event import log_event
-from scripts.config_loader import get_path, get_float, get_bool, CONFIG_PATH
+from core.engine import log_event
+from core.config import get_path, get_float, get_bool, CONFIG_PATH
+from core.policies import apply_alias_suggestion
 
 AIOS_ROOT = Path(__file__).resolve().parent.parent
 LEARNING_DIR = AIOS_ROOT / "learning"
@@ -52,25 +49,6 @@ def save_learned(aliases: dict):
     LEARNED_FILE.write_text(json.dumps(aliases, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def apply_alias_suggestion(alias_map: dict, item: dict, min_conf: float, no_overwrite: bool) -> tuple:
-    """
-    单条 alias 建议应用逻辑。
-    返回 (applied: bool, reason: str)
-    """
-    inp = item.get("input", "")
-    sug = item.get("suggested", "")
-    conf = item.get("confidence", 0)
-
-    if no_overwrite and inp in alias_map:
-        return False, "skip_existing_key_no_overwrite"
-    if conf < min_conf:
-        return False, "skip_low_confidence"
-    if inp not in alias_map:
-        alias_map[inp] = sug
-        return True, "applied_append_new_key"
-    return False, "skip_existing_key_no_overwrite"
-
-
 def run(mode: str = "show") -> dict:
     data = load_suggestions()
     if not data:
@@ -90,8 +68,7 @@ def run(mode: str = "show") -> dict:
         print(f"=== {total} Suggestions ===\n")
         learned = load_learned()
         for s in alias_sug:
-            safe = s["input"] not in learned
-            tag = "AUTO" if safe else "EXISTS"
+            tag = "AUTO" if s["input"] not in learned else "EXISTS"
             print(f"  [{tag}] alias: \"{s['input']}\" -> \"{s['suggested']}\" (confidence: {s['confidence']})")
         for s in threshold_warn:
             print(f"  [NEEDS REVIEW] threshold: {s['field']} {s['current']} -> {s['suggested']}")
@@ -100,20 +77,20 @@ def run(mode: str = "show") -> dict:
         return {"total": total}
 
     elif mode == "auto":
-        applied = []
+        applied_list = []
         pending_alias = []
         learned = load_learned()
 
         for s in alias_sug:
-            applied_ok, why = apply_alias_suggestion(learned, s, MIN_CONF, NO_OVERWRITE)
-            if applied_ok:
-                applied.append({
+            applied, why = apply_alias_suggestion(learned, s, MIN_CONF, NO_OVERWRITE)
+            if applied:
+                applied_list.append({
                     "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
                     "alias": {s["input"]: s["suggested"]},
                     "confidence": s.get("confidence", 0),
                     "reason": why,
                 })
-                log_event("suggestion_applied", "apply_suggestions",
+                log_event("suggestion_applied", "apply",
                           f"alias: {s['input']} -> {s['suggested']}",
                           {"input": s["input"], "applied": s["suggested"]})
                 print(f"  APPLIED: \"{s['input']}\" -> \"{s['suggested']}\" ({why})")
@@ -121,9 +98,9 @@ def run(mode: str = "show") -> dict:
                 pending_alias.append(s)
                 print(f"  SKIP: \"{s['input']}\" ({why})")
 
-        if applied:
+        if applied_list:
             save_learned(learned)
-            APPLIED_LOG.write_text(json.dumps(applied, ensure_ascii=False, indent=2), encoding="utf-8")
+            APPLIED_LOG.write_text(json.dumps(applied_list, ensure_ascii=False, indent=2), encoding="utf-8")
 
         # threshold + route -> pending
         pending = {
@@ -138,23 +115,17 @@ def run(mode: str = "show") -> dict:
         for s in route_sug:
             print(f"  PENDING: route HTTP {s['status_code']} (needs human review)")
 
-        has_pending = pending_alias or threshold_warn or route_sug
-        if has_pending:
+        if pending_alias or threshold_warn or route_sug:
             PENDING_FILE.write_text(json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8")
 
         SUGGESTIONS_FILE.write_text(json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8")
 
-        # write applied_log.json
-        if applied:
-            APPLIED_LOG.write_text(json.dumps(applied, ensure_ascii=False, indent=2), encoding="utf-8")
-
         pending_count = len(pending_alias) + len(threshold_warn) + len(route_sug)
-        print(f"\nApplied: {len(applied)}, Pending review: {pending_count}")
-        return {"applied": len(applied), "pending": pending_count}
+        print(f"\nApplied: {len(applied_list)}, Pending review: {pending_count}")
+        return {"applied": len(applied_list), "pending": pending_count}
 
     else:
-        print(f"Unknown mode: {mode}")
-        print("Usage: apply_suggestions.py [show|auto]")
+        print("Usage: apply.py [show|auto]")
         return {}
 
 
