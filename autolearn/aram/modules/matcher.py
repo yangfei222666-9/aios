@@ -14,6 +14,13 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from aram.learning.feedback_log import log_match, log_correction, log_confirm, load_learned
 
+# aios 事件总线（可选，不影响核心功能）
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "aios"))
+    from bridge import on_match as _aios_match, on_correction as _aios_correction, on_confirm as _aios_confirm
+except Exception:
+    _aios_match = _aios_correction = _aios_confirm = None
+
 # 常用别名词典（国服玩家习惯叫法）
 ALIASES = {
     # 简称/昵称 → champion_id
@@ -141,11 +148,19 @@ def feedback(query: str, correct_champion_id: str, was_wrong: bool = True):
         wrong_id = prev[0]["champion_id"] if prev else ""
         wrong_title = prev[0]["title"] if prev else ""
         rec = log_correction(query, wrong_id, wrong_title, correct_champion_id, correct_info.get("title", ""))
+        # → aios 事件总线
+        if _aios_correction:
+            try: _aios_correction(query, wrong_title, correct_info.get("title", ""), correct_champion_id)
+            except Exception: pass
     else:
         prev = match(query, top_n=1)
         score = prev[0]["score"] if prev else 0
         title = correct_info.get("title", "")
         rec = log_confirm(query, correct_champion_id, title, score)
+        # → aios 事件总线
+        if _aios_confirm:
+            try: _aios_confirm(query, title, correct_champion_id)
+            except Exception: pass
     
     return rec
 
