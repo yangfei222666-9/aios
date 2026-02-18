@@ -16,7 +16,15 @@ import argparse, json, time, sys
 from pathlib import Path
 
 AIOS_ROOT = Path(__file__).resolve().parent.parent
-EVENTS_FILE = AIOS_ROOT / "events" / "events.jsonl"
+
+# 从 config 加载路径
+try:
+    sys.path.insert(0, str(AIOS_ROOT))
+    from scripts.config_loader import get_path
+    _events_path = get_path("events")
+    EVENTS_FILE = _events_path if _events_path and str(_events_path) != "." else AIOS_ROOT / "events" / "events.jsonl"
+except Exception:
+    EVENTS_FILE = AIOS_ROOT / "events" / "events.jsonl"
 
 
 def log_event(event_type: str, source: str, summary: str, data: dict = None) -> dict:

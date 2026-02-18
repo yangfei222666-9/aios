@@ -3,24 +3,21 @@ config:
   version: "0.1.0"
   description: "个人 AI 操作系统 — 事件驱动，自学习"
 
-# 事件源
-events:
-  store: "events/events.jsonl"    # 唯一事实来源
-  max_age_days: 90                # 保留天数
+paths:
+  events: "%USERPROFILE%\\.openclaw\\workspace\\aios\\events\\events.jsonl"
+  suggestions: "%USERPROFILE%\\.openclaw\\workspace\\aios\\learning\\suggestions.json"
+  applied_log: "%USERPROFILE%\\.openclaw\\workspace\\aios\\learning\\applied_log.json"
+  alias: "%USERPROFILE%\\.openclaw\\workspace\\autolearn\\data\\learned_aliases.json"
 
-# 学习层
-learning:
-  lessons: "learning/lessons.md"
-  suggestions: "learning/suggestions.json"
-  daily_report: "learning/daily_report.md"
-  auto_apply: false               # 建议默认需人工审核
+policy:
+  alias_min_confidence: 0.80
+  alias_no_overwrite: true
 
-# 分析
 analysis:
-  correction_threshold: 3         # 纠正 N 次触发建议
-  report_schedule: "daily"        # daily / weekly
+  correction_threshold: 3
+  low_score_threshold: 0.80
+  report_schedule: "daily"
 
-# 模块
 modules:
   aram:
     enabled: true

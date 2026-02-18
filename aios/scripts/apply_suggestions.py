@@ -22,11 +22,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.log_event import log_event
+from scripts.config_loader import get_path, get_policy
 
 AIOS_ROOT = Path(__file__).resolve().parent.parent
 LEARNING_DIR = AIOS_ROOT / "learning"
-SUGGESTIONS_FILE = LEARNING_DIR / "suggestions.json"
+SUGGESTIONS_FILE = get_path("suggestions") or (LEARNING_DIR / "suggestions.json")
 PENDING_FILE = LEARNING_DIR / "pending_review.json"
+APPLIED_LOG = get_path("applied_log") or (LEARNING_DIR / "applied_log.json")
 
 # 安全白名单：只有这些类型允许自动应用
 SAFE_AUTO_TYPES = {"alias_redirect"}
@@ -34,10 +36,11 @@ SAFE_AUTO_TYPES = {"alias_redirect"}
 # 危险黑名单：这些类型必须人工确认
 REQUIRES_HUMAN = {"threshold_warning", "route_suggestion", "config_change", "alias_delete"}
 
-CONFIDENCE_THRESHOLD = 0.8
+CONFIDENCE_THRESHOLD = get_policy("alias_min_confidence", 0.80)
+NO_OVERWRITE = get_policy("alias_no_overwrite", True)
 
 # learned_aliases 路径
-LEARNED_FILE = Path(__file__).resolve().parent.parent.parent / "autolearn" / "data" / "learned_aliases.json"
+LEARNED_FILE = get_path("alias")
 APPLIED_LOG = LEARNING_DIR / "applied_log.json"
 
 
@@ -162,7 +165,7 @@ def run(mode: str = "show") -> dict:
                 print(f"  ⏭️ LOW CONF: \"{s['input']}\" (confidence {conf} < {CONFIDENCE_THRESHOLD})")
                 continue
             
-            if s["input"] in learned:
+            if NO_OVERWRITE and s["input"] in learned:
                 pending_alias.append(s)
                 print(f"  ⏭️ EXISTS: \"{s['input']}\" already in aliases")
                 continue
