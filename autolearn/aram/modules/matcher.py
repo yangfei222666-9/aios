@@ -245,7 +245,7 @@ if __name__ == "__main__":
             if r["match_type"] == "contains":
                 out["reasons"].append("name_contains")
             if r["score"] >= 0.8:
-                out["reasons"].append(f"fuzzy_score>{r['score']:.1f}")
+                out["reasons"].append(f"fuzzy_score>={r['score']:.1f}")
             print(json.dumps(out, ensure_ascii=False))
     else:
         print(explain(q))
