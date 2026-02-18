@@ -52,6 +52,25 @@ def save_learned(aliases: dict):
     LEARNED_FILE.write_text(json.dumps(aliases, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def apply_alias_suggestion(alias_map: dict, item: dict, min_conf: float, no_overwrite: bool) -> tuple:
+    """
+    单条 alias 建议应用逻辑。
+    返回 (applied: bool, reason: str)
+    """
+    inp = item.get("input", "")
+    sug = item.get("suggested", "")
+    conf = item.get("confidence", 0)
+
+    if no_overwrite and inp in alias_map:
+        return False, "skip_existing_key_no_overwrite"
+    if conf < min_conf:
+        return False, "skip_low_confidence"
+    if inp not in alias_map:
+        alias_map[inp] = sug
+        return True, "applied_append_new_key"
+    return False, "skip_existing_key_no_overwrite"
+
+
 def run(mode: str = "show") -> dict:
     data = load_suggestions()
     if not data:
@@ -69,8 +88,8 @@ def run(mode: str = "show") -> dict:
 
     if mode == "show":
         print(f"=== {total} Suggestions ===\n")
+        learned = load_learned()
         for s in alias_sug:
-            learned = load_learned()
             safe = s["input"] not in learned
             tag = "AUTO" if safe else "EXISTS"
             print(f"  [{tag}] alias: \"{s['input']}\" -> \"{s['suggested']}\" (confidence: {s['confidence']})")
@@ -83,37 +102,28 @@ def run(mode: str = "show") -> dict:
     elif mode == "auto":
         applied = []
         pending_alias = []
+        learned = load_learned()
 
         for s in alias_sug:
-            learned = load_learned()
-            conf = s.get("confidence", 0)
-
-            if conf < MIN_CONF:
+            ok, reason = apply_alias_suggestion(learned, s, MIN_CONF, NO_OVERWRITE)
+            if ok:
+                applied.append({
+                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "alias": {s["input"]: s["suggested"]},
+                    "confidence": s.get("confidence", 0),
+                    "reason": reason,
+                })
+                log_event("suggestion_applied", "apply_suggestions",
+                          f"alias: {s['input']} -> {s['suggested']}",
+                          {"input": s["input"], "applied": s["suggested"]})
+                print(f"  APPLIED: \"{s['input']}\" -> \"{s['suggested']}\" ({reason})")
+            else:
                 pending_alias.append(s)
-                print(f"  LOW CONF: \"{s['input']}\" (confidence {conf} < {MIN_CONF})")
-                continue
+                print(f"  SKIP: \"{s['input']}\" ({reason})")
 
-            if NO_OVERWRITE and s["input"] in learned:
-                pending_alias.append(s)
-                print(f"  EXISTS: \"{s['input']}\" already in aliases")
-                continue
-
-            # safe: append only
-            learned[s["input"]] = s["suggested"]
+        if applied:
             save_learned(learned)
-
-            record = {
-                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                "alias": {s["input"]: s["suggested"]},
-                "confidence": conf,
-                "reason": s.get("reason", ""),
-            }
-            applied.append(record)
-
-            log_event("suggestion_applied", "apply_suggestions",
-                      f"alias: {s['input']} -> {s['suggested']}",
-                      {"input": s["input"], "applied": s["suggested"]})
-            print(f"  APPLIED: \"{s['input']}\" -> \"{s['suggested']}\" (confidence: {conf})")
+            APPLIED_LOG.write_text(json.dumps(applied, ensure_ascii=False, indent=2), encoding="utf-8")
 
         # threshold + route -> pending
         pending = {
