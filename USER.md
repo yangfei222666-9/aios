@@ -6,6 +6,9 @@
 - **Timezone:** Asia/Shanghai (GMT+8)
 - **Telegram:** @shh7799
 
+## 授权
+- 允许读取所有聊天记录并给出建议
+
 ## Context
 
 - 电脑配置很强：Ryzen 7 9800X3D + RTX 5070 Ti + 32GB RAM + 2TB NVMe

@@ -76,3 +76,28 @@ def on_circuit_breaker(sig: str, tripped: bool):
         return log_event("error", "autolearn.circuit_breaker", f"TRIPPED: {sig}", {
             "sig": sig,
         })
+
+
+def on_http_error(source: str, url: str, status_code: int, detail: str = ""):
+    """HTTP 错误（502/401/404 等）"""
+    return log_event("http_error", source, f"HTTP {status_code}: {url}", {
+        "url": url,
+        "status_code": status_code,
+        "detail": detail[:200],
+    })
+
+
+def on_health(source: str, ok: bool, checks: dict):
+    """健康检查结果"""
+    return log_event("health", source, f"{'PASS' if ok else 'FAIL'}", {
+        "ok": ok,
+        "checks": checks,
+    })
+
+
+def on_deploy(source: str, action: str, detail: str = ""):
+    """版本/配置变更"""
+    return log_event("deploy", source, f"[{action}] {detail[:200]}", {
+        "action": action,
+        "detail": detail[:500],
+    })

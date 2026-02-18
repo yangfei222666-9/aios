@@ -114,6 +114,11 @@ def generate_daily_report(days: int = 1) -> str:
     suggestions = analyze_corrections(days)
     lessons = analyze_errors(days)
     
+    # 按类型分组
+    http_errors = [e for e in events if e.get("type") == "http_error"]
+    health_events = [e for e in events if e.get("type") == "health"]
+    deploy_events = [e for e in events if e.get("type") == "deploy"]
+    
     lines = [
         f"# AIOS Daily Report",
         f"Date: {time.strftime('%Y-%m-%d')}",
@@ -123,6 +128,27 @@ def generate_daily_report(days: int = 1) -> str:
     ]
     for t, c in sorted(counts.items()):
         lines.append(f"  - {t}: {c}")
+    
+    # HTTP errors
+    if http_errors:
+        lines.append(f"\n## HTTP Errors ({len(http_errors)})")
+        status_counts = Counter(e.get("data", {}).get("status_code", "?") for e in http_errors)
+        for code, cnt in status_counts.most_common():
+            lines.append(f"- {code}: x{cnt}")
+    
+    # Health
+    if health_events:
+        latest = health_events[-1]
+        data = latest.get("data", {})
+        lines.append(f"\n## Latest Health Check")
+        lines.append(f"- Status: {latest.get('summary', '?')}")
+        lines.append(f"- Passed: {data.get('passed', '?')}, Failed: {data.get('failed', '?')}, Warned: {data.get('warned', '?')}")
+    
+    # Deploys
+    if deploy_events:
+        lines.append(f"\n## Deploys ({len(deploy_events)})")
+        for d in deploy_events[-5:]:
+            lines.append(f"- {d.get('summary', '?')}")
     
     lines.append(f"\n## Suggestions ({len(suggestions)})")
     if suggestions:
