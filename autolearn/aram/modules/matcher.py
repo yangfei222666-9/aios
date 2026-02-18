@@ -8,9 +8,11 @@ from difflib import SequenceMatcher
 
 ARAM_DIR = Path(r"C:\Users\A\Desktop\ARAM-Helper")
 DATA_FILE = ARAM_DIR / "aram_data.json"
-FEEDBACK_DIR = Path(__file__).resolve().parent.parent.parent / "data"
-FEEDBACK_FILE = FEEDBACK_DIR / "matcher_feedback.jsonl"
-LEARNED_ALIASES_FILE = FEEDBACK_DIR / "learned_aliases.json"
+
+# 使用 learning 模块管理反馈
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+from aram.learning.feedback_log import log_match, log_correction, log_confirm, load_learned
 
 # 常用别名词典（国服玩家习惯叫法）
 ALIASES = {
@@ -127,44 +129,20 @@ def _similarity(a: str, b: str) -> float:
 
 def _load_learned_aliases() -> dict:
     """加载用户纠正后学习到的别名"""
-    if not LEARNED_ALIASES_FILE.exists():
-        return {}
-    try:
-        return json.loads(LEARNED_ALIASES_FILE.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
-
-def _save_learned_aliases(aliases: dict):
-    FEEDBACK_DIR.mkdir(exist_ok=True)
-    LEARNED_ALIASES_FILE.write_text(json.dumps(aliases, ensure_ascii=False, indent=2), encoding="utf-8")
+    return load_learned()
 
 def feedback(query: str, correct_champion_id: str, was_wrong: bool = True):
-    """
-    用户纠正反馈。
-    query: 用户输入
-    correct_champion_id: 正确的英雄 ID
-    was_wrong: 匹配结果是否错误
-    """
-    FEEDBACK_DIR.mkdir(exist_ok=True)
+    """用户纠正反馈"""
     data = _load_data()
     correct_info = data.get(correct_champion_id, {})
     
-    # 记录反馈
-    rec = {
-        "ts": int(time.time()),
-        "query": query,
-        "correct_id": correct_champion_id,
-        "correct_title": correct_info.get("title", ""),
-        "was_wrong": was_wrong,
-    }
-    with FEEDBACK_FILE.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    
-    # 自动学习：把纠正写入 learned_aliases
     if was_wrong:
-        learned = _load_learned_aliases()
-        learned[query] = correct_champion_id
-        _save_learned_aliases(learned)
+        # 找之前匹配的错误 ID
+        prev = match(query, top_n=1)
+        wrong_id = prev[0]["champion_id"] if prev else ""
+        rec = log_correction(query, wrong_id, correct_champion_id, correct_info.get("title", ""))
+    else:
+        rec = log_confirm(query, correct_champion_id)
     
     return rec
 
@@ -181,7 +159,7 @@ def match(query: str, top_n: int = 3) -> list:
     results = []
     
     # 0. 用户学习的别名（最高优先级）
-    learned = _load_learned_aliases()
+    learned = load_learned()
     if query in learned:
         cid = learned[query]
         if cid in data:
