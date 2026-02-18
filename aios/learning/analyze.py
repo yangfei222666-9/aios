@@ -1,9 +1,7 @@
 # aios/learning/analyze.py - 自动分析器
 """
-从 events.jsonl 分析，产出三类输出：
-  A. 质量指标 (Metrics)
-  B. Top 问题 (Top Issues)
-  C. 建议 (Suggestions)
+从 events.jsonl 分析，产出结构化报告：
+  metrics / top_issues / alias_suggestions / tool_suggestions / threshold_warnings
 """
 import json, time, sys
 from collections import Counter, defaultdict
@@ -37,16 +35,15 @@ def compute_metrics(days: int = 1) -> dict:
     tool_ok = [t for t in tools if (t.get("data") or {}).get("ok", True)]
     tool_success_rate = len(tool_ok) / len(tools) if tools else 1.0
 
-    http_status_counts = Counter((e.get("data") or {}).get("status_code", "?") for e in http_errors)
+    http_status = Counter((e.get("data") or {}).get("status_code", "?") for e in http_errors)
 
     return {
-        "period_days": days,
         "match_correction_rate": round(correction_rate, 3),
         "low_score_ratio": round(low_score_ratio, 3),
         "tool_success_rate": round(tool_success_rate, 3),
         "tool_total": len(tools),
         "http_error_count": len(http_errors),
-        "http_status_breakdown": dict(http_status_counts),
+        "http_status_breakdown": dict(http_status),
         "total_events": len(events),
     }
 
@@ -55,159 +52,213 @@ def compute_top_issues(days: int = 7) -> dict:
     events = load_events(days)
     corrections = [e for e in events if e.get("type") == "correction"]
     errors = [e for e in events if e.get("type") in ("error", "http_error")]
-    tools = [e for e in events if e.get("type") in ("tool", "task") and not (e.get("data") or {}).get("ok", True)]
-
-    correction_inputs = Counter((e.get("data") or {}).get("input", e.get("summary", "?")) for e in corrections)
-    failed_tools = Counter((e.get("data") or {}).get("tool", e.get("source", "?")) for e in tools)
-    error_types = Counter(
-        f"{e.get('type')}:{(e.get('data') or {}).get('status_code', '')}" if e.get("type") == "http_error"
-        else e.get("source", "?")
-        for e in errors
-    )
+    failed_tools = [e for e in events if e.get("type") in ("tool", "task") and not (e.get("data") or {}).get("ok", True)]
 
     return {
-        "top_corrected_inputs": dict(correction_inputs.most_common(10)),
-        "top_failed_tools": dict(failed_tools.most_common(5)),
-        "top_error_types": dict(error_types.most_common(5)),
+        "top_corrected_inputs": dict(Counter(
+            (e.get("data") or {}).get("input", "?") for e in corrections
+        ).most_common(10)),
+        "top_failed_tools": dict(Counter(
+            (e.get("data") or {}).get("tool", e.get("source", "?")) for e in failed_tools
+        ).most_common(5)),
+        "top_error_types": dict(Counter(
+            f"{e.get('type')}:{(e.get('data') or {}).get('status_code', '')}" if e.get("type") == "http_error"
+            else e.get("source", "?")
+            for e in errors
+        ).most_common(5)),
     }
 
 
-def compute_suggestions(days: int = 7) -> dict:
-    events = load_events(days)
-    corrections = [e for e in events if e.get("type") == "correction"]
-    matches = [e for e in events if e.get("type") == "match"]
-    http_errors = [e for e in events if e.get("type") == "http_error"]
+def compute_alias_suggestions(days: int = 7) -> list:
+    """L1: alias 建议（可自动应用）"""
+    corrections = load_events(days, "correction")
+    targets = defaultdict(list)
+    examples = defaultdict(list)
 
-    alias_suggestions = []
-    threshold_warnings = []
-    route_suggestions = []
-
-    # alias
-    correction_targets = defaultdict(list)
     for c in corrections:
         data = c.get("data", {})
         inp = data.get("input", "")
         target = data.get("correct_target", "")
+        matched = data.get("matched", "")
         if inp and target:
-            correction_targets[inp].append(target)
+            targets[inp].append(target)
+            if matched:
+                ex = f"{matched}->{target}"
+                if ex not in examples[inp]:
+                    examples[inp].append(ex)
 
-    for inp, targets in correction_targets.items():
-        tc = Counter(targets)
+    suggestions = []
+    for inp, tlist in targets.items():
+        tc = Counter(tlist)
         top, count = tc.most_common(1)[0]
         if count >= CORRECTION_THRESHOLD:
-            alias_suggestions.append({
+            suggestions.append({
+                "level": "L1",
                 "input": inp,
                 "suggested": top,
-                "reason": f"corrected_{count}_times",
-                "confidence": round(count / len(targets), 2),
+                "confidence": round(count / len(tlist), 2),
+                "evidence": {
+                    "corrections": count,
+                    "examples": examples[inp][:3],
+                },
+                "reason": f"corrected>={count}",
             })
 
-    # threshold
-    total_match = len(matches) + len(corrections)
-    if total_match > 0:
-        cr = len(corrections) / total_match
+    return suggestions
+
+
+def compute_tool_suggestions(days: int = 7) -> list:
+    """L2: tool 建议（需人工审核）"""
+    events = load_events(days)
+    failed = [e for e in events if e.get("type") in ("tool", "task", "error", "http_error")
+              and not (e.get("data") or {}).get("ok", True)]
+
+    # 按 source/tool 聚合
+    by_tool = defaultdict(list)
+    for e in failed:
+        tool = (e.get("data") or {}).get("tool", e.get("source", "?"))
+        by_tool[tool].append(e)
+
+    suggestions = []
+    for tool, errs in by_tool.items():
+        if len(errs) < 2:
+            continue
+
+        # top error
+        err_types = Counter()
+        for e in errs:
+            data = e.get("data", {})
+            code = data.get("status_code", "")
+            err = data.get("error", "")
+            err_types[str(code) if code else err[:50] or "unknown"] += 1
+
+        top_err, top_count = err_types.most_common(1)[0]
+
+        suggestions.append({
+            "level": "L2",
+            "name": tool,
+            "action": f"cooldown_10m" if len(errs) >= 3 else "monitor",
+            "confidence": round(min(len(errs) / 5, 1.0), 2),
+            "evidence": {
+                "fails": len(errs),
+                "top_err": top_err,
+            },
+            "reason": f"repeat_fail>={len(errs)}",
+        })
+
+    return suggestions
+
+
+def compute_threshold_warnings(days: int = 7) -> list:
+    """L3: 阈值警告（仅报警）"""
+    events = load_events(days)
+    matches = [e for e in events if e.get("type") == "match"]
+    corrections = [e for e in events if e.get("type") == "correction"]
+    warnings = []
+
+    total = len(matches) + len(corrections)
+    if total > 0:
+        cr = len(corrections) / total
         if cr > 0.15:
-            threshold_warnings.append({
+            warnings.append({
                 "field": "correction_rate",
                 "current": round(cr, 2),
                 "suggested": 0.10,
                 "reason": "high_correction_rate",
             })
+
+    if matches:
         low = [m for m in matches if (m.get("data") or {}).get("score", 1.0) < LOW_SCORE_THRESHOLD]
-        lsr = len(low) / len(matches) if matches else 0
+        lsr = len(low) / len(matches)
         if lsr > 0.15:
-            threshold_warnings.append({
+            warnings.append({
                 "field": "low_score_rate",
                 "current": round(lsr, 2),
                 "suggested": 0.10,
                 "reason": "too_many_low_score_matches",
             })
 
-    # route
-    status_counts = Counter((e.get("data") or {}).get("status_code", 0) for e in http_errors)
-    for code, cnt in status_counts.items():
-        if cnt >= 3:
-            route_suggestions.append({
-                "status_code": code,
-                "count": cnt,
-                "reason": f"http_{code}_x{cnt}",
-                "action": "consider_fallback",
-            })
+    return warnings
 
-    return {
-        "generated_at": time.strftime("%Y-%m-%d"),
-        "alias_suggestions": alias_suggestions,
-        "threshold_warnings": threshold_warnings,
-        "route_suggestions": route_suggestions,
+
+def generate_full_report(days: int = 7) -> dict:
+    """完整结构化报告"""
+    report = {
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "metrics": compute_metrics(days),
+        "top_issues": compute_top_issues(days),
+        "alias_suggestions": compute_alias_suggestions(days),
+        "tool_suggestions": compute_tool_suggestions(days),
+        "threshold_warnings": compute_threshold_warnings(days),
     }
 
+    # 写 suggestions.json（只含可操作部分）
+    sug = {
+        "generated_at": report["generated_at"],
+        "alias_suggestions": [{
+            "input": s["input"],
+            "suggested": s["suggested"],
+            "reason": s["reason"],
+            "confidence": s["confidence"],
+        } for s in report["alias_suggestions"]],
+        "threshold_warnings": report["threshold_warnings"],
+        "route_suggestions": [],
+    }
+    (LEARNING_DIR / "suggestions.json").write_text(json.dumps(sug, ensure_ascii=False, indent=2), encoding="utf-8")
 
-def generate_suggestions(days: int = 7) -> dict:
-    sug = compute_suggestions(days)
-    out = LEARNING_DIR / "suggestions.json"
-    out.write_text(json.dumps(sug, ensure_ascii=False, indent=2), encoding="utf-8")
-    return sug
+    return report
 
 
 def generate_daily_report(days: int = 1) -> str:
-    metrics = compute_metrics(days)
-    issues = compute_top_issues(days)
-    suggestions = compute_suggestions(days)
-
+    r = generate_full_report(days)
+    m = r["metrics"]
     lines = [
         f"# AIOS Daily Report",
-        f"Date: {time.strftime('%Y-%m-%d')}",
-        f"Period: last {days} day(s)\n",
+        f"Generated: {r['generated_at']}\n",
         "## A. Metrics",
-        f"- match correction_rate: {metrics['match_correction_rate']:.1%}",
-        f"- low_score_ratio: {metrics['low_score_ratio']:.1%}",
-        f"- tool success_rate: {metrics['tool_success_rate']:.1%} ({metrics['tool_total']} total)",
-        f"- http_errors: {metrics['http_error_count']}",
+        f"- correction_rate: {m['match_correction_rate']:.1%}",
+        f"- low_score_ratio: {m['low_score_ratio']:.1%}",
+        f"- tool_success_rate: {m['tool_success_rate']:.1%} ({m['tool_total']})",
+        f"- http_errors: {m['http_error_count']}",
     ]
-    for code, cnt in metrics["http_status_breakdown"].items():
-        lines.append(f"  - {code}: x{cnt}")
 
-    lines.append(f"\n## B. Top Issues")
-    if issues["top_corrected_inputs"]:
-        for inp, cnt in issues["top_corrected_inputs"].items():
-            lines.append(f"- corrected: \"{inp}\" x{cnt}")
-    if issues["top_failed_tools"]:
-        for tool, cnt in issues["top_failed_tools"].items():
-            lines.append(f"- failed_tool: {tool} x{cnt}")
-    if issues["top_error_types"]:
-        for et, cnt in issues["top_error_types"].items():
-            lines.append(f"- error: {et} x{cnt}")
-    if not any(issues.values()):
-        lines.append("- none")
+    lines.append("\n## B. Top Issues")
+    for inp, cnt in r["top_issues"].get("top_corrected_inputs", {}).items():
+        lines.append(f"- corrected: \"{inp}\" x{cnt}")
+    for t, cnt in r["top_issues"].get("top_failed_tools", {}).items():
+        lines.append(f"- failed: {t} x{cnt}")
 
-    lines.append(f"\n## C. Suggestions")
-    if suggestions["alias_suggestions"]:
-        for s in suggestions["alias_suggestions"]:
-            lines.append(f"- alias: \"{s['input']}\" -> \"{s['suggested']}\" ({s['reason']})")
-    if suggestions["threshold_warnings"]:
-        for s in suggestions["threshold_warnings"]:
-            lines.append(f"- threshold: {s['field']} {s['current']} -> {s['suggested']}")
-    if suggestions["route_suggestions"]:
-        for s in suggestions["route_suggestions"]:
-            lines.append(f"- route: HTTP {s['status_code']} x{s['count']}")
-    if not any([suggestions["alias_suggestions"], suggestions["threshold_warnings"], suggestions["route_suggestions"]]):
-        lines.append("- none")
+    lines.append("\n## C. Alias Suggestions (L1)")
+    for s in r["alias_suggestions"]:
+        lines.append(f"- \"{s['input']}\" → \"{s['suggested']}\" conf={s['confidence']} ({s['reason']})")
 
-    report = "\n".join(lines)
-    (LEARNING_DIR / "daily_report.md").write_text(report, encoding="utf-8")
-    return report
+    lines.append("\n## D. Tool Suggestions (L2)")
+    for s in r["tool_suggestions"]:
+        lines.append(f"- {s['name']}: {s['action']} conf={s['confidence']} ({s['reason']})")
+
+    if r["threshold_warnings"]:
+        lines.append("\n## E. Threshold Warnings")
+        for w in r["threshold_warnings"]:
+            lines.append(f"- {w['field']}: {w['current']} → {w['suggested']}")
+
+    if not any([r["alias_suggestions"], r["tool_suggestions"], r["threshold_warnings"]]):
+        lines.append("\n- No suggestions")
+
+    report_text = "\n".join(lines)
+    (LEARNING_DIR / "daily_report.md").write_text(report_text, encoding="utf-8")
+    return report_text
 
 
 if __name__ == "__main__":
     action = sys.argv[1] if len(sys.argv) > 1 else "report"
-    if action == "metrics":
-        print(json.dumps(compute_metrics(), ensure_ascii=False, indent=2))
-    elif action == "issues":
-        print(json.dumps(compute_top_issues(), ensure_ascii=False, indent=2))
+    if action == "json":
+        print(json.dumps(generate_full_report(), ensure_ascii=False, indent=2))
     elif action == "suggestions":
-        sug = generate_suggestions()
+        r = generate_full_report()
+        sug = {k: r[k] for k in ("alias_suggestions", "tool_suggestions", "threshold_warnings")}
+        sug["generated_at"] = r["generated_at"]
         print(json.dumps(sug, ensure_ascii=False, indent=2))
     elif action == "report":
         print(generate_daily_report())
     else:
-        print("Usage: analyze.py [metrics|issues|suggestions|report]")
+        print("Usage: analyze.py [json|suggestions|report]")
