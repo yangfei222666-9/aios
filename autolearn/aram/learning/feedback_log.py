@@ -30,17 +30,16 @@ def log_match(query: str, matched_id: str, matched_title: str, score: float, mat
     return rec
 
 
-def log_correction(query: str, wrong_id: str, correct_id: str, correct_title: str):
+def log_correction(query: str, wrong_id: str, wrong_title: str, correct_id: str, correct_title: str):
     """记录一次用户纠正"""
     rec = {
         "timestamp": _ts_iso(),
         "input": query,
-        "matched": correct_title,
-        "matched_id": correct_id,
-        "score": None,
-        "match_type": "user_correction",
+        "matched": wrong_title,
+        "matched_id": wrong_id,
         "corrected": True,
-        "wrong_id": wrong_id,
+        "correct_target": correct_title,
+        "correct_id": correct_id,
     }
     _append(rec)
 

@@ -139,7 +139,8 @@ def feedback(query: str, correct_champion_id: str, was_wrong: bool = True):
     if was_wrong:
         prev = match(query, top_n=1)
         wrong_id = prev[0]["champion_id"] if prev else ""
-        rec = log_correction(query, wrong_id, correct_champion_id, correct_info.get("title", ""))
+        wrong_title = prev[0]["title"] if prev else ""
+        rec = log_correction(query, wrong_id, wrong_title, correct_champion_id, correct_info.get("title", ""))
     else:
         prev = match(query, top_n=1)
         score = prev[0]["score"] if prev else 0
