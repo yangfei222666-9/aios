@@ -104,91 +104,55 @@ def trend_summary(limit: int = 7) -> str:
 
 def evolution_score(limit: int = 7) -> dict:
     """
-    进化评分：对比最早和最近的 baseline，综合打分。
+    进化评分：基于最新 baseline 快照直接计算。
     
-    维度权重：
-      correction_rate  下降=好  权重 30
-      tool_success_rate 上升=好  权重 30
-      tool_p95_ms      下降=好  权重 25
-      http_error_count 下降=好  权重 15
+    score = tool_success_rate * 0.4
+          - correction_rate * 0.2
+          - http_502_rate * 0.2
+          - p95_slow_ratio * 0.2
     
-    score: -100 (严重退化) ~ 0 (持平) ~ +100 (显著进化)
+    p95_slow_ratio = 超过 5000ms 的 tool 占比
+    score: 0.0 (最差) ~ 1.0 (完美)
     """
     history = load_history(limit)
-    if len(history) < 2:
-        return {"score": 0, "grade": "N/A", "reason": "not_enough_data", "snapshots": len(history)}
+    if not history:
+        return {"score": 0, "grade": "N/A", "reason": "no_data"}
 
-    first, last = history[0], history[-1]
+    last = history[-1]
 
-    # correction_rate: 下降=好 (0→0 也是好)
-    cr_f, cr_l = first["correction_rate"], last["correction_rate"]
-    if cr_f == 0 and cr_l == 0:
-        cr_score = 10  # 一直是0，小加分
-    elif cr_f == 0:
-        cr_score = -50  # 从0变差
+    tsr = last.get("tool_success_rate", 1.0)
+    cr = last.get("correction_rate", 0)
+    h502 = last.get("http_502_rate", 0)
+
+    # p95_slow_ratio: 超过 5s 的 tool 占比
+    p95 = last.get("tool_p95_ms", {})
+    if p95:
+        slow = sum(1 for v in p95.values() if v > 5000)
+        p95_slow_ratio = slow / len(p95)
     else:
-        cr_score = (cr_f - cr_l) / cr_f * 100  # 下降比例
-    cr_score = max(-100, min(100, cr_score))
+        p95_slow_ratio = 0
 
-    # tool_success_rate: 上升=好
-    ts_f, ts_l = first["tool_success_rate"], last["tool_success_rate"]
-    if ts_f == 1.0 and ts_l == 1.0:
-        ts_score = 10
-    elif ts_f == 0:
-        ts_score = 50 if ts_l > 0 else 0
+    score = round(tsr * 0.4 - cr * 0.2 - h502 * 0.2 - p95_slow_ratio * 0.2, 4)
+
+    if score >= 0.35:
+        grade = "healthy"
+    elif score >= 0.25:
+        grade = "ok"
+    elif score >= 0.15:
+        grade = "degraded"
     else:
-        ts_score = (ts_l - ts_f) / ts_f * 100
-    ts_score = max(-100, min(100, ts_score))
-
-    # p95: 下降=好（取所有 tool 平均变化）
-    p95_f = first.get("tool_p95_ms", {})
-    p95_l = last.get("tool_p95_ms", {})
-    common_tools = set(p95_f.keys()) & set(p95_l.keys())
-    if common_tools:
-        deltas = []
-        for t in common_tools:
-            if p95_f[t] > 0:
-                deltas.append((p95_f[t] - p95_l[t]) / p95_f[t] * 100)
-        p95_score = sum(deltas) / len(deltas) if deltas else 0
-    else:
-        p95_score = 0
-    p95_score = max(-100, min(100, p95_score))
-
-    # http_error: 下降=好
-    he_f, he_l = first.get("http_error_count", 0), last.get("http_error_count", 0)
-    if he_f == 0 and he_l == 0:
-        he_score = 10
-    elif he_f == 0:
-        he_score = -50
-    else:
-        he_score = (he_f - he_l) / he_f * 100
-    he_score = max(-100, min(100, he_score))
-
-    # 加权
-    score = round(cr_score * 0.30 + ts_score * 0.30 + p95_score * 0.25 + he_score * 0.15, 1)
-
-    # 评级
-    if score >= 20:
-        grade = "evolving"
-    elif score >= 5:
-        grade = "improving"
-    elif score >= -5:
-        grade = "stable"
-    elif score >= -20:
-        grade = "declining"
-    else:
-        grade = "regressing"
+        grade = "critical"
 
     return {
         "score": score,
         "grade": grade,
-        "snapshots": len(history),
         "breakdown": {
-            "correction_rate": {"weight": 0.30, "score": round(cr_score, 1), "before": cr_f, "after": cr_l},
-            "tool_success_rate": {"weight": 0.30, "score": round(ts_score, 1), "before": ts_f, "after": ts_l},
-            "tool_p95_ms": {"weight": 0.25, "score": round(p95_score, 1)},
-            "http_errors": {"weight": 0.15, "score": round(he_score, 1), "before": he_f, "after": he_l},
+            "tool_success_rate": {"value": tsr, "weight": 0.4},
+            "correction_rate": {"value": cr, "weight": -0.2},
+            "http_502_rate": {"value": h502, "weight": -0.2},
+            "p95_slow_ratio": {"value": round(p95_slow_ratio, 3), "weight": -0.2},
         },
+        "snapshot_ts": last.get("ts", "?"),
     }
 
 
