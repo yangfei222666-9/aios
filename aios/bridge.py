@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "autolearn"))
 
 from scripts.log_event import log_event
+from core.engine import log_tool_event
 
 
 def on_match(query: str, matched_title: str, matched_id: str, score: float, match_type: str):
@@ -42,14 +43,14 @@ def on_confirm(query: str, matched_title: str, matched_id: str):
 
 
 def on_executor_run(intent: str, tool: str, ok: bool, result: str = "", elapsed_ms: int = 0):
-    """autolearn executor 执行后调用"""
-    etype = "task" if ok else "error"
-    return log_event(etype, f"autolearn.executor.{tool}", f"[{intent}] {'ok' if ok else 'fail'}: {result[:200]}", {
-        "intent": intent,
-        "tool": tool,
-        "ok": ok,
-        "elapsed_ms": elapsed_ms,
-    })
+    """autolearn executor 执行后调用 — 统一 tool 事件格式"""
+    return log_tool_event(
+        name=tool,
+        ok=ok,
+        ms=elapsed_ms,
+        err=result[:500] if not ok else None,
+        meta={"intent": intent},
+    )
 
 
 def on_retest(level: str, passed: int, failed: int):

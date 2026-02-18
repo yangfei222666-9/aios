@@ -117,7 +117,8 @@ def compute_tool_suggestions(days: int = 7) -> list:
     # --- Failure Learner ---
     by_tool_fail = defaultdict(list)
     for e in failed:
-        tool = (e.get("data") or {}).get("tool", e.get("source", "?"))
+        data = e.get("data", {})
+        tool = data.get("name", data.get("tool", e.get("source", "?")))
         by_tool_fail[tool].append(e)
 
     suggestions = []
@@ -128,7 +129,7 @@ def compute_tool_suggestions(days: int = 7) -> list:
         for e in errs:
             data = e.get("data", {})
             code = data.get("status_code", "")
-            err = data.get("error", "")
+            err = data.get("err", data.get("error", ""))
             err_types[str(code) if code else err[:50] or "unknown"] += 1
         top_err, _ = err_types.most_common(1)[0]
 
@@ -142,11 +143,12 @@ def compute_tool_suggestions(days: int = 7) -> list:
         })
 
     # --- Perf Learner ---
+    import math
     by_tool_perf = defaultdict(list)
     for e in tool_events:
         data = e.get("data", {})
-        tool = data.get("tool", e.get("source", "?"))
-        ms = data.get("elapsed_ms", 0)
+        tool = data.get("name", data.get("tool", e.get("source", "?")))
+        ms = data.get("ms", data.get("elapsed_ms", 0))
         if ms > 0:
             by_tool_perf[tool].append(ms)
 
@@ -154,7 +156,8 @@ def compute_tool_suggestions(days: int = 7) -> list:
         if len(times) < 3:
             continue
         times_sorted = sorted(times)
-        p95 = times_sorted[int(len(times_sorted) * 0.95)]
+        p95_idx = math.ceil(0.95 * len(times_sorted)) - 1
+        p95 = times_sorted[p95_idx]
         median = times_sorted[len(times_sorted) // 2]
 
         if p95 > 5000:  # p95 > 5s

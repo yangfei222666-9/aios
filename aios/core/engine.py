@@ -60,3 +60,13 @@ def count_by_type(days: int = 30) -> dict:
         t = ev.get("type", "unknown")
         counts[t] = counts.get(t, 0) + 1
     return counts
+
+
+def log_tool_event(name: str, ok: bool, ms: int, err: str = None, meta: dict = None) -> dict:
+    """统一 tool 事件格式: {type:"tool", name, ok, ms, err?, meta?}"""
+    data = {"name": name, "ok": ok, "ms": ms}
+    if not ok and err:
+        data["err"] = err[:500]
+    if meta:
+        data["meta"] = meta
+    return log_event("tool", name, f"{'ok' if ok else 'fail'} {ms}ms", data)

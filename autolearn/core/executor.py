@@ -57,10 +57,10 @@ def run(intent: str, tool: str, payload: dict, do_task) -> dict:
     
     log_event(type="start", intent=intent, tool=tool, env=env)
     
-    t0 = time.time()
+    t0 = time.perf_counter()
     try:
         out = do_task(intent, payload)
-        elapsed_ms = int((time.time() - t0) * 1000)
+        elapsed_ms = int((time.perf_counter() - t0) * 1000)
         if isinstance(out, dict) and out.get("ok"):
             log_event(type="done", intent=intent, tool=tool, ok=True, elapsed_ms=elapsed_ms, env=env)
             # → aios
@@ -77,7 +77,7 @@ def run(intent: str, tool: str, payload: dict, do_task) -> dict:
         raise RuntimeError(msg)
 
     except Exception as e:
-        elapsed_ms = int((time.time() - t0) * 1000)
+        elapsed_ms = int((time.perf_counter() - t0) * 1000)
         sig_s = sign_strict(type(e).__name__, str(e))
         loose = sign_loose(str(e))
         sig_l = loose["sig"]
