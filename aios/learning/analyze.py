@@ -235,6 +235,21 @@ def generate_full_report(days: int = 7) -> dict:
 
 def generate_daily_report(days: int = 1) -> str:
     r = generate_full_report(days)
+
+    # 基线固化
+    try:
+        from learning.baseline import snapshot
+        snapshot(days)
+    except Exception:
+        pass
+
+    # L2 → 工单
+    try:
+        from learning.tickets import ingest
+        ingest(r.get("tool_suggestions", []))
+    except Exception:
+        pass
+
     m = r["metrics"]
     lines = [
         f"# AIOS Daily Report",
