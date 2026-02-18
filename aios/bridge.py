@@ -41,13 +41,14 @@ def on_confirm(query: str, matched_title: str, matched_id: str):
     })
 
 
-def on_executor_run(intent: str, tool: str, ok: bool, result: str = ""):
+def on_executor_run(intent: str, tool: str, ok: bool, result: str = "", elapsed_ms: int = 0):
     """autolearn executor 执行后调用"""
     etype = "task" if ok else "error"
     return log_event(etype, f"autolearn.executor.{tool}", f"[{intent}] {'ok' if ok else 'fail'}: {result[:200]}", {
         "intent": intent,
         "tool": tool,
         "ok": ok,
+        "elapsed_ms": elapsed_ms,
     })
 
 

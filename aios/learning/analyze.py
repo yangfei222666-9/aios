@@ -108,43 +108,64 @@ def compute_alias_suggestions(days: int = 7) -> list:
 
 
 def compute_tool_suggestions(days: int = 7) -> list:
-    """L2: tool 建议（需人工审核）"""
+    """L2: tool 建议 — 失败驱动 + 性能驱动"""
     events = load_events(days)
+    tool_events = [e for e in events if e.get("type") in ("tool", "task")]
     failed = [e for e in events if e.get("type") in ("tool", "task", "error", "http_error")
               and not (e.get("data") or {}).get("ok", True)]
 
-    # 按 source/tool 聚合
-    by_tool = defaultdict(list)
+    # --- Failure Learner ---
+    by_tool_fail = defaultdict(list)
     for e in failed:
         tool = (e.get("data") or {}).get("tool", e.get("source", "?"))
-        by_tool[tool].append(e)
+        by_tool_fail[tool].append(e)
 
     suggestions = []
-    for tool, errs in by_tool.items():
+    for tool, errs in by_tool_fail.items():
         if len(errs) < 2:
             continue
-
-        # top error
         err_types = Counter()
         for e in errs:
             data = e.get("data", {})
             code = data.get("status_code", "")
             err = data.get("error", "")
             err_types[str(code) if code else err[:50] or "unknown"] += 1
-
-        top_err, top_count = err_types.most_common(1)[0]
+        top_err, _ = err_types.most_common(1)[0]
 
         suggestions.append({
             "level": "L2",
             "name": tool,
-            "action": f"cooldown_10m" if len(errs) >= 3 else "monitor",
+            "action": "cooldown_10m" if len(errs) >= 3 else "monitor",
             "confidence": round(min(len(errs) / 5, 1.0), 2),
-            "evidence": {
-                "fails": len(errs),
-                "top_err": top_err,
-            },
+            "evidence": {"fails": len(errs), "top_err": top_err},
             "reason": f"repeat_fail>={len(errs)}",
         })
+
+    # --- Perf Learner ---
+    by_tool_perf = defaultdict(list)
+    for e in tool_events:
+        data = e.get("data", {})
+        tool = data.get("tool", e.get("source", "?"))
+        ms = data.get("elapsed_ms", 0)
+        if ms > 0:
+            by_tool_perf[tool].append(ms)
+
+    for tool, times in by_tool_perf.items():
+        if len(times) < 3:
+            continue
+        times_sorted = sorted(times)
+        p95 = times_sorted[int(len(times_sorted) * 0.95)]
+        median = times_sorted[len(times_sorted) // 2]
+
+        if p95 > 5000:  # p95 > 5s
+            suggestions.append({
+                "level": "L2",
+                "name": tool,
+                "action": "optimize_or_cache",
+                "confidence": round(min(p95 / 10000, 1.0), 2),
+                "evidence": {"p95_ms": p95, "median_ms": median, "samples": len(times)},
+                "reason": f"p95>{p95}ms",
+            })
 
     return suggestions
 
