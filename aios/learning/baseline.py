@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from core.engine import load_events
+from core.engine import load_events, append_jsonl
 from core.config import get_path
 
 LEARNING_DIR = Path(__file__).resolve().parent
@@ -59,10 +59,7 @@ def snapshot(days: int = 1) -> dict:
         "total_events": len(events),
     }
 
-    HISTORY_FILE.parent.mkdir(exist_ok=True)
-    with HISTORY_FILE.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
-
+    append_jsonl(HISTORY_FILE, record)
     return record
 
 

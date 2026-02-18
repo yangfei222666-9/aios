@@ -10,10 +10,16 @@ def _events_path() -> Path:
     return get_path("paths.events") or Path(__file__).resolve().parent.parent / "events" / "events.jsonl"
 
 
+def append_jsonl(path: Path, obj: dict):
+    """通用 JSONL 追加"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(obj, ensure_ascii=False) + "\n")
+
+
 def log_event(event_type: str, source: str, summary: str, data: dict = None) -> dict:
     """追加一条事件"""
     p = _events_path()
-    p.parent.mkdir(exist_ok=True)
 
     event = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime()),
@@ -25,9 +31,7 @@ def log_event(event_type: str, source: str, summary: str, data: dict = None) -> 
     if data:
         event["data"] = data
 
-    with p.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(event, ensure_ascii=False) + "\n")
-
+    append_jsonl(p, event)
     return event
 
 

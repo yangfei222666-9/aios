@@ -9,6 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from core.config import get_path
+from core.engine import append_jsonl
 
 LEARNING_DIR = Path(__file__).resolve().parent
 TICKETS_FILE = get_path("paths.tickets") or (LEARNING_DIR / "tickets.jsonl")
@@ -37,7 +38,7 @@ def load_tickets(status: str = None) -> list:
 
 
 def _save_all(tickets: list):
-    TICKETS_FILE.parent.mkdir(exist_ok=True)
+    TICKETS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with TICKETS_FILE.open("w", encoding="utf-8") as f:
         for t in tickets:
             f.write(json.dumps(t, ensure_ascii=False) + "\n")
