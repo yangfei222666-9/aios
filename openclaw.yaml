@@ -1,0 +1,56 @@
+# OpenClaw 主配置文件
+# 包含语音唤醒配置
+
+# 语音唤醒配置
+voice_wake:
+  enabled: true
+  model_path: "C:\\Users\\A\\.openclaw\\models\\vosk-cn"
+  
+  # 唤醒词（支持同音字）
+  wake_phrases:
+    - "小九"
+    - "你好小九"
+    - "小酒"
+    - "hi 小九"
+    - "hey 小九"
+  
+  # 超时和冷却
+  command_timeout: 8.0  # 命令模式超时（秒）
+  cooldown: 2.0         # 唤醒冷却时间（秒）
+  
+  # 音频设备（null 表示默认设备）
+  device: null
+  
+  # 日志级别
+  log_level: "INFO"
+  
+  # 防自唤醒
+  pause_while_tts: true
+  tts_flag_path: "logs\\tts_playing.flag"
+  
+  # VAD 配置
+  vad_end_silence_ms: 800        # 静音800ms认为说完
+  vad_energy_threshold: 0.015    # 能量阈值（0.01-0.03）
+  
+  # 音频参数
+  sample_rate: 16000
+  blocksize: 8000
+
+# Telegram 配置
+telegram:
+  bot_token: "8278846913:AAFISe00lCJdu4r1AKuo0zd_N_cCnoX2_AM"
+  allowed_users:
+    - "7986452220"  # 珊瑚海
+
+# 笔记系统
+notes:
+  inbox_path: "notes/inbox.md"
+  auto_create: true
+  timestamp_format: "YYYY-MM-DDTHH:mm:00+08:00"
+
+# 每日检查
+daily_check:
+  enabled: true
+  script: "tools/daily_check_asr_tts.py"
+  output_format: "summary"  # summary|detailed
+  search_fallback: true

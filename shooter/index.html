@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Shooter</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+canvas { display: block; }
+#ui { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: #0ff; font-family: 'Courier New', monospace; font-size: 14px; display: flex; gap: 40px; z-index: 10; text-shadow: 0 0 8px #0ff; }
+#overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-family: 'Courier New', monospace; z-index: 20; background: rgba(0,0,0,0.8); }
+#overlay h1 { font-size: 32px; color: #0ff; margin-bottom: 10px; text-shadow: 0 0 20px #0ff; }
+#overlay .sub { font-size: 14px; color: #888; margin-top: 8px; }
+#overlay .blink { animation: blink 1s infinite; margin-top: 20px; font-size: 13px; }
+@keyframes blink { 50% { opacity: 0; } }
+.hidden { display: none !important; }
+#touch-controls { position: absolute; bottom: 20px; left: 0; width: 100%; display: none; justify-content: space-between; padding: 0 20px; z-index: 15; }
+.touch-btn { width: 56px; height: 56px; border-radius: 50%; background: rgba(0,255,255,0.15); border: 2px solid rgba(0,255,255,0.4); color: #0ff; font-size: 18px; display: flex; justify-content: center; align-items: center; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+@media (pointer: coarse) { #touch-controls { display: flex; } }
+</style>
+</head>
+<body>
+<div id="ui">
+  <span>SCORE <span id="score">000000</span></span>
+  <span>WAVE <span id="wave">1</span></span>
+  <span>LIVES <span id="lives">♥♥♥</span></span>
+</div>
+<div id="overlay">
+  <h1>SPACE SHOOTER</h1>
+  <div class="sub">消灭外星入侵者，保卫地球</div>
+  <div class="blink">按任意键开始 / TAP TO START</div>
+</div>
+<canvas id="game"></canvas>
+<div id="touch-controls">
+  <div style="display:flex;gap:10px">
+    <button class="touch-btn" id="btn-left">◀</button>
+    <button class="touch-btn" id="btn-right">▶</button>
+  </div>
+  <div style="display:flex;gap:10px">
+    <button class="touch-btn" id="btn-up">▲</button>
+    <button class="touch-btn" id="btn-fire">🔥</button>
+  </div>
+</div>
+<script src="shooter.js"></script>
+</body>
+</html>

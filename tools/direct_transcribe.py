@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""
+直接转录音频 - 尝试多种方法
+"""
+
+import os
+import sys
+import tempfile
+import subprocess
+from pathlib import Path
+
+def transcribe_audio_direct(audio_path: str) -> str:
+    """直接转录音频，尝试多种方法"""
+    
+    print(f"转录音频文件: {audio_path}")
+    
+    # 方法1: 尝试使用 vosk 直接读取（如果支持）
+    text = try_vosk_direct(audio_path)
+    if text:
+        return text
+    
+    # 方法2: 尝试使用系统命令转换
+    print("尝试使用系统命令转换音频...")
+    
+    # 检查是否有可用的工具
+    for tool in ['ffmpeg', 'sox']:
+        try:
+            subprocess.run([tool, '--version'], capture_output=True, check=True)
+            print(f"找到工具: {tool}")
+            
+            wav_path = tempfile.mktemp(suffix='.wav')
+            
+            if tool == 'ffmpeg':
+                cmd = [
+                    'ffmpeg', '-i', audio_path,
+                    '-ar', '16000', '-ac', '1',
+                    '-acodec', 'pcm_s16le',
+                    '-y', wav_path
+                ]
+            elif tool == 'sox':
+                cmd = [
+                    'sox', audio_path,
+                    '-r', '16000', '-c', '1',
+                    '-b', '16', wav_path
+                ]
+            
+            print(f"执行: {' '.join(cmd)}")
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            
+            if result.returncode == 0 and os.path.exists(wav_path):
+                print(f"转换成功: {wav_path}")
+                text = try_vosk_direct(wav_path)
+                
+                # 清理临时文件
+                try:
+                    os.unlink(wav_path)
+                except:
+                    pass
+                
+                if text:
+                    return text
+                    
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            continue
+        except Exception as e:
+            print(f"{tool} 处理出错: {e}")
+    
+    # 方法3: 尝试使用 Python 音频库
+    print("尝试使用 Python 音频库...")
+    try:
+        import soundfile as sf
+        import librosa
+        
+        # 尝试使用 soundfile
+        try:
+            data, samplerate = sf.read(audio_path)
+            print(f"soundfile 读取成功: {samplerate}Hz, {len(data)} samples")
+            
+            # 如果需要，重采样到 16kHz
+            if samplerate != 16000:
+                import numpy as np
+                from scipy import signal
+                data = signal.resample(data, int(len(data) * 16000 / samplerate))
+                samplerate = 16000
+            
+            # 保存为临时 WAV 文件
+            wav_path = tempfile.mktemp(suffix='.wav')
+            sf.write(wav_path, data, samplerate, subtype='PCM_16')
+            
+            text = try_vosk_direct(wav_path)
+            
+            try:
+                os.unlink(wav_path)
+            except:
+                pass
+            
+            if text:
+                return text
+                
+        except Exception as e:
+            print(f"soundfile 读取失败: {e}")
+            
+        # 尝试使用 librosa
+        try:
+            data, samplerate = librosa.load(audio_path, sr=16000, mono=True)
+            print(f"librosa 读取成功: {samplerate}Hz, {len(data)} samples")
+            
+            wav_path = tempfile.mktemp(suffix='.wav')
+            sf.write(wav_path, data, samplerate, subtype='PCM_16')
+            
+            text = try_vosk_direct(wav_path)
+            
+            try:
+                os.unlink(wav_path)
+            except:
+                pass
+            
+            if text:
+                return text
+                
+        except Exception as e:
+            print(f"librosa 读取失败: {e}")
+            
+    except ImportError:
+        print("soundfile 或 librosa 未安装")
+    
+    return None
+
+def try_vosk_direct(audio_path: str) -> str:
+    """使用 vosk 直接转录音频"""
+    try:
+        from vosk import Model, KaldiRecognizer
+        import wave
+        import json
+        
+        model_path = r"C:\Users\A\.openclaw\models\vosk-cn"
+        
+        if not os.path.exists(model_path):
+            print(f"模型路径不存在: {model_path}")
+            return None
+        
+        print(f"加载 vosk 模型: {model_path}")
+        model = Model(model_path)
+        
+        # 尝试打开音频文件
+        try:
+            wf = wave.open(audio_path, "rb")
+        except wave.Error:
+            print(f"不是有效的 WAV 文件: {audio_path}")
+            return None
+        
+        # 创建识别器
+        rec = KaldiRecognizer(model, wf.getframerate())
+        
+        # 识别音频
+        print("开始语音识别...")
+        text_parts = []
+        
+        while True:
+            data = wf.readframes(4000)
+            if len(data) == 0:
+                break
+            
+            if rec.AcceptWaveform(data):
+                result = json.loads(rec.Result())
+                if result.get("text"):
+                    text_parts.append(result["text"])
+        
+        # 获取最终结果
+        final_result = json.loads(rec.FinalResult())
+        if final_result.get("text"):
+            text_parts.append(final_result["text"])
+        
+        wf.close()
+        
+        # 合并结果
+        full_text = " ".join(text_parts).strip()
+        
+        if full_text:
+            print(f"识别结果: '{full_text}'")
+            return full_text
+        else:
+            print("识别结果为空")
+            return None
+            
+    except ImportError:
+        print("vosk 未安装")
+        return None
+    except Exception as e:
+        print(f"vosk 识别失败: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+def main():
+    """主函数"""
+    if len(sys.argv) < 2:
+        print("用法: python direct_transcribe.py <音频文件>")
+        sys.exit(1)
+    
+    audio_path = sys.argv[1]
+    
+    if not os.path.exists(audio_path):
+        print(f"文件不存在: {audio_path}")
+        sys.exit(1)
+    
+    print(f"处理文件: {audio_path}")
+    print(f"文件大小: {os.path.getsize(audio_path)} bytes")
+    
+    # 转录音频
+    text = transcribe_audio_direct(audio_path)
+    
+    if text:
+        print("\n" + "="*60)
+        print("最终识别结果:")
+        print("="*60)
+        print(text)
+        print("="*60)
+        
+        # 保存结果
+        output_file = Path(audio_path).with_suffix('.txt')
+        with open(output_file, 'w', encoding='utf-8', errors='replace') as f:
+            f.write(text)
+        print(f"结果已保存到: {output_file}")
+        
+        return text
+    else:
+        print("\n未能识别出文本")
+        print("可能的原因:")
+        print("1. 音频质量不佳")
+        print("2. 音频格式不支持")
+        print("3. 语音模型不匹配")
+        print("4. 音频内容为空或噪音")
+        return None
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,30 @@
+# Runtime data
+autolearn/data/
+logs/
+*.log
+*.wav
+*.mp3
+*.zip
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Temp/test files
+test_*.py
+debug_*.py
+fix_*.py
+check_*.py
+verify_*.py
+analyze_*.py
+final_*.py
+*.bak
+
+# Media
+avatar/
+
+# Misc
+query
+file_*---*.txt
+vosk-model-*

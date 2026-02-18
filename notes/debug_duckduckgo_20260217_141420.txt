@@ -1,0 +1,12 @@
+﻿=== DuckDuckGo 解析失败调试信息 ===
+时间: 2026-02-17 14:14:20
+查询: 马来西亚 新山 天气
+使用策略: B
+HTML长度: 14184 字符
+HTML片段（前200字符）:
+<!-- <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="canonical" href="https://duckduc

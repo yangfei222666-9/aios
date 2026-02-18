@@ -1,0 +1,6 @@
+﻿web_search工具编码错误分析：
+- 错误信息：Cannot convert argument to a ByteString because the character at index 0 has a value of 20320 which is greater than 255.
+- 字符值20320对应Unicode字符：'你' (U+4F60)
+- 问题：工具参数传递时，中文字符被当作单字节处理
+- 可能原因：工具调用层面对字符串编码处理有问题
+- 测试时间：2026-02-17 14:00:46

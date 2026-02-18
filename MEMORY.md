@@ -1,0 +1,67 @@
+# MEMORY.md - 小九的长期记忆
+
+## 珊瑚海
+- 电脑：Ryzen 7 9800X3D + RTX 5070 Ti + 32GB RAM + 2TB NVMe
+- 系统：Windows 11 Pro，显示器 2560x1440 (ASUS XG27UCG)
+- Python 3.12 装在 C:\Program Files\Python312\
+- 没有 OpenAI API Key
+- 喜欢叫我"小九"
+- 玩国服英雄联盟（海克斯大乱斗模式），通过 WeGame 启动
+- LOL 安装在 E:\WeGameApps\英雄联盟\
+- 看电视剧时会发语音消息（背景有电视声音）
+- Telegram: @shh7799
+
+## 已完成项目
+- Mario 平台跳跃游戏 (HTML5)
+- 太空射击游戏 (HTML5)
+- smartlearn.py 自学习模块修复
+- 元气时钟桌面壁纸 (HTML + Lively Wallpaper)
+- PC 清理（释放 ~1.4GB）
+- 2026 世界杯分析 + 提醒 cron (2026-06-01)
+- Whisper 语音转文字（本地 CPU 运行）
+- ARAM 大乱斗助手 (C:\Users\A\Desktop\ARAM-Helper\)
+- Autolearn v1.0 自主学习系统 (C:\Users\A\.openclaw\workspace\autolearn\)
+
+## Autolearn v1.0 (2026-02-19)
+- 状态：已完成，10/10 测试全绿，可复刻可发布
+- 核心闭环：错误→签名(strict+loose)→教训匹配→复测验证
+- 事件落盘 events.jsonl（带环境指纹：Python/OS/git/GPU驱动）
+- 教训库 lessons.jsonl（draft→verified→hardened 自动推进 + dup_of 去重）
+- 复测分级：smoke/regression/full，当前 10/10 PASS + unit 6/6 PASS
+- 熔断器：同 sig 30min ≥3 次自动熔断，1h 恢复
+- 规则引擎：执行前拦截改写（dir /b→Get-ChildItem, ~/→绝对路径）
+- 自动提案：高频 sig 升级、类别爆发补 smoke、缺 retest 提醒
+- 周报生成：top errors、类别分布、环境变化
+- CLI: python -m autolearn [health|retest|report|proposals|triage|version]
+- ARAM 对接：aram.py [build|check|report|status]，172英雄100%覆盖
+- 数据版本化：schema_version 1.0 + module_version 1.0.0
+- 外置规则：data/rules.local.jsonl 不改代码可扩展
+
+## Autolearn 未完成待办
+1. ARAM 助手 v0.1 正式发布（一键 build/update/report，已有 aram.py 雏形）
+2. 投资助手票据化 v0（低风险、人工确认、可复盘）
+3. 模糊匹配可解释性（matched_keywords / similarity_score / alternatives）
+
+## ARAM 助手状态
+- 172 英雄数据库，出装数据从腾讯 lol.qq.com API 拉取
+- 悬浮窗界面：出装 → 召唤师技能 → 小贴士 → ARAM调整
+- 守护进程 + 开机自启
+- LCU API 连接正常（腾讯服需要管理员权限读取 CommandLine）
+- **未完成：海克斯强化推荐** — 掌盟 APP 的海克斯大乱斗数据接口需要登录认证，外部无法直接访问
+- 从 LCU 拉到的 cherry-augments.json (531个) 是斗魂竞技场的，不是海克斯大乱斗的
+- 海克斯大乱斗有三个等级：银色、金色、彩色（棱彩）
+- 需要用户提供掌盟截图或抓包数据才能获取真实的海克斯强化胜率
+
+## 珊瑚海的偏好
+- 数据质量：宁缺毋滥，不接受编造或模板凑数
+- UI修改：改之前要确认具体指哪个元素，别改错
+- 命名：以国服游戏内实际名称为准
+- 沟通：直接说问题，不绕弯子
+
+## 技术笔记
+- PowerShell 用 `;` 不用 `&&`
+- Python 输出中文到 PowerShell 终端会 GBK 乱码，但文件写入 UTF-8 是正确的
+- write 工具写 Python 文件比 PowerShell heredoc 更可靠
+- DDragon 版本需要跟国服同步（当前 16.3.1）
+- 腾讯服英雄名字可能跟 DDragon 不一致（如 904 亚恒）
+- web_search 工具有 ByteString 编码 bug，中文搜索全部失败

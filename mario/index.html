@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Mario</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+canvas { display: block; image-rendering: pixelated; }
+#ui { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); color: #fff; font-family: 'Press Start 2P', monospace, sans-serif; font-size: 14px; display: flex; gap: 40px; z-index: 10; text-shadow: 2px 2px #000; }
+#start-screen, #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-family: 'Press Start 2P', monospace, sans-serif; z-index: 20; background: rgba(0,0,0,0.7); }
+#start-screen h1, #game-over h1 { font-size: 28px; color: #e52521; margin-bottom: 20px; text-shadow: 3px 3px #000; }
+#start-screen p, #game-over p { font-size: 12px; margin-top: 15px; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.hidden { display: none !important; }
+#touch-controls { position: absolute; bottom: 20px; left: 0; width: 100%; display: none; justify-content: space-between; padding: 0 20px; z-index: 15; }
+#dpad { display: flex; gap: 10px; }
+#buttons { display: flex; gap: 10px; }
+.touch-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.5); color: #fff; font-size: 20px; display: flex; justify-content: center; align-items: center; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+@media (pointer: coarse) { #touch-controls { display: flex; } }
+</style>
+</head>
+<body>
+<div id="ui">
+  <span>MARIO <span id="score">000000</span></span>
+  <span>COINS <span id="coins">×00</span></span>
+  <span>WORLD 1-1</span>
+  <span>TIME <span id="time">400</span></span>
+</div>
+<div id="start-screen">
+  <h1>SUPER MARIO</h1>
+  <p>按任意键开始 / TAP TO START</p>
+</div>
+<div id="game-over" class="hidden">
+  <h1>GAME OVER</h1>
+  <p>按任意键重新开始</p>
+</div>
+<canvas id="game"></canvas>
+<div id="touch-controls">
+  <div id="dpad">
+    <button class="touch-btn" id="btn-left">◀</button>
+    <button class="touch-btn" id="btn-right">▶</button>
+  </div>
+  <div id="buttons">
+    <button class="touch-btn" id="btn-jump">A</button>
+  </div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>

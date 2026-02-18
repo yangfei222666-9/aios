@@ -1,0 +1,78 @@
+# OpenClaw 语音唤醒配置
+# 保存为: C:\Users\A\.openclaw\workspace\openclaw_voice_wake.yaml
+
+voice_wake:
+  # 基本配置
+  enabled: true
+  model_path: "C:\\Users\\A\\.openclaw\\models\\vosk-cn"
+  
+  # 唤醒词（支持同音字）
+  wake_phrases:
+    - "小九"
+    - "你好小九"
+    - "小酒"
+    - "hi 小九"
+    - "hey 小九"
+  
+  # 超时和冷却
+  command_timeout: 8.0  # 命令模式超时（秒）
+  cooldown: 2.0         # 唤醒冷却时间（秒）
+  
+  # 音频设备（null 表示默认设备）
+  device: null
+  
+  # 日志级别
+  log_level: "INFO"
+  
+  # 防自唤醒
+  pause_while_tts: true
+  tts_flag_path: "logs\\tts_playing.flag"
+  
+  # VAD 配置
+  vad_end_silence_ms: 800        # 静音800ms认为说完
+  vad_energy_threshold: 0.015    # 能量阈值（0.01-0.03）
+  
+  # 音频参数
+  sample_rate: 16000
+  blocksize: 8000
+  
+# 命令处理配置
+commands:
+  # 状态检查
+  check_status:
+    triggers: ["检查状态", "系统状态", "状态检查"]
+    action: "run_script"
+    script: "tools/daily_check_asr_tts.py"
+    
+  # 笔记管理
+  add_note:
+    triggers: ["添加笔记", "记一下", "记录"]
+    action: "add_note"
+    
+  # 测试命令
+  test:
+    triggers: ["测试", "测试语音"]
+    action: "test"
+    
+  # 停止命令
+  stop:
+    triggers: ["停止", "退出", "取消"]
+    action: "stop"
+
+# 集成配置
+integration:
+  # 命令输出目标
+  output:
+    - type: "log"           # 写入日志
+      path: "logs/voice_commands.log"
+    - type: "note"          # 写入笔记
+      path: "notes/inbox.md"
+    - type: "telegram"      # 发送到Telegram
+      enabled: false
+        
+  # TTS 响应
+  tts_response:
+    enabled: true
+    voice: "Microsoft Huihui Desktop"
+    rate: -2
+    volume: 100

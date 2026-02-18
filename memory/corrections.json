@@ -1,0 +1,50 @@
+{
+  "corrections": [
+    {
+      "date": "2026-02-18",
+      "context": "ARAM助手海克斯强化",
+      "user_said": "海克斯里面没有符文 应该把紫色那段去掉",
+      "what_i_did_wrong": "把峡谷的符文数据放在大乱斗界面上",
+      "correct_behavior": "大乱斗不需要符文推荐，删掉",
+      "preference_learned": "大乱斗界面只需要：出装、召唤师技能、ARAM调整、小贴士"
+    },
+    {
+      "date": "2026-02-18",
+      "context": "ARAM助手海克斯强化",
+      "user_said": "这个英雄名字叫不落魔峰-亚恒",
+      "what_i_did_wrong": "用DDragon翻译名(暗裔魔后-扎恩)而不是国服实际名字",
+      "correct_behavior": "以国服客户端实际显示的名字为准",
+      "preference_learned": "国服名字优先级：游戏内 > 腾讯API > DDragon"
+    },
+    {
+      "date": "2026-02-18",
+      "context": "ARAM助手海克斯强化",
+      "user_said": "你把强化海克斯那一项给删了留下了错误的符文推荐",
+      "what_i_did_wrong": "删错了元素——删了用户想保留的海克斯推荐，留了用户想删的符文推荐",
+      "correct_behavior": "先确认用户指的是哪个UI元素再操作",
+      "preference_learned": "改UI前复述一遍要改什么，确认后再动手"
+    },
+    {
+      "date": "2026-02-18",
+      "context": "ARAM助手数据",
+      "user_said": "这个看起来还不行数据库不完美一些英雄根本没数据",
+      "what_i_did_wrong": "只有30个英雄有精确数据，其余用通用模板凑数",
+      "correct_behavior": "要么全部用真实数据，要么明确标注哪些是估算的",
+      "preference_learned": "珊瑚海对数据质量要求高，宁缺毋滥"
+    },
+    {
+      "date": "2026-02-18",
+      "context": "ARAM助手海克斯强化",
+      "user_said": "趁热打铁这个海克斯也没有",
+      "what_i_did_wrong": "编造了不存在的海克斯强化名称",
+      "correct_behavior": "只用从真实数据源获取的名称",
+      "preference_learned": "绝对不编造游戏内容，没有数据就说没有"
+    }
+  ],
+  "user_preferences": {
+    "data_quality": "宁缺毋滥，不接受编造或模板凑数",
+    "ui_changes": "改之前要确认，别改错了",
+    "naming": "以国服游戏内实际名称为准",
+    "communication": "直接说问题，不需要绕弯子"
+  }
+}

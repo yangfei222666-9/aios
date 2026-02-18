@@ -1,0 +1,46 @@
+﻿标题：web_search 工具在 Windows 下对中文查询出现编码/调用层错误（参数已正确 UTF-8/URL 编码仍失败）
+
+环境：
+- OS：Windows（版本：10.0.26100，Build: 26100）
+- 系统描述：Microsoft Windows NT 10.0.26100.0
+- OpenClaw 版本：0.1.5-fix.1
+- Node 版本：v24.13.1
+- Python 版本：未安装
+- 终端/编码：PowerShell 5.1.26100.4061；当前编码：中文(GB2312)，代码页：936
+- 尝试过的编码设置：UTF-8（chcp 65001 / OutputEncoding UTF8）
+
+复现步骤：
+1) 调用 web_search("你好") 或 web_search("马来西亚 新山 天气") 或 web_search("test")
+2) 观察：失败（工具层报编码/调用错误）
+3) 错误信息：Cannot convert argument to a ByteString because the character at index 0 has a value of 20320 which is greater than 255.
+
+已做的修复尝试：
+- 查询参数 UTF-8 URL 编码（encodeURIComponent / Uri.EscapeDataString）
+- round-trip 校验通过
+- 设置 UTF-8 输出环境（chcp 65001 / [Console]::OutputEncoding=[System.Text.Encoding]::UTF8）
+- 测试三组查询词均编码验证通过：
+  * "OpenClaw skills test" -> 'OpenClaw+skills+test'
+  * "你好" -> '%e4%bd%a0%e5%a5%bd'
+  * "马来西亚 新山 天气" -> '%e9%a9%ac%e6%9d%a5%e8%a5%bf%e4%ba%9a+%e6%96%b0%e5%b1%b1+%e5%a4%a9%e6%b0%94'
+=> 仍失败，判定为工具层问题
+
+期望结果：
+- web_search 能正常处理 UTF-8 中文查询并返回结果
+
+实际结果：
+- 所有查询（包括英文"test"）均失败
+- daily_check 中 search 常失败
+- 问题似乎与查询内容无关，而是工具调用层面的编码处理问题
+
+证据/日志：
+- 调试日志：C:\Users\A\.openclaw\workspace\notes\websearch_debug_20260217_140046.txt
+- 额外验证：参数编码三组测试均通过，但 web_search 调用层仍报错
+
+临时解决方案：
+- 已实现 search_fallback 规则，使用 DuckDuckGo HTML 版作为替代方案
+- fallback 方法已验证有效：能正确处理中文查询并返回结果
+
+建议修复方向：
+1. 检查 web_search 工具的参数传递机制
+2. 确保字符串在工具调用时保持正确的 UTF-8 编码
+3. 或提供配置选项允许用户指定编码方式

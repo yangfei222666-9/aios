@@ -1,0 +1,31 @@
+﻿# Inbox
+
+- 2026-02-17T13:35:00+08:00 我今天部署完成了 OpenClaw。下一步：完善笔记系统（自动创建 notes/inbox.md）、设置白名单自动执行（notes 与 sandbox）、做一次 ASR 端到端测试。
+- 2026-02-17T13:36:00+08:00 明天把 OpenClaw 的 3 个核心技能（status / note / search）跑一遍，并记录结果。
+---
+## daily_check 模板（每天一遍）
+- [ ] daily_check | {DATE} | {TZ}
+  - status
+    - ASR: {OK/FAIL} | {detail}
+    - TTS: {OK/FAIL} | {detail}
+    - Network/API: {OK/FAIL} | {detail}
+    - Logs: {path}
+  - search
+    - Query: "OpenClaw skills test"
+    - Result: {OK/FAIL} | {title_or_error}
+  - note
+    - 今日一句总结：{one_line}
+    - 明日最重要一件事：{one_thing}
+  - 下一步
+    - 若 ASR FAIL：检查 LINEAR16/16k/mono + Key 权限
+    - 若 Network FAIL：离线降级 + 队列写入，网络恢复后同步
+---
+- [ ] daily_check | 2026-02-17 | Asia/Kuala_Lumpur
+  - status
+    - ASR: FAIL | 需要配置ASR服务
+    - TTS: FAIL | 需要配置TTS服务
+    - Network/API: OK | Telegram连接正常，web_search编码错误
+    - Logs: C:\Users\A\.openclaw\logs\
+  - search
+    - Query: "OpenClaw skills test"
+    - Result: FAIL | web_search编码错误（中文字符>255）
