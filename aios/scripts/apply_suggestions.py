@@ -173,9 +173,7 @@ def run(mode: str = "show") -> dict:
             
             record = {
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                "action": "alias_append",
-                "input": s["input"],
-                "target": s["suggested"],
+                "alias": {s["input"]: s["suggested"]},
                 "confidence": conf,
                 "reason": s.get("reason", ""),
             }
