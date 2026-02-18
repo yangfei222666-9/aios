@@ -1,83 +1,107 @@
-# aios/scripts/config_loader.py - 加载 config.yaml，解析路径
-import os, json
+# aios/scripts/config_loader.py - 加载 config.yaml（flat key: paths.events）
+import os, sys
 from pathlib import Path
 
 AIOS_ROOT = Path(__file__).resolve().parent.parent
-CONFIG_FILE = AIOS_ROOT / "config.yaml"
+CONFIG_PATH = AIOS_ROOT / "config.yaml"
 
 _cache = {}
 
-def _expand(s: str) -> str:
-    """展开 %USERPROFILE% 等环境变量"""
+
+def expand_env_vars(s: str) -> str:
     return os.path.expandvars(s)
 
-def load() -> dict:
-    if "cfg" in _cache:
-        return _cache["cfg"]
+
+def read_simple_yaml(path: Path) -> dict:
+    """简单 yaml 解析，支持嵌套 → flat key（paths.events）"""
+    if not path.exists():
+        return {}
+    result = {}
+    prefix = ""
+    indent_stack = []
     
-    # 简单 yaml 解析（不依赖 pyyaml）
-    cfg = {"paths": {}, "policy": {}, "analysis": {}}
-    
-    if not CONFIG_FILE.exists():
-        return cfg
-    
-    current_section = None
-    for line in CONFIG_FILE.read_text(encoding="utf-8").splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip() or line.strip().startswith("#"):
             continue
         
-        # 顶级 section
-        if not line.startswith(" ") and stripped.endswith(":") and ":" == stripped[-1]:
-            current_section = stripped[:-1]
-            if current_section not in cfg:
-                cfg[current_section] = {}
-            continue
+        # 计算缩进
+        stripped = line.lstrip()
+        indent = len(line) - len(stripped)
         
-        # key: value
+        # 弹出缩进栈
+        while indent_stack and indent <= indent_stack[-1][0]:
+            indent_stack.pop()
+        
+        prefix = ".".join(s[1] for s in indent_stack)
+        
         if ":" in stripped:
             key, _, val = stripped.partition(":")
             key = key.strip()
             val = val.strip().strip('"').strip("'")
             
-            if current_section and current_section in cfg:
-                # 类型转换
-                if val.lower() == "true": val = True
-                elif val.lower() == "false": val = False
-                else:
-                    try: val = float(val) if "." in str(val) else int(val)
-                    except (ValueError, TypeError): pass
-                
-                cfg[current_section][key] = val
+            full_key = f"{prefix}.{key}" if prefix else key
+            
+            if val:
+                result[full_key] = val
+            else:
+                # section header
+                indent_stack.append((indent, key))
     
+    return result
+
+
+def load() -> dict:
+    if "cfg" in _cache:
+        return _cache["cfg"]
+    cfg = read_simple_yaml(CONFIG_PATH)
     _cache["cfg"] = cfg
     return cfg
 
 
-def get_path(name: str) -> Path:
-    """获取配置中的路径，自动展开环境变量"""
+def get(key: str, default: str = "") -> str:
     cfg = load()
-    raw = cfg.get("paths", {}).get(name, "")
+    return cfg.get(key, default)
+
+
+def get_path(key: str) -> Path:
+    raw = get(key)
     if not raw:
-        return Path("")
-    return Path(_expand(raw))
+        return None
+    return Path(expand_env_vars(raw))
 
 
-def get_policy(name: str, default=None):
-    cfg = load()
-    return cfg.get("policy", {}).get(name, default)
+def get_float(key: str, default: float = 0.0) -> float:
+    raw = get(key)
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except (ValueError, TypeError):
+        return default
 
 
-def get_analysis(name: str, default=None):
-    cfg = load()
-    return cfg.get("analysis", {}).get(name, default)
+def get_bool(key: str, default: bool = False) -> bool:
+    raw = get(key)
+    if not raw:
+        return default
+    return raw.lower() in ("1", "true", "yes", "y", "on")
+
+
+def get_int(key: str, default: int = 0) -> int:
+    raw = get(key)
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except (ValueError, TypeError):
+        return default
 
 
 if __name__ == "__main__":
+    import json
     cfg = load()
-    print(json.dumps({k: str(v) if isinstance(v, Path) else v for k, v in cfg.items()}, 
-                     ensure_ascii=False, indent=2))
-    print(f"\nevents: {get_path('events')}")
-    print(f"alias: {get_path('alias')}")
-    print(f"min_confidence: {get_policy('alias_min_confidence')}")
-    print(f"no_overwrite: {get_policy('alias_no_overwrite')}")
+    print(json.dumps(cfg, ensure_ascii=False, indent=2))
+    print(f"\npaths.events: {get_path('paths.events')}")
+    print(f"paths.alias: {get_path('paths.alias')}")
+    print(f"policy.alias_min_confidence: {get_float('policy.alias_min_confidence')}")
+    print(f"policy.alias_no_overwrite: {get_bool('policy.alias_no_overwrite')}")

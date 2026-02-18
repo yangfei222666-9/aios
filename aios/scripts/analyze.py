@@ -16,14 +16,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.log_event import load_events, count_by_type
-from scripts.config_loader import get_analysis
+from scripts.config_loader import get_int, get_float
 
 AIOS_ROOT = Path(__file__).resolve().parent.parent
 LEARNING_DIR = AIOS_ROOT / "learning"
 LEARNING_DIR.mkdir(exist_ok=True)
 
-CORRECTION_THRESHOLD = get_analysis("correction_threshold", 3)
-LOW_SCORE_THRESHOLD = get_analysis("low_score_threshold", 0.80)
+CORRECTION_THRESHOLD = get_int("analysis.correction_threshold", 3)
+LOW_SCORE_THRESHOLD = get_float("analysis.low_score_threshold", 0.80)
 
 
 # ==================== A. 质量指标 (Metrics) ====================
