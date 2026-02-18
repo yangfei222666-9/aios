@@ -226,4 +226,26 @@ def explain(query: str) -> str:
 if __name__ == "__main__":
     import sys
     q = sys.argv[1] if len(sys.argv) > 1 else "凯隐"
-    print(explain(q))
+    fmt = sys.argv[2] if len(sys.argv) > 2 else "json"
+    
+    results = match(q)
+    if fmt == "json":
+        for r in results:
+            out = {
+                "input": q,
+                "matched": r["title"],
+                "champion_id": r["champion_id"],
+                "score": r["score"],
+                "reasons": [],
+            }
+            if r["match_type"] == "alias_exact":
+                out["reasons"].append("alias_hit")
+            elif r["match_type"] == "alias_fuzzy":
+                out["reasons"].append("alias_fuzzy")
+            if r["match_type"] == "contains":
+                out["reasons"].append("name_contains")
+            if r["score"] >= 0.8:
+                out["reasons"].append(f"fuzzy_score>{r['score']:.1f}")
+            print(json.dumps(out, ensure_ascii=False))
+    else:
+        print(explain(q))
