@@ -1,13 +1,16 @@
-# aram/modules/fuzzy_match.py - 英雄模糊搜索（可解释）
+# aram/modules/matcher.py - 英雄模糊搜索（可解释 + 反馈学习）
 """
-输入中文/拼音/简称 → 匹配英雄 → 返回匹配理由
+输入中文/拼音/简称 → 匹配英雄 → 返回匹配理由 → 用户纠正 → 自动学习
 """
-import json, re
+import json, re, time
 from pathlib import Path
 from difflib import SequenceMatcher
 
 ARAM_DIR = Path(r"C:\Users\A\Desktop\ARAM-Helper")
 DATA_FILE = ARAM_DIR / "aram_data.json"
+FEEDBACK_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+FEEDBACK_FILE = FEEDBACK_DIR / "matcher_feedback.jsonl"
+LEARNED_ALIASES_FILE = FEEDBACK_DIR / "learned_aliases.json"
 
 # 常用别名词典（国服玩家习惯叫法）
 ALIASES = {
@@ -122,6 +125,49 @@ def _load_data():
 def _similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
+def _load_learned_aliases() -> dict:
+    """加载用户纠正后学习到的别名"""
+    if not LEARNED_ALIASES_FILE.exists():
+        return {}
+    try:
+        return json.loads(LEARNED_ALIASES_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+def _save_learned_aliases(aliases: dict):
+    FEEDBACK_DIR.mkdir(exist_ok=True)
+    LEARNED_ALIASES_FILE.write_text(json.dumps(aliases, ensure_ascii=False, indent=2), encoding="utf-8")
+
+def feedback(query: str, correct_champion_id: str, was_wrong: bool = True):
+    """
+    用户纠正反馈。
+    query: 用户输入
+    correct_champion_id: 正确的英雄 ID
+    was_wrong: 匹配结果是否错误
+    """
+    FEEDBACK_DIR.mkdir(exist_ok=True)
+    data = _load_data()
+    correct_info = data.get(correct_champion_id, {})
+    
+    # 记录反馈
+    rec = {
+        "ts": int(time.time()),
+        "query": query,
+        "correct_id": correct_champion_id,
+        "correct_title": correct_info.get("title", ""),
+        "was_wrong": was_wrong,
+    }
+    with FEEDBACK_FILE.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    
+    # 自动学习：把纠正写入 learned_aliases
+    if was_wrong:
+        learned = _load_learned_aliases()
+        learned[query] = correct_champion_id
+        _save_learned_aliases(learned)
+    
+    return rec
+
 def match(query: str, top_n: int = 3) -> list:
     """
     模糊匹配英雄。
@@ -133,6 +179,22 @@ def match(query: str, top_n: int = 3) -> list:
     
     query = query.strip()
     results = []
+    
+    # 0. 用户学习的别名（最高优先级）
+    learned = _load_learned_aliases()
+    if query in learned:
+        cid = learned[query]
+        if cid in data:
+            info = data[cid]
+            results.append({
+                "champion_id": cid,
+                "name": info.get("name", ""),
+                "title": info.get("title", ""),
+                "score": 1.0,
+                "reason": f"用户纠正学习: {query} → {info.get('title', '')}",
+                "match_type": "learned",
+            })
+            return results
     
     # 1. 别名词典精确命中
     if query in ALIASES:
@@ -225,6 +287,15 @@ def explain(query: str) -> str:
 
 if __name__ == "__main__":
     import sys
+    
+    # feedback mode: python matcher.py feedback "卡特" "55"
+    if len(sys.argv) >= 4 and sys.argv[1] == "feedback":
+        q = sys.argv[2]
+        correct_id = sys.argv[3]
+        rec = feedback(q, correct_id)
+        print(json.dumps(rec, ensure_ascii=False))
+        sys.exit(0)
+    
     q = sys.argv[1] if len(sys.argv) > 1 else "凯隐"
     fmt = sys.argv[2] if len(sys.argv) > 2 else "json"
     
@@ -238,7 +309,9 @@ if __name__ == "__main__":
                 "score": r["score"],
                 "reasons": [],
             }
-            if r["match_type"] == "alias_exact":
+            if r["match_type"] == "learned":
+                out["reasons"].append("user_learned")
+            elif r["match_type"] == "alias_exact":
                 out["reasons"].append("alias_hit")
             elif r["match_type"] == "alias_fuzzy":
                 out["reasons"].append("alias_fuzzy")
