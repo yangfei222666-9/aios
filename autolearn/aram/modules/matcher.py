@@ -264,7 +264,15 @@ def match(query: str, top_n: int = 3) -> list:
     
     # 排序返回 top_n
     ranked = sorted(seen.values(), key=lambda x: x["score"], reverse=True)
-    return ranked[:top_n]
+    final = ranked[:top_n]
+    
+    # → aios 事件总线：每次匹配都记录
+    if final and _aios_match:
+        top = final[0]
+        try: _aios_match(query, top["title"], top["champion_id"], top["score"], top["match_type"])
+        except Exception: pass
+    
+    return final
 
 
 def explain(query: str) -> str:

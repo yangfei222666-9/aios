@@ -7,6 +7,13 @@ from core.circuit_breaker import check_and_trip, allow, get_checklist
 from core.rules import apply_rules
 from core.version import MODULE_VERSION, SCHEMA_VERSION
 
+# aios 事件总线（可选）
+try:
+    sys.path.insert(0, os.path.join(os.environ.get("USERPROFILE", ""), ".openclaw", "workspace", "aios"))
+    from bridge import on_executor_run as _aios_exec, on_circuit_breaker as _aios_cb
+except Exception:
+    _aios_exec = _aios_cb = None
+
 def _env_fingerprint() -> dict:
     env = {
         "python": sys.version.split()[0],
@@ -54,6 +61,10 @@ def run(intent: str, tool: str, payload: dict, do_task) -> dict:
         out = do_task(intent, payload)
         if isinstance(out, dict) and out.get("ok"):
             log_event(type="done", intent=intent, tool=tool, ok=True, env=env)
+            # → aios
+            if _aios_exec:
+                try: _aios_exec(intent, tool, True, str(out.get("result", ""))[:200])
+                except Exception: pass
             return out
 
         msg = ""
@@ -96,5 +107,14 @@ def run(intent: str, tool: str, payload: dict, do_task) -> dict:
         if tripped:
             result["tripped"] = True
             result["checklist"] = get_checklist()
+            # → aios 熔断事件
+            if _aios_cb:
+                try: _aios_cb(sig_s, True)
+                except Exception: pass
+        
+        # → aios 错误事件
+        if _aios_exec:
+            try: _aios_exec(intent, tool, False, str(e)[:200])
+            except Exception: pass
         
         return result

@@ -1,6 +1,6 @@
 # ARAM v0.1 Report
-Run: 20260219-061613 | 2026-02-19 06:16:13
-Command: `report`
+Run: 20260219-065143 | 2026-02-19 06:51:43
+Command: `update`
 
 ## Environment
 - python: 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
@@ -17,9 +17,9 @@ Command: `report`
   - champions: 172
   - data_size: 66785
   - fetch_script: ok
-- [PASS] report
-  - report generated
+- [PASS] update
+  - update check ok — 172 champions, 100.0% coverage
 
 ## Summary
 - Overall: ALL PASS
-- Generated: 2026-02-19 06:16:13
+- Generated: 2026-02-19 06:51:43
