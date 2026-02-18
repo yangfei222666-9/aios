@@ -3,7 +3,7 @@
 从 events.jsonl 分析，产出结构化报告：
   metrics / top_issues / alias_suggestions / tool_suggestions / threshold_warnings
 """
-import json, time, sys
+import json, time, sys, math
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -23,28 +23,53 @@ def compute_metrics(days: int = 1) -> dict:
     events = load_events(days)
     matches = [e for e in events if e.get("type") == "match"]
     corrections = [e for e in events if e.get("type") == "correction"]
-    tools = [e for e in events if e.get("type") in ("tool", "task")]
+    tools = [e for e in events if e.get("type") == "tool"]
     http_errors = [e for e in events if e.get("type") == "http_error"]
 
     total_match = len(matches) + len(corrections)
     correction_rate = len(corrections) / total_match if total_match > 0 else 0
 
-    low_score = [m for m in matches if (m.get("data") or {}).get("score", 1.0) < LOW_SCORE_THRESHOLD]
-    low_score_ratio = len(low_score) / len(matches) if matches else 0
-
     tool_ok = [t for t in tools if (t.get("data") or {}).get("ok", True)]
     tool_success_rate = len(tool_ok) / len(tools) if tools else 1.0
 
-    http_status = Counter((e.get("data") or {}).get("status_code", "?") for e in http_errors)
+    http_codes = Counter((e.get("data") or {}).get("status_code", "?") for e in http_errors)
+
+    # p95 + p50 per tool
+    by_tool = defaultdict(list)
+    for e in tools:
+        data = e.get("data", {})
+        name = data.get("name", data.get("tool", e.get("source", "?")))
+        ms = data.get("ms", data.get("elapsed_ms", 0))
+        if ms > 0:
+            by_tool[name].append(ms)
+
+    tool_p95 = {}
+    tool_p50 = {}
+    for name, times in by_tool.items():
+        if len(times) >= 2:
+            s = sorted(times)
+            tool_p95[name] = s[math.ceil(0.95 * len(s)) - 1]
+            tool_p50[name] = s[len(s) // 2]
 
     return {
-        "match_correction_rate": round(correction_rate, 3),
-        "low_score_ratio": round(low_score_ratio, 3),
-        "tool_success_rate": round(tool_success_rate, 3),
-        "tool_total": len(tools),
-        "http_error_count": len(http_errors),
-        "http_status_breakdown": dict(http_status),
-        "total_events": len(events),
+        "counts": {
+            "events": len(events),
+            "matches": len(matches),
+            "corrections": len(corrections),
+            "tools": len(tools),
+        },
+        "quality": {
+            "correction_rate": round(correction_rate, 4),
+        },
+        "reliability": {
+            "tool_success_rate": round(tool_success_rate, 4),
+            "http_502": http_codes.get(502, 0),
+            "http_404": http_codes.get(404, 0),
+        },
+        "performance": {
+            "tool_p95_ms": tool_p95,
+            "tool_p50_ms": tool_p50,
+        },
     }
 
 
@@ -143,7 +168,6 @@ def compute_tool_suggestions(days: int = 7) -> list:
         })
 
     # --- Perf Learner ---
-    import math
     by_tool_perf = defaultdict(list)
     for e in tool_events:
         data = e.get("data", {})
@@ -205,20 +229,43 @@ def compute_threshold_warnings(days: int = 7) -> list:
     return warnings
 
 
+def _get_git_commit() -> str:
+    try:
+        import subprocess, os
+        git_exe = r"C:\Program Files\Git\cmd\git.exe"
+        r = subprocess.run([git_exe, "rev-parse", "--short", "HEAD"],
+                          capture_output=True, text=True, timeout=3,
+                          cwd=os.path.join(os.environ.get("USERPROFILE", ""), ".openclaw", "workspace"))
+        return r.stdout.strip() if r.returncode == 0 else "unknown"
+    except Exception:
+        return "unknown"
+
+
+AIOS_VERSION = "0.1.0"
+
+
 def generate_full_report(days: int = 7) -> dict:
     """完整结构化报告"""
+    now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    window_from = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() - days * 86400))
+
+    metrics = compute_metrics(days)
+
     report = {
-        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "metrics": compute_metrics(days),
+        "ts": now,
+        "window": {"from": window_from, "to": now},
+        **metrics,
+        "model": {"default": "claude-sonnet-4-6", "fallback": "claude-opus-4-6"},
+        "version": {"aios": AIOS_VERSION, "commit": _get_git_commit()},
         "top_issues": compute_top_issues(days),
         "alias_suggestions": compute_alias_suggestions(days),
         "tool_suggestions": compute_tool_suggestions(days),
         "threshold_warnings": compute_threshold_warnings(days),
     }
 
-    # 写 suggestions.json（只含可操作部分）
+    # 写 suggestions.json
     sug = {
-        "generated_at": report["generated_at"],
+        "generated_at": now,
         "alias_suggestions": [{
             "input": s["input"],
             "suggested": s["suggested"],
@@ -250,16 +297,27 @@ def generate_daily_report(days: int = 1) -> str:
     except Exception:
         pass
 
-    m = r["metrics"]
+    m = r
+    q = m.get("quality", {})
+    rel = m.get("reliability", {})
+    perf = m.get("performance", {})
+    counts = m.get("counts", {})
     lines = [
         f"# AIOS Daily Report",
-        f"Generated: {r['generated_at']}\n",
+        f"Generated: {r['ts']}",
+        f"Window: {r['window']['from']} → {r['window']['to']}\n",
         "## A. Metrics",
-        f"- correction_rate: {m['match_correction_rate']:.1%}",
-        f"- low_score_ratio: {m['low_score_ratio']:.1%}",
-        f"- tool_success_rate: {m['tool_success_rate']:.1%} ({m['tool_total']})",
-        f"- http_errors: {m['http_error_count']}",
+        f"- events: {counts.get('events', 0)}  matches: {counts.get('matches', 0)}  corrections: {counts.get('corrections', 0)}  tools: {counts.get('tools', 0)}",
+        f"- correction_rate: {q.get('correction_rate', 0):.2%}",
+        f"- tool_success_rate: {rel.get('tool_success_rate', 0):.2%}",
+        f"- http_502: {rel.get('http_502', 0)}  http_404: {rel.get('http_404', 0)}",
     ]
+    if perf.get("tool_p95_ms"):
+        lines.append("- p95/p50:")
+        for t in perf["tool_p95_ms"]:
+            p95 = perf["tool_p95_ms"].get(t, "?")
+            p50 = perf.get("tool_p50_ms", {}).get(t, "?")
+            lines.append(f"  - {t}: p95={p95}ms p50={p50}ms")
 
     lines.append("\n## B. Top Issues")
     for inp, cnt in r["top_issues"].get("top_corrected_inputs", {}).items():
