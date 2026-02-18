@@ -180,8 +180,8 @@ def run(mode: str = "show") -> dict:
             applied.append(record)
             
             log_event("suggestion_applied", "apply_suggestions",
-                      f"AUTO: alias \"{s['input']}\" → \"{s['suggested']}\" (conf={conf})",
-                      s)
+                      f"alias: {s['input']} → {s['suggested']}",
+                      {"input": s["input"], "applied": s["suggested"]})
             print(f"  ✅ APPLIED: \"{s['input']}\" → \"{s['suggested']}\" (confidence: {conf})")
         
         # threshold + route 全部进 pending
