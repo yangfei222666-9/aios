@@ -18,6 +18,7 @@ fix_*.py
 check_*.py
 verify_*.py
 analyze_*.py
+!aios/learning/analyze*.py
 final_*.py
 *.bak
 
