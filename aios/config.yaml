@@ -8,7 +8,7 @@ paths:
   suggestions: "%USERPROFILE%\\.openclaw\\workspace\\aios\\learning\\suggestions.json"
   applied_log: "%USERPROFILE%\\.openclaw\\workspace\\aios\\learning\\applied_log.json"
   alias: "%USERPROFILE%\\.openclaw\\workspace\\autolearn\\data\\learned_aliases.json"
-  metrics_history: "%USERPROFILE%\\.openclaw\\workspace\\aios\\learning\\metrics_history.jsonl"
+  metrics_history: "%USERPROFILE%\\.openclaw\\workspace\\aios\\learning\\baseline.jsonl"
   tickets: "%USERPROFILE%\\.openclaw\\workspace\\aios\\learning\\tickets.jsonl"
 
 policy:
