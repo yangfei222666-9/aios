@@ -34,8 +34,11 @@ SAFE_AUTO_TYPES = {"alias_redirect"}
 # 危险黑名单：这些类型必须人工确认
 REQUIRES_HUMAN = {"threshold_warning", "route_suggestion", "config_change", "alias_delete"}
 
+CONFIDENCE_THRESHOLD = 0.8
+
 # learned_aliases 路径
 LEARNED_FILE = Path(__file__).resolve().parent.parent.parent / "autolearn" / "data" / "learned_aliases.json"
+APPLIED_LOG = LEARNING_DIR / "applied_log.json"
 
 
 def load_suggestions() -> dict:
@@ -152,18 +155,36 @@ def run(mode: str = "show") -> dict:
         
         for s in alias_sug:
             learned = load_learned()
-            if s["input"] not in learned:
-                # 安全：追加
-                learned[s["input"]] = s["suggested"]
-                save_learned(learned)
-                log_event("suggestion_applied", "apply_suggestions",
-                          f"AUTO: alias \"{s['input']}\" → \"{s['suggested']}\"",
-                          s)
-                applied.append(s)
-                print(f"  ✅ APPLIED: \"{s['input']}\" → \"{s['suggested']}\"")
-            else:
+            conf = s.get("confidence", 0)
+            
+            if conf < CONFIDENCE_THRESHOLD:
                 pending_alias.append(s)
-                print(f"  ⏭️ SKIPPED: \"{s['input']}\" already exists")
+                print(f"  ⏭️ LOW CONF: \"{s['input']}\" (confidence {conf} < {CONFIDENCE_THRESHOLD})")
+                continue
+            
+            if s["input"] in learned:
+                pending_alias.append(s)
+                print(f"  ⏭️ EXISTS: \"{s['input']}\" already in aliases")
+                continue
+            
+            # 安全：追加
+            learned[s["input"]] = s["suggested"]
+            save_learned(learned)
+            
+            record = {
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "action": "alias_append",
+                "input": s["input"],
+                "target": s["suggested"],
+                "confidence": conf,
+                "reason": s.get("reason", ""),
+            }
+            applied.append(record)
+            
+            log_event("suggestion_applied", "apply_suggestions",
+                      f"AUTO: alias \"{s['input']}\" → \"{s['suggested']}\" (conf={conf})",
+                      s)
+            print(f"  ✅ APPLIED: \"{s['input']}\" → \"{s['suggested']}\" (confidence: {conf})")
         
         # threshold + route 全部进 pending
         pending = {
@@ -187,6 +208,11 @@ def run(mode: str = "show") -> dict:
         SUGGESTIONS_FILE.write_text(json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8")
         
         pending_count = len(pending_alias) + len(threshold_warn) + len(route_sug)
+        
+        # 写 applied_log.json
+        if applied:
+            APPLIED_LOG.write_text(json.dumps(applied, ensure_ascii=False, indent=2), encoding="utf-8")
+        
         print(f"\nApplied: {len(applied)}, Pending review: {pending_count}")
         return {"applied": len(applied), "pending": pending_count}
     
