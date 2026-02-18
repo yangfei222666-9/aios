@@ -38,13 +38,13 @@ REQUIRES_HUMAN = {"threshold_warning", "route_suggestion", "config_change", "ali
 LEARNED_FILE = Path(__file__).resolve().parent.parent.parent / "autolearn" / "data" / "learned_aliases.json"
 
 
-def load_suggestions() -> list:
+def load_suggestions() -> dict:
     if not SUGGESTIONS_FILE.exists():
-        return []
+        return {}
     try:
         return json.loads(SUGGESTIONS_FILE.read_text(encoding="utf-8"))
     except Exception:
-        return []
+        return {}
 
 
 def load_learned() -> dict:
@@ -117,49 +117,78 @@ def run(mode: str = "show") -> dict:
     mode:
       show  - 展示所有建议，标记哪些可自动/需人工
       auto  - 自动应用安全建议，危险建议存入 pending
-      force - 人工确认后应用 pending 中的指定建议
     """
-    suggestions = load_suggestions()
+    data = load_suggestions()
     
-    if not suggestions:
+    if not data:
+        print("No pending suggestions.")
+        return {"applied": 0, "pending": 0}
+    
+    alias_sug = data.get("alias_suggestions", [])
+    threshold_warn = data.get("threshold_warnings", [])
+    route_sug = data.get("route_suggestions", [])
+    
+    total = len(alias_sug) + len(threshold_warn) + len(route_sug)
+    if total == 0:
         print("No pending suggestions.")
         return {"applied": 0, "pending": 0}
     
     if mode == "show":
-        print(f"=== {len(suggestions)} Suggestions ===\n")
-        for i, s in enumerate(suggestions, 1):
-            safe = _is_safe(s)
-            tag = "✅ AUTO" if safe else "⏳ NEEDS REVIEW"
-            print(f"  {i}. [{tag}] [{s.get('severity','?')}] {s.get('reason','?')}")
-        return {"total": len(suggestions)}
+        print(f"=== {total} Suggestions ===\n")
+        for s in alias_sug:
+            learned = load_learned()
+            safe = s["input"] not in learned
+            tag = "✅ AUTO" if safe else "⏳ EXISTS"
+            print(f"  [{tag}] alias: \"{s['input']}\" → \"{s['suggested']}\" (confidence: {s['confidence']})")
+        for s in threshold_warn:
+            print(f"  [⏳ NEEDS REVIEW] threshold: {s['field']} {s['current']} → {s['suggested']}")
+        for s in route_sug:
+            print(f"  [⏳ NEEDS REVIEW] route: HTTP {s['status_code']} x{s['count']}")
+        return {"total": total}
     
     elif mode == "auto":
         applied = []
-        pending = []
+        pending_alias = []
         
-        for s in suggestions:
-            if _is_safe(s):
-                result = apply_safe(s)
-                if result.get("applied"):
-                    applied.append({"suggestion": s, "result": result})
-                    print(f"  ✅ APPLIED: {s.get('reason','?')}")
-                else:
-                    pending.append(s)
-                    print(f"  ⏭️ SKIPPED: {result.get('reason','?')}")
+        for s in alias_sug:
+            learned = load_learned()
+            if s["input"] not in learned:
+                # 安全：追加
+                learned[s["input"]] = s["suggested"]
+                save_learned(learned)
+                log_event("suggestion_applied", "apply_suggestions",
+                          f"AUTO: alias \"{s['input']}\" → \"{s['suggested']}\"",
+                          s)
+                applied.append(s)
+                print(f"  ✅ APPLIED: \"{s['input']}\" → \"{s['suggested']}\"")
             else:
-                pending.append(s)
-                print(f"  ⏳ PENDING: {s.get('reason','?')} (needs human review)")
+                pending_alias.append(s)
+                print(f"  ⏭️ SKIPPED: \"{s['input']}\" already exists")
+        
+        # threshold + route 全部进 pending
+        pending = {
+            "generated_at": data.get("generated_at", ""),
+            "alias_suggestions": pending_alias,
+            "threshold_warnings": threshold_warn,
+            "route_suggestions": route_sug,
+        }
+        
+        for s in threshold_warn:
+            print(f"  ⏳ PENDING: threshold {s['field']} (needs human review)")
+        for s in route_sug:
+            print(f"  ⏳ PENDING: route HTTP {s['status_code']} (needs human review)")
+        
+        # 写入 pending
+        has_pending = pending_alias or threshold_warn or route_sug
+        if has_pending:
+            PENDING_FILE.write_text(json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8")
         
         # 更新 suggestions.json（清空已应用的）
         SUGGESTIONS_FILE.write_text(json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8")
         
-        # 写入 pending_review.json
-        if pending:
-            PENDING_FILE.write_text(json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8")
-        
-        summary = {"applied": len(applied), "pending": len(pending)}
-        print(f"\nApplied: {summary['applied']}, Pending review: {summary['pending']}")
-        return summary
+        pending_count = len(pending_alias) + len(threshold_warn) + len(route_sug)
+        print(f"\nApplied: {len(applied)}, Pending review: {pending_count}")
+        return {"applied": len(applied), "pending": pending_count}
     
     else:
         print(f"Unknown mode: {mode}")

@@ -98,15 +98,18 @@ def compute_top_issues(days: int = 7) -> dict:
 
 # ==================== C. 建议 (Suggestions) ====================
 
-def compute_suggestions(days: int = 7) -> list:
+def compute_suggestions(days: int = 7) -> dict:
+    """生成结构化建议，分类输出"""
     events = load_events(days)
     corrections = [e for e in events if e.get("type") == "correction"]
     matches = [e for e in events if e.get("type") == "match"]
     http_errors = [e for e in events if e.get("type") == "http_error"]
     
-    suggestions = []
+    alias_suggestions = []
+    threshold_warnings = []
+    route_suggestions = []
     
-    # 1. alias 建议：纠正 >= N 次
+    # 1. alias 建议
     correction_targets = defaultdict(list)
     for c in corrections:
         data = c.get("data", {})
@@ -119,46 +122,59 @@ def compute_suggestions(days: int = 7) -> list:
         tc = Counter(targets)
         top, count = tc.most_common(1)[0]
         if count >= CORRECTION_THRESHOLD:
-            suggestions.append({
-                "type": "alias_redirect",
-                "severity": "high",
-                "reason": f"alias 建议: \"{inp}\" → \"{top}\" (纠正 {count} 次)",
+            confidence = round(count / len(targets), 2)
+            alias_suggestions.append({
                 "input": inp,
-                "target": top,
-                "count": count,
+                "suggested": top,
+                "reason": f"corrected_{count}_times",
+                "confidence": confidence,
             })
     
-    # 2. 阈值建议：低分且纠正多 → 需要二次确认
-    low_score_corrected = set()
-    for c in corrections:
-        low_score_corrected.add((c.get("data") or {}).get("input", ""))
-    low_score_matches = [m for m in matches if (m.get("data") or {}).get("score", 1.0) < LOW_SCORE_THRESHOLD]
-    low_corrected_count = sum(1 for m in low_score_matches 
-                              if (m.get("data") or {}).get("input", "") in low_score_corrected)
-    if low_corrected_count >= 3:
-        suggestions.append({
-            "type": "threshold_warning",
-            "severity": "medium",
-            "reason": f"阈值建议: 低分且纠正多 ({low_corrected_count}次) → 提高\"需要二次确认\"",
-            "count": low_corrected_count,
-        })
+    # 2. 阈值警告
+    total_matches = len(matches) + len(corrections)
+    if total_matches > 0:
+        correction_rate = len(corrections) / total_matches
+        low_score = [m for m in matches if (m.get("data") or {}).get("score", 1.0) < LOW_SCORE_THRESHOLD]
+        low_score_rate = len(low_score) / len(matches) if matches else 0
+        
+        if correction_rate > 0.15:
+            threshold_warnings.append({
+                "field": "correction_rate",
+                "current": round(correction_rate, 2),
+                "suggested": 0.10,
+                "reason": "high_correction_rate",
+            })
+        
+        if low_score_rate > 0.15:
+            threshold_warnings.append({
+                "field": "low_score_rate",
+                "current": round(low_score_rate, 2),
+                "suggested": 0.10,
+                "reason": "too_many_low_score_matches",
+            })
     
-    # 3. 路由建议：502 多 → 降级
-    status_502 = sum(1 for e in http_errors if (e.get("data") or {}).get("status_code") == 502)
-    if status_502 >= 3:
-        suggestions.append({
-            "type": "route_suggestion",
-            "severity": "medium",
-            "reason": f"路由建议: 502 x{status_502} → 考虑降级或切换备用",
-            "count": status_502,
-        })
+    # 3. 路由建议
+    status_counts = Counter((e.get("data") or {}).get("status_code", 0) for e in http_errors)
+    for code, cnt in status_counts.items():
+        if cnt >= 3:
+            route_suggestions.append({
+                "status_code": code,
+                "count": cnt,
+                "reason": f"http_{code}_x{cnt}",
+                "action": "consider_fallback",
+            })
     
-    return suggestions
+    return {
+        "generated_at": time.strftime("%Y-%m-%d"),
+        "alias_suggestions": alias_suggestions,
+        "threshold_warnings": threshold_warnings,
+        "route_suggestions": route_suggestions,
+    }
 
 
 # ==================== 输出 ====================
 
-def generate_suggestions(days: int = 7) -> list:
+def generate_suggestions(days: int = 7) -> dict:
     sug = compute_suggestions(days)
     out_path = LEARNING_DIR / "suggestions.json"
     out_path.write_text(json.dumps(sug, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -243,10 +259,24 @@ def generate_daily_report(days: int = 1) -> str:
     
     # C. Suggestions
     lines.append(f"\n## C. 建议 (Suggestions)")
-    if suggestions:
-        for s in suggestions:
-            lines.append(f"- [{s['severity']}] {s['reason']}")
-    else:
+    
+    if suggestions["alias_suggestions"]:
+        lines.append("### Alias")
+        for s in suggestions["alias_suggestions"]:
+            lines.append(f"- \"{s['input']}\" → \"{s['suggested']}\" (confidence: {s['confidence']}, {s['reason']})")
+    
+    if suggestions["threshold_warnings"]:
+        lines.append("### Threshold Warnings")
+        for s in suggestions["threshold_warnings"]:
+            lines.append(f"- {s['field']}: {s['current']} → suggested {s['suggested']} ({s['reason']})")
+    
+    if suggestions["route_suggestions"]:
+        lines.append("### Route")
+        for s in suggestions["route_suggestions"]:
+            lines.append(f"- HTTP {s['status_code']} x{s['count']} → {s['action']}")
+    
+    has_any = any([suggestions["alias_suggestions"], suggestions["threshold_warnings"], suggestions["route_suggestions"]])
+    if not has_any:
         lines.append("- No suggestions")
     
     report = "\n".join(lines)
