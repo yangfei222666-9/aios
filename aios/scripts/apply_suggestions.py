@@ -105,21 +105,21 @@ def run(mode: str = "show") -> dict:
         learned = load_learned()
 
         for s in alias_sug:
-            ok, reason = apply_alias_suggestion(learned, s, MIN_CONF, NO_OVERWRITE)
-            if ok:
+            applied_ok, why = apply_alias_suggestion(learned, s, MIN_CONF, NO_OVERWRITE)
+            if applied_ok:
                 applied.append({
                     "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
                     "alias": {s["input"]: s["suggested"]},
                     "confidence": s.get("confidence", 0),
-                    "reason": reason,
+                    "reason": why,
                 })
                 log_event("suggestion_applied", "apply_suggestions",
                           f"alias: {s['input']} -> {s['suggested']}",
                           {"input": s["input"], "applied": s["suggested"]})
-                print(f"  APPLIED: \"{s['input']}\" -> \"{s['suggested']}\" ({reason})")
+                print(f"  APPLIED: \"{s['input']}\" -> \"{s['suggested']}\" ({why})")
             else:
                 pending_alias.append(s)
-                print(f"  SKIP: \"{s['input']}\" ({reason})")
+                print(f"  SKIP: \"{s['input']}\" ({why})")
 
         if applied:
             save_learned(learned)
