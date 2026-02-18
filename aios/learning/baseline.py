@@ -8,9 +8,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from core.engine import load_events
+from core.config import get_path
 
 LEARNING_DIR = Path(__file__).resolve().parent
-HISTORY_FILE = LEARNING_DIR / "metrics_history.jsonl"
+HISTORY_FILE = get_path("paths.metrics_history") or (LEARNING_DIR / "metrics_history.jsonl")
 
 
 def snapshot(days: int = 1) -> dict:

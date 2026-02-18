@@ -7,8 +7,11 @@ status: open | done | wontfix
 import json, time, sys, hashlib
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from core.config import get_path
+
 LEARNING_DIR = Path(__file__).resolve().parent
-TICKETS_FILE = LEARNING_DIR / "tickets.jsonl"
+TICKETS_FILE = get_path("paths.tickets") or (LEARNING_DIR / "tickets.jsonl")
 
 
 def _gen_id(suggestion: dict) -> str:
