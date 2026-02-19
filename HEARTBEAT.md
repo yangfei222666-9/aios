@@ -13,6 +13,11 @@
 - 提取重要教训和新知识到 MEMORY.md
 - 清理过期信息
 
+### 每天：AIOS 基线快照
+- 运行 `C:\Program Files\Python312\python.exe C:\Users\A\.openclaw\workspace\aios\learning\baseline.py snapshot`
+- 追加到 baseline.jsonl
+- 如果 evolution_score grade 是 degraded/critical，主动提醒珊瑚海
+
 ### 每次会话开始：教训检查
 - 读 memory/lessons.json 里的 rules_derived
 - 读 memory/corrections.json 里的 user_preferences

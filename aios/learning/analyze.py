@@ -341,6 +341,18 @@ def generate_daily_report(days: int = 1) -> str:
     if not any([r["alias_suggestions"], r["tool_suggestions"], r["threshold_warnings"]]):
         lines.append("\n- No suggestions")
 
+    # evolution score
+    try:
+        from learning.baseline import evolution_score
+        evo = evolution_score()
+        lines.append(f"\n## F. Evolution Score")
+        lines.append(f"- score: {evo['score']}  grade: {evo['grade']}")
+        bd = evo.get("breakdown", {})
+        for k, v in bd.items():
+            lines.append(f"  - {k}: {v['value']} (w={v['weight']})")
+    except Exception:
+        pass
+
     report_text = "\n".join(lines)
     (LEARNING_DIR / "daily_report.md").write_text(report_text, encoding="utf-8")
     return report_text
