@@ -381,7 +381,7 @@ def generate_daily_report(days: int = 1) -> str:
     if gate_result and gate_result.get("alerts"):
         lines.append(f"\n## G. Regression Gate ⚠")
         for a in gate_result["alerts"]:
-            lines.append(f"- {a['name']}: {a['reason']} → {a['action']}")
+            lines.append(f"- {a['title']}: {a['evidence'].get('rule', '')}")
     elif gate_result:
         lines.append(f"\n## G. Regression Gate ✓")
         lines.append(f"- {gate_result['status']}")
