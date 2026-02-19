@@ -163,6 +163,21 @@ try:
 except:
     pass
 
+# 集成变更保险丝统计
+try:
+    import safe_run
+    sr_stats = safe_run.weekly_stats()
+    lines.extend(['', '## 高风险变更'])
+    lines.append(f'- 本周变更总计: {sr_stats["total"]}')
+    lines.append(f'- 高风险变更: {sr_stats["high_risk"]}')
+    lines.append(f'- 成功: {sr_stats["success"]} | 拒绝: {sr_stats["rejected"]} | 失败: {sr_stats["failed"]} | 回滚: {sr_stats["rolled_back"]}')
+    if sr_stats['failed'] > 0:
+        issues.append(f'{sr_stats["failed"]} 次变更执行失败')
+    if sr_stats['rolled_back'] > 0:
+        issues.append(f'{sr_stats["rolled_back"]} 次变更被回滚')
+except:
+    pass
+
 if not issues:
     lines.append('🟢 系统稳定运行，无异常趋势')
 else:
