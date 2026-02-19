@@ -6,6 +6,16 @@ logs/
 *.mp3
 *.zip
 
+# AIOS runtime
+aios/events/
+aios/learning/baseline.jsonl
+aios/learning/metrics_history.jsonl
+aios/learning/suggestions.json
+aios/learning/applied_log.json
+aios/learning/daily_report.md
+aios/learning/pending_review.json
+aios/learning/tickets.jsonl
+
 # Python cache
 __pycache__/
 *.pyc
