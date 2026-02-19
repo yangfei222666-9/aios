@@ -1,6 +1,6 @@
 {
-  "lol_version": "16.3.1",
-  "last_lol_refresh": "2026-02-18",
+  "lol_version": "16.4.1",
+  "last_lol_refresh": "2026-02-19",
   "last_memory_review": "2026-02-18",
   "lessons_learned": [
     "不要编造游戏数据名称，必须从真实数据源获取",
