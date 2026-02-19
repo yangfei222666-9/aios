@@ -149,6 +149,20 @@ try:
 except:
     pass
 
+# 集成闭环状态机统计
+try:
+    import alert_fsm
+    fsm_stats = alert_fsm.stats()
+    lines.extend(['', '## 告警闭环状态'])
+    lines.append(f'- 当前 OPEN: {fsm_stats["open"]}')
+    lines.append(f'- 当前 ACK (处理中): {fsm_stats["ack"]}')
+    lines.append(f'- 今日已解决: {fsm_stats["resolved_today"]}')
+    lines.append(f'- 超 SLA: {fsm_stats["overdue"]}')
+    if fsm_stats['overdue'] > 0:
+        issues.append(f'{fsm_stats["overdue"]} 个告警超 SLA')
+except:
+    pass
+
 if not issues:
     lines.append('🟢 系统稳定运行，无异常趋势')
 else:

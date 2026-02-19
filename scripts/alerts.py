@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
+# 导入闭环状态机
+sys.path.insert(0, os.path.dirname(__file__))
+import alert_fsm
+
 WS = r'C:\Users\A\.openclaw\workspace'
 PYTHON = r'C:\Program Files\Python312\python.exe'
 ALERTS_STATE = os.path.join(WS, 'memory', 'alerts_state.json')
@@ -160,11 +164,26 @@ def run_checks():
         results[level].append(full_msg)
         log_event(level, rule_id, msg)
 
+        # 闭环状态机集成
+        if level in ("CRIT", "WARN"):
+            alert_fsm.open_alert(rule_id, level, msg)
+        else:
+            # INFO = 正常，记录恢复
+            alert_fsm.record_recovery(rule_id)
+
         # CRIT 需要实时推送，但要检查冷却
         if level == "CRIT":
             if is_cooled_down(state, rule_id):
                 notifications.append(full_msg)
                 mark_alerted(state, rule_id)
+
+    # 检查 SLA 超时
+    overdue = alert_fsm.check_sla()
+    for a in overdue:
+        sla_msg = f"⏰ SLA超时: [{a['id']}] {a['severity']} {a['message']}"
+        if is_cooled_down(state, f"sla_{a['id']}"):
+            notifications.append(sla_msg)
+            mark_alerted(state, f"sla_{a['id']}")
 
     save_state(state)
     return results, notifications
@@ -184,6 +203,12 @@ def format_summary(results):
 
     if not results['CRIT'] and not results['WARN']:
         lines.append("🟢 全部正常")
+
+    # 状态机摘要
+    s = alert_fsm.stats()
+    active_total = s['open'] + s['ack']
+    if active_total > 0 or s['overdue'] > 0:
+        lines.append(f"\n📋 告警状态: OPEN={s['open']} ACK={s['ack']} 超SLA={s['overdue']}")
 
     return '\n'.join(lines)
 
