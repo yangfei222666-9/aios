@@ -193,6 +193,25 @@ try:
 except:
     pass
 
+# 集成运营看板治理评分
+try:
+    import ops_dashboard
+    aq = ops_dashboard.alert_quality(7)
+    cs = ops_dashboard.change_safety(7)
+    qh = ops_dashboard.queue_health(7)
+    gs = ops_dashboard.governance_score(aq, cs, qh)
+    lines.extend(['', '## 治理评分'])
+    lines.append(f'- 告警质量: {gs["alert_quality_score"]}/100')
+    lines.append(f'- 变更安全: {gs["change_safety_score"]}/100')
+    lines.append(f'- 队列健康: {gs["queue_health_score"]}/100')
+    icon = '🟢' if gs['stable'] else '🟡'
+    lines.append(f'- 综合评分: {gs["governance_score"]}/100 {icon}')
+    ops_dashboard.record_score(gs)
+    if gs['governance_score'] < 70:
+        issues.append(f'治理评分偏低: {gs["governance_score"]}/100')
+except:
+    pass
+
 if not issues:
     lines.append('🟢 系统稳定运行，无异常趋势')
 else:
