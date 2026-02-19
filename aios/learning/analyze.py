@@ -293,8 +293,24 @@ def generate_daily_report(days: int = 1) -> str:
     # 门禁检测
     gate_result = None
     try:
-        from learning.baseline import regression_gate
-        gate_result = regression_gate()
+        from learning.guardrail import guardrail_from_history
+        from learning.baseline import load_history
+        from learning.tickets import ingest
+        history = load_history(30)
+        gate_tickets = guardrail_from_history(history)
+        if gate_tickets:
+            ingest([{
+                "level": t.level,
+                "name": t.title,
+                "action": "investigate",
+                "reason": t.evidence.get("rule", ""),
+                "confidence": 0.8,
+                "evidence": t.evidence,
+            } for t in gate_tickets])
+        gate_result = {
+            "alerts": [{"title": t.title, "evidence": t.evidence} for t in gate_tickets],
+            "status": "regression_detected" if gate_tickets else "gate_passed",
+        }
     except Exception:
         pass
 

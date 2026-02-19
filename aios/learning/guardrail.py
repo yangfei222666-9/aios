@@ -90,25 +90,8 @@ def guardrail_from_history(history: list[dict]) -> list[Ticket]:
 
 
 def run_guardrail(history: list[dict]) -> dict:
-    """运行门禁，返回结构化结果 + 写入工单"""
+    """运行门禁，返回结构化结果"""
     alerts = guardrail_from_history(history)
-
-    if alerts:
-        try:
-            import sys
-            sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-            from learning.tickets import ingest
-            ingest([{
-                "level": t.level,
-                "name": t.title,
-                "action": "investigate",
-                "reason": t.evidence.get("rule", ""),
-                "confidence": 0.8,
-                "evidence": t.evidence,
-            } for t in alerts])
-        except Exception:
-            pass
-
     return {
         "alerts": [asdict(t) for t in alerts],
         "status": "regression_detected" if alerts else "gate_passed",
