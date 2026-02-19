@@ -197,6 +197,76 @@ def test_replay():
     assert "events_count" in r
 
 
+def _getv(d: dict, path: str, default=None):
+    cur = d
+    for part in path.split("."):
+        if not isinstance(cur, dict) or part not in cur:
+            return default
+        cur = cur[part]
+    return cur
+
+
+def _load_last_n_jsonl(path: Path, n: int) -> list:
+    if not path.exists():
+        return []
+    lines = path.read_text(encoding="utf-8").splitlines()
+    out = []
+    for line in lines[-n:]:
+        if line.strip():
+            try:
+                out.append(json.loads(line))
+            except Exception:
+                pass
+    return out
+
+
+def run_metrics_regression() -> tuple:
+    """对比最近两次 baseline，检查是否退化"""
+    from core.config import get_path
+    hist = get_path("paths.metrics_history")
+    if not hist:
+        hist = Path(__file__).resolve().parent.parent / "learning" / "baseline.jsonl"
+
+    last2 = _load_last_n_jsonl(hist, 2)
+    if len(last2) < 2:
+        print("  ⚠ not enough baseline history (need >=2), skipping metrics regression")
+        return (0, 0)
+
+    prev, curr = last2[-2], last2[-1]
+    checks = [
+        ("correction_rate", "correction_rate", "down"),
+        ("tool_success_rate", "tool_success_rate", "up"),
+        ("http_502_rate", "http_502_rate", "down"),
+        ("http_404_rate", "http_404_rate", "down"),
+    ]
+
+    ok = 0
+    total = 0
+    print(f"  comparing: {prev.get('ts', '?')} → {curr.get('ts', '?')}")
+
+    for name, path, direction in checks:
+        a = _getv(prev, path, 0)
+        b = _getv(curr, path, 0)
+        total += 1
+
+        if direction == "down":
+            passed = b <= a
+            arrow = "↓" if b < a else "→"
+        else:
+            passed = b >= a
+            arrow = "↑" if b > a else "→"
+
+        if passed:
+            ok += 1
+            RESULTS.append(("PASS", f"metrics:{name}"))
+            print(f"  ✓ {name}: {a} → {b} {arrow}")
+        else:
+            RESULTS.append(("FAIL", f"metrics:{name}", f"{a} → {b} (expected {direction})"))
+            print(f"  ✗ {name}: {a} → {b} {arrow} (expected {direction})")
+
+    return (ok, total)
+
+
 # === run ===
 
 if __name__ == "__main__":
@@ -224,6 +294,12 @@ if __name__ == "__main__":
 
     print("\n[scripts]")
     test("replay", test_replay)
+
+    # === metrics regression (baseline compare) ===
+    print("\n[metrics regression]")
+    metrics_ok, metrics_total = run_metrics_regression()
+    PASS += metrics_ok
+    FAIL += (metrics_total - metrics_ok)
 
     print(f"\n{'='*40}")
     print(f"Results: {PASS} passed, {FAIL} failed, {PASS+FAIL} total")
