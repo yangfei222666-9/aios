@@ -1,0 +1,159 @@
+"""weekly_health.py - 周报自动汇总
+从 reports/refresh_*.md + AIOS score + autolearn health 聚合趋势
+输出 reports/weekly_health_YYYYmmdd.md
+"""
+import os, re, json, subprocess, sys
+from datetime import datetime, timedelta
+
+WS = r'C:\Users\A\.openclaw\workspace'
+REPORTS = os.path.join(WS, 'reports')
+PYTHON = r'C:\Program Files\Python312\python.exe'
+GIT = r'C:\Program Files\Git\cmd\git.exe'
+
+now = datetime.now()
+week_ago = now - timedelta(days=7)
+
+# 1. 聚合 refresh 报告
+refresh_files = sorted([f for f in os.listdir(REPORTS) if f.startswith('refresh_') and f.endswith('.md')])
+weekly_refreshes = []
+for f in refresh_files:
+    # refresh_20260219.md -> 2026-02-19
+    m = re.match(r'refresh_(\d{4})(\d{2})(\d{2})\.md', f)
+    if not m:
+        continue
+    dt = datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    if dt >= week_ago:
+        path = os.path.join(REPORTS, f)
+        with open(path, 'r', encoding='utf-8') as fh:
+            content = fh.read()
+        entry = {'date': dt.strftime('%Y-%m-%d'), 'file': f}
+        for line in content.splitlines():
+            if line.startswith('- DDragon'):
+                entry['version'] = line.split(':')[-1].strip()
+            elif line.startswith('- 成功:'):
+                entry['success'] = int(line.split(':')[-1].strip())
+            elif line.startswith('- 失败:'):
+                entry['fail'] = int(line.split(':')[-1].strip())
+            elif line.startswith('- 变更:'):
+                entry['changed'] = int(line.split(':')[-1].strip())
+            elif line.startswith('- 新增:'):
+                entry['new'] = int(line.split(':')[-1].strip())
+            elif line.startswith('- 重试次数:'):
+                entry['retries'] = int(line.split(':')[-1].strip())
+        weekly_refreshes.append(entry)
+
+# 2. AIOS score
+try:
+    r = subprocess.run([PYTHON, '-m', 'aios', 'score'], cwd=WS, capture_output=True, text=True, timeout=15)
+    aios = json.loads(r.stdout)
+except:
+    aios = {'score': 'N/A', 'grade': 'N/A'}
+
+# 3. Autolearn health
+try:
+    r = subprocess.run([PYTHON, '-m', 'autolearn', 'health'], cwd=WS, capture_output=True, text=True, timeout=15)
+    al_out = r.stdout.strip()
+    al_healthy = 'healthy' in al_out.lower()
+    # 提取 pass/fail
+    m = re.search(r'(\d+) PASS / (\d+) FAIL', al_out)
+    al_pass = int(m.group(1)) if m else 0
+    al_fail = int(m.group(2)) if m else 0
+except:
+    al_healthy = False
+    al_pass = al_fail = 0
+
+# 4. Git 活动
+try:
+    since = week_ago.strftime('%Y-%m-%d')
+    r = subprocess.run([GIT, 'log', f'--since={since}', '--oneline'], cwd=WS, capture_output=True, text=True, timeout=10)
+    commits = [l for l in r.stdout.strip().splitlines() if l]
+except:
+    commits = []
+
+# 5. 备份检查
+backup_dir = os.path.join(os.environ['USERPROFILE'], 'Desktop', 'autolearn_backups')
+backups = []
+if os.path.isdir(backup_dir):
+    for f in sorted(os.listdir(backup_dir)):
+        if f.startswith('autolearn_backup_') and f.endswith('.zip'):
+            size_mb = round(os.path.getsize(os.path.join(backup_dir, f)) / 1024 / 1024, 2)
+            backups.append(f'{f} ({size_mb} MB)')
+
+# 6. 生成周报
+ts = now.strftime('%Y%m%d')
+out_path = os.path.join(REPORTS, f'weekly_health_{ts}.md')
+
+lines = [
+    f'# 周报 {now.strftime("%Y-%m-%d %H:%M")}',
+    f'> 统计周期: {week_ago.strftime("%Y-%m-%d")} ~ {now.strftime("%Y-%m-%d")}',
+    '',
+    '## 系统健康',
+    f'- AIOS score: {aios.get("score", "N/A")} (grade: {aios.get("grade", "N/A")})',
+    f'- Autolearn: {"✅ healthy" if al_healthy else "⚠️ unhealthy"} ({al_pass} pass / {al_fail} fail)',
+    '',
+    '## LOL 数据刷新',
+]
+
+if weekly_refreshes:
+    total_success = sum(r.get('success', 0) for r in weekly_refreshes)
+    total_fail = sum(r.get('fail', 0) for r in weekly_refreshes)
+    total_changed = sum(r.get('changed', 0) for r in weekly_refreshes)
+    total_new = sum(r.get('new', 0) for r in weekly_refreshes)
+    total_retries = sum(r.get('retries', 0) for r in weekly_refreshes)
+    latest_ver = weekly_refreshes[-1].get('version', 'N/A')
+
+    lines.append(f'- 刷新次数: {len(weekly_refreshes)}')
+    lines.append(f'- 当前版本: {latest_ver}')
+    lines.append(f'- 总成功/失败: {total_success}/{total_fail}')
+    lines.append(f'- 总变更/新增: {total_changed}/{total_new}')
+    lines.append(f'- 总重试: {total_retries}')
+    lines.append(f'- 成功率: {round(total_success/(total_success+total_fail)*100, 1) if (total_success+total_fail) > 0 else 0}%')
+    lines.append('')
+
+    if total_fail > 0:
+        lines.append('⚠️ 本周有失败记录，建议排查')
+    else:
+        lines.append('✅ 本周零失败')
+else:
+    lines.append('- 本周无刷新记录')
+
+lines.extend(['', '## 版本控制', f'- 本周提交: {len(commits)}'])
+for c in commits[-10:]:
+    lines.append(f'  - {c}')
+
+lines.extend(['', '## 备份', f'- 备份文件数: {len(backups)}'])
+for b in backups[-7:]:
+    lines.append(f'  - {b}')
+
+# 趋势判断
+lines.extend(['', '## 趋势判断'])
+issues = []
+if aios.get('grade') in ('degraded', 'critical'):
+    issues.append('AIOS 评分异常')
+if not al_healthy:
+    issues.append('Autolearn 测试有失败')
+if weekly_refreshes and total_fail > 0:
+    issues.append(f'LOL 刷新有 {total_fail} 次失败')
+
+if not issues:
+    lines.append('🟢 系统稳定运行，无异常趋势')
+else:
+    lines.append('🟡 需要关注:')
+    for i in issues:
+        lines.append(f'- {i}')
+
+with open(out_path, 'w', encoding='utf-8') as f:
+    f.write('\n'.join(lines) + '\n')
+
+# Git 提交
+try:
+    subprocess.run([GIT, 'add', out_path], cwd=WS, capture_output=True)
+    subprocess.run([GIT, 'commit', '-m', f'report: weekly health {now.strftime("%Y-%m-%d")}'], cwd=WS, capture_output=True)
+except:
+    pass
+
+import sys, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+print(f'weekly report: {out_path}')
+for l in lines:
+    print(l)
