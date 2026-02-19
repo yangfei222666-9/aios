@@ -70,6 +70,14 @@
   3. ✅ 任务队列化：job_queue.py (enqueue/worker/retry/dead-letter/recover)
 - 三件事全部 MVP 落地，验收全过 (17/17 + 17/17 + 19/19)
 
+## 14天运营期验收指标 (2026-02-19 ~ 2026-03-05)
+- MTTR：故障平均恢复时长（目标：逐周下降）
+- Noise Rate：告警噪音率（WARN/CRIT 中可行动告警 > 70%）
+- Retry Yield：重试挽回率（指数退避后成功占比稳定上升）
+- Rollback Safety：回滚成功率（目标 100%，恢复后数据一致）
+- 口令：先看噪声，再看风险，最后看吞吐
+- 规则：冻结核心规则口径，只修严重噪声项，不做大改
+
 ## Autolearn 未完成待办
 1. ARAM 助手 v0.1 正式发布（一键 build/update/report，已有 aram.py 雏形）
 2. 投资助手票据化 v0（低风险、人工确认、可复盘）

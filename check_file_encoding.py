@@ -1,0 +1,214 @@
+#!/usr/bin/env python3
+"""
+检查文件编码规范
+确保所有文件操作都使用正确的编码设置
+"""
+
+import os
+import re
+import sys
+from pathlib import Path
+
+# 编码修复
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except AttributeError:
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
+def check_file_operations():
+    """检查文件操作编码规范"""
+    print("文件编码规范检查")
+    print("=" * 60)
+    
+    # 检查目录
+    directories = ["tools", "."]
+    
+    issues = []
+    good_practices = []
+    
+    for directory in directories:
+        if not os.path.exists(directory):
+            continue
+            
+        for py_file in Path(directory).rglob("*.py"):
+            try:
+                with open(py_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+                
+                # 查找所有 open() 调用
+                open_pattern = r'open\([^)]+\)'
+                matches = re.finditer(open_pattern, content, re.IGNORECASE)
+                
+                for match in matches:
+                    open_call = match.group(0)
+                    line_num = content[:match.start()].count('\n') + 1
+                    
+                    # 检查模式
+                    if '"w"' in open_call or "'w'" in open_call or '"a"' in open_call or "'a'" in open_call or '"r"' in open_call or "'r'" in open_call:
+                        # 文本文件操作
+                        if 'encoding=' in open_call:
+                            if 'encoding="utf-8"' in open_call or "encoding='utf-8'" in open_call:
+                                if ('"w"' in open_call or "'w'" in open_call or '"a"' in open_call or "'a'" in open_call) and 'errors=' in open_call:
+                                    # 最佳实践：写入/追加模式有 errors 参数
+                                    good_practices.append((py_file, line_num, open_call))
+                                elif '"r"' in open_call or "'r'" in open_call:
+                                    # 读取模式只需要 encoding
+                                    good_practices.append((py_file, line_num, open_call))
+                                else:
+                                    # 写入模式但没有 errors 参数
+                                    issues.append((py_file, line_num, open_call, "写入模式缺少 errors='replace'"))
+                            else:
+                                # 有 encoding 但不是 utf-8
+                                issues.append((py_file, line_num, open_call, "编码不是 utf-8"))
+                        else:
+                            # 文本文件操作但没有 encoding 参数
+                            issues.append((py_file, line_num, open_call, "文本文件操作缺少 encoding 参数"))
+                    elif '"rb"' in open_call or "'rb'" in open_call or '"wb"' in open_call or "'wb'" in open_call:
+                        # 二进制文件操作，不需要编码参数
+                        good_practices.append((py_file, line_num, open_call))
+                
+            except Exception as e:
+                print(f"读取文件 {py_file} 时出错: {e}")
+    
+    # 输出结果
+    print("\n✅ 符合规范的文件操作:")
+    print("-" * 40)
+    if good_practices:
+        for file_path, line_num, open_call in good_practices[:10]:  # 只显示前10个
+            print(f"{file_path}:{line_num}")
+            print(f"  {open_call}")
+            print()
+    else:
+        print("(无)")
+    
+    print("\n⚠️ 需要修复的文件操作:")
+    print("-" * 40)
+    if issues:
+        for file_path, line_num, open_call, problem in issues:
+            print(f"{file_path}:{line_num} - {problem}")
+            print(f"  {open_call}")
+            print()
+    else:
+        print("✅ 所有文件操作都符合编码规范！")
+    
+    return len(issues) == 0
+
+def check_specific_files():
+    """检查特定重要文件的编码规范"""
+    print("\n重要文件编码规范检查")
+    print("=" * 60)
+    
+    important_files = [
+        "tools/wake_listener.py",
+        "tools/command_router.py",
+        "tools/voice_command_handler_integrated.py",
+        "tools/unicode_sanitizer.py",
+        "start_voice_system.py",
+    ]
+    
+    all_good = True
+    
+    for file_path in important_files:
+        if not os.path.exists(file_path):
+            print(f"❌ 文件不存在: {file_path}")
+            all_good = False
+            continue
+            
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            
+            # 检查是否有文本文件写入操作
+            if 'open(' in content and ('"w"' in content or "'w'" in content or '"a"' in content or "'a'" in content):
+                # 检查是否有正确的编码设置
+                if 'encoding="utf-8"' in content or "encoding='utf-8'" in content:
+                    print(f"✅ {file_path}: 包含正确的编码设置")
+                else:
+                    print(f"❌ {file_path}: 文本文件操作可能缺少编码设置")
+                    all_good = False
+            else:
+                print(f"✅ {file_path}: 无文本文件写入操作或已正确设置")
+                
+        except Exception as e:
+            print(f"❌ 检查 {file_path} 时出错: {e}")
+            all_good = False
+    
+    return all_good
+
+def demonstrate_best_practices():
+    """演示最佳实践"""
+    print("\n文件编码最佳实践示例")
+    print("=" * 60)
+    
+    examples = [
+        ("读取文本文件", 'with open("file.txt", "r", encoding="utf-8") as f:\n    content = f.read()'),
+        ("写入文本文件", 'with open("file.txt", "w", encoding="utf-8", errors="replace", errors="replace") as f:\n    f.write("内容 ✅🎉\\n")'),
+        ("追加文本文件", 'with open("file.txt", "a", encoding="utf-8", errors="replace", errors="replace") as f:\n    f.write("追加内容\\n")'),
+        ("读取二进制文件", 'with open("file.bin", "rb") as f:\n    data = f.read()'),
+        ("写入二进制文件", 'with open("file.bin", "wb") as f:\n    f.write(data)'),
+        ("YAML配置文件", 'import yaml\nwith open("config.yaml", "r", encoding="utf-8") as f:\n    config = yaml.safe_load(f)'),
+        ("JSON文件", 'import json\nwith open("data.json", "w", encoding="utf-8", errors="replace") as f:\n    json.dump(data, f, ensure_ascii=False, indent=2)'),
+    ]
+    
+    for description, code in examples:
+        print(f"{description}:")
+        print(code)
+        print()
+    
+    print("关键要点:")
+    print("  1. 文本文件操作必须指定 encoding='utf-8'")
+    print("  2. 写入/追加模式应该添加 errors='replace'")
+    print("  3. 二进制文件操作不需要编码参数")
+    print("  4. 使用 with 语句确保文件正确关闭")
+
+def main():
+    """主检查函数"""
+    print("文件编码规范检查工具")
+    print("=" * 60)
+    print("确保所有文件操作都遵循最佳实践:")
+    print("  open(..., encoding='utf-8', errors='replace')")
+    print()
+    
+    # 运行检查
+    files_ok = check_file_operations()
+    important_ok = check_specific_files()
+    
+    # 演示最佳实践
+    demonstrate_best_practices()
+    
+    print("\n" + "=" * 60)
+    print("检查结果汇总:")
+    print("=" * 60)
+    
+    all_ok = files_ok and important_ok
+    
+    if all_ok:
+        print("🎉 所有文件操作都符合编码规范！")
+        print()
+        print("系统已实施的最佳实践:")
+        print("  1. ✅ 所有文本文件操作指定 encoding='utf-8'")
+        print("  2. ✅ 写入/追加模式包含 errors='replace'")
+        print("  3. ✅ 重要文件都已检查通过")
+        print("  4. ✅ 统一的编码标准")
+        print()
+        print("这确保了:")
+        print("  • 中文和 Unicode 字符正确显示")
+        print("  • 跨平台兼容性")
+        print("  • 数据完整性")
+        print("  • 系统稳定性")
+        return 0
+    else:
+        print("⚠️ 发现需要修复的文件操作")
+        print()
+        print("建议修复:")
+        print("  1. 为所有文本文件操作添加 encoding='utf-8'")
+        print("  2. 为写入/追加模式添加 errors='replace'")
+        print("  3. 运行此检查工具验证修复")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())

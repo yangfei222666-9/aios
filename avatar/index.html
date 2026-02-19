@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>小九 Avatar</title>
+<style>body{margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#f0f0f0;}</style>
+</head>
+<body>
+<canvas id="c" width="512" height="512"></canvas>
+<script>
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+const W = 512, H = 512;
+
+// Background - soft gradient circle
+const bg = ctx.createRadialGradient(W/2, H/2, 50, W/2, H/2, 280);
+bg.addColorStop(0, '#ffe4f0');
+bg.addColorStop(1, '#c8e6ff');
+ctx.fillStyle = bg;
+ctx.fillRect(0, 0, W, H);
+
+// Helper
+function ellipse(x, y, rx, ry, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+function roundRect(x, y, w, h, r, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  ctx.fill();
+}
+
+// === Hair (back layer) ===
+ctx.fillStyle = '#2a1a3a';
+ctx.beginPath();
+ctx.moveTo(140, 160);
+ctx.quadraticCurveTo(100, 200, 105, 380);
+ctx.quadraticCurveTo(110, 430, 140, 440);
+ctx.lineTo(160, 400);
+ctx.lineTo(150, 200);
+ctx.closePath();
+ctx.fill();
+
+ctx.beginPath();
+ctx.moveTo(372, 160);
+ctx.quadraticCurveTo(412, 200, 407, 380);
+ctx.quadraticCurveTo(402, 430, 372, 440);
+ctx.lineTo(352, 400);
+ctx.lineTo(362, 200);
+ctx.closePath();
+ctx.fill();
+
+// === Neck ===
+ctx.fillStyle = '#fce4d6';
+ctx.fillRect(230, 320, 52, 40);
+
+// === JK Uniform - Sailor collar ===
+// Shoulders / body
+ctx.fillStyle = '#1a237e';
+ctx.beginPath();
+ctx.moveTo(160, 360);
+ctx.quadraticCurveTo(180, 345, 230, 340);
+ctx.lineTo(282, 340);
+ctx.quadraticCurveTo(332, 345, 352, 360);
+ctx.lineTo(370, 480);
+ctx.lineTo(142, 480);
+ctx.closePath();
+ctx.fill();
+
+// White inner shirt
+ctx.fillStyle = '#fff';
+ctx.beginPath();
+ctx.moveTo(220, 340);
+ctx.lineTo(292, 340);
+ctx.lineTo(280, 480);
+ctx.lineTo(232, 480);
+ctx.closePath();
+ctx.fill();
+
+// Sailor collar - navy blue triangles
+ctx.fillStyle = '#1a237e';
+ctx.beginPath();
+ctx.moveTo(200, 345);
+ctx.lineTo(256, 420);
+ctx.lineTo(180, 390);
+ctx.closePath();
+ctx.fill();
+
+ctx.beginPath();
+ctx.moveTo(312, 345);
+ctx.lineTo(256, 420);
+ctx.lineTo(332, 390);
+ctx.closePath();
+ctx.fill();
+
+// Collar white stripes
+ctx.strokeStyle = '#fff';
+ctx.lineWidth = 2;
+// Left collar stripe
+ctx.beginPath();
+ctx.moveTo(195, 355);
+ctx.lineTo(245, 410);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(192, 362);
+ctx.lineTo(240, 415);
+ctx.stroke();
+// Right collar stripe
+ctx.beginPath();
+ctx.moveTo(317, 355);
+ctx.lineTo(267, 410);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(320, 362);
+ctx.lineTo(272, 415);
+ctx.stroke();
+
+// Red ribbon bow
+ctx.fillStyle = '#e53935';
+// Left bow
+ctx.beginPath();
+ctx.moveTo(256, 370);
+ctx.quadraticCurveTo(230, 355, 232, 375);
+ctx.quadraticCurveTo(234, 390, 256, 380);
+ctx.closePath();
+ctx.fill();
+// Right bow
+ctx.beginPath();
+ctx.moveTo(256, 370);
+ctx.quadraticCurveTo(282, 355, 280, 375);
+ctx.quadraticCurveTo(278, 390, 256, 380);
+ctx.closePath();
+ctx.fill();
+// Knot
+ellipse(256, 375, 5, 6, '#c62828');
+// Ribbon tails
+ctx.fillStyle = '#e53935';
+ctx.beginPath();
+ctx.moveTo(253, 380);
+ctx.quadraticCurveTo(245, 410, 240, 420);
+ctx.lineTo(248, 415);
+ctx.quadraticCurveTo(252, 400, 256, 385);
+ctx.closePath();
+ctx.fill();
+ctx.beginPath();
+ctx.moveTo(259, 380);
+ctx.quadraticCurveTo(267, 410, 272, 420);
+ctx.lineTo(264, 415);
+ctx.quadraticCurveTo(260, 400, 256, 385);
+ctx.closePath();
+ctx.fill();
+
+// Back collar flap
+ctx.fillStyle = '#1a237e';
+ctx.beginPath();
+ctx.moveTo(180, 345);
+ctx.lineTo(332, 345);
+ctx.lineTo(340, 370);
+ctx.quadraticCurveTo(330, 380, 310, 375);
+ctx.lineTo(256, 350);
+ctx.lineTo(202, 375);
+ctx.quadraticCurveTo(182, 380, 172, 370);
+ctx.closePath();
+ctx.fill();
+// Stripes on back collar
+ctx.strokeStyle = '#fff';
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(185, 358);
+ctx.lineTo(327, 358);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(183, 364);
+ctx.lineTo(329, 364);
+ctx.stroke();
+
+// === Face ===
+ellipse(256, 240, 90, 100, '#fce4d6');
+
+// === Eyes ===
+// White
+ellipse(220, 235, 22, 26, '#fff');
+ellipse(292, 235, 22, 26, '#fff');
+// Iris
+ellipse(222, 238, 15, 18, '#6a1b9a');
+ellipse(294, 238, 15, 18, '#6a1b9a');
+// Pupil
+ellipse(224, 240, 8, 10, '#1a0030');
+ellipse(296, 240, 8, 10, '#1a0030');
+// Eye highlight
+ellipse(228, 230, 5, 6, '#fff');
+ellipse(300, 230, 5, 6, '#fff');
+ellipse(218, 242, 3, 3, '#fff');
+ellipse(290, 242, 3, 3, '#fff');
+// Upper eyelid line
+ctx.strokeStyle = '#2a1a3a';
+ctx.lineWidth = 3;
+ctx.beginPath();
+ctx.ellipse(220, 232, 24, 16, 0, Math.PI + 0.3, -0.3);
+ctx.stroke();
+ctx.beginPath();
+ctx.ellipse(292, 232, 24, 16, 0, Math.PI + 0.3, -0.3);
+ctx.stroke();
+// Eyelashes
+ctx.lineWidth = 2.5;
+ctx.beginPath(); ctx.moveTo(197, 225); ctx.lineTo(192, 218); ctx.stroke();
+ctx.beginPath(); ctx.moveTo(243, 225); ctx.lineTo(248, 218); ctx.stroke();
+ctx.beginPath(); ctx.moveTo(269, 225); ctx.lineTo(264, 218); ctx.stroke();
+ctx.beginPath(); ctx.moveTo(315, 225); ctx.lineTo(320, 218); ctx.stroke();
+
+// === Eyebrows ===
+ctx.strokeStyle = '#3a2a4a';
+ctx.lineWidth = 3;
+ctx.beginPath();
+ctx.moveTo(200, 205);
+ctx.quadraticCurveTo(220, 195, 242, 205);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(270, 205);
+ctx.quadraticCurveTo(290, 195, 312, 205);
+ctx.stroke();
+
+// === Blush ===
+ellipse(195, 265, 18, 10, 'rgba(255,150,150,0.4)');
+ellipse(317, 265, 18, 10, 'rgba(255,150,150,0.4)');
+
+// === Nose ===
+ctx.fillStyle = '#f0c8b0';
+ctx.beginPath();
+ctx.moveTo(254, 260);
+ctx.lineTo(258, 270);
+ctx.lineTo(252, 268);
+ctx.closePath();
+ctx.fill();
+
+// === Mouth - cute smile ===
+ctx.strokeStyle = '#c0756b';
+ctx.lineWidth = 2.5;
+ctx.beginPath();
+ctx.moveTo(238, 288);
+ctx.quadraticCurveTo(256, 302, 274, 288);
+ctx.stroke();
+// Little fang
+ctx.fillStyle = '#fff';
+ctx.beginPath();
+ctx.moveTo(265, 288);
+ctx.lineTo(268, 296);
+ctx.lineTo(262, 292);
+ctx.closePath();
+ctx.fill();
+
+// === Hair (front layer) ===
+ctx.fillStyle = '#2a1a3a';
+// Bangs
+ctx.beginPath();
+ctx.moveTo(155, 190);
+ctx.quadraticCurveTo(160, 120, 200, 110);
+ctx.quadraticCurveTo(256, 95, 312, 110);
+ctx.quadraticCurveTo(352, 120, 357, 190);
+ctx.lineTo(350, 200);
+ctx.quadraticCurveTo(340, 170, 310, 210);
+ctx.lineTo(290, 215);
+ctx.quadraticCurveTo(280, 185, 270, 210);
+ctx.lineTo(256, 220);
+ctx.quadraticCurveTo(245, 190, 235, 215);
+ctx.lineTo(215, 210);
+ctx.quadraticCurveTo(190, 180, 170, 210);
+ctx.quadraticCurveTo(162, 195, 155, 190);
+ctx.closePath();
+ctx.fill();
+
+// Hair shine
+ctx.strokeStyle = 'rgba(120,80,160,0.4)';
+ctx.lineWidth = 3;
+ctx.beginPath();
+ctx.moveTo(200, 130);
+ctx.quadraticCurveTo(230, 140, 240, 170);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(280, 125);
+ctx.quadraticCurveTo(295, 140, 300, 165);
+ctx.stroke();
+
+// Side hair
+ctx.fillStyle = '#2a1a3a';
+// Left side
+ctx.beginPath();
+ctx.moveTo(155, 190);
+ctx.quadraticCurveTo(140, 220, 135, 300);
+ctx.quadraticCurveTo(130, 370, 145, 420);
+ctx.quadraticCurveTo(150, 430, 158, 420);
+ctx.quadraticCurveTo(155, 360, 160, 300);
+ctx.quadraticCurveTo(165, 240, 175, 210);
+ctx.closePath();
+ctx.fill();
+// Right side
+ctx.beginPath();
+ctx.moveTo(357, 190);
+ctx.quadraticCurveTo(372, 220, 377, 300);
+ctx.quadraticCurveTo(382, 370, 367, 420);
+ctx.quadraticCurveTo(362, 430, 354, 420);
+ctx.quadraticCurveTo(357, 360, 352, 300);
+ctx.quadraticCurveTo(347, 240, 337, 210);
+ctx.closePath();
+ctx.fill();
+
+// === Hair accessory - small bow ===
+ctx.fillStyle = '#e53935';
+ctx.beginPath();
+ctx.moveTo(320, 145);
+ctx.quadraticCurveTo(340, 130, 345, 145);
+ctx.quadraticCurveTo(340, 155, 320, 150);
+ctx.closePath();
+ctx.fill();
+ctx.beginPath();
+ctx.moveTo(320, 145);
+ctx.quadraticCurveTo(305, 135, 300, 148);
+ctx.quadraticCurveTo(305, 158, 320, 150);
+ctx.closePath();
+ctx.fill();
+ellipse(320, 148, 4, 4, '#c62828');
+
+// === "小九" text ===
+ctx.fillStyle = 'rgba(100,60,140,0.7)';
+ctx.font = 'bold 20px sans-serif';
+ctx.textAlign = 'center';
+ctx.fillText('🐾 小九', 256, 495);
+
+// Export as PNG
+const link = document.createElement('a');
+link.download = 'xiaojiu-avatar.png';
+link.href = c.toDataURL('image/png');
+// Auto-download
+// link.click();
+</script>
+</body>
+</html>

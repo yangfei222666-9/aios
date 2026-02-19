@@ -1,41 +1,28 @@
-# Runtime data
-autolearn/data/
-logs/
-*.log
-*.wav
-*.mp3
-*.zip
-
-# AIOS runtime
-aios/events/
-aios/learning/baseline.jsonl
-aios/learning/metrics_history.jsonl
-aios/learning/suggestions.json
-aios/learning/applied_log.json
-aios/learning/daily_report.md
-aios/learning/pending_review.json
-aios/learning/tickets.jsonl
-
-# Python cache
+# Python
 __pycache__/
 *.pyc
 *.pyo
+*.egg-info/
+.venv/
+venv/
 
-# Temp/test files
-test_*.py
-debug_*.py
-fix_*.py
-check_*.py
-verify_*.py
-analyze_*.py
-!aios/learning/analyze*.py
-final_*.py
-*.bak
+# Node
+node_modules/
+dist/
+build/
 
-# Media
-avatar/
+# Env & secrets
+.env
+.env.*
 
-# Misc
-query
-file_*---*.txt
-vosk-model-*
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs & temp
+*.log
+*.tmp
+
+# Snapshots (large/frequent)
+memory/snapshots/

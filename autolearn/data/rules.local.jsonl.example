@@ -1,0 +1,1 @@
+{"rule_id": "local:example_rm_to_trash", "name": "rm_to_trash", "description": "rm → trash (recoverable)", "reason": "trash is safer than rm; files can be recovered", "pattern": "\\brm\\s+-rf?\\s+", "replacement": "trash ", "fields": ["cmd", "command"]}

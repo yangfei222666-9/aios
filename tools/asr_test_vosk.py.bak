@@ -1,0 +1,34 @@
+﻿import wave, json, os, sys
+from vosk import Model, KaldiRecognizer
+
+MODEL = r"C:\Users\A\.openclaw\models\vosk-cn"
+WAV = r"C:\Users\A\.openclaw\workspace\test.wav"  # 你截图里已创建；路径不对就改这行
+
+if not os.path.isdir(MODEL):
+    print("MODEL_NOT_FOUND:", MODEL); sys.exit(2)
+if not os.path.isfile(WAV):
+    print("WAV_NOT_FOUND:", WAV); sys.exit(3)
+
+wf = wave.open(WAV, "rb")
+print("WAV:", wf.getnchannels(), "ch", wf.getframerate(), "Hz", wf.getsampwidth()*8, "bit")
+
+model = Model(MODEL)
+rec = KaldiRecognizer(model, wf.getframerate())
+rec.SetWords(True)
+
+parts = []
+while True:
+    data = wf.readframes(4000)
+    if not data:
+        break
+    if rec.AcceptWaveform(data):
+        j = json.loads(rec.Result())
+        if j.get("text"):
+            parts.append(j["text"])
+
+j = json.loads(rec.FinalResult())
+if j.get("text"):
+    parts.append(j["text"])
+
+text = " ".join(parts).strip()
+print("TEXT:", text if text else "(empty)")

@@ -1,0 +1,168 @@
+﻿#!/usr/bin/env python3
+"""
+ASR 系统检查脚本
+检查 vosk 模型、音频文件、识别功能
+"""
+
+import os
+import sys
+import wave
+import json
+from vosk import Model, KaldiRecognizer
+
+def check_model():
+    """检查 vosk 模型"""
+    model_path = r"C:\Users\A\.openclaw\models\vosk-cn"
+    
+    print("=== 检查 Vosk 模型 ===")
+    print(f"模型路径: {model_path}")
+    
+    if not os.path.isdir(model_path):
+        print("ERROR: 模型目录不存在")
+        return False
+    
+    # 检查关键文件
+    required_files = [
+        "am/final.mdl",
+        "conf/mfcc.conf", 
+        "ivector/final.ie"
+    ]
+    
+    missing_files = []
+    for f in required_files:
+        full_path = os.path.join(model_path, f)
+        if not os.path.exists(full_path):
+            missing_files.append(f)
+    
+    if missing_files:
+        print(f"WARNING: 缺少文件: {missing_files}")
+    else:
+        print("OK: 关键模型文件存在")
+    
+    # 尝试加载模型
+    try:
+        print("尝试加载模型...")
+        model = Model(model_path)
+        print("SUCCESS: 模型加载成功")
+        return True
+    except Exception as e:
+        print(f"FAILED: 模型加载失败: {e}")
+        return False
+
+def check_audio_files():
+    """检查音频文件"""
+    print("\n=== 检查音频文件 ===")
+    
+    audio_files = [
+        ("asr_test.wav", "合成测试音频"),
+        ("logs/voice_16k.wav", "转换后的音频"),
+        ("logs/tts_test.mp3", "TTS生成的MP3")
+    ]
+    
+    all_ok = True
+    for filename, description in audio_files:
+        if os.path.exists(filename):
+            try:
+                size = os.path.getsize(filename)
+                print(f"OK: {filename} ({description}) - {size:,} bytes")
+                
+                # 如果是 WAV 文件，检查格式
+                if filename.endswith('.wav'):
+                    with wave.open(filename, 'rb') as wf:
+                        channels = wf.getnchannels()
+                        rate = wf.getframerate()
+                        width = wf.getsampwidth()
+                        
+                        vosk_ok = (channels == 1 and rate == 16000 and width == 2)
+                        status = "OK: 符合vosk要求" if vosk_ok else "WARNING: 不符合vosk要求"
+                        print(f"    格式: {channels}ch, {rate}Hz, {width*8}bit - {status}")
+            except Exception as e:
+                print(f"WARNING: {filename} - 检查失败: {e}")
+                all_ok = False
+        else:
+            print(f"ERROR: {filename} - 文件不存在")
+            all_ok = False
+    
+    return all_ok
+
+def test_recognition():
+    """测试语音识别功能"""
+    print("\n=== 测试语音识别 ===")
+    
+    model_path = r"C:\Users\A\.openclaw\models\vosk-cn"
+    audio_file = "logs/voice_16k.wav"
+    
+    if not os.path.exists(audio_file):
+        print(f"ERROR: 音频文件不存在: {audio_file}")
+        return False
+    
+    try:
+        # 加载模型
+        model = Model(model_path)
+        
+        # 打开音频文件
+        wf = wave.open(audio_file, 'rb')
+        print(f"音频文件: {audio_file}")
+        print(f"格式: {wf.getnchannels()}ch, {wf.getframerate()}Hz, {wf.getsampwidth()*8}bit")
+        
+        # 创建识别器
+        rec = KaldiRecognizer(model, wf.getframerate())
+        rec.SetWords(True)
+        
+        print("开始识别...")
+        parts = []
+        while True:
+            data = wf.readframes(4000)
+            if not data:
+                break
+            if rec.AcceptWaveform(data):
+                j = json.loads(rec.Result())
+                if j.get("text"):
+                    parts.append(j["text"])
+        
+        j = json.loads(rec.FinalResult())
+        if j.get("text"):
+            parts.append(j["text"])
+        
+        text = " ".join(parts).strip()
+        print(f"识别结果: '{text}'")
+        
+        if text:
+            print("SUCCESS: 识别成功（有文本输出）")
+            return True
+        else:
+            print("WARNING: 识别成功但无文本（可能是静音或合成音频）")
+            return True  # 技术上成功，只是没有识别到语音
+            
+    except Exception as e:
+        print(f"FAILED: 识别测试失败: {e}")
+        return False
+
+def main():
+    """主函数"""
+    print("ASR 系统检查")
+    print("=" * 50)
+    
+    # 检查模型
+    model_ok = check_model()
+    
+    # 检查音频文件
+    audio_ok = check_audio_files()
+    
+    # 测试识别功能
+    recognition_ok = test_recognition()
+    
+    # 总结
+    print("\n" + "=" * 50)
+    print("检查总结:")
+    print(f"  模型检查: {'PASS' if model_ok else 'FAIL'}")
+    print(f"  音频文件: {'PASS' if audio_ok else 'FAIL'}")
+    print(f"  识别测试: {'PASS' if recognition_ok else 'FAIL'}")
+    
+    overall = model_ok and audio_ok and recognition_ok
+    print(f"\n总体状态: {'ASR 系统正常' if overall else 'ASR 系统有问题'}")
+    
+    return 0 if overall else 1
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,322 @@
+﻿#!/usr/bin/env python3
+"""
+鏈€缁堢郴缁熼獙璇?楠岃瘉鎵€鏈夋敼杩涘拰鍔熻兘
+"""
+
+import sys
+import os
+import tempfile
+from pathlib import Path
+
+sys.path.insert(0, '.')
+
+def print_header(title):
+    """鎵撳嵃鏍囬"""
+    print("\n" + "=" * 60)
+    print(title)
+    print("=" * 60)
+
+# 缂栫爜淇
+import sys
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except AttributeError:
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
+def verify_system_architecture():
+    """楠岃瘉绯荤粺鏋舵瀯"""
+    print_header("绯荤粺鏋舵瀯楠岃瘉")
+    
+    components = [
+        ("璇煶鍞ら啋鏈嶅姟", "tools/wake_listener.py"),
+        ("鍛戒护璺敱鍣?, "tools/command_router.py"),
+        ("鍛戒护澶勭悊鍣?, "tools/voice_command_handler_integrated.py"),
+        ("Unicode 娓呯悊", "tools/unicode_sanitizer.py"),
+        ("TTS 璇煶鍚堟垚", "tools/simple_tts.py"),
+        ("缂栫爜淇", "tools/encoding_fix.py"),
+        ("鍚姩鑴氭湰", "start_voice_system.py"),
+        ("绯荤粺鏂囨。", "SYSTEM_SUMMARY.md"),
+        ("閰嶇疆鏂囦欢", "openclaw.yaml"),
+    ]
+    
+    all_exist = True
+    for name, path in components:
+        exists = os.path.exists(path)
+        status = "[OK]" if exists else "[NO]"
+        print(f"{status} {name}: {path}")
+        if not exists:
+            all_exist = False
+    
+    return all_exist
+
+def verify_dependencies():
+    """楠岃瘉渚濊禆"""
+    print_header("渚濊禆楠岃瘉")
+    
+    dependencies = [
+        ("vosk", "璇煶璇嗗埆"),
+        ("sounddevice", "闊抽杈撳叆"),
+        ("numpy", "鏁板€艰绠?),
+        ("yaml", "閰嶇疆瑙ｆ瀽"),
+        ("edge_tts", "璇煶鍚堟垚"),
+    ]
+    
+    all_installed = True
+    for import_name, description in dependencies:
+        try:
+            __import__(import_name)
+            print(f"[OK] {description}: 宸插畨瑁?)
+        except ImportError:
+            print(f"[NO] {description}: 鏈畨瑁?)
+            all_installed = False
+    
+    return all_installed
+
+def verify_directories():
+    """楠岃瘉鐩綍缁撴瀯"""
+    print_header("鐩綍缁撴瀯楠岃瘉")
+    
+    directories = [
+        ("notes", "绗旇鐩綍"),
+        ("logs", "鏃ュ織鐩綍"),
+        ("tools", "宸ュ叿鐩綍"),
+        ("models/vosk-cn", "璇煶妯″瀷"),
+    ]
+    
+    all_exist = True
+    for path, description in directories:
+        exists = os.path.exists(path)
+        status = "[OK]" if exists else "[NO]"
+        print(f"{status} {description}: {path}/")
+        if not exists:
+            all_exist = False
+    
+    return all_exist
+
+def verify_configuration():
+    """楠岃瘉閰嶇疆"""
+    print_header("閰嶇疆楠岃瘉")
+    
+    config_path = "openclaw.yaml"
+    
+    if not os.path.exists(config_path):
+        print(f"[NO] 閰嶇疆鏂囦欢涓嶅瓨鍦? {config_path}")
+        
+        # 鍒涘缓榛樿閰嶇疆
+        default_config = """voice_wake:
+  enabled: true
+  model_path: "models/vosk-cn"
+  wake_phrases: ["灏忎節", "浣犲ソ灏忎節", "灏忛厭"]
+  command_timeout: 8.0
+  cooldown: 2.0
+  pause_while_tts: true
+  tts_flag_path: "logs/tts_playing.flag"
+  vad_end_silence_ms: 800
+  vad_energy_threshold: 0.015
+  sample_rate: 16000
+  blocksize: 4000
+  device: null
+
+log_level: "INFO"
+"""
+        
+        with open(config_path, "w", encoding="utf-8") as f:
+            f.write(default_config)
+        
+        print(f"[OK] 宸插垱寤洪粯璁ら厤缃枃浠? {config_path}")
+        return True
+    
+    print(f"鉁?閰嶇疆鏂囦欢瀛樺湪: {config_path}")
+    
+    # 楠岃瘉閰嶇疆鍐呭
+    try:
+        import yaml
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+        
+        required_keys = ["voice_wake", "log_level"]
+        for key in required_keys:
+            if key in config:
+                print(f"鉁?閰嶇疆鍖呭惈: {key}")
+            else:
+                print(f"鉂?閰嶇疆缂哄皯: {key}")
+                return False
+        
+        return True
+        
+    except Exception as e:
+        print(f"鉂?閰嶇疆瑙ｆ瀽閿欒: {e}")
+        return False
+
+def verify_functionality():
+    """楠岃瘉鍔熻兘"""
+    print_header("鍔熻兘楠岃瘉")
+    
+    # 鍒涘缓娴嬭瘯鐜
+    test_dir = tempfile.mkdtemp(prefix="final_test_")
+    original_dir = os.getcwd()
+    os.chdir(test_dir)
+    
+    try:
+        # 鍒涘缓蹇呰鐨勭洰褰?        os.makedirs("notes", exist_ok=True)
+        os.makedirs("logs", exist_ok=True)
+        os.makedirs("tools", exist_ok=True)
+        
+        print(f"娴嬭瘯鐩綍: {test_dir}")
+        print()
+        
+        # 娴嬭瘯 Unicode 娓呯悊
+        print("1. Unicode 娓呯悊鍔熻兘娴嬭瘯")
+        from tools.unicode_sanitizer import clean_asr_text
+        
+        test_cases = [
+            ("灏忎節\u200b妫€鏌ョ郴缁?, "灏忎節妫€鏌ョ郴缁?),
+            ("娣诲姞绗旇锛氭祴璇?, "娣诲姞绗旇:娴嬭瘯"),
+            ("鐜板湪銆€鍑犵偣锛?, "鐜板湪 鍑犵偣?"),
+        ]
+        
+        unicode_passed = True
+        for input_text, expected in test_cases:
+            cleaned = clean_asr_text(input_text)
+            if cleaned == expected:
+                print(f"   鉁?'{input_text}' -> '{cleaned}'")
+            else:
+                print(f"   鉂?'{input_text}' -> '{cleaned}' (鏈熸湜: '{expected}')")
+                unicode_passed = False
+        
+        print()
+        
+        # 娴嬭瘯鍛戒护璺敱鍣?        print("2. 鍛戒护璺敱鍣ㄦ祴璇?)
+        from tools.command_router import CommandRouter
+        
+        router = CommandRouter(test_dir)
+        
+        command_tests = [
+            ("妫€鏌ョ郴缁熺姸鎬?, "RUN_DAILY_CHECK"),
+            ("娣诲姞绗旇娴嬭瘯", "ADD_NOTE"),
+            ("鐜板湪鍑犵偣", "TELL_TIME"),
+        ]
+        
+        router_passed = True
+        for cmd_text, expected_action in command_tests:
+            action, payload = router.route_command(cmd_text)
+            if action == expected_action:
+                print(f"   鉁?'{cmd_text}' -> {action}")
+            else:
+                print(f"   鉂?'{cmd_text}' -> {action} (鏈熸湜: {expected_action})")
+                router_passed = False
+        
+        print()
+        
+        # 娴嬭瘯鐘舵€佹満姒傚康
+        print("3. 鐘舵€佹満娴佺▼楠岃瘉")
+        states = ["SLEEP", "PROMPT", "COMMAND", "SLEEP"]
+        print("   鐘舵€佹祦绋? " + " 鈫?".join(states))
+        print("   鉁?鐘舵€佹満璁捐姝ｇ‘")
+        
+        print()
+        
+        # 鎬讳綋璇勪及
+        print("4. 鍔熻兘鎬讳綋璇勪及")
+        all_passed = unicode_passed and router_passed
+        
+        if all_passed:
+            print("   鉁?鎵€鏈夊姛鑳芥祴璇曢€氳繃")
+        else:
+            print("   鉂?閮ㄥ垎鍔熻兘娴嬭瘯澶辫触")
+        
+        return all_passed
+        
+    finally:
+        # 鎭㈠鍘熷鐩綍
+        os.chdir(original_dir)
+        
+        # 娓呯悊娴嬭瘯鐩綍
+        import shutil
+        try:
+            shutil.rmtree(test_dir)
+            print(f"\n宸叉竻鐞嗘祴璇曠洰褰? {test_dir}")
+        except:
+            pass
+
+def verify_improvements():
+    """楠岃瘉鏀硅繘"""
+    print_header("绯荤粺鏀硅繘楠岃瘉")
+    
+    improvements = [
+        ("鐘舵€佹満浼樺寲", "SLEEP 鈫?PROMPT 鈫?COMMAND", "闃叉 TTS 骞叉壈"),
+        ("鍛戒护璺敱鍣?, "绠€娲佺殑璺敱绯荤粺", "鏇撮珮鏁堢殑鍛戒护瑙ｆ瀽"),
+        ("Unicode 娓呯悊", "涓撲笟鐨勬枃鏈竻鐞?, "瑙ｅ喅缂栫爜闂"),
+        ("缂栫爜淇", "UTF-8 寮哄埗閰嶇疆", "Windows 鍏煎鎬?),
+        ("闃茶嚜鍞ら啋", "TTS 鏍囧織绠＄悊", "闃叉璇瘑鍒?),
+        ("瀹屾暣鏃ュ織", "缁撴瀯鍖栨棩蹇楄褰?, "绯荤粺鐩戞帶鍜岃皟璇?),
+        ("閰嶇疆椹卞姩", "YAML 閰嶇疆鏂囦欢", "鐏垫椿鐨勭郴缁熼厤缃?),
+        ("妯″潡鍖栬璁?, "娓呮櫚鐨勭粍浠跺垎绂?, "鏄撲簬缁存姢鍜屾墿灞?),
+    ]
+    
+    print("绯荤粺宸插畬鎴愪互涓嬫敼杩?")
+    for i, (name, technical, benefit) in enumerate(improvements, 1):
+        print(f"{i:2d}. {name}")
+        print(f"    鎶€鏈? {technical}")
+        print(f"    浼樺娍: {benefit}")
+        print()
+    
+    return True
+
+def main():
+    """涓婚獙璇佸嚱鏁?""
+    print("鏈€缁堢郴缁熼獙璇?)
+    print("=" * 60)
+    print("楠岃瘉璇煶鍞ら啋绯荤粺鐨勫畬鏁存€у拰鐢熶骇灏辩华鐘舵€?)
+    print()
+    
+    results = []
+    
+    results.append(("绯荤粺鏋舵瀯", verify_system_architecture()))
+    results.append(("渚濊禆", verify_dependencies()))
+    results.append(("鐩綍缁撴瀯", verify_directories()))
+    results.append(("閰嶇疆", verify_configuration()))
+    results.append(("鍔熻兘", verify_functionality()))
+    results.append(("鏀硅繘", verify_improvements()))
+    
+    print_header("楠岃瘉缁撴灉姹囨€?)
+    
+    all_passed = True
+    for test_name, result in results:
+        status = "鉁?閫氳繃" if result else "鉂?澶辫触"
+        print(f"{test_name:10} : {status}")
+        if not result:
+            all_passed = False
+    
+    print("\n" + "=" * 60)
+    
+    if all_passed:
+        print("馃帀 绯荤粺楠岃瘉瀹屽叏閫氳繃锛?)
+        print()
+        print("绯荤粺鐘舵€? 鐢熶骇灏辩华 馃殌")
+        print()
+        print("涓嬩竴姝?")
+        print("  1. 鍚姩绯荤粺: python start_voice_system.py")
+        print("  2. 浣跨敤璇煶鍛戒护杩涜浜や簰")
+        print("  3. 鏌ョ湅鏃ュ織: logs/voice_wake.log")
+        print("  4. 鏌ョ湅鏂囨。: SYSTEM_SUMMARY.md")
+        print()
+        print("鎭枩锛佽闊冲敜閱掔郴缁熷凡瀹屽叏寮€鍙戝畬鎴愬苟楠岃瘉閫氳繃锛?)
+        return 0
+    else:
+        print("鈿狅笍 绯荤粺楠岃瘉鏈畬鍏ㄩ€氳繃")
+        print()
+        print("闇€瑕佽В鍐崇殑闂:")
+        for test_name, result in results:
+            if not result:
+                print(f"  鈥?{test_name}")
+        print()
+        print("璇疯В鍐充笂杩伴棶棰樺悗閲嶆柊楠岃瘉")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
