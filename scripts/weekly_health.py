@@ -178,6 +178,21 @@ try:
 except:
     pass
 
+# 集成任务队列统计
+try:
+    import job_queue
+    jq_stats = job_queue.stats()
+    lines.extend(['', '## 任务队列'])
+    lines.append(f'- 吞吐: 入队={jq_stats["total_enqueued"]} 成功={jq_stats["total_success"]}')
+    lines.append(f'- 成功率: {jq_stats["success_rate"]}%')
+    lines.append(f'- 平均等待: {jq_stats["avg_wait_sec"]}s')
+    lines.append(f'- 死信: {jq_stats["total_dead"]} | 重试: {jq_stats["total_retried"]}')
+    lines.append(f'- 当前队列: 待执行={jq_stats["queued"]} 运行中={jq_stats["running"]} 待重试={jq_stats["retry_pending"]}')
+    if jq_stats['total_dead'] > 0:
+        issues.append(f'{jq_stats["total_dead"]} 个任务进入死信')
+except:
+    pass
+
 if not issues:
     lines.append('🟢 系统稳定运行，无异常趋势')
 else:
