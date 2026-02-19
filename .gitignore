@@ -24,5 +24,20 @@ desktop.ini
 *.log
 *.tmp
 
+# Backup files
+*.bak
+
+# Test artifacts
+test_*.py
+test_*.wav
+test_*.mp3
+tts_test.mp3
+test.wav
+test_real.wav
+verify_fix.py
+
+# Large binary
+*.zip
+
 # Snapshots (large/frequent)
 memory/snapshots/
