@@ -135,6 +135,20 @@ if not al_healthy:
 if weekly_refreshes and total_fail > 0:
     issues.append(f'LOL 刷新有 {total_fail} 次失败')
 
+# 集成 alerts 系统的 WARN 事件
+try:
+    sys.path.insert(0, os.path.join(WS, 'scripts'))
+    from alerts import get_recent_warns
+    weekly_warns = get_recent_warns(days=7)
+    if weekly_warns:
+        lines.extend(['', '## 本周告警 (WARN)'])
+        for w in weekly_warns:
+            lines.append(f'- [{w["rule"]}] {w["message"]} (x{w["count"]})')
+        for w in weekly_warns:
+            issues.append(f'告警: {w["message"]}')
+except:
+    pass
+
 if not issues:
     lines.append('🟢 系统稳定运行，无异常趋势')
 else:

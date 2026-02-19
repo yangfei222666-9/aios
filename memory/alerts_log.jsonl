@@ -1,0 +1,10 @@
+{"ts": "2026-02-19T17:27:56.694016", "level": "INFO", "rule": "consecutive_failures", "message": "autolearn smoke 全部通过"}
+{"ts": "2026-02-19T17:27:56.702037", "level": "INFO", "rule": "data_drop", "message": "ARAM 数据库 172 英雄，正常"}
+{"ts": "2026-02-19T17:27:56.702037", "level": "CRIT", "rule": "critical_files", "message": "关键文件缺失: events.jsonl"}
+{"ts": "2026-02-19T17:27:56.746762", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 ok (0.340)"}
+{"ts": "2026-02-19T17:27:56.747777", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 1h ago)"}
+{"ts": "2026-02-19T17:28:30.880691", "level": "INFO", "rule": "consecutive_failures", "message": "autolearn smoke 全部通过"}
+{"ts": "2026-02-19T17:28:30.881697", "level": "INFO", "rule": "data_drop", "message": "ARAM 数据库 172 英雄，正常"}
+{"ts": "2026-02-19T17:28:30.881697", "level": "INFO", "rule": "critical_files", "message": "关键文件完整"}
+{"ts": "2026-02-19T17:28:30.921894", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 ok (0.340)"}
+{"ts": "2026-02-19T17:28:30.921894", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 1h ago)"}

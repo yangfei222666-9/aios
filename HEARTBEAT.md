@@ -29,3 +29,9 @@
 - 深夜(23:00-08:00)不执行，等下次心跳
 - 每次只执行1个到期任务，避免耗时过长
 - 执行后更新 memory/selflearn-state.json 的时间戳
+
+### 每次心跳：异常检查（轻量）
+- 运行 `& "C:\Program Files\Python312\python.exe" C:\Users\A\.openclaw\workspace\scripts\alerts.py`
+- 如果输出包含 CRIT 且有"需要立即推送"，主动告知珊瑚海
+- WARN 不推送，自动进周报
+- INFO 静默，仅落盘
