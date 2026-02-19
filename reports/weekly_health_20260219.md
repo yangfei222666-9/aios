@@ -16,7 +16,7 @@
 ✅ 本周零失败
 
 ## 版本控制
-- 本周提交: 54
+- 本周提交: 55
   - 01b8967 feedback: corrected=true shows matched (wrong) + correct_target (intended)
   - 1837412 learning: unified log format {timestamp, input, matched, score, corrected}
   - 2fb1580 aram/learning: feedback_log + analyzer + alias_suggest + matcher integration
