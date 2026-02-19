@@ -59,6 +59,17 @@
 - 每日报告 cron 9AM 自动发 Telegram
 - 结构：core/{config,engine,policies} + learning/{analyze,apply,baseline,tickets} + plugins/aram/{matcher,data_adapter,rules}
 
+## 珊瑚海的战略判断 (2026-02-19)
+- 小九已跨过 0→1（能干活），正在 1→10（可规模化可靠干活）的门槛上
+- 最大护城河：记忆 + 执行 + 反馈闭环连成系统
+- 当前瓶颈：并发与感知带宽太窄（单线程、被动输入）
+- 最大风险：错误自动化——策略错了会稳定地错
+- 三个优先级（比加新花活更值）：
+  1. ✅ 闭环状态机：alert_fsm.py (OPEN/ACK/RESOLVED + SLA + 自动恢复 + 审计)
+  2. ✅ 变更保险丝：safe_run.py (风险分级 + 门禁 + 快照回滚 + 审计)
+  3. ✅ 任务队列化：job_queue.py (enqueue/worker/retry/dead-letter/recover)
+- 三件事全部 MVP 落地，验收全过 (17/17 + 17/17 + 19/19)
+
 ## Autolearn 未完成待办
 1. ARAM 助手 v0.1 正式发布（一键 build/update/report，已有 aram.py 雏形）
 2. 投资助手票据化 v0（低风险、人工确认、可复盘）
