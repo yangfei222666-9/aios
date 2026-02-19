@@ -37,7 +37,19 @@
 - 数据版本化：schema_version 1.0 + module_version 1.0.0
 - 外置规则：data/rules.local.jsonl 不改代码可扩展
 
-## AIOS v0.1 (2026-02-19)
+## AIOS v0.2 (2026-02-19)
+- 5层事件架构：KERNEL / COMMS / TOOL / MEM / SEC
+- emit() 统一事件发射器，向后兼容 v0.1 的 log_event/log_tool_event
+- 各层便捷方法：log_kernel/log_comms/log_mem/log_sec
+- load_events 支持 layer 过滤，count_by_layer 按层统计
+- analyze.py / baseline.py 向后兼容验证通过
+- Week 1 完成（Schema 标准化），Week 2 完成（探针植入），Week 3 完成（分析脚本）
+- insight.py：穷人版 ClickHouse，6 维度简报 + 死循环检测 + 双格式输出
+- CLI: `python -m aios insight [--since 24h|7d] [--format markdown|telegram] [--save]`
+- reflect.py：晨间反思，6 条规则引擎自动生成每日策略（不依赖 LLM API）
+- 规则：low_tsr / slow_tool / critical_sec / high_miss_rate / high_correction_rate / all_clear
+- strategies.jsonl 存储策略，--inject 模式输出可注入 prompt 的文本
+- 每日 9AM cron 升级为 insight + reflect 联动
 - GitHub: https://github.com/yangfei222666-9/aios (public)
 - 三个学习器：A.纠正驱动(L1) + B.失败驱动(L2) + C.性能驱动(L2 p95)
 - 统一 tool 事件格式 {name, ok, ms, err, meta}
@@ -72,6 +84,6 @@
 - PowerShell 用 `;` 不用 `&&`
 - Python 输出中文到 PowerShell 终端会 GBK 乱码，但文件写入 UTF-8 是正确的
 - write 工具写 Python 文件比 PowerShell heredoc 更可靠
-- DDragon 版本需要跟国服同步（当前 16.3.1）
+- DDragon 版本需要动态获取（当前自动拉取，已修复写死问题）
 - 腾讯服英雄名字可能跟 DDragon 不一致（如 904 亚恒）
 - web_search 工具有 ByteString 编码 bug，中文搜索全部失败

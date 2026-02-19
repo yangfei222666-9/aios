@@ -1,7 +1,7 @@
 config:
   name: "AIOS"
-  version: "0.1.0"
-  description: "个人 AI 操作系统 — 事件驱动，自学习"
+  version: "0.2.0"
+  description: "个人 AI 操作系统 — 5层事件架构，自学习"
 
 paths:
   events: "%USERPROFILE%\\.openclaw\\workspace\\aios\\events\\events.jsonl"

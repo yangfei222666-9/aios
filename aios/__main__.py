@@ -135,6 +135,39 @@ def cmd_test(args) -> int:
     return subprocess.call([sys.executable, suite])
 
 
+def cmd_insight(args) -> int:
+    from scripts.insight import generate_insight
+    compact = args.format == "telegram"
+    report = generate_insight(days=_parse_since(args.since), compact=compact)
+    print(report)
+    if args.save and not compact:
+        import time
+        from pathlib import Path
+        date_str = time.strftime("%Y-%m-%d")
+        out_path = Path(AIOS_ROOT) / "learning" / f"insight_{date_str}.md"
+        out_path.write_text(report, encoding="utf-8")
+        print(f"\n已保存到: {out_path}")
+    return 0
+
+
+def cmd_reflect(args) -> int:
+    if args.inject:
+        from scripts.reflect import load_today_strategies, format_strategies_for_prompt
+        strategies = load_today_strategies()
+        if strategies:
+            print(format_strategies_for_prompt(strategies))
+        else:
+            print("今天暂无策略。")
+    else:
+        from scripts.reflect import analyze_and_reflect, save_strategies
+        strategies = analyze_and_reflect(_parse_since(args.since))
+        save_strategies(strategies)
+        for s in strategies:
+            icon = {"critical": "🚨", "high": "⚠️", "medium": "📋", "low": "✅"}.get(s["priority"], "📋")
+            print(f"  {icon} [{s['rule']}] {s['content']}")
+    return 0
+
+
 def cmd_version(args) -> int:
     from learning.analyze import AIOS_VERSION, _get_git_commit
     print(f"AIOS {AIOS_VERSION} (commit: {_get_git_commit()})")
@@ -142,6 +175,7 @@ def cmd_version(args) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    sys.stdout.reconfigure(encoding='utf-8')
     p = argparse.ArgumentParser(prog="aios", description="AIOS — 个人 AI 操作系统")
     sub = p.add_subparsers(dest="cmd")
 
@@ -162,6 +196,15 @@ def main(argv: list[str] | None = None) -> int:
     pt = sub.add_parser("tickets", help="列出 L2 工单")
     pt.add_argument("--status", default="open", choices=["open", "done", "wontfix", "all"])
 
+    pi = sub.add_parser("insight", help="每日健康简报 (穷人版 ClickHouse)")
+    pi.add_argument("--since", default="24h", help="时间窗口: 24h, 7d, all")
+    pi.add_argument("--format", default="markdown", choices=["markdown", "telegram"])
+    pi.add_argument("--save", action="store_true", help="保存到文件")
+
+    pr2 = sub.add_parser("reflect", help="晨间反思 (自动生成每日策略)")
+    pr2.add_argument("--since", default="24h", help="分析窗口: 24h, 7d")
+    pr2.add_argument("--inject", action="store_true", help="只输出今日策略")
+
     sub.add_parser("score", help="evolution_score 进化评分")
     sub.add_parser("gate", help="门禁检测 (退化报警)")
     sub.add_parser("test", help="跑回归测试 (15 cases)")
@@ -177,6 +220,8 @@ def main(argv: list[str] | None = None) -> int:
         "health": cmd_health,
         "analyze": cmd_analyze,
         "report": cmd_report,
+        "insight": cmd_insight,
+        "reflect": cmd_reflect,
         "apply": cmd_apply,
         "replay": cmd_replay,
         "tickets": cmd_tickets,

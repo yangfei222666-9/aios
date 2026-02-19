@@ -18,28 +18,64 @@ LEARNING_DIR.mkdir(exist_ok=True)
 CORRECTION_THRESHOLD = get_int("analysis.correction_threshold", 3)
 LOW_SCORE_THRESHOLD = get_float("analysis.low_score_threshold", 0.80)
 
+# 时间衰减: W = e^(-λ * Δt), λ = ln(2)/half_life_hours
+DECAY_HALF_LIFE_HOURS = 12  # 12h 半衰期
+DECAY_LAMBDA = math.log(2) / (DECAY_HALF_LIFE_HOURS * 3600)
+
+
+def _decay_weight(event_ts: int) -> float:
+    """指数衰减权重，越近的事件权重越大"""
+    dt = max(0, time.time() - event_ts)
+    return math.exp(-DECAY_LAMBDA * dt)
+
 
 def compute_metrics(days: int = 1) -> dict:
     events = load_events(days)
-    matches = [e for e in events if e.get("type") == "match"]
-    corrections = [e for e in events if e.get("type") == "correction"]
-    tools = [e for e in events if e.get("type") == "tool"]
-    http_errors = [e for e in events if e.get("type") == "http_error"]
 
+    # v0.2: 按层分类（兼容 v0.1 旧格式）
+    layer_map = {
+        "tool": "TOOL", "task": "TOOL",
+        "match": "MEM", "correction": "MEM", "confirm": "MEM", "lesson": "MEM",
+        "error": "SEC", "http_error": "SEC",
+        "health": "KERNEL", "deploy": "KERNEL",
+    }
+
+    by_layer = {"KERNEL": [], "COMMS": [], "TOOL": [], "MEM": [], "SEC": []}
+    for e in events:
+        layer = e.get("layer")
+        if not layer:
+            # v0.1 兼容
+            old_type = e.get("type", "")
+            v1_type = (e.get("payload") or {}).get("_v1_type", "")
+            layer = layer_map.get(old_type) or layer_map.get(v1_type) or "TOOL"
+        if layer not in by_layer:
+            layer = "TOOL"
+        by_layer[layer].append(e)
+
+    # 从各层提取指标
+    tools = by_layer["TOOL"]
+    mem_events = by_layer["MEM"]
+    sec_events = by_layer["SEC"]
+
+    # 匹配/纠正（MEM 层）
+    matches = [e for e in mem_events if _event_name(e) in ("match", "confirm")]
+    corrections = [e for e in mem_events if _event_name(e) == "correction"]
     total_match = len(matches) + len(corrections)
     correction_rate = len(corrections) / total_match if total_match > 0 else 0
 
-    tool_ok = [t for t in tools if (t.get("data") or {}).get("ok", True)]
+    # 工具成功率
+    tool_ok = [t for t in tools if _is_ok(t)]
     tool_success_rate = len(tool_ok) / len(tools) if tools else 1.0
 
-    http_codes = Counter((e.get("data") or {}).get("status_code", "?") for e in http_errors)
+    # HTTP 错误（SEC 层）
+    http_errors = [e for e in sec_events if _event_name(e) == "http_error"]
+    http_codes = Counter(_payload(e).get("status_code", "?") for e in http_errors)
 
     # p95 + p50 per tool
     by_tool = defaultdict(list)
     for e in tools:
-        data = e.get("data", {})
-        name = data.get("name", data.get("tool", e.get("source", "?")))
-        ms = data.get("ms", data.get("elapsed_ms", 0))
+        name = _tool_name(e)
+        ms = _latency(e)
         if ms > 0:
             by_tool[name].append(ms)
 
@@ -57,6 +93,7 @@ def compute_metrics(days: int = 1) -> dict:
             "matches": len(matches),
             "corrections": len(corrections),
             "tools": len(tools),
+            "by_layer": {k: len(v) for k, v in by_layer.items()},
         },
         "quality": {
             "correction_rate": round(correction_rate, 4),
@@ -73,22 +110,67 @@ def compute_metrics(days: int = 1) -> dict:
     }
 
 
+# ── v0.2 辅助函数：统一从新旧 schema 提取字段 ──
+
+def _event_name(e: dict) -> str:
+    """提取事件名（兼容 v0.1 type 和 v0.2 event）"""
+    name = e.get("event", "")
+    if name:
+        # v0.2 event 可能是 "tool_exec" 或 "correction"
+        # 去掉 v0.1 兼容层加的前缀
+        for prefix in ("tool_", ""):
+            pass
+        return name
+    return (e.get("payload") or {}).get("_v1_type", e.get("type", ""))
+
+
+def _is_ok(e: dict) -> bool:
+    """判断事件是否成功"""
+    if e.get("status") == "err":
+        return False
+    payload = e.get("payload", e.get("data", {}))
+    return payload.get("ok", True)
+
+
+def _tool_name(e: dict) -> str:
+    """提取工具名"""
+    payload = e.get("payload", e.get("data", {}))
+    return payload.get("name", payload.get("tool", e.get("source", e.get("event", "?"))))
+
+
+def _latency(e: dict) -> int:
+    """提取延迟"""
+    ms = e.get("latency_ms", 0)
+    if ms:
+        return ms
+    payload = e.get("payload", e.get("data", {}))
+    return payload.get("ms", payload.get("elapsed_ms", 0))
+
+
+def _payload(e: dict) -> dict:
+    """提取 payload（兼容 v0.1 data 和 v0.2 payload）"""
+    return e.get("payload", e.get("data", {}))
+
+
 def compute_top_issues(days: int = 7) -> dict:
     events = load_events(days)
-    corrections = [e for e in events if e.get("type") == "correction"]
-    errors = [e for e in events if e.get("type") in ("error", "http_error")]
-    failed_tools = [e for e in events if e.get("type") in ("tool", "task") and not (e.get("data") or {}).get("ok", True)]
+    corrections = [e for e in events if _event_name(e) == "correction"]
+    errors = [e for e in events if e.get("status") == "err" or
+              _event_name(e) in ("runtime_error", "http_error")]
+    failed_tools = [e for e in events if
+                    e.get("layer", e.get("type")) in ("TOOL", "tool", "task")
+                    and not _is_ok(e)]
 
     return {
         "top_corrected_inputs": dict(Counter(
-            (e.get("data") or {}).get("input", "?") for e in corrections
+            _payload(e).get("query", _payload(e).get("input", "?")) for e in corrections
         ).most_common(10)),
         "top_failed_tools": dict(Counter(
-            (e.get("data") or {}).get("tool", e.get("source", "?")) for e in failed_tools
+            _tool_name(e) for e in failed_tools
         ).most_common(5)),
         "top_error_types": dict(Counter(
-            f"{e.get('type')}:{(e.get('data') or {}).get('status_code', '')}" if e.get("type") == "http_error"
-            else e.get("source", "?")
+            f"http_{_payload(e).get('status_code', '?')}" if _event_name(e) == "http_error"
+            else _payload(e).get("error", e.get("event", "?"))[:50]
             for e in errors
         ).most_common(5)),
     }
@@ -135,15 +217,14 @@ def compute_alias_suggestions(days: int = 7) -> list:
 def compute_tool_suggestions(days: int = 7) -> list:
     """L2: tool 建议 — 失败驱动 + 性能驱动"""
     events = load_events(days)
-    tool_events = [e for e in events if e.get("type") in ("tool", "task")]
-    failed = [e for e in events if e.get("type") in ("tool", "task", "error", "http_error")
-              and not (e.get("data") or {}).get("ok", True)]
+    tool_events = [e for e in events if e.get("layer") == "TOOL" or e.get("type") in ("tool", "task")]
+    failed = [e for e in events if not _is_ok(e) and
+              (e.get("layer") in ("TOOL", "SEC") or e.get("type") in ("tool", "task", "error", "http_error"))]
 
     # --- Failure Learner ---
     by_tool_fail = defaultdict(list)
     for e in failed:
-        data = e.get("data", {})
-        tool = data.get("name", data.get("tool", e.get("source", "?")))
+        tool = _tool_name(e)
         by_tool_fail[tool].append(e)
 
     suggestions = []
@@ -152,9 +233,9 @@ def compute_tool_suggestions(days: int = 7) -> list:
             continue
         err_types = Counter()
         for e in errs:
-            data = e.get("data", {})
-            code = data.get("status_code", "")
-            err = data.get("err", data.get("error", ""))
+            p = _payload(e)
+            code = p.get("status_code", "")
+            err = p.get("err", p.get("error", ""))
             err_types[str(code) if code else err[:50] or "unknown"] += 1
         top_err, _ = err_types.most_common(1)[0]
 
@@ -170,9 +251,8 @@ def compute_tool_suggestions(days: int = 7) -> list:
     # --- Perf Learner ---
     by_tool_perf = defaultdict(list)
     for e in tool_events:
-        data = e.get("data", {})
-        tool = data.get("name", data.get("tool", e.get("source", "?")))
-        ms = data.get("ms", data.get("elapsed_ms", 0))
+        tool = _tool_name(e)
+        ms = _latency(e)
         if ms > 0:
             by_tool_perf[tool].append(ms)
 
@@ -241,7 +321,7 @@ def _get_git_commit() -> str:
         return "unknown"
 
 
-AIOS_VERSION = "0.1.0"
+AIOS_VERSION = "0.2.0"
 
 
 def generate_full_report(days: int = 7) -> dict:
