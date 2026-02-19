@@ -157,101 +157,10 @@ def evolution_score(limit: int = 7) -> dict:
 
 
 def regression_gate(limit: int = 5) -> dict:
-    """
-    门禁检测：进化不能倒退。
-    
-    规则：
-      - correction_rate 连续 3 次上升 → L2 ticket
-      - 某 tool 的 p95_ms 连续 3 次上升 → L2 ticket
-      - tool_success_rate 连续 2 次下降 → L2 ticket
-    
-    先报警不自动修，保证安全。
-    """
+    """门禁检测：委托给 guardrail.py"""
+    from learning.guardrail import run_guardrail
     history = load_history(limit)
-    if len(history) < 3:
-        return {"alerts": [], "status": "insufficient_data", "snapshots": len(history)}
-
-    alerts = []
-
-    # correction_rate 连续 3 次上升
-    cr_values = [h["correction_rate"] for h in history]
-    cr_rising = _consecutive_rising(cr_values)
-    if cr_rising >= 3:
-        alerts.append({
-            "level": "L2",
-            "name": "correction_rate",
-            "action": "investigate",
-            "reason": f"rising_{cr_rising}_consecutive",
-            "evidence": {"values": cr_values[-4:], "trend": "up"},
-            "confidence": min(cr_rising / 5, 1.0),
-        })
-
-    # tool_success_rate 连续 2 次下降
-    tsr_values = [h["tool_success_rate"] for h in history]
-    tsr_falling = _consecutive_falling(tsr_values)
-    if tsr_falling >= 2:
-        alerts.append({
-            "level": "L2",
-            "name": "tool_success_rate",
-            "action": "investigate",
-            "reason": f"falling_{tsr_falling}_consecutive",
-            "evidence": {"values": tsr_values[-3:], "trend": "down"},
-            "confidence": min(tsr_falling / 4, 1.0),
-        })
-
-    # p95 per tool 连续 3 次上升
-    all_tools = set()
-    for h in history:
-        all_tools.update(h.get("tool_p95_ms", {}).keys())
-
-    for tool in all_tools:
-        p95_values = [h.get("tool_p95_ms", {}).get(tool) for h in history]
-        p95_values = [v for v in p95_values if v is not None]
-        if len(p95_values) < 3:
-            continue
-        p95_rising = _consecutive_rising(p95_values)
-        if p95_rising >= 3:
-            alerts.append({
-                "level": "L2",
-                "name": f"p95_{tool}",
-                "action": "optimize_or_cache",
-                "reason": f"p95_rising_{p95_rising}_consecutive",
-                "evidence": {"tool": tool, "values": p95_values[-4:], "trend": "up"},
-                "confidence": min(p95_rising / 5, 1.0),
-            })
-
-    # 写入工单
-    if alerts:
-        try:
-            from learning.tickets import ingest
-            ingest(alerts)
-        except Exception:
-            pass
-
-    status = "regression_detected" if alerts else "gate_passed"
-    return {"alerts": alerts, "status": status, "snapshots": len(history)}
-
-
-def _consecutive_rising(values: list) -> int:
-    """从末尾往前数连续上升次数"""
-    count = 0
-    for i in range(len(values) - 1, 0, -1):
-        if values[i] > values[i - 1]:
-            count += 1
-        else:
-            break
-    return count
-
-
-def _consecutive_falling(values: list) -> int:
-    """从末尾往前数连续下降次数"""
-    count = 0
-    for i in range(len(values) - 1, 0, -1):
-        if values[i] < values[i - 1]:
-            count += 1
-        else:
-            break
-    return count
+    return run_guardrail(history)
 
 
 if __name__ == "__main__":
