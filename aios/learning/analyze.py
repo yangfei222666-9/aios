@@ -290,6 +290,14 @@ def generate_daily_report(days: int = 1) -> str:
     except Exception:
         pass
 
+    # 门禁检测
+    gate_result = None
+    try:
+        from learning.baseline import regression_gate
+        gate_result = regression_gate()
+    except Exception:
+        pass
+
     # L2 → 工单
     try:
         from learning.tickets import ingest
@@ -352,6 +360,15 @@ def generate_daily_report(days: int = 1) -> str:
             lines.append(f"  - {k}: {v['value']} (w={v['weight']})")
     except Exception:
         pass
+
+    # regression gate
+    if gate_result and gate_result.get("alerts"):
+        lines.append(f"\n## G. Regression Gate ⚠")
+        for a in gate_result["alerts"]:
+            lines.append(f"- {a['name']}: {a['reason']} → {a['action']}")
+    elif gate_result:
+        lines.append(f"\n## G. Regression Gate ✓")
+        lines.append(f"- {gate_result['status']}")
 
     report_text = "\n".join(lines)
     (LEARNING_DIR / "daily_report.md").write_text(report_text, encoding="utf-8")

@@ -115,6 +115,15 @@ def cmd_score():
     print(json.dumps(evolution_score(), ensure_ascii=False, indent=2))
 
 
+def cmd_gate():
+    from learning.baseline import regression_gate
+    r = regression_gate()
+    print(json.dumps(r, ensure_ascii=False, indent=2))
+    if r.get("alerts"):
+        return 1
+    return 0
+
+
 def cmd_test():
     import subprocess
     suite = os.path.join(AIOS_ROOT, "scripts", "run_regression_suite.py")
@@ -156,6 +165,8 @@ def main():
         cmd_tickets()
     elif cmd == "score":
         cmd_score()
+    elif cmd == "gate":
+        sys.exit(cmd_gate())
     elif cmd == "test":
         sys.exit(cmd_test())
     elif cmd == "version":
