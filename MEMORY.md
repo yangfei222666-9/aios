@@ -37,6 +37,16 @@
 - 数据版本化：schema_version 1.0 + module_version 1.0.0
 - 外置规则：data/rules.local.jsonl 不改代码可扩展
 
+## AIOS v0.1 (2026-02-19)
+- GitHub: https://github.com/yangfei222666-9/aios (public)
+- 三个学习器：A.纠正驱动(L1) + B.失败驱动(L2) + C.性能驱动(L2 p95)
+- 统一 tool 事件格式 {name, ok, ms, err, meta}
+- evolution_score: tsr*0.4 - cr*0.2 - 502*0.2 - p95_slow*0.2
+- 基线固化 baseline.jsonl + L2 工单队列 tickets.jsonl
+- 回放模式 replay.py（科学迭代：改动=可验证）
+- 每日报告 cron 9AM 自动发 Telegram
+- 结构：core/{config,engine,policies} + learning/{analyze,apply,baseline,tickets} + plugins/aram/{matcher,data_adapter,rules}
+
 ## Autolearn 未完成待办
 1. ARAM 助手 v0.1 正式发布（一键 build/update/report，已有 aram.py 雏形）
 2. 投资助手票据化 v0（低风险、人工确认、可复盘）
