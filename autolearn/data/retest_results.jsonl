@@ -120,3 +120,9 @@
 {"suite": "smoke", "test": "ps_dir_b", "ok": true, "err": "", "ts": 1771505605, "schema_version": "1.0", "module_version": "1.0.0"}
 {"suite": "smoke", "test": "tilde_expand", "ok": true, "err": "", "ts": 1771505605, "schema_version": "1.0", "module_version": "1.0.0"}
 {"suite": "smoke", "test": "absolute_path", "ok": true, "err": "", "ts": 1771505605, "schema_version": "1.0", "module_version": "1.0.0"}
+{"suite": "smoke", "test": "ps_dir_b", "ok": true, "err": "", "ts": 1771507226, "schema_version": "1.0", "module_version": "1.0.0"}
+{"suite": "smoke", "test": "tilde_expand", "ok": true, "err": "", "ts": 1771507226, "schema_version": "1.0", "module_version": "1.0.0"}
+{"suite": "smoke", "test": "absolute_path", "ok": true, "err": "", "ts": 1771507226, "schema_version": "1.0", "module_version": "1.0.0"}
+{"suite": "smoke", "test": "ps_dir_b", "ok": true, "err": "", "ts": 1771510834, "schema_version": "1.0", "module_version": "1.0.0"}
+{"suite": "smoke", "test": "tilde_expand", "ok": true, "err": "", "ts": 1771510834, "schema_version": "1.0", "module_version": "1.0.0"}
+{"suite": "smoke", "test": "absolute_path", "ok": true, "err": "", "ts": 1771510834, "schema_version": "1.0", "module_version": "1.0.0"}
