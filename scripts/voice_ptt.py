@@ -106,29 +106,34 @@ def stop_recording():
         pass
 
 def send_to_openclaw(text):
-    """通过 openclaw CLI 发送 wake 事件"""
+    """通过 openclaw-cn CLI 发送 wake 事件，或写入 voice_inbox.jsonl"""
+    # 尝试找到 openclaw-cn
+    openclaw_cmd = r"C:\Users\A\AppData\Roaming\npm\openclaw-cn.cmd"
+    
     try:
-        result = subprocess.run(
-            ["openclaw", "wake", text],
-            capture_output=True, text=True, timeout=10,
-            encoding='utf-8', errors='replace'
-        )
-        if result.returncode == 0:
-            print(f"✅ 已发送给小九: {text}")
-        else:
-            # 备选：写到文件让心跳捡起来
-            fallback_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "memory", "voice_inbox.jsonl"
+        if os.path.exists(openclaw_cmd):
+            result = subprocess.run(
+                [openclaw_cmd, "wake", text],
+                capture_output=True, text=True, timeout=10,
+                encoding='utf-8', errors='replace'
             )
-            with open(fallback_path, "a", encoding="utf-8") as f:
-                f.write(json.dumps({
-                    "ts": int(time.time()),
-                    "text": text,
-                    "source": "ptt",
-                    "delivered": False,
-                }, ensure_ascii=False) + "\n")
-            print(f"📥 已存入 voice_inbox.jsonl (openclaw wake 失败)")
+            if result.returncode == 0:
+                print(f"✅ 已发送给小九: {text}")
+                return
+        
+        # 备选：写到文件让心跳捡起来
+        fallback_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "memory", "voice_inbox.jsonl"
+        )
+        with open(fallback_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps({
+                "ts": int(time.time()),
+                "text": text,
+                "source": "ptt",
+                "delivered": False,
+            }, ensure_ascii=False) + "\n")
+        print(f"📥 已存入 voice_inbox.jsonl")
     except Exception as e:
         print(f"⚠️ 发送失败: {e}")
 
@@ -158,15 +163,15 @@ def main():
     )
     stream.start()
     
-    # 注册快捷键
-    keyboard.on_press_key(hotkey.split('+')[-1], lambda e: start_recording() if keyboard.is_pressed(hotkey.rsplit('+', 1)[0]) else None)
+    # 注册快捷键（按下开始录音，松开停止）
+    def on_hotkey_press():
+        start_recording()
     
-    # 更简单的方式：用 hotkey
-    keyboard.add_hotkey(hotkey, start_recording, trigger_on_release=False)
+    keyboard.add_hotkey(hotkey, on_hotkey_press, suppress=False)
     
-    # 松开检测
-    release_key = hotkey.split('+')[-1]
-    keyboard.on_release_key(release_key, lambda e: stop_recording())
+    # 松开检测：监听最后一个键的释放
+    last_key = hotkey.split('+')[-1]
+    keyboard.on_release_key(last_key, lambda e: stop_recording() if not recording else stop_recording(), suppress=False)
     
     print("🟢 就绪，等待语音输入...\n")
     
