@@ -60,6 +60,56 @@ def save_cache(action, data):
         json.dump(cache, f, ensure_ascii=False, indent=2)
 
 
+def _count_severity(events: list) -> dict:
+    """统计事件严重度分布，统一 fatal→CRIT 映射"""
+    counts = {"CRIT": 0, "WARN": 0, "INFO": 0, "ERR": 0}
+    for e in events:
+        status = e.get("status", "ok")
+        layer = e.get("layer", "")
+        event_name = e.get("event", "")
+        payload = e.get("payload") or {}
+
+        # fatal 事件 → CRIT
+        if any(k in event_name.lower() for k in ("fatal", "circuit_breaker")):
+            counts["CRIT"] += 1
+        elif status == "err" and layer == "SEC":
+            counts["CRIT"] += 1
+        elif status == "err":
+            counts["ERR"] += 1
+        elif layer in ("SEC",) and "hallucination" in event_name:
+            counts["WARN"] += 1
+        else:
+            counts["INFO"] += 1
+    return counts
+
+
+def _inline_evolution_score(record: dict) -> dict:
+    """从单条 snapshot record 直接算 evolution_score，不依赖 history"""
+    tsr = record.get("tool_success_rate", 1.0)
+    cr = record.get("correction_rate", 0)
+    h502 = record.get("http_502_rate", 0)
+
+    p95 = record.get("tool_p95_ms", {})
+    if p95:
+        slow = sum(1 for v in p95.values() if v > 5000)
+        p95_slow_ratio = slow / len(p95)
+    else:
+        p95_slow_ratio = 0
+
+    score = round(tsr * 0.4 - cr * 0.2 - h502 * 0.2 - p95_slow_ratio * 0.2, 4)
+
+    if score >= 0.35:
+        grade = "healthy"
+    elif score >= 0.25:
+        grade = "ok"
+    elif score >= 0.15:
+        grade = "degraded"
+    else:
+        grade = "critical"
+
+    return {"score": score, "grade": grade}
+
+
 def _classify(e: dict) -> str:
     """v0.1/v0.2 兼容分类"""
     # v0.1: type 字段
@@ -135,7 +185,21 @@ def snapshot(days: int = 1) -> dict:
         "http_502_rate": round(http_codes.get(502, 0) / max(total_http, 1), 3),
         "http_404_rate": round(http_codes.get(404, 0) / max(total_http, 1), 3),
         "total_events": len(events),
+        # 事件严重度统计（fatal/error/warn 分级）
+        "severity_counts": _count_severity(events),
     }
+
+    # 强制内联 evolution_score + grade（不缺 key）
+    evo = _inline_evolution_score(record)
+    record["evolution_score"] = evo["score"]
+    record["grade"] = evo["grade"]
+
+    # Schema 校验：必须字段齐全才入正式快照
+    REQUIRED_KEYS = {"ts", "correction_rate", "tool_success_rate", "evolution_score", "grade"}
+    missing_keys = REQUIRED_KEYS - set(record.keys())
+    if missing_keys:
+        record["_schema_warning"] = f"missing keys: {sorted(missing_keys)}"
+        # 仍然写入但标记，不静默丢失
 
     append_jsonl(HISTORY_FILE, record)
     return record

@@ -1,1 +1,17 @@
-{}
+{
+  "event_severity:default:2026-02-20": {
+    "id": "b034bbe4",
+    "fingerprint": "event_severity:default:2026-02-20",
+    "rule_id": "event_severity",
+    "severity": "CRIT",
+    "message": "事件异常: fatal事件 4 个",
+    "scope": "default",
+    "owner": "小九",
+    "status": "OPEN",
+    "created_at": "2026-02-20T12:00:04.821069",
+    "last_hit": "2026-02-20T12:06:49.990755",
+    "hit_count": 2,
+    "recovery_streak": 0,
+    "sla_deadline": "2026-02-20T13:00:04.821069"
+  }
+}

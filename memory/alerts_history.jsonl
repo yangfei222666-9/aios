@@ -2,3 +2,4 @@
 {"ts": "2026-02-19T18:32:08.858779", "alert_id": "12b047fb", "fingerprint": "test_rule:default:2026-02-19", "rule_id": "test_rule", "severity": "WARN", "from": "OPEN", "to": "ACK", "reason": "手动确认"}
 {"ts": "2026-02-19T18:32:08.866783", "alert_id": "12b047fb", "fingerprint": "test_rule:default:2026-02-19", "rule_id": "test_rule", "severity": "WARN", "from": "ACK", "to": "OPEN", "reason": "问题复发"}
 {"ts": "2026-02-19T18:32:08.874321", "alert_id": "12b047fb", "fingerprint": "test_rule:default:2026-02-19", "rule_id": "test_rule", "severity": "WARN", "from": "OPEN", "to": "RESOLVED", "reason": "连续恢复 2 次，自动关闭"}
+{"ts": "2026-02-20T12:00:04.821069", "alert_id": "b034bbe4", "fingerprint": "event_severity:default:2026-02-20", "rule_id": "event_severity", "severity": "CRIT", "from": null, "to": "OPEN", "reason": "新告警: 事件异常: fatal事件 4 个"}

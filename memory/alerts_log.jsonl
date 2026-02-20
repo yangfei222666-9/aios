@@ -123,3 +123,21 @@
 {"ts": "2026-02-20T10:35:41.879956", "level": "INFO", "rule": "critical_files", "message": "关键文件完整"}
 {"ts": "2026-02-20T10:35:41.922578", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 healthy (0.400)"}
 {"ts": "2026-02-20T10:35:41.923078", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 18h ago)"}
+{"ts": "2026-02-20T11:34:17.017393", "level": "INFO", "rule": "consecutive_failures", "message": "autolearn smoke 全部通过"}
+{"ts": "2026-02-20T11:34:17.019401", "level": "INFO", "rule": "data_drop", "message": "ARAM 数据库 172 英雄，正常"}
+{"ts": "2026-02-20T11:34:17.019401", "level": "INFO", "rule": "critical_files", "message": "关键文件完整"}
+{"ts": "2026-02-20T11:34:17.056060", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 healthy (0.400)"}
+{"ts": "2026-02-20T11:34:17.056558", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 19h ago)"}
+{"ts": "2026-02-20T12:00:04.778147", "level": "INFO", "rule": "consecutive_failures", "message": "autolearn smoke 全部通过"}
+{"ts": "2026-02-20T12:00:04.779648", "level": "INFO", "rule": "data_drop", "message": "ARAM 数据库 172 英雄，正常"}
+{"ts": "2026-02-20T12:00:04.779648", "level": "INFO", "rule": "critical_files", "message": "关键文件完整"}
+{"ts": "2026-02-20T12:00:04.820068", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 healthy (0.400)"}
+{"ts": "2026-02-20T12:00:04.820568", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 19h ago)"}
+{"ts": "2026-02-20T12:00:04.821069", "level": "CRIT", "rule": "event_severity", "message": "事件异常: fatal事件 4 个"}
+{"ts": "2026-02-20T12:06:49.937520", "level": "INFO", "rule": "consecutive_failures", "message": "autolearn smoke 全部通过"}
+{"ts": "2026-02-20T12:06:49.938520", "level": "INFO", "rule": "data_drop", "message": "ARAM 数据库 172 英雄，正常"}
+{"ts": "2026-02-20T12:06:49.939526", "level": "INFO", "rule": "critical_files", "message": "关键文件完整"}
+{"ts": "2026-02-20T12:06:49.984744", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 healthy (0.400)"}
+{"ts": "2026-02-20T12:06:49.985248", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 19h ago)"}
+{"ts": "2026-02-20T12:06:49.990251", "level": "CRIT", "rule": "event_severity", "message": "事件异常: fatal事件 4 个; 疑似死循环: exec_retry_test"}
+{"ts": "2026-02-20T12:06:49.991255", "level": "INFO", "rule": "executor_bypass", "message": "执行器覆盖正常: 40 正规 / 6 旧路径"}

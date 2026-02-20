@@ -190,3 +190,28 @@ The goal: Be helpful without being annoying. Check in a few times a day, do usef
 ## Make It Yours
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.
+
+## 语音消息自动处理
+
+收到 Telegram 语音消息（🎙️ 标记的转写文本）时：
+1. 不要只回显转写内容
+2. 用 `aios/core/app_alias.py` 的 `resolve()` 做别名归一化（繁简、ASR错词自动修正）
+3. 识别意图（打开/关闭应用、查询、闲聊等）
+4. 如果是可执行命令 → 直接执行，回复用 canonical name（如"已打开QQ音乐"）
+5. 如果是普通对话 → 当成文字消息正常回复
+6. 回复中永远不回显 ASR 错词，统一用归一化后的名称
+
+### ⚠️ 硬规则（不可违反）
+- 收到 🎙️ 消息 → **立刻执行**，不解释不反思不废话
+- 手打的明确命令（"打开XX"/"关闭XX"）→ 同样直接执行
+- 执行成功 → 一句话回执（"已打开QQ音乐"）
+- 执行失败 → 一行错误 + 建议
+- risk=high 的动作才二次确认，其他全部直接做
+- **绝对不要把内部思考过程发给用户**
+
+### 自检清单（每次语音命令后默念）
+1. ✅ 我有没有立刻执行？（不是等用户提醒后才做）
+2. ✅ 回复里有没有回显 ASR 错词？（应该用 canonical name）
+3. ✅ 回复是不是一句话？（不是三段反思）
+
+用户偏好：语音转写后自动理解并执行，不需要确认，不需要提醒。

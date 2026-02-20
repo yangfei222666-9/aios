@@ -119,3 +119,22 @@
 {"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\queue\\2026-02-20.jsonl"}, "priority": 1, "ts": 1771554941.9365911, "source": "file_watcher"}
 {"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\autolearn\\data\\retest_results.jsonl"}, "priority": 1, "ts": 1771554941.9365911, "source": "file_watcher"}
 {"topic": "sensor.system.health", "payload": {"disk_c_pct": 52.1, "disk_c_free_gb": 143.8, "memory_pct": 39.8}, "priority": 1, "ts": 1771554942.315643, "source": "system_health"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\sensor_state.json"}, "priority": 1, "ts": 1771558457.0700982, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\queue\\2026-02-20.jsonl"}, "priority": 1, "ts": 1771558457.071097, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\autolearn\\data\\retest_results.jsonl"}, "priority": 1, "ts": 1771558457.071097, "source": "file_watcher"}
+{"topic": "sensor.file.deleted", "payload": {"type": "deleted", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\pending_actions.jsonl"}, "priority": 1, "ts": 1771558457.071097, "source": "file_watcher"}
+{"topic": "sensor.process.started", "payload": {"process": "pythonw", "status": "started"}, "priority": 1, "ts": 1771558457.2316222, "source": "process_monitor"}
+{"topic": "sensor.system.health", "payload": {"disk_c_pct": 52.4, "disk_c_free_gb": 142.9, "memory_pct": 42.8}, "priority": 1, "ts": 1771558457.4768684, "source": "system_health"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\core\\engine.py"}, "priority": 1, "ts": 1771560004.8427632, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\sensor_state.json"}, "priority": 1, "ts": 1771560004.8427632, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\learning\\baseline.py"}, "priority": 1, "ts": 1771560004.8427632, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\queue\\2026-02-20.jsonl"}, "priority": 1, "ts": 1771560004.8437667, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\autolearn\\data\\retest_results.jsonl"}, "priority": 1, "ts": 1771560004.8437667, "source": "file_watcher"}
+{"topic": "sensor.file.created", "payload": {"type": "created", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\core\\executor.py"}, "priority": 1, "ts": 1771560410.005316, "source": "file_watcher"}
+{"topic": "sensor.file.created", "payload": {"type": "created", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\core\\test_executor.py"}, "priority": 1, "ts": 1771560410.005818, "source": "file_watcher"}
+{"topic": "sensor.file.created", "payload": {"type": "created", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\dedup_state.json"}, "priority": 1, "ts": 1771560410.005818, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\events.jsonl"}, "priority": 1, "ts": 1771560410.005818, "source": "file_watcher"}
+{"topic": "sensor.file.created", "payload": {"type": "created", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\execution_log.jsonl"}, "priority": 1, "ts": 1771560410.006318, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\learning\\baseline.jsonl"}, "priority": 1, "ts": 1771560410.006318, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\learning\\baseline_cache.json"}, "priority": 1, "ts": 1771560410.006318, "source": "file_watcher"}
+{"topic": "sensor.system.health", "payload": {"disk_c_pct": 52.5, "disk_c_free_gb": 142.6, "memory_pct": 44.0}, "priority": 1, "ts": 1771560410.4071782, "source": "system_health"}

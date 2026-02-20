@@ -40,11 +40,29 @@
       "correct_behavior": "只用从真实数据源获取的名称",
       "preference_learned": "绝对不编造游戏内容，没有数据就说没有"
     }
+    {
+      "date": "2026-02-20",
+      "category": "execution_discipline",
+      "mistake": "语音转写消息'打开QQ音乐'连续5次没有自动执行，每次都等用户提醒后才补做",
+      "lesson": "收到带🎙️的消息或明确命令，第一个动作必须是执行，不是思考/回复/反思。先做再说。",
+      "severity": "critical",
+      "verified": false,
+      "repeat_count": 5
+    }
   ],
+  "voice_aliases": {
+    "柯柯音乐": "QQ音乐",
+    "扣扣音乐": "QQ音乐",
+    "呵呵音乐": "QQ音乐"
+  },
+  "app_paths": {
+    "QQ音乐": "E:\\QQMusic\\QQMusic.exe"
+  },
   "user_preferences": {
     "data_quality": "宁缺毋滥，不接受编造或模板凑数",
     "ui_changes": "改之前要确认，别改错了",
     "naming": "以国服游戏内实际名称为准",
-    "communication": "直接说问题，不需要绕弯子"
+    "communication": "直接说问题，不需要绕弯子",
+    "voice_commands": "语音转写后自动理解并执行，不要回显错词，不需要确认"
   }
 }

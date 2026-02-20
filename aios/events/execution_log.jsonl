@@ -1,0 +1,20 @@
+{"ts": "2026-02-20T12:03:12", "epoch": 1771560192, "command_key": "test_cmd", "terminal_state": "SUCCESS", "reason_code": "executed", "detail": "模拟执行成功", "latency_ms": 0}
+{"ts": "2026-02-20T12:03:12", "epoch": 1771560192, "command_key": "test_cmd", "terminal_state": "NOOP_DEDUP", "reason_code": "dedup_window", "detail": "上次执行 0s 前，窗口 10s", "latency_ms": 0}
+{"ts": "2026-02-20T12:03:12", "epoch": 1771560192, "command_key": "test_fail", "terminal_state": "FAILED_NON_RETRYABLE", "reason_code": "NON_RETRYABLE", "detail": "WnsUniversalSDK create failed", "latency_ms": 0}
+{"ts": "2026-02-20T12:03:26", "epoch": 1771560206, "command_key": "open_explorer", "terminal_state": "NOOP_ALREADY_RUNNING", "reason_code": "process_exists", "detail": "explorer.exe 已在运行", "latency_ms": 0}
+{"ts": "2026-02-20T12:05:52", "epoch": 1771560352, "command_key": "test_dedup", "terminal_state": "SUCCESS", "reason_code": "executed", "detail": "done", "latency_ms": 0}
+{"ts": "2026-02-20T12:05:52", "epoch": 1771560352, "command_key": "test_dedup", "terminal_state": "NOOP_DEDUP", "reason_code": "dedup_window", "detail": "上次执行 0s 前，窗口 30s", "latency_ms": 0}
+{"ts": "2026-02-20T12:05:52", "epoch": 1771560352, "command_key": "test_dedup_other", "terminal_state": "SUCCESS", "reason_code": "executed", "detail": "done", "latency_ms": 0}
+{"ts": "2026-02-20T12:05:52", "epoch": 1771560352, "command_key": "open_explorer", "terminal_state": "NOOP_ALREADY_RUNNING", "reason_code": "process_exists", "detail": "explorer.exe 已在运行", "latency_ms": 0}
+{"ts": "2026-02-20T12:05:53", "epoch": 1771560353, "command_key": "preflight_test", "terminal_state": "NOOP_ALREADY_RUNNING", "reason_code": "process_exists", "detail": "explorer.exe 已在运行", "latency_ms": 0}
+{"ts": "2026-02-20T12:05:53", "epoch": 1771560353, "command_key": "non_retry_test", "terminal_state": "FAILED_NON_RETRYABLE", "reason_code": "NON_RETRYABLE", "detail": "WnsUniversalSDK initialization create failed", "latency_ms": 0}
+{"ts": "2026-02-20T12:05:53", "epoch": 1771560353, "command_key": "retry_test", "terminal_state": "FAILED_RETRYABLE", "reason_code": "RETRYABLE", "detail": "Connection timed out after 30s", "latency_ms": 0}
+{"ts": "2026-02-20T12:05:54", "epoch": 1771560354, "command_key": "retry_test", "terminal_state": "FAILED_RETRYABLE", "reason_code": "RETRYABLE", "detail": "network unreachable", "latency_ms": 0}
+{"ts": "2026-02-20T12:06:03", "epoch": 1771560363, "command_key": "test_dedup", "terminal_state": "SUCCESS", "reason_code": "executed", "detail": "done", "latency_ms": 0}
+{"ts": "2026-02-20T12:06:03", "epoch": 1771560363, "command_key": "test_dedup", "terminal_state": "NOOP_DEDUP", "reason_code": "dedup_window", "detail": "上次执行 0s 前，窗口 30s", "latency_ms": 0}
+{"ts": "2026-02-20T12:06:03", "epoch": 1771560363, "command_key": "test_dedup_other", "terminal_state": "SUCCESS", "reason_code": "executed", "detail": "done", "latency_ms": 0}
+{"ts": "2026-02-20T12:06:04", "epoch": 1771560364, "command_key": "open_explorer", "terminal_state": "NOOP_ALREADY_RUNNING", "reason_code": "process_exists", "detail": "explorer.exe 已在运行", "latency_ms": 0}
+{"ts": "2026-02-20T12:06:04", "epoch": 1771560364, "command_key": "preflight_test", "terminal_state": "NOOP_ALREADY_RUNNING", "reason_code": "process_exists", "detail": "explorer.exe 已在运行", "latency_ms": 0}
+{"ts": "2026-02-20T12:06:04", "epoch": 1771560364, "command_key": "non_retry_test", "terminal_state": "FAILED_NON_RETRYABLE", "reason_code": "NON_RETRYABLE", "detail": "WnsUniversalSDK initialization create failed", "latency_ms": 0}
+{"ts": "2026-02-20T12:06:04", "epoch": 1771560364, "command_key": "retry_test", "terminal_state": "FAILED_RETRYABLE", "reason_code": "RETRYABLE", "detail": "Connection timed out after 30s", "latency_ms": 0}
+{"ts": "2026-02-20T12:06:05", "epoch": 1771560365, "command_key": "retry_test", "terminal_state": "FAILED_RETRYABLE", "reason_code": "RETRYABLE", "detail": "network unreachable", "latency_ms": 0}

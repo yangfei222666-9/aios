@@ -1,8 +1,10 @@
 {
   "last_alerts": {
-    "critical_files": "2026-02-19T17:27:56.702537"
+    "critical_files": "2026-02-19T17:27:56.702537",
+    "event_severity": "2026-02-20T12:00:04.821569"
   },
   "counters": {
-    "critical_files": 1
+    "critical_files": 1,
+    "event_severity": 1
   }
 }

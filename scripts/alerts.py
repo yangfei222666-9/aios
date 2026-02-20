@@ -28,6 +28,7 @@ ALERTS_LOG = os.path.join(WS, 'memory', 'alerts_log.jsonl')
 ALERTS_CACHE = os.path.join(WS, 'memory', 'alerts_cache.json')
 COOLDOWN_HOURS = 6
 CACHE_TTL_SECONDS = 300  # 5分钟缓存
+DEDUP_WINDOW_SECONDS = 60  # 同一命令60秒内去重
 
 # --- Cache Management ---
 
@@ -176,6 +177,132 @@ def check_backup():
         return "CRIT", f"最近备份文件异常小 ({size} bytes): {latest}"
     return "INFO", f"备份正常: {latest} ({round(size/1024/1024, 2)} MB, {int(age_hours)}h ago)"
 
+def check_event_severity():
+    """规则6: 事件严重度标准化 — fatal/死循环检测"""
+    events_file = os.path.join(WS, 'aios', 'events', 'events.jsonl')
+    if not os.path.exists(events_file):
+        return "INFO", "无事件文件"
+
+    now = time.time()
+    cutoff = now - 86400  # 最近24h
+    fatal_count = 0
+    loop_candidates = []  # (event_name, epoch) 用于检测重复
+
+    try:
+        with open(events_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    ev = json.loads(line)
+                except:
+                    continue
+                epoch = ev.get("epoch", 0)
+                if epoch < cutoff:
+                    continue
+
+                status = ev.get("status", "ok")
+                event_name = ev.get("event", "")
+                layer = ev.get("layer", "")
+
+                # fatal 检测：SEC层err + 特定关键词
+                if status == "err" and (
+                    "fatal" in event_name.lower() or
+                    "circuit_breaker" in event_name.lower() or
+                    (layer == "SEC" and "runtime_error" in event_name)
+                ):
+                    fatal_count += 1
+
+                # 死循环检测：同一命令短时间内重复执行
+                if status == "err" and layer == "TOOL":
+                    loop_candidates.append((event_name, epoch))
+
+        # 死循环判定：同一 event_name 在 DEDUP_WINDOW_SECONDS 内出现 >= 3 次
+        loop_detected = []
+        from collections import Counter
+        if loop_candidates:
+            # 按 event_name 分组，检查时间窗口内的密度
+            by_name = {}
+            for name, ep in loop_candidates:
+                by_name.setdefault(name, []).append(ep)
+            for name, epochs in by_name.items():
+                epochs.sort()
+                for i in range(len(epochs) - 2):
+                    if epochs[i+2] - epochs[i] <= DEDUP_WINDOW_SECONDS:
+                        loop_detected.append(name)
+                        break
+
+        issues = []
+        if fatal_count > 0:
+            issues.append(f"fatal事件 {fatal_count} 个")
+        if loop_detected:
+            issues.append(f"疑似死循环: {', '.join(loop_detected[:3])}")
+
+        if fatal_count > 0 or loop_detected:
+            return "CRIT", f"事件异常: {'; '.join(issues)}"
+        return "INFO", "事件严重度正常"
+
+    except Exception as e:
+        return "WARN", f"事件检查异常: {e}"
+
+def check_executor_bypass():
+    """规则7: 执行器绕过检测 — 命令执行事件未走 execute() 入口"""
+    events_file = os.path.join(WS, 'aios', 'events', 'events.jsonl')
+    exec_log_file = os.path.join(WS, 'aios', 'events', 'execution_log.jsonl')
+    if not os.path.exists(events_file):
+        return "INFO", "无事件文件"
+
+    now = time.time()
+    cutoff = now - 86400  # 最近24h
+
+    # 收集 events.jsonl 中的 TOOL 层执行事件（exec_ 开头 = 走了 executor）
+    tool_exec_events = 0
+    executor_events = 0
+
+    try:
+        with open(events_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    ev = json.loads(line)
+                except:
+                    continue
+                epoch = ev.get("epoch", 0)
+                if epoch < cutoff:
+                    continue
+                layer = ev.get("layer", "")
+                event_name = ev.get("event", "")
+                payload = ev.get("payload") or {}
+
+                if layer == "TOOL":
+                    # tool_exec / tool_* 是直接执行
+                    if event_name.startswith("tool_"):
+                        tool_exec_events += 1
+                    # exec_ 开头是走了 executor.execute()
+                    if event_name.startswith("exec_"):
+                        executor_events += 1
+                    # payload 里有 terminal_state 也算走了 executor
+                    if "terminal_state" in payload:
+                        executor_events += 1
+
+        # 如果有 tool 执行事件但没有任何走 executor 的，告警
+        total_exec = tool_exec_events + executor_events
+        if total_exec == 0:
+            return "INFO", "无执行事件"
+
+        bypass_count = tool_exec_events  # tool_ 开头的没走 executor
+        if bypass_count > 0 and executor_events == 0:
+            return "WARN", f"全部 {bypass_count} 个执行事件未走 executor 入口，建议迁移到 execute()"
+        elif bypass_count > executor_events * 2:
+            return "WARN", f"执行器绕过率偏高: {bypass_count} 绕过 vs {executor_events} 正规 ({bypass_count/(bypass_count+executor_events)*100:.0f}%)"
+        return "INFO", f"执行器覆盖正常: {executor_events} 正规 / {bypass_count} 旧路径"
+
+    except Exception as e:
+        return "WARN", f"执行器绕过检查异常: {e}"
+
 # --- Main ---
 
 RULES = [
@@ -184,6 +311,8 @@ RULES = [
     ("critical_files", "关键文件缺失", check_critical_files),
     ("aios_score", "API超时/评分", check_aios_score),
     ("backup", "备份状态", check_backup),
+    ("event_severity", "事件严重度/死循环", check_event_severity),
+    ("executor_bypass", "执行器绕过", check_executor_bypass),
 ]
 
 def run_checks():

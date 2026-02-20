@@ -39,6 +39,27 @@ def append_jsonl(path: Path, obj: dict):
         f.write(json.dumps(obj, ensure_ascii=False) + "\n")
 
 
+# ── 严重度标准化 ──
+
+def _classify_severity(layer: str, event: str, status: str) -> str:
+    """
+    统一事件严重度映射，确保 fatal→CRIT 不丢失。
+    返回: CRIT / WARN / INFO
+    """
+    ev_lower = event.lower()
+    # fatal / circuit_breaker → 一律 CRIT
+    if "fatal" in ev_lower or "circuit_breaker" in ev_lower:
+        return "CRIT"
+    # SEC 层 err → CRIT
+    if layer == LAYER_SEC and status == "err":
+        return "CRIT"
+    # 其他 err → WARN
+    if status == "err":
+        return "WARN"
+    # 正常 → INFO
+    return "INFO"
+
+
 # ── v0.2 核心: emit ──
 
 def emit(layer: str, event: str, status: str = "ok",
@@ -61,6 +82,7 @@ def emit(layer: str, event: str, status: str = "ok",
         "layer": layer,
         "event": event,
         "status": status,
+        "severity": _classify_severity(layer, event, status),
     }
     if latency_ms is not None:
         record["latency_ms"] = latency_ms
