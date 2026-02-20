@@ -40,7 +40,7 @@ CHAT_ID = "7986452220"
 WAKE_WORD = "小九"
 WAKE_WINDOW_SEC = 1.2       # 唤醒检测窗口
 WAKE_CHECK_INTERVAL = 0.6   # 每0.6秒检测一次
-SILENCE_TIMEOUT = 3.0       # 静音3秒再停止，给思考时间
+SILENCE_TIMEOUT = 1.8       # 静音1.8秒停止
 SILENCE_THRESHOLD = 0.008   # 静音 RMS 阈值
 MIN_RECORD_SEC = 0.5        # 最短录音时长
 
