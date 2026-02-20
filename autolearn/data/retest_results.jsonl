@@ -150,3 +150,6 @@
 {"suite": "smoke", "test": "ps_dir_b", "ok": true, "err": "", "ts": 1771551805, "schema_version": "1.0", "module_version": "1.1.0"}
 {"suite": "smoke", "test": "tilde_expand", "ok": true, "err": "", "ts": 1771551805, "schema_version": "1.0", "module_version": "1.1.0"}
 {"suite": "smoke", "test": "absolute_path", "ok": true, "err": "", "ts": 1771551805, "schema_version": "1.0", "module_version": "1.1.0"}
+{"suite": "smoke", "test": "ps_dir_b", "ok": true, "err": "", "ts": 1771554941, "schema_version": "1.0", "module_version": "1.1.0"}
+{"suite": "smoke", "test": "tilde_expand", "ok": true, "err": "", "ts": 1771554941, "schema_version": "1.0", "module_version": "1.1.0"}
+{"suite": "smoke", "test": "absolute_path", "ok": true, "err": "", "ts": 1771554941, "schema_version": "1.0", "module_version": "1.1.0"}

@@ -112,3 +112,10 @@
 {"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\autolearn\\data\\lessons.jsonl"}, "priority": 1, "ts": 1771552918.0245419, "source": "file_watcher"}
 {"topic": "sensor.file.created", "payload": {"type": "created", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\pending_actions.jsonl"}, "priority": 1, "ts": 1771552946.2198665, "source": "file_watcher"}
 {"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\tests\\test_concurrency.py"}, "priority": 1, "ts": 1771552960.2071326, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\sensor_state.json"}, "priority": 1, "ts": 1771554941.93559, "source": "file_watcher"}
+{"topic": "sensor.file.created", "payload": {"type": "created", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\tests\\test_auto_switch_real.py"}, "priority": 1, "ts": 1771554941.9360905, "source": "file_watcher"}
+{"topic": "sensor.file.created", "payload": {"type": "created", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\tests\\test_edge_cases.py"}, "priority": 1, "ts": 1771554941.9360905, "source": "file_watcher"}
+{"topic": "sensor.file.created", "payload": {"type": "created", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\tests\\test_realistic_flow.py"}, "priority": 1, "ts": 1771554941.9365911, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\aios\\events\\queue\\2026-02-20.jsonl"}, "priority": 1, "ts": 1771554941.9365911, "source": "file_watcher"}
+{"topic": "sensor.file.modified", "payload": {"type": "modified", "path": "C:\\Users\\A\\.openclaw\\workspace\\autolearn\\data\\retest_results.jsonl"}, "priority": 1, "ts": 1771554941.9365911, "source": "file_watcher"}
+{"topic": "sensor.system.health", "payload": {"disk_c_pct": 52.1, "disk_c_free_gb": 143.8, "memory_pct": 39.8}, "priority": 1, "ts": 1771554942.315643, "source": "system_health"}

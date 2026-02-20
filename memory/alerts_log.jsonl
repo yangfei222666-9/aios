@@ -118,3 +118,8 @@
 {"ts": "2026-02-20T09:43:25.602091", "level": "INFO", "rule": "critical_files", "message": "关键文件完整"}
 {"ts": "2026-02-20T09:43:25.642100", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 healthy (0.400)"}
 {"ts": "2026-02-20T09:43:25.642602", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 17h ago)"}
+{"ts": "2026-02-20T10:35:41.877459", "level": "INFO", "rule": "consecutive_failures", "message": "autolearn smoke 全部通过"}
+{"ts": "2026-02-20T10:35:41.879457", "level": "INFO", "rule": "data_drop", "message": "ARAM 数据库 172 英雄，正常"}
+{"ts": "2026-02-20T10:35:41.879956", "level": "INFO", "rule": "critical_files", "message": "关键文件完整"}
+{"ts": "2026-02-20T10:35:41.922578", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 healthy (0.400)"}
+{"ts": "2026-02-20T10:35:41.923078", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 18h ago)"}
