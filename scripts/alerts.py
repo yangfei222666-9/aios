@@ -2,6 +2,7 @@
 三级事件: INFO(仅落盘) / WARN(进周报) / CRIT(立即推送)
 5条规则: 连续失败 / 数据量骤降 / 关键文件缺失 / API超时率 / 备份失败
 冷却机制: 同类事件6小时内只报一次
+缓存机制: 结果缓存5分钟，减少重复执行开销
 """
 import json, os, time, subprocess, sys, io
 from datetime import datetime, timedelta
@@ -13,10 +14,50 @@ sys.path.insert(0, os.path.dirname(__file__))
 import alert_fsm
 
 WS = r'C:\Users\A\.openclaw\workspace'
+
+# 导入 AIOS dispatcher（感知扫描）
+try:
+    sys.path.insert(0, os.path.join(WS, 'aios'))
+    from core.dispatcher import dispatch as aios_dispatch, get_pending_actions, clear_actions
+    HAS_DISPATCHER = True
+except ImportError:
+    HAS_DISPATCHER = False
 PYTHON = r'C:\Program Files\Python312\python.exe'
 ALERTS_STATE = os.path.join(WS, 'memory', 'alerts_state.json')
 ALERTS_LOG = os.path.join(WS, 'memory', 'alerts_log.jsonl')
+ALERTS_CACHE = os.path.join(WS, 'memory', 'alerts_cache.json')
 COOLDOWN_HOURS = 6
+CACHE_TTL_SECONDS = 300  # 5分钟缓存
+
+# --- Cache Management ---
+
+def load_cache():
+    """加载缓存，如果未过期则返回结果"""
+    if not os.path.exists(ALERTS_CACHE):
+        return None
+    
+    try:
+        with open(ALERTS_CACHE, 'r', encoding='utf-8') as f:
+            cache = json.load(f)
+        
+        cached_at = cache.get('cached_at', 0)
+        age = time.time() - cached_at
+        
+        if age < CACHE_TTL_SECONDS:
+            return cache.get('data')
+        else:
+            return None
+    except:
+        return None
+
+def save_cache(data):
+    """保存结果到缓存"""
+    cache = {
+        'cached_at': time.time(),
+        'data': data
+    }
+    with open(ALERTS_CACHE, 'w', encoding='utf-8') as f:
+        json.dump(cache, f, ensure_ascii=False, indent=2)
 
 # --- State Management ---
 
@@ -185,6 +226,22 @@ def run_checks():
             notifications.append(sla_msg)
             mark_alerted(state, f"sla_{a['id']}")
 
+    # 感知扫描（dispatcher）
+    if HAS_DISPATCHER:
+        try:
+            aios_dispatch(run_sensors=True)
+            actions = get_pending_actions()
+            for a in actions:
+                pri = a.get("priority", "normal")
+                summary = a.get("summary", "")
+                if pri == "high":
+                    results["WARN"].append(f"[感知] {summary}")
+                    log_event("WARN", "sensor", summary)
+            if actions:
+                clear_actions()
+        except Exception:
+            pass
+
     save_state(state)
     return results, notifications
 
@@ -242,13 +299,33 @@ def get_recent_warns(days=7):
     return list(merged.values())
 
 if __name__ == '__main__':
-    results, notifications = run_checks()
-    summary = format_summary(results)
-    print(summary)
-
-    if notifications:
-        print("\n📢 需要立即推送:")
-        for n in notifications:
-            print(f"  {n}")
+    # 尝试从缓存加载
+    cached = load_cache()
+    if cached:
+        print(cached['summary'])
+        if cached['notifications']:
+            print("\n📢 需要立即推送:")
+            for n in cached['notifications']:
+                print(f"  {n}")
+        else:
+            print("\n静默: 无需推送")
+        print("\n💾 [缓存命中]")
     else:
-        print("\n静默: 无需推送")
+        # 缓存未命中，执行检查
+        results, notifications = run_checks()
+        summary = format_summary(results)
+        print(summary)
+
+        if notifications:
+            print("\n📢 需要立即推送:")
+            for n in notifications:
+                print(f"  {n}")
+        else:
+            print("\n静默: 无需推送")
+        
+        # 保存到缓存
+        save_cache({
+            'summary': summary,
+            'notifications': notifications,
+            'results': results
+        })

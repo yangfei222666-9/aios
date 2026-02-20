@@ -3,7 +3,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 audio_path = sys.argv[1]
-model = whisper.load_model('small')
+model = whisper.load_model('medium', device='cuda')
 result = model.transcribe(audio_path, language='zh', no_speech_threshold=0.5)
 
 for seg in result['segments']:

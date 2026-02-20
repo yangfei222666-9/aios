@@ -16,6 +16,9 @@ def _extract_keywords(msg: str) -> list:
     noise = {"the", "a", "an", "is", "was", "not", "for", "to", "in", "of", "at", "by", "on", "with", "from"}
     return sorted(set(w for w in re.findall(r"[a-z_]{3,}", msg) if w not in noise))[:15]
 
+# 公开别名，供 lessons.py 模糊匹配使用
+extract_keywords = _extract_keywords
+
 # === v1.0 STABLE API ===
 
 def sign_strict(exc_type: str, msg: str) -> str:

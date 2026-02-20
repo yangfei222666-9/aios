@@ -1,0 +1,18 @@
+{
+  "cached_at": 1771551806.029974,
+  "data": {
+    "summary": "🔍 异常检查 2026-02-20 09:43\nCRIT: 0 | WARN: 0 | INFO: 5\n🟢 全部正常",
+    "notifications": [],
+    "results": {
+      "INFO": [
+        "[连续失败] autolearn smoke 全部通过",
+        "[数据量骤降] ARAM 数据库 172 英雄，正常",
+        "[关键文件缺失] 关键文件完整",
+        "[API超时/评分] AIOS 评分 healthy (0.400)",
+        "[备份状态] 备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 17h ago)"
+      ],
+      "WARN": [],
+      "CRIT": []
+    }
+  }
+}

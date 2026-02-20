@@ -1,9 +1,12 @@
 # MEMORY.md - 小九的长期记忆
 
 ## 珊瑚海
+- 住在马来西亚新山 (Johor Bahru)，新加坡旁边
 - 电脑：Ryzen 7 9800X3D + RTX 5070 Ti + 32GB RAM + 2TB NVMe
 - 系统：Windows 11 Pro，显示器 2560x1440 (ASUS XG27UCG)
 - Python 3.12 装在 C:\Program Files\Python312\
+- PyTorch 2.10.0+cu128 (CUDA 12.8)，RTX 5070 Ti GPU 加速已启用
+- Whisper medium 模型，GPU 模式，占用 ~2.9GB 显存
 - 没有 OpenAI API Key
 - 喜欢叫我"小九"
 - 玩国服英雄联盟（海克斯大乱斗模式），通过 WeGame 启动
@@ -57,7 +60,15 @@
 - 基线固化 baseline.jsonl + L2 工单队列 tickets.jsonl
 - 回放模式 replay.py（科学迭代：改动=可验证）
 - 每日报告 cron 9AM 自动发 Telegram
-- 结构：core/{config,engine,policies} + learning/{analyze,apply,baseline,tickets} + plugins/aram/{matcher,data_adapter,rules}
+- 结构：core/{config,engine,policies,event_bus,sensors,dispatcher} + learning/{analyze,apply,baseline,tickets} + plugins/aram/{matcher,data_adapter,rules}
+
+## AIOS v0.3 感知层 (2026-02-20)
+- EventBus: 进程内 pub/sub + 通配符 + 文件队列跨会话
+- Sensors: FileWatcher(mtime对比) + ProcessMonitor + SystemHealth(磁盘/内存) + NetworkProbe(连通性)
+- Dispatcher: 感知→分发→行动建议(pending_actions.jsonl)
+- 已集成到 alerts.py，每次心跳自动跑感知扫描
+- baseline.py 修复：v0.1/v0.2 双格式兼容，清理了 195 条合成数据
+- Cooldown 机制：文件10min/进程5min/系统30min/网络10min
 
 ## 珊瑚海的战略判断 (2026-02-19)
 - 小九已跨过 0→1（能干活），正在 1→10（可规模化可靠干活）的门槛上
@@ -77,11 +88,16 @@
 - Rollback Safety：回滚成功率（目标 100%，恢复后数据一致）
 - 口令：先看噪声，再看风险，最后看吞吐
 - 规则：冻结核心规则口径，只修严重噪声项，不做大改
+- 数据收集：每日 9:10 自动收集（ops_metrics.py），周报生成（ops_weekly.py）
+
+## Autolearn v1.1 (2026-02-20)
+- 模糊匹配可解释性：三层匹配 strict→loose→fuzzy(Jaccard)
+- 返回 _match_type / _similarity_score / _matched_keywords / _alternatives
+- 版本 1.1.0，向后兼容 1.0 API
 
 ## Autolearn 未完成待办
 1. ARAM 助手 v0.1 正式发布（一键 build/update/report，已有 aram.py 雏形）
 2. 投资助手票据化 v0（低风险、人工确认、可复盘）
-3. 模糊匹配可解释性（matched_keywords / similarity_score / alternatives）
 
 ## ARAM 助手状态
 - 172 英雄数据库，出装数据从腾讯 lol.qq.com API 拉取
@@ -92,6 +108,13 @@
 - 从 LCU 拉到的 cherry-augments.json (531个) 是斗魂竞技场的，不是海克斯大乱斗的
 - 海克斯大乱斗有三个等级：银色、金色、彩色（棱彩）
 - 需要用户提供掌盟截图或抓包数据才能获取真实的海克斯强化胜率
+
+## 重要教训：自动模型切换 v2 vs v3 (2026-02-20)
+- v2（min_dwell=3 + hysteresis up=0.72/down=0.45）：9/10 准确率，简单有效
+- v3（灰区 + dwell累积 + 时间冷却 + confidence门槛）：4/10 准确率，过于保守
+- 教训：多重护栏叠加会导致切换过于保守，真实对话中很难同时满足所有条件
+- 原则：简单机制 > 复杂机制，先跑起来再迭代，别过度设计
+- v3 伪代码留作参考，等 v2 暴露实际问题再升级
 
 ## 珊瑚海的偏好
 - 数据质量：宁缺毋滥，不接受编造或模板凑数

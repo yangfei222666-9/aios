@@ -81,7 +81,7 @@ def run(intent: str, tool: str, payload: dict, do_task) -> dict:
         sig_s = sign_strict(type(e).__name__, str(e))
         loose = sign_loose(str(e))
         sig_l = loose["sig"]
-        tips = find(sig_s, sig_loose=sig_l)
+        tips = find(sig_s, sig_loose=sig_l, keywords=loose["keywords"])
         
         tripped = check_and_trip(sig_s)
         

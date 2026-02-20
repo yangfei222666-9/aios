@@ -11,6 +11,7 @@
 
 ## Context
 
+- 住在马来西亚新山 (Johor Bahru)，新加坡旁边
 - 电脑配置很强：Ryzen 7 9800X3D + RTX 5070 Ti + 32GB RAM + 2TB NVMe
 - 系统：Windows 11 专业版
 - 对游戏开发感兴趣（马里奥、射击游戏）

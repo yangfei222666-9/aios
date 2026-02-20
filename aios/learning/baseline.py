@@ -1,8 +1,9 @@
 # aios/learning/baseline.py - 基线固化（metrics_history.jsonl）
 """
 每次 analyze 后追加一条基线快照，用于画趋势。
+缓存机制: snapshot/score 结果缓存5分钟，减少重复计算开销
 """
-import json, time, sys, math
+import json, time, sys, math, os
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -12,27 +13,104 @@ from core.config import get_path
 
 LEARNING_DIR = Path(__file__).resolve().parent
 HISTORY_FILE = get_path("paths.metrics_history") or (LEARNING_DIR / "metrics_history.jsonl")
+CACHE_FILE = LEARNING_DIR / "baseline_cache.json"
+CACHE_TTL_SECONDS = 300  # 5分钟缓存
 
+# --- Cache Management ---
+
+def load_cache(action):
+    """加载缓存，如果未过期则返回结果"""
+    if not CACHE_FILE.exists():
+        return None
+    
+    try:
+        with open(CACHE_FILE, 'r', encoding='utf-8') as f:
+            cache = json.load(f)
+        
+        if action not in cache:
+            return None
+        
+        entry = cache[action]
+        cached_at = entry.get('cached_at', 0)
+        age = time.time() - cached_at
+        
+        if age < CACHE_TTL_SECONDS:
+            return entry.get('data')
+        else:
+            return None
+    except:
+        return None
+
+def save_cache(action, data):
+    """保存结果到缓存"""
+    cache = {}
+    if CACHE_FILE.exists():
+        try:
+            with open(CACHE_FILE, 'r', encoding='utf-8') as f:
+                cache = json.load(f)
+        except:
+            pass
+    
+    cache[action] = {
+        'cached_at': time.time(),
+        'data': data
+    }
+    
+    with open(CACHE_FILE, 'w', encoding='utf-8') as f:
+        json.dump(cache, f, ensure_ascii=False, indent=2)
+
+
+def _classify(e: dict) -> str:
+    """v0.1/v0.2 兼容分类"""
+    # v0.1: type 字段
+    if "type" in e:
+        return e["type"]
+    # v0.2: layer + payload._v1_type
+    layer = e.get("layer", "")
+    v1 = (e.get("payload") or {}).get("_v1_type", "")
+    if v1:
+        return v1
+    layer_map = {"TOOL": "tool", "MEM": "match", "SEC": "http_error"}
+    return layer_map.get(layer, "")
+
+def _tool_name_ms(e: dict) -> tuple:
+    """从 v0.1 或 v0.2 事件中提取 (tool_name, ms, ok)"""
+    # v0.2: payload.name / payload.ms
+    p = e.get("payload") or {}
+    name = p.get("name", "")
+    ms = p.get("ms", 0)
+    ok = p.get("ok", True)
+    if name and ms:
+        return name, ms, ok
+    # v0.1: data.name / data.ms
+    data = e.get("data") or {}
+    name = name or data.get("name", data.get("tool", e.get("source", "?")))
+    ms = ms or data.get("ms", data.get("elapsed_ms", 0))
+    ok = data.get("ok", ok)
+    # v0.2 latency_ms fallback
+    if not ms:
+        ms = e.get("latency_ms", 0)
+    return name, ms, ok
 
 def snapshot(days: int = 1) -> dict:
     events = load_events(days)
-    matches = [e for e in events if e.get("type") == "match"]
-    corrections = [e for e in events if e.get("type") == "correction"]
-    tools = [e for e in events if e.get("type") == "tool"]
-    http_errors = [e for e in events if e.get("type") == "http_error"]
+    
+    matches = [e for e in events if _classify(e) in ("match", "memory_recall")]
+    corrections = [e for e in events if _classify(e) == "correction"]
+    tools = [e for e in events if _classify(e) == "tool" or e.get("layer") == "TOOL"]
+    http_errors = [e for e in events if _classify(e) == "http_error" or
+                   (e.get("layer") == "SEC" and "http" in e.get("event", ""))]
 
     total_match = len(matches) + len(corrections)
     correction_rate = len(corrections) / total_match if total_match > 0 else 0
 
-    tool_ok = [t for t in tools if (t.get("data") or {}).get("ok", True)]
+    tool_ok = [t for t in tools if _tool_name_ms(t)[2]]
     tool_success_rate = len(tool_ok) / len(tools) if tools else 1.0
 
     # p95 per tool
     by_tool = defaultdict(list)
     for e in tools:
-        data = e.get("data", {})
-        name = data.get("name", data.get("tool", e.get("source", "?")))
-        ms = data.get("ms", data.get("elapsed_ms", 0))
+        name, ms, _ = _tool_name_ms(e)
         if ms > 0:
             by_tool[name].append(ms)
 
@@ -165,13 +243,27 @@ def regression_gate(limit: int = 5) -> dict:
 
 if __name__ == "__main__":
     action = sys.argv[1] if len(sys.argv) > 1 else "snapshot"
+    
+    # 可缓存的操作
+    cacheable = ["snapshot", "score"]
+    
+    if action in cacheable:
+        cached = load_cache(action)
+        if cached:
+            print(json.dumps(cached, ensure_ascii=False, indent=2))
+            sys.exit(0)
+    
+    # 缓存未命中，执行实际操作
     if action == "snapshot":
         r = snapshot()
+        save_cache(action, r)
         print(json.dumps(r, ensure_ascii=False, indent=2))
     elif action == "trend":
         print(trend_summary())
     elif action == "score":
-        print(json.dumps(evolution_score(), ensure_ascii=False, indent=2))
+        r = evolution_score()
+        save_cache(action, r)
+        print(json.dumps(r, ensure_ascii=False, indent=2))
     elif action == "gate":
         print(json.dumps(regression_gate(), ensure_ascii=False, indent=2))
     elif action == "history":

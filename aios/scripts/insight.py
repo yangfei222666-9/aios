@@ -119,6 +119,10 @@ def generate_insight(days: int = 1, compact: bool = False) -> str:
     sec = by_layer["SEC"]
     sec_by_event = Counter(_event_name(e) for e in sec)
     critical = [e for e in sec if _event_name(e) in ("system_crash", "circuit_breaker_tripped")]
+    
+    # 区分测试事件：payload 里有 sig="sig_abc" 或 test=True 的视为测试
+    test_critical = [e for e in critical if _payload(e).get("sig") == "sig_abc" or _payload(e).get("test")]
+    real_critical = [e for e in critical if e not in test_critical]
 
     # ── 5. MEM 分析：记忆深度 ──
     mem = by_layer["MEM"]
@@ -133,18 +137,39 @@ def generate_insight(days: int = 1, compact: bool = False) -> str:
     response_latencies = [_latency(e) for e in agent_responses if _latency(e) > 0]
     avg_response_ms = round(sum(response_latencies) / len(response_latencies)) if response_latencies else 0
 
-    # ── 7. 认知死循环检测 ──
+    # ── 7. 认知死循环检测（优化：排除部署窗口）──
     # 连续 5+ 个 KERNEL 事件没有 TOOL 产出 = 可能卡住了
+    # 但排除 deploy/restart/rollout 等正常批量事件
     deadlock_warnings = 0
+    excluded_deploy_restart = 0
     consecutive_kernel = 0
+    consecutive_kernel_events = []
+    
     for e in events:
-        if _layer(e) == "KERNEL":
+        layer = _layer(e)
+        event_name = _event_name(e)
+        
+        if layer == "KERNEL":
             consecutive_kernel += 1
-        elif _layer(e) == "TOOL":
+            consecutive_kernel_events.append(e)
+        elif layer == "TOOL":
             consecutive_kernel = 0
+            consecutive_kernel_events = []
+        
         if consecutive_kernel >= 5:
-            deadlock_warnings += 1
+            # 检查是否是部署窗口：所有事件都是 deploy/restart/rollout
+            is_deploy_window = all(
+                any(k in _event_name(ev).lower() for k in ("deploy", "restart", "rollout"))
+                for ev in consecutive_kernel_events
+            )
+            
+            if is_deploy_window:
+                excluded_deploy_restart += 1
+            else:
+                deadlock_warnings += 1
+            
             consecutive_kernel = 0
+            consecutive_kernel_events = []
 
     # ══════════════════════════════════════════════
     #  生成报告
@@ -160,10 +185,14 @@ def generate_insight(days: int = 1, compact: bool = False) -> str:
         if tool_stats:
             slowest = tool_stats[0]
             lines.append(f"最慢: {slowest['name']} p95={slowest['p95']}ms")
-        if critical:
-            lines.append(f"⚠️ 致命事件: {len(critical)}")
+        if real_critical:
+            lines.append(f"⚠️ 致命事件: {len(real_critical)}")
+        if test_critical:
+            lines.append(f"⚠️ 致命事件(含测试): {len(critical)} (测试{len(test_critical)})")
         if deadlock_warnings:
             lines.append(f"⚠️ 疑似死循环: {deadlock_warnings}")
+        if excluded_deploy_restart:
+            lines.append(f"ℹ️ 已排除部署窗口: {excluded_deploy_restart}")
         lines.append(f"记忆: 读{len(mem_reads)} 写{len(mem_writes)} 盲区{len(mem_misses)}")
         if total_input_tokens + total_output_tokens > 0:
             lines.append(f"Token: 入{total_input_tokens} 出{total_output_tokens}")

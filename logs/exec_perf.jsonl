@@ -1,0 +1,6 @@
+{"ts": "2026-02-20T09:00:27.245931", "cmd": "wsl -d Ubuntu -- apt-get update", "ms": 2500, "exit_code": 0, "cached": false}
+{"ts": "2026-02-20T09:00:27.246435", "cmd": "wsl -d Ubuntu -- go install github.com/...", "ms": 5200, "exit_code": 0, "cached": false}
+{"ts": "2026-02-20T09:00:27.246435", "cmd": "Get-Content events.jsonl | Select-String exec", "ms": 1200, "exit_code": 0, "cached": false}
+{"ts": "2026-02-20T09:00:49.898477", "cmd": "wsl -d Ubuntu -- apt-get update", "ms": 2500, "exit_code": 0, "cached": false}
+{"ts": "2026-02-20T09:00:49.898477", "cmd": "wsl -d Ubuntu -- go install github.com/...", "ms": 5200, "exit_code": 0, "cached": false}
+{"ts": "2026-02-20T09:00:49.898477", "cmd": "Get-Content events.jsonl | Select-String exec", "ms": 1200, "exit_code": 0, "cached": false}

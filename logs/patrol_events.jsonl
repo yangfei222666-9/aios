@@ -1,0 +1,10 @@
+{"ts": "2026-02-20T09:16:47.269620", "level": "INFO", "category": "disk_space", "message": "C盘空间正常：50.9% 已用", "push": false}
+{"ts": "2026-02-20T09:16:47.270121", "level": "INFO", "category": "aram_data", "message": "ARAM 数据正常（0 天前更新）", "push": false}
+{"ts": "2026-02-20T09:16:47.270121", "level": "INFO", "category": "memory_files", "message": "关键文件完整", "push": false}
+{"ts": "2026-02-20T09:16:47.270620", "level": "INFO", "category": "ai_news", "message": "今日 AI 新闻已更新", "push": false}
+{"ts": "2026-02-20T09:16:47.306460", "level": "INFO", "category": "logs_size", "message": "日志大小正常：0.8 MB", "push": false}
+{"ts": "2026-02-20T09:17:04.815589", "level": "INFO", "category": "disk_space", "message": "C盘空间正常：50.9% 已用", "push": false}
+{"ts": "2026-02-20T09:17:04.816091", "level": "INFO", "category": "aram_data", "message": "ARAM 数据正常（0 天前更新）", "push": false}
+{"ts": "2026-02-20T09:17:04.816091", "level": "INFO", "category": "memory_files", "message": "关键文件完整", "push": false}
+{"ts": "2026-02-20T09:17:04.816091", "level": "INFO", "category": "ai_news", "message": "今日 AI 新闻已更新", "push": false}
+{"ts": "2026-02-20T09:17:04.816591", "level": "INFO", "category": "logs_size", "message": "日志大小正常：0.8 MB", "push": false}
