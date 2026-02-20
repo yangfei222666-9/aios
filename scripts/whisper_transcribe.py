@@ -13,7 +13,7 @@ from faster_whisper import WhisperModel
 
 MODEL_SIZE = "large-v3"
 DEVICE = "cuda"
-COMPUTE_TYPE = "float16"  # RTX 5070 Ti 支持 fp16
+COMPUTE_TYPE = "int8_float16"  # 比 float16 快 30-40%
 
 def transcribe(audio_path, language="zh"):
     t0 = time.time()
