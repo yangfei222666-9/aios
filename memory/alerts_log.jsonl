@@ -141,3 +141,17 @@
 {"ts": "2026-02-20T12:06:49.985248", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 19h ago)"}
 {"ts": "2026-02-20T12:06:49.990251", "level": "CRIT", "rule": "event_severity", "message": "事件异常: fatal事件 4 个; 疑似死循环: exec_retry_test"}
 {"ts": "2026-02-20T12:06:49.991255", "level": "INFO", "rule": "executor_bypass", "message": "执行器覆盖正常: 40 正规 / 6 旧路径"}
+{"ts": "2026-02-20T13:20:58.771496", "level": "INFO", "rule": "consecutive_failures", "message": "autolearn smoke 全部通过"}
+{"ts": "2026-02-20T13:20:58.772996", "level": "INFO", "rule": "data_drop", "message": "ARAM 数据库 172 英雄，正常"}
+{"ts": "2026-02-20T13:20:58.772996", "level": "INFO", "rule": "critical_files", "message": "关键文件完整"}
+{"ts": "2026-02-20T13:20:58.812636", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 healthy (0.400)"}
+{"ts": "2026-02-20T13:20:58.812636", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 21h ago)"}
+{"ts": "2026-02-20T13:20:58.813641", "level": "CRIT", "rule": "event_severity", "message": "事件异常: 疑似死循环: exec_retry_test"}
+{"ts": "2026-02-20T13:20:58.813641", "level": "INFO", "rule": "executor_bypass", "message": "执行器覆盖正常: 40 正规 / 0 旧路径"}
+{"ts": "2026-02-20T13:21:30.776118", "level": "INFO", "rule": "consecutive_failures", "message": "autolearn smoke 全部通过"}
+{"ts": "2026-02-20T13:21:30.778124", "level": "INFO", "rule": "data_drop", "message": "ARAM 数据库 172 英雄，正常"}
+{"ts": "2026-02-20T13:21:30.778625", "level": "INFO", "rule": "critical_files", "message": "关键文件完整"}
+{"ts": "2026-02-20T13:21:30.816253", "level": "INFO", "rule": "aios_score", "message": "AIOS 评分 healthy (0.400)"}
+{"ts": "2026-02-20T13:21:30.816753", "level": "INFO", "rule": "backup", "message": "备份正常: autolearn_backup_20260219_160934.zip (0.04 MB, 21h ago)"}
+{"ts": "2026-02-20T13:21:30.825338", "level": "INFO", "rule": "event_severity", "message": "事件严重度正常"}
+{"ts": "2026-02-20T13:21:30.825837", "level": "INFO", "rule": "executor_bypass", "message": "执行器覆盖正常: 6 正规 / 0 旧路径"}

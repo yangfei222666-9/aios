@@ -1,26 +1,28 @@
 {
-  "snapshot": {
-    "cached_at": 1771560012.0059829,
+  "score": {
+    "cached_at": 1771564898.6750534,
     "data": {
-      "ts": "2026-02-20T12:00:12",
-      "period_days": 1,
-      "correction_rate": 0.0,
-      "tool_success_rate": 1.0,
-      "tool_p95_ms": {
-        "exec": 300
+      "score": 0.4,
+      "grade": "healthy",
+      "breakdown": {
+        "tool_success_rate": {
+          "value": 1.0,
+          "weight": 0.4
+        },
+        "correction_rate": {
+          "value": 0.0,
+          "weight": -0.2
+        },
+        "http_502_rate": {
+          "value": 0.0,
+          "weight": -0.2
+        },
+        "p95_slow_ratio": {
+          "value": 0.0,
+          "weight": -0.2
+        }
       },
-      "http_error_count": 9,
-      "http_502_rate": 0.0,
-      "http_404_rate": 0.0,
-      "total_events": 48,
-      "severity_counts": {
-        "CRIT": 7,
-        "WARN": 0,
-        "INFO": 39,
-        "ERR": 2
-      },
-      "evolution_score": 0.4,
-      "grade": "healthy"
+      "snapshot_ts": "2026-02-20T12:00:12"
     }
   }
 }

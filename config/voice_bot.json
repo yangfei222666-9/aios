@@ -1,0 +1,8 @@
+{
+  "voice_bot_token": "8297495903:AAFwnRpSiBCo946x_NzK7kA10ToniDOium8",
+  "allowed_user_id": 7986452220,
+  "whisper_model": "large-v3",
+  "whisper_device": "cuda",
+  "whisper_compute": "int8_float16",
+  "command_dedup_window": 60
+}

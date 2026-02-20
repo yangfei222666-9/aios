@@ -19,9 +19,16 @@ from telegram import Update
 from telegram.ext import Application, MessageHandler, CommandHandler, filters, ContextTypes
 
 # 配置
-VOICE_BOT_TOKEN = '8297495903:AAFwnRpSiBCo946x_NzK7kA10ToniDOium8'
-ALLOWED_USER_ID = 7986452220  # 珊瑚海的 Telegram ID
-COMMAND_DEDUP_WINDOW = 60
+CONFIG_FILE = Path(__file__).resolve().parent.parent / 'config' / 'voice_bot.json'
+
+def _load_config():
+    with CONFIG_FILE.open('r', encoding='utf-8') as f:
+        return json.load(f)
+
+_cfg = _load_config()
+VOICE_BOT_TOKEN = _cfg['voice_bot_token']
+ALLOWED_USER_ID = _cfg['allowed_user_id']
+COMMAND_DEDUP_WINDOW = _cfg.get('command_dedup_window', 60)
 
 # Whisper 模型
 _model = None
