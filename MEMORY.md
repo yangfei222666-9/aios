@@ -6,7 +6,8 @@
 - 系统：Windows 11 Pro，显示器 2560x1440 (ASUS XG27UCG)
 - Python 3.12 装在 C:\Program Files\Python312\
 - PyTorch 2.10.0+cu128 (CUDA 12.8)，RTX 5070 Ti GPU 加速已启用
-- Whisper medium 模型，GPU 模式，占用 ~2.9GB 显存
+- Whisper large-v3 模型 + faster-whisper，GPU fp16 模式
+- Git 2.53.0 已安装
 - 没有 OpenAI API Key
 - 喜欢叫我"小九"
 - 玩国服英雄联盟（海克斯大乱斗模式），通过 WeGame 启动
