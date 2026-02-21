@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\A\\Desktop",
+        "C:\\Users\\A\\Downloads",
+        "C:\\Users\\A\\Documents",
+        "C:\\Users\\A\\.openclaw\\workspace"
+      ]
+    }
+  },
+  "imports": []
+}

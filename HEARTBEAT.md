@@ -25,6 +25,13 @@
 - 犯了新错就追加到 lessons.json
 - 被用户纠正就追加到 corrections.json，并更新 user_preferences
 
+### 每周：技能探索（主动学习）
+- 搜索 ClawdHub 不同类别的新技能（轮换关键词：automation、monitor、finance、news、utility、dev tools 等）
+- 评估是否对珊瑚海有用（结合已知偏好：游戏、AI、系统管理、资讯）
+- 有价值的直接安装并简单测试
+- 记录到 memory/YYYY-MM-DD.md（学了什么、装了什么、能干什么）
+- 不打扰珊瑚海，除非发现特别好用的才主动推荐
+
 ### 执行规则
 - 深夜(23:00-08:00)不执行，等下次心跳
 - 每次只执行1个到期任务，避免耗时过长

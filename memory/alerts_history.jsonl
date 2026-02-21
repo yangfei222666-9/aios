@@ -4,3 +4,4 @@
 {"ts": "2026-02-19T18:32:08.874321", "alert_id": "12b047fb", "fingerprint": "test_rule:default:2026-02-19", "rule_id": "test_rule", "severity": "WARN", "from": "OPEN", "to": "RESOLVED", "reason": "连续恢复 2 次，自动关闭"}
 {"ts": "2026-02-20T12:00:04.821069", "alert_id": "b034bbe4", "fingerprint": "event_severity:default:2026-02-20", "rule_id": "event_severity", "severity": "CRIT", "from": null, "to": "OPEN", "reason": "新告警: 事件异常: fatal事件 4 个"}
 {"ts": "2026-02-20T13:21:11.643946", "alert_id": "b034bbe4", "fingerprint": "event_severity:default:2026-02-20", "rule_id": "event_severity", "severity": "CRIT", "from": "OPEN", "to": "RESOLVED", "reason": "fatal事件已修复，测试数据导致的误报"}
+{"ts": "2026-02-21T16:30:05.073906", "alert_id": "654d8d30", "fingerprint": "backup:default:2026-02-21", "rule_id": "backup", "severity": "WARN", "from": null, "to": "OPEN", "reason": "新告警: 最近备份已超过 48h (autolearn_backup_20260219_160934.zip)"}

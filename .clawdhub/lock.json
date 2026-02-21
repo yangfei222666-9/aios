@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "baidu-search": {
+      "version": "1.1.0",
+      "installedAt": 1771671962382
+    },
+    "ripgrep": {
+      "version": "1.0.0",
+      "installedAt": 1771672262192
+    },
+    "daily-briefing": {
+      "version": "1.0.5",
+      "installedAt": 1771672553099
+    }
+  }
+}

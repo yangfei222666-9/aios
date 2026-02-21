@@ -24,5 +24,27 @@
       },
       "snapshot_ts": "2026-02-20T12:00:12"
     }
+  },
+  "snapshot": {
+    "cached_at": 1771658766.39647,
+    "data": {
+      "ts": "2026-02-21T15:26:06",
+      "period_days": 1,
+      "correction_rate": 0,
+      "tool_success_rate": 1.0,
+      "tool_p95_ms": {},
+      "http_error_count": 0,
+      "http_502_rate": 0.0,
+      "http_404_rate": 0.0,
+      "total_events": 2,
+      "severity_counts": {
+        "CRIT": 0,
+        "WARN": 0,
+        "INFO": 2,
+        "ERR": 0
+      },
+      "evolution_score": 0.4,
+      "grade": "healthy"
+    }
   }
 }

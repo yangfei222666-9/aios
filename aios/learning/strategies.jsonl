@@ -4,3 +4,5 @@
 {"ts": "2026-02-20T09:15:17", "date": "2026-02-20", "topic": "daily_strategy", "rule": "slow_tool", "priority": "medium", "content": "exec p95=6640ms 过慢。今天尽量减少 exec 调用，优先用本地数据/缓存替代。", "evidence": {"tool": "exec", "p95_ms": 6640, "calls": 65, "median_ms": 4320}}
 {"ts": "2026-02-20T09:15:17", "date": "2026-02-20", "topic": "daily_strategy", "rule": "critical_sec", "priority": "critical", "content": "昨天有 1 个致命安全事件。今天第一优先级：排查并修复这些崩溃，其他任务延后。", "evidence": {"critical_count": 1, "events": ["circuit_breaker_tripped"]}}
 {"ts": "2026-02-20T09:15:17", "date": "2026-02-20", "topic": "daily_strategy", "rule": "high_correction_rate", "priority": "high", "content": "纠正率 33% 偏高。今天回答前多检查一遍，不确定的事情先查证再说。", "evidence": {"correction_rate": 0.33, "corrections": 1, "total": 3}}
+{"ts": "2026-02-21T09:15:07", "date": "2026-02-21", "topic": "daily_strategy", "rule": "all_clear", "priority": "low", "content": "昨天表现良好，各项指标正常。保持节奏，继续进化。", "evidence": {}}
+{"ts": "2026-02-21T09:39:32", "date": "2026-02-21", "topic": "daily_strategy", "rule": "all_clear", "priority": "low", "content": "昨天表现良好，各项指标正常。保持节奏，继续进化。", "evidence": {}}

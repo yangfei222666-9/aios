@@ -1,0 +1,415 @@
+{
+  "generated_at": "2026-02-21T22:15:26.629776",
+  "overview": {
+    "evolution_score": 0.4,
+    "grade": "healthy",
+    "tsr": 1.0,
+    "correction_rate": 0,
+    "total_events_24h": 2,
+    "severity": {
+      "CRIT": 0,
+      "WARN": 0,
+      "INFO": 2,
+      "ERR": 0
+    }
+  },
+  "timeline": [
+    {
+      "ts": "2026-02-19T09:07:41",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 0
+    },
+    {
+      "ts": "2026-02-19T10:38:55",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 195
+    },
+    {
+      "ts": "2026-02-19T18:25:00",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 242
+    },
+    {
+      "ts": "2026-02-19T18:25:06",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 242
+    },
+    {
+      "ts": "2026-02-19T18:25:13",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 242
+    },
+    {
+      "ts": "2026-02-19T20:20:58",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 242
+    },
+    {
+      "ts": "2026-02-20T07:02:15",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 242
+    },
+    {
+      "ts": "2026-02-20T08:31:29",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 242
+    },
+    {
+      "ts": "2026-02-20T08:31:52",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 242
+    },
+    {
+      "ts": "2026-02-20T08:46:43",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 242
+    },
+    {
+      "ts": "2026-02-20T08:52:02",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 242
+    },
+    {
+      "ts": "2026-02-20T09:22:26",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 243
+    },
+    {
+      "ts": "2026-02-20T09:32:26",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 0.9602,
+      "cr": 0.1111,
+      "events": 243
+    },
+    {
+      "ts": "2026-02-20T09:34:55",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 48
+    },
+    {
+      "ts": "2026-02-20T09:35:25",
+      "score": 0,
+      "grade": "unknown",
+      "tsr": 1.0,
+      "cr": 0.0,
+      "events": 48
+    },
+    {
+      "ts": "2026-02-20T12:00:12",
+      "score": 0.4,
+      "grade": "healthy",
+      "tsr": 1.0,
+      "cr": 0.0,
+      "events": 48
+    },
+    {
+      "ts": "2026-02-20T15:30:49",
+      "score": 0.4,
+      "grade": "healthy",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 4
+    },
+    {
+      "ts": "2026-02-20T21:22:29",
+      "score": 0.4,
+      "grade": "healthy",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 4
+    },
+    {
+      "ts": "2026-02-21T03:11:24",
+      "score": 0.4,
+      "grade": "healthy",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 4
+    },
+    {
+      "ts": "2026-02-21T08:30:19",
+      "score": 0.4,
+      "grade": "healthy",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 4
+    },
+    {
+      "ts": "2026-02-21T09:20:09",
+      "score": 0.4,
+      "grade": "healthy",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 4
+    },
+    {
+      "ts": "2026-02-21T14:56:27",
+      "score": 0.4,
+      "grade": "healthy",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 2
+    },
+    {
+      "ts": "2026-02-21T15:26:06",
+      "score": 0.4,
+      "grade": "healthy",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 2
+    }
+  ],
+  "events": {
+    "by_layer": {
+      "KERNEL": 14,
+      "COMMS": 8,
+      "TOOL": 10,
+      "MEM": 12,
+      "SEC": 9,
+      "UNKNOWN": 250
+    },
+    "by_severity": {
+      "INFO": 303
+    },
+    "by_status": {
+      "ok": 44,
+      "err": 9,
+      "unknown": 250
+    },
+    "daily": {
+      "2026-02-19": 47,
+      "2026-02-20": 197,
+      "2026-02-21": 59
+    },
+    "recent": [
+      {
+        "ts": "2026-02-21T15:26:02.056590",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T15:26:02.056590",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T16:30:05.087476",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T16:30:05.087980",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T16:30:05.088477",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T16:30:05.088477",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T16:30:05.088477",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T16:30:05.483232",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T17:30:05.513316",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T17:30:05.513816",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T17:30:05.514318",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T17:30:05.908777",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T18:30:06.466450",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T18:30:06.466949",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T18:30:06.467450",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T18:30:06.854084",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T19:48:25.383837",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T19:48:25.384335",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T19:48:25.384335",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      },
+      {
+        "ts": "2026-02-21T19:48:25.816515",
+        "layer": null,
+        "event": null,
+        "status": null,
+        "severity": null
+      }
+    ]
+  },
+  "sensors": {
+    "file_watches": 104,
+    "running_procs": 3,
+    "cooldowns_active": 35,
+    "network_probes": 3
+  },
+  "execution": {
+    "terminal_states": {
+      "SUCCESS": 5,
+      "NOOP_DEDUP": 3,
+      "FAILED_NON_RETRYABLE": 3,
+      "NOOP_ALREADY_RUNNING": 5,
+      "FAILED_RETRYABLE": 4
+    },
+    "total": 20
+  },
+  "strategies": [
+    {
+      "date": "2026-02-20",
+      "rule": "slow_tool",
+      "priority": "medium",
+      "content": "exec p95=6640ms 过慢。今天尽量减少 exec 调用，优先用本地数据/缓存替代。"
+    },
+    {
+      "date": "2026-02-20",
+      "rule": "critical_sec",
+      "priority": "critical",
+      "content": "昨天有 1 个致命安全事件。今天第一优先级：排查并修复这些崩溃，其他任务延后。"
+    },
+    {
+      "date": "2026-02-20",
+      "rule": "high_correction_rate",
+      "priority": "high",
+      "content": "纠正率 33% 偏高。今天回答前多检查一遍，不确定的事情先查证再说。"
+    },
+    {
+      "date": "2026-02-21",
+      "rule": "all_clear",
+      "priority": "low",
+      "content": "昨天表现良好，各项指标正常。保持节奏，继续进化。"
+    },
+    {
+      "date": "2026-02-21",
+      "rule": "all_clear",
+      "priority": "low",
+      "content": "昨天表现良好，各项指标正常。保持节奏，继续进化。"
+    }
+  ]
+}
