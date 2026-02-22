@@ -1,12 +1,14 @@
 {
   "last_alerts": {
     "critical_files": "2026-02-19T17:27:56.702537",
-    "event_severity": "2026-02-20T12:00:04.821569",
-    "sla_b034bbe4": "2026-02-20T13:20:58.819166"
+    "event_severity": "2026-02-22T10:34:13.278424",
+    "sla_b034bbe4": "2026-02-20T13:20:58.819166",
+    "sla_42cf11a5": "2026-02-22T11:53:01.462216"
   },
   "counters": {
     "critical_files": 1,
-    "event_severity": 1,
-    "sla_b034bbe4": 1
+    "event_severity": 2,
+    "sla_b034bbe4": 1,
+    "sla_42cf11a5": 1
   }
 }

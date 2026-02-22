@@ -1,0 +1,5 @@
+{"ts": "2026-02-22T10:01:15", "epoch": 1771725675, "input_tokens": 1000, "output_tokens": 500, "total_tokens": 1500, "model": "claude-sonnet-4", "task": "test"}
+{"ts": "2026-02-22T10:02:19", "epoch": 1771725739, "input_tokens": 2000, "output_tokens": 1000, "total_tokens": 3000, "model": "claude-opus-4", "task": "complex_task"}
+{"ts": "2026-02-22T10:02:19", "epoch": 1771725739, "input_tokens": 500, "output_tokens": 300, "total_tokens": 800, "model": "claude-sonnet-4", "task": "simple_query"}
+{"ts": "2026-02-22T10:02:19", "epoch": 1771725739, "input_tokens": 1500, "output_tokens": 800, "total_tokens": 2300, "model": "claude-haiku-4", "task": "batch_processing"}
+{"ts": "2026-02-22T10:03:05", "epoch": 1771725785, "input_tokens": 1000, "output_tokens": 500, "total_tokens": 1500, "model": "claude-sonnet-4", "task": "test_task"}

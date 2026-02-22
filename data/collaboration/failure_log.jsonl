@@ -1,0 +1,16 @@
+{"ts": 1771729441.6166196, "plan_id": "test_degraded", "task_id": "t3", "failure_type": "gateway_502", "error": "502 Bad Gateway error", "retry_count": 1}
+{"ts": 1771729441.6166196, "plan_id": "test_degraded", "task_id": "t3", "failure_type": "gateway_502", "error": "502 Bad Gateway error", "retry_count": 2}
+{"ts": 1771729441.617622, "plan_id": "test_degraded", "task_id": "t3", "failure_type": "gateway_502", "error": "502 Bad Gateway error", "retry_count": 3}
+{"ts": 1771729441.617622, "plan_id": "test_degraded", "task_id": "t3", "failure_type": "gateway_502", "error": "502 Bad Gateway error", "retry_count": 4}
+{"ts": 1771729441.619634, "plan_id": "test_abort", "task_id": "t2", "failure_type": "timeout", "error": "timeout error", "retry_count": 1}
+{"ts": 1771729441.619634, "plan_id": "test_abort", "task_id": "t2", "failure_type": "timeout", "error": "timeout error", "retry_count": 2}
+{"ts": 1771729441.619634, "plan_id": "test_abort", "task_id": "t2", "failure_type": "timeout", "error": "timeout error", "retry_count": 3}
+{"ts": 1771729441.6206446, "plan_id": "test_abort", "task_id": "t2", "failure_type": "timeout", "error": "timeout error", "retry_count": 4}
+{"ts": 1771729441.6216524, "plan_id": "test_retry", "task_id": "t1", "failure_type": "gateway_502", "error": "502 Bad Gateway", "retry_count": 1}
+{"ts": 1771729441.622652, "plan_id": "test_retry", "task_id": "t1", "failure_type": "gateway_502", "error": "502 Bad Gateway", "retry_count": 2}
+{"ts": 1771729441.6231527, "plan_id": "test_retry", "task_id": "t1", "failure_type": "gateway_502", "error": "502 Bad Gateway", "retry_count": 3}
+{"ts": 1771729441.6236527, "plan_id": "test_retry", "task_id": "t1", "failure_type": "gateway_502", "error": "502 Bad Gateway", "retry_count": 4}
+{"ts": 1771729441.6251526, "plan_id": "test_report", "task_id": "t2", "failure_type": "gateway_502", "error": "502 Bad Gateway from API", "retry_count": 1}
+{"ts": 1771729441.6251526, "plan_id": "test_report", "task_id": "t2", "failure_type": "gateway_502", "error": "502 Bad Gateway from API", "retry_count": 2}
+{"ts": 1771729441.6251526, "plan_id": "test_report", "task_id": "t2", "failure_type": "gateway_502", "error": "502 Bad Gateway from API", "retry_count": 3}
+{"ts": 1771729441.626156, "plan_id": "test_report", "task_id": "t2", "failure_type": "gateway_502", "error": "502 Bad Gateway from API", "retry_count": 4}

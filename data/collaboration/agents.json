@@ -1,0 +1,44 @@
+[
+  {
+    "agent_id": "agent_coder",
+    "name": "agent_coder",
+    "capabilities": [
+      "code",
+      "debug",
+      "test"
+    ],
+    "status": "idle",
+    "load": 0.0,
+    "max_concurrent": 1,
+    "last_heartbeat": 1771728816.947583,
+    "metadata": {}
+  },
+  {
+    "agent_id": "agent_reviewer",
+    "name": "agent_reviewer",
+    "capabilities": [
+      "review",
+      "validate",
+      "audit"
+    ],
+    "status": "idle",
+    "load": 0.0,
+    "max_concurrent": 1,
+    "last_heartbeat": 1771728817.1497233,
+    "metadata": {}
+  },
+  {
+    "agent_id": "agent_researcher",
+    "name": "agent_researcher",
+    "capabilities": [
+      "research",
+      "search",
+      "analyze"
+    ],
+    "status": "idle",
+    "load": 0.0,
+    "max_concurrent": 1,
+    "last_heartbeat": 1771728817.048576,
+    "metadata": {}
+  }
+]

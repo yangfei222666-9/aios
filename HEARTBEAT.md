@@ -25,6 +25,16 @@
 - 犯了新错就追加到 lessons.json
 - 被用户纠正就追加到 corrections.json，并更新 user_preferences
 
+### 每周：周趋势报告
+- 运行 `& "C:\Program Files\Python312\python.exe" -m aios.scripts.trend_weekly --save --format telegram`
+- 检查是否有"发散中"的错误类型，有则提醒珊瑚海
+- 上次执行时间记录在 selflearn-state.json 的 last_trend_weekly
+
+### 每3天：记忆盲区扫描
+- 运行 `& "C:\Program Files\Python312\python.exe" -m aios.scripts.memory_gaps --format telegram`
+- 如果输出包含"盲区超阈值"，主动提醒珊瑚海并给出修复建议
+- 上次执行时间记录在 selflearn-state.json 的 last_memory_gaps
+
 ### 每周：技能探索（主动学习）
 - 搜索 ClawdHub 不同类别的新技能（轮换关键词：automation、monitor、finance、news、utility、dev tools 等）
 - 评估是否对珊瑚海有用（结合已知偏好：游戏、AI、系统管理、资讯）
@@ -37,8 +47,10 @@
 - 每次只执行1个到期任务，避免耗时过长
 - 执行后更新 memory/selflearn-state.json 的时间戳
 
-### 每次心跳：异常检查（轻量）
-- 运行 `& "C:\Program Files\Python312\python.exe" C:\Users\A\.openclaw\workspace\scripts\alerts.py`
-- 如果输出包含 CRIT 且有"需要立即推送"，主动告知珊瑚海
-- WARN 不推送，自动进周报
-- INFO 静默，仅落盘
+### 每次心跳：AIOS Pipeline（替代原 alerts.py）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\pipeline.py run`
+- Pipeline 自动执行：sensors → alerts → reactor → verifier → convergence → feedback → evolution
+- 如果 evolution grade 是 critical，主动告知珊瑚海
+- 如果有 high_priority 建议，简要提醒
+- 如果 reactor 有 pending_confirm，告知珊瑚海确认
+- 其他情况静默（HEARTBEAT_OK）

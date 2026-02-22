@@ -1,0 +1,9 @@
+{"ts": "2026-02-22T12:03:48.628536", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-22T12:03:48.628536", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-22T12:16:53.519633", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-22T12:16:53.519633", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-22T12:17:26.312564", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-22T12:17:26.313066", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-22T12:26:30.807553", "reaction_id": "9b5e10a5", "alert_id": "654d8d30", "playbook_id": "backup_expired", "verify_method": "command_check", "passed": false, "detail": "FAIL"}
+{"ts": "2026-02-22T12:26:35.946975", "reaction_id": "2e043f2c", "alert_id": "test1", "playbook_id": "backup_expired", "verify_method": "command_check", "passed": false, "detail": "FAIL"}
+{"ts": "2026-02-22T12:26:41.072550", "reaction_id": "d9b4b984", "alert_id": "654d8d30", "playbook_id": "backup_expired", "verify_method": "command_check", "passed": false, "detail": "FAIL"}

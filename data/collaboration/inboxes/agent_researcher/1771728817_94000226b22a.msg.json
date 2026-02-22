@@ -1,0 +1,1 @@
+{"msg_id": "94000226b22a", "msg_type": "request", "sender": "orchestrator", "receiver": "agent_researcher", "payload": {"action": "execute_task", "task_id": "bb49da06d5_1", "description": "搜索业界最佳实践作为对比基准", "delegation_id": "bb49da06d5"}, "timestamp": 1771728816.8460543, "reply_to": "", "ttl": 300}

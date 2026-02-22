@@ -1,10 +1,12 @@
 """AIOS Dashboard - 数据生成器
 读取 AIOS 各数据源，输出 dashboard_data.json 供前端渲染
 """
-import json, os, sys
+import json, os, sys, io
 from datetime import datetime, timedelta
 from pathlib import Path
 from collections import Counter
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 BASE = Path(r"C:\Users\A\.openclaw\workspace\aios")
 EVENTS_DIR = BASE / "events"
@@ -49,19 +51,40 @@ def get_events(days=7):
     """Merge events from events.jsonl + queue/*.jsonl within N days."""
     cutoff = (datetime.now() - timedelta(days=days)).isoformat()
     all_events = []
-    # Main events
+    # Main events (v0.2 格式，已有 layer)
     for e in load_jsonl(EVENTS_DIR / "events.jsonl"):
         e["ts"] = normalize_ts(e.get("ts"))
         if e["ts"] >= cutoff:
             all_events.append(e)
-    # Queue events
+    # Queue events (EventBus 格式，需要映射)
     queue_dir = EVENTS_DIR / "queue"
     if queue_dir.exists():
         for f in sorted(queue_dir.glob("*.jsonl")):
             for e in load_jsonl(f):
                 e["ts"] = normalize_ts(e.get("ts"))
-                if e["ts"] >= cutoff:
-                    all_events.append(e)
+                if e["ts"] < cutoff:
+                    continue
+                # 映射 EventBus topic → AIOS layer
+                topic = e.get("topic", "")
+                source = e.get("source", "")
+                if "layer" not in e:
+                    if "sensor.system" in topic or "sensor.network" in topic:
+                        e["layer"] = "KERNEL"
+                    elif "sensor.file" in topic:
+                        e["layer"] = "MEM"
+                    elif "sensor.process" in topic:
+                        e["layer"] = "KERNEL"
+                    elif "dispatch" in topic or "action" in topic:
+                        e["layer"] = "TOOL"
+                    else:
+                        e["layer"] = "KERNEL"  # 感知事件默认归 KERNEL
+                if "event" not in e:
+                    e["event"] = topic or source or "queue_event"
+                if "status" not in e:
+                    e["status"] = "ok"
+                if "severity" not in e:
+                    e["severity"] = "INFO"
+                all_events.append(e)
     return sorted(all_events, key=lambda x: x.get("ts", ""))
 
 
@@ -80,6 +103,87 @@ def get_strategies():
 
 def get_execution_log():
     return load_jsonl(EVENTS_DIR / "execution_log.jsonl")
+
+
+def get_reactor_data():
+    """Reactor v0.6 数据"""
+    DATA = BASE / "data"
+    reactions = load_jsonl(DATA / "reactions.jsonl")
+    verify = load_jsonl(DATA / "verify_log.jsonl")
+    pb_stats = load_json(DATA / "playbook_stats.json", {})
+    fuse = load_json(DATA / "reactor_fuse.json", {"tripped": False, "failures": []})
+
+    total = len(reactions)
+    success = sum(1 for r in reactions if r.get("status") == "success")
+    pending = sum(1 for r in reactions if r.get("status") == "pending_confirm")
+    failed = total - success - pending
+
+    v_total = len(verify)
+    v_passed = sum(1 for v in verify if v.get("passed"))
+
+    playbooks = []
+    for pid, s in pb_stats.items():
+        t = s.get("total", 0)
+        rate = s.get("success", 0) / t * 100 if t > 0 else 0
+        playbooks.append({"id": pid, "total": t, "success": s.get("success", 0), "fail": s.get("fail", 0), "rate": round(rate, 0)})
+
+    return {
+        "total": total,
+        "success": success,
+        "pending": pending,
+        "failed": failed,
+        "auto_exec_rate": round(success / max(success + pending, 1) * 100, 0),
+        "verify_total": v_total,
+        "verify_passed": v_passed,
+        "verify_rate": round(v_passed / max(v_total, 1) * 100, 0),
+        "fuse_tripped": fuse.get("tripped", False),
+        "fuse_failures": len(fuse.get("failures", [])),
+        "playbooks": playbooks,
+        "recent": [
+            {"ts": (r.get("ts") or "")[:16], "pb": r.get("playbook_id", "?"), "status": r.get("status", "?"), "decision_id": (r.get("decision_id") or "")[:8]}
+            for r in reactions[-8:]
+        ]
+    }
+
+
+def get_evolution_v2_data():
+    """Evolution v2 数据"""
+    DATA = BASE / "data"
+    history = load_jsonl(DATA / "evolution_history.jsonl")
+    if not history:
+        return {"v2_score": 0, "grade": "unknown", "base": 0, "reactor": 0, "detail": {}, "trend": []}
+    latest = history[-1]
+    trend = [
+        {"ts": (h.get("ts") or "")[:16], "v2": h.get("evolution_v2", 0), "base": h.get("base_score", 0), "reactor": h.get("reactor_score", 0), "grade": h.get("grade", "?")}
+        for h in history[-20:]
+    ]
+    return {
+        "v2_score": latest.get("evolution_v2", 0),
+        "grade": latest.get("grade", "unknown"),
+        "base": latest.get("base_score", 0),
+        "reactor": latest.get("reactor_score", 0),
+        "detail": latest.get("detail", {}),
+        "trend": trend
+    }
+
+
+def get_pipeline_data():
+    """Pipeline 运行历史"""
+    DATA = BASE / "data"
+    runs = load_jsonl(DATA / "pipeline_runs.jsonl")
+    recent = runs[-10:] if runs else []
+    return {
+        "total_runs": len(runs),
+        "recent": [
+            {
+                "ts": (r.get("ts") or "")[:16],
+                "ms": r.get("total_ms", 0),
+                "errors": len(r.get("errors", [])),
+                "grade": r.get("stages", {}).get("evolution", {}).get("result", {}).get("grade", "?")
+            }
+            for r in recent
+        ]
+    }
 
 
 def build_dashboard():
@@ -143,6 +247,70 @@ def build_dashboard():
         "network_probes": len(sensor.get("network_state", {})),
     }
 
+    # 7. Tasks (tracker)
+    tasks_file = BASE / "data" / "tasks.jsonl"
+    tasks = load_jsonl(tasks_file) if tasks_file.exists() else []
+    task_summary = {"total": 0, "todo": 0, "in_progress": 0, "blocked": 0, "done": 0, "overdue": 0, "recent": []}
+    now_iso = now.isoformat()
+    for t in tasks:
+        task_summary["total"] += 1
+        s = t.get("status", "TODO").upper()
+        if s == "TODO":
+            task_summary["todo"] += 1
+        elif s == "IN_PROGRESS":
+            task_summary["in_progress"] += 1
+        elif s == "BLOCKED":
+            task_summary["blocked"] += 1
+        elif s == "DONE":
+            task_summary["done"] += 1
+        dl = t.get("deadline", "")
+        if dl and dl < now_iso and s not in ("DONE",):
+            task_summary["overdue"] += 1
+    task_summary["recent"] = [
+        {"id": t.get("id", "")[:8], "title": t.get("title", "")[:40], "status": t.get("status", ""), "priority": t.get("priority", ""), "deadline": (t.get("deadline") or "")[:10]}
+        for t in tasks if t.get("status", "").upper() != "DONE"
+    ][-8:]
+
+    # 8. Budget
+    budget_config_file = BASE / "data" / "budget_config.json"
+    token_usage_file = BASE / "data" / "token_usage.jsonl"
+    heartbeat_file = BASE / "data" / "heartbeat_time.jsonl"
+    budget_config = load_json(budget_config_file, {"daily_token_budget": 150000, "weekly_token_budget": 800000})
+    token_records = load_jsonl(token_usage_file) if token_usage_file.exists() else []
+    heartbeat_records = load_jsonl(heartbeat_file) if heartbeat_file.exists() else []
+    today_str = now.strftime("%Y-%m-%d")
+    daily_tokens = sum(r.get("input_tokens", 0) + r.get("output_tokens", 0) for r in token_records if (r.get("ts") or "").startswith(today_str))
+    weekly_tokens = sum(r.get("input_tokens", 0) + r.get("output_tokens", 0) for r in token_records)
+    hb_times = [r.get("seconds", 0) for r in heartbeat_records[-20:]]
+    budget_summary = {
+        "daily_used": daily_tokens,
+        "daily_budget": budget_config.get("daily_token_budget", 150000),
+        "daily_pct": round(daily_tokens / max(budget_config.get("daily_token_budget", 150000), 1) * 100, 1),
+        "weekly_used": weekly_tokens,
+        "weekly_budget": budget_config.get("weekly_token_budget", 800000),
+        "weekly_pct": round(weekly_tokens / max(budget_config.get("weekly_token_budget", 800000), 1) * 100, 1),
+        "heartbeat_avg": round(sum(hb_times) / len(hb_times), 1) if hb_times else 0,
+        "heartbeat_count": len(heartbeat_records),
+    }
+
+    # 9. Decisions
+    decisions_file = BASE / "data" / "decisions.jsonl"
+    decisions = load_jsonl(decisions_file) if decisions_file.exists() else []
+    dec_outcomes = Counter(d.get("outcome", "pending") for d in decisions)
+    dec_total = len(decisions)
+    dec_success = dec_outcomes.get("success", 0)
+    dec_confs = [d.get("confidence", 0) for d in decisions if d.get("confidence")]
+    decision_summary = {
+        "total": dec_total,
+        "success_rate": round(dec_success / max(dec_total, 1) * 100, 1),
+        "avg_confidence": round(sum(dec_confs) / len(dec_confs) * 100, 1) if dec_confs else 0,
+        "outcomes": dict(dec_outcomes),
+        "recent": [
+            {"ts": (d.get("ts") or "")[:16], "context": (d.get("context") or "")[:30], "chosen": (d.get("chosen") or "")[:30], "confidence": d.get("confidence", 0), "outcome": d.get("outcome", "pending")}
+            for d in decisions[-5:]
+        ],
+    }
+
     dashboard = {
         "generated_at": now.isoformat(),
         "overview": {
@@ -170,6 +338,12 @@ def build_dashboard():
             {"date": s.get("date"), "rule": s.get("rule"), "priority": s.get("priority"), "content": s.get("content")}
             for s in recent_strategies
         ],
+        "tasks": task_summary,
+        "budget": budget_summary,
+        "decisions": decision_summary,
+        "reactor": get_reactor_data(),
+        "evolution_v2": get_evolution_v2_data(),
+        "pipeline": get_pipeline_data(),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

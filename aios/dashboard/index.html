@@ -177,17 +177,137 @@ footer a:hover{text-decoration:underline}
   <div class="card"><h2><span class="icon">📈</span> 进化趋势</h2><div class="tlw"><canvas id="cv"></canvas></div></div>
 </div>
 
+<!-- v0.6/v0.7 Reactor + Evolution v2 -->
+<div class="grid g3">
+  <div class="card">
+    <h2><span class="icon">⚡</span> Reactor 自动响应</h2>
+    <div class="sgrid">
+      <div class="sbox"><div class="icon">🎯</div><div class="n" id="rx-exec">—</div><div class="l">自动执行率</div></div>
+      <div class="sbox"><div class="icon">✅</div><div class="n" id="rx-verify">—</div><div class="l">验证通过率</div></div>
+      <div class="sbox"><div class="icon">📊</div><div class="n" id="rx-total">—</div><div class="l">总响应</div></div>
+      <div class="sbox" id="rx-fuse-box"><div class="icon">🔒</div><div class="n" id="rx-fuse">—</div><div class="l">熔断状态</div></div>
+    </div>
+    <div class="evl" id="rx-history" style="max-height:160px;margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <h2><span class="icon">🧬</span> Evolution v2</h2>
+    <div class="num-block" id="evo2-block"><div class="n" id="evo2-score">—</div><div class="l" id="evo2-grade">—</div></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <div style="flex:1;text-align:center"><div style="font-size:.75em;color:#888">基础分</div><div style="font-size:1.4em;font-weight:800;color:#c4b5fd" id="evo2-base">—</div></div>
+      <div style="flex:1;text-align:center"><div style="font-size:.75em;color:#888">Reactor分</div><div style="font-size:1.4em;font-weight:800;color:#22c55e" id="evo2-reactor">—</div></div>
+    </div>
+    <div style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;font-size:.78em;color:#888;margin-bottom:4px"><span>自动修复率</span><span id="evo2-fix">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.78em;color:#888;margin-bottom:4px"><span>误报率</span><span id="evo2-fp">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.78em;color:#888"><span>自动关闭率</span><span id="evo2-close">—</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="icon">🔄</span> Pipeline 运行</h2>
+    <div class="sgrid">
+      <div class="sbox"><div class="icon">🏃</div><div class="n" id="pl-runs">—</div><div class="l">总运行</div></div>
+      <div class="sbox"><div class="icon">⏱️</div><div class="n" id="pl-last-ms">—</div><div class="l">最近耗时(ms)</div></div>
+    </div>
+    <div class="evl" id="pl-history" style="max-height:160px;margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- Playbook 成功率 -->
+<div class="grid g3">
+  <div class="card" style="grid-column:span 3">
+    <h2><span class="icon">📋</span> 剧本成功率</h2>
+    <div class="bars" id="pb-bars"></div>
+  </div>
+</div>
+
 <div class="grid g2">
   <div class="card"><h2><span class="icon">🔄</span> 最近事件流</h2><div class="evl" id="evl"></div></div>
   <div class="card"><h2><span class="icon">🧠</span> 策略引擎</h2><div id="str"></div><h2 style="margin-top:16px"><span class="icon">⚡</span> 执行器</h2><div class="egrid" id="exc"></div></div>
 </div>
 
-<footer>AIOS v0.3 · 小九控制台 · <a href="https://github.com/yangfei222666-9/aios">GitHub</a> · 按 R 手动刷新</footer>
+<div class="grid g3">
+  <div class="card">
+    <h2><span class="icon">📋</span> 任务看板</h2>
+    <div class="sgrid">
+      <div class="sbox"><div class="icon">📝</div><div class="n" id="tk-todo">—</div><div class="l">待办</div></div>
+      <div class="sbox"><div class="icon">🔄</div><div class="n" id="tk-prog">—</div><div class="l">进行中</div></div>
+      <div class="sbox"><div class="icon">🚫</div><div class="n" id="tk-block">—</div><div class="l">阻塞</div></div>
+      <div class="sbox"><div class="icon">✅</div><div class="n" id="tk-done">—</div><div class="l">完成</div></div>
+    </div>
+    <div class="sub" id="tk-overdue"></div>
+    <div class="evl" id="tk-list" style="max-height:200px;margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <h2><span class="icon">💰</span> 资源预算</h2>
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:.85em;color:#aaa;margin-bottom:4px"><span>今日 Token</span><span id="bud-daily-txt">—</span></div>
+      <div class="prog"><div class="prog-fill" id="bud-daily-bar" style="background:#22c55e"></div></div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:.85em;color:#aaa;margin-bottom:4px"><span>本周 Token</span><span id="bud-weekly-txt">—</span></div>
+      <div class="prog"><div class="prog-fill" id="bud-weekly-bar" style="background:#3b82f6"></div></div>
+    </div>
+    <div class="sgrid" style="margin-top:12px">
+      <div class="sbox"><div class="icon">⏱️</div><div class="n" id="bud-hb-avg">—</div><div class="l">心跳均耗(s)</div></div>
+      <div class="sbox"><div class="icon">💓</div><div class="n" id="bud-hb-cnt">—</div><div class="l">心跳次数</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="icon">🎯</span> 决策审计</h2>
+    <div class="sgrid">
+      <div class="sbox"><div class="icon">📊</div><div class="n" id="dec-total">—</div><div class="l">总决策</div></div>
+      <div class="sbox"><div class="icon">✅</div><div class="n" id="dec-rate">—</div><div class="l">成功率</div></div>
+      <div class="sbox"><div class="icon">🎯</div><div class="n" id="dec-conf">—</div><div class="l">平均信心</div></div>
+      <div class="sbox"><div class="icon">⏳</div><div class="n" id="dec-pend">—</div><div class="l">待验证</div></div>
+    </div>
+    <div class="evl" id="dec-list" style="max-height:180px;margin-top:10px"></div>
+  </div>
+</div>
+
+<footer>AIOS v0.7 · 小九控制台 · <a href="https://github.com/yangfei222666-9/aios">GitHub</a> · 按 R 手动刷新</footer>
 
 <script>
-let lastData=null,cd=30,refreshing=false;
+let lastData=null,cd=30,refreshing=false,wsConnected=false,ws=null;
+
+// ── WebSocket 连接 ──
+function connectWS(){
+  try{
+    ws=new WebSocket('ws://127.0.0.1:9091');
+    ws.onopen=()=>{
+      wsConnected=true;
+      document.getElementById('rdot').style.background='#22c55e';
+      document.getElementById('refresh-text').textContent='实时 · WebSocket';
+    };
+    ws.onmessage=(e)=>{
+      try{
+        const msg=JSON.parse(e.data);
+        if(msg.type==='full'||msg.type==='update'){
+          const d=msg.data;
+          const changed=!lastData||JSON.stringify(d.overview)!==JSON.stringify(lastData.overview);
+          R(d,changed);
+          lastData=d;
+          // 闪烁指示收到数据
+          const dot=document.getElementById('rdot');
+          dot.style.background='#c4b5fd';
+          setTimeout(()=>dot.style.background='#22c55e',300);
+        }
+      }catch(err){}
+    };
+    ws.onclose=()=>{
+      wsConnected=false;
+      document.getElementById('rdot').style.background='#eab308';
+      document.getElementById('refresh-text').textContent='WebSocket 断开 · 轮询中';
+      setTimeout(connectWS,5000);
+    };
+    ws.onerror=()=>{ws.close()};
+  }catch(e){
+    wsConnected=false;
+  }
+}
+connectWS();
 
 function refresh(){
+  if(wsConnected)return; // WebSocket 连接时不轮询
   refreshing=true;
   document.getElementById('rdot').style.display='none';
   document.getElementById('rspinner').style.display='inline-block';
@@ -203,6 +323,7 @@ function refresh(){
       refreshing=false;
       document.getElementById('rdot').style.display='inline-block';
       document.getElementById('rspinner').style.display='none';
+      if(!wsConnected)document.getElementById('refresh-text').textContent='HTTP轮询 · '+cd+'s';
     })
     .catch(()=>{
       refreshing=false;
@@ -213,16 +334,21 @@ function refresh(){
 }
 
 refresh();
-setInterval(refresh,30000);
+setInterval(()=>{if(!wsConnected)refresh()},30000);
 setInterval(()=>{
-  if(!refreshing){
+  if(!refreshing&&!wsConnected){
     cd--;if(cd<=0)cd=30;
-    document.getElementById('refresh-text').textContent='实时 · '+cd+'s 后刷新';
+    document.getElementById('refresh-text').textContent='HTTP轮询 · '+cd+'s 后刷新';
   }
 },1000);
 
 // 按 R 手动刷新
-document.addEventListener('keydown',e=>{if(e.key==='r'||e.key==='R'){cd=30;refresh()}});
+document.addEventListener('keydown',e=>{
+  if(e.key==='r'||e.key==='R'){
+    if(wsConnected&&ws){ws.send('refresh')}
+    else{cd=30;refresh()}
+  }
+});
 
 function flash(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}
 
@@ -267,6 +393,16 @@ function R(d,changed){
   mkStr(d.strategies);
   mkExc(d.execution);
   document.getElementById('ts').textContent=d.generated_at.replace('T',' ').slice(0,19);
+
+  // v0.5 新模块
+  if(d.tasks)mkTasks(d.tasks);
+  if(d.budget)mkBudget(d.budget);
+  if(d.decisions)mkDecisions(d.decisions);
+
+  // v0.6/v0.7 新模块
+  if(d.reactor)mkReactor(d.reactor);
+  if(d.evolution_v2)mkEvo2(d.evolution_v2);
+  if(d.pipeline)mkPipeline(d.pipeline);
 }
 
 function bars(id,data,order,colors){
@@ -319,6 +455,116 @@ function mkExc(ex){
   const el=document.getElementById('exc');
   let h='<div class="ebox"><div class="n">'+ex.total+'</div><div class="l">总执行</div></div>';
   for(const[k,v]of Object.entries(ex.terminal_states))h+='<div class="ebox"><div class="n">'+v+'</div><div class="l">'+k.replace(/_/g,' ')+'</div></div>';
+  el.innerHTML=h;
+}
+
+function mkTasks(tk){
+  document.getElementById('tk-todo').textContent=tk.todo;
+  document.getElementById('tk-prog').textContent=tk.in_progress;
+  document.getElementById('tk-block').textContent=tk.blocked;
+  document.getElementById('tk-done').textContent=tk.done;
+  const od=document.getElementById('tk-overdue');
+  od.innerHTML=tk.overdue>0?'⚠️ '+tk.overdue+' 个任务已过期':'✅ 无过期任务';
+  od.style.color=tk.overdue>0?'#ef4444':'#22c55e';
+  const el=document.getElementById('tk-list');
+  if(!tk.recent||!tk.recent.length){el.innerHTML='<div style="color:#666;padding:10px;text-align:center">无活跃任务</div>';return}
+  let h='';
+  const sIcon={'TODO':'📝','IN_PROGRESS':'🔄','BLOCKED':'🚫','DONE':'✅'};
+  const pColor={'P0':'#ef4444','P1':'#eab308','P2':'#3b82f6','P3':'#666'};
+  tk.recent.forEach(t=>{
+    h+='<div class="evi"><span class="t">'+(t.deadline||'—')+'</span><span style="color:'+(pColor[t.priority]||'#888')+';font-weight:800;font-size:.8em;min-width:28px">'+t.priority+'</span><span class="ev">'+(sIcon[t.status]||'❓')+' '+t.title+'</span></div>';
+  });
+  el.innerHTML=h;
+}
+
+function mkBudget(b){
+  const dp=Math.min(b.daily_pct,100),wp=Math.min(b.weekly_pct,100);
+  document.getElementById('bud-daily-txt').textContent=b.daily_used.toLocaleString()+'/'+b.daily_budget.toLocaleString()+' ('+b.daily_pct+'%)';
+  document.getElementById('bud-weekly-txt').textContent=b.weekly_used.toLocaleString()+'/'+b.weekly_budget.toLocaleString()+' ('+b.weekly_pct+'%)';
+  const db=document.getElementById('bud-daily-bar');
+  db.style.width=Math.max(dp,2)+'%';
+  db.style.background=dp>80?'#ef4444':dp>50?'#eab308':'#22c55e';
+  const wb=document.getElementById('bud-weekly-bar');
+  wb.style.width=Math.max(wp,2)+'%';
+  wb.style.background=wp>80?'#ef4444':wp>50?'#eab308':'#3b82f6';
+  document.getElementById('bud-hb-avg').textContent=b.heartbeat_avg;
+  document.getElementById('bud-hb-cnt').textContent=b.heartbeat_count;
+}
+
+function mkDecisions(dc){
+  document.getElementById('dec-total').textContent=dc.total;
+  document.getElementById('dec-rate').textContent=dc.success_rate+'%';
+  document.getElementById('dec-conf').textContent=dc.avg_confidence+'%';
+  document.getElementById('dec-pend').textContent=(dc.outcomes||{}).pending||0;
+  const el=document.getElementById('dec-list');
+  if(!dc.recent||!dc.recent.length){el.innerHTML='<div style="color:#666;padding:10px;text-align:center">无决策记录</div>';return}
+  let h='';
+  const oIcon={'success':'✅','fail':'❌','pending':'⏳'};
+  dc.recent.forEach(d=>{
+    const conf=Math.round((d.confidence||0)*100);
+    h+='<div class="evi"><span class="t">'+(d.ts||'').slice(11,16)+'</span><span style="font-size:.85em">'+(oIcon[d.outcome]||'❓')+'</span><span class="ev">'+d.context+' → <b>'+d.chosen+'</b> <span style="color:#888;font-size:.8em">'+conf+'%</span></span></div>';
+  });
+  el.innerHTML=h;
+}
+
+function mkReactor(rx){
+  document.getElementById('rx-exec').textContent=rx.auto_exec_rate+'%';
+  document.getElementById('rx-verify').textContent=rx.verify_rate+'%';
+  document.getElementById('rx-total').textContent=rx.total;
+  const fuseBox=document.getElementById('rx-fuse-box');
+  if(rx.fuse_tripped){
+    document.getElementById('rx-fuse').textContent='🔴';
+    fuseBox.style.background='#3b1111';
+  }else{
+    document.getElementById('rx-fuse').textContent='🟢';
+    fuseBox.style.background='';
+  }
+  // 历史
+  const el=document.getElementById('rx-history');
+  if(!rx.recent||!rx.recent.length){el.innerHTML='<div style="color:#666;padding:10px;text-align:center">无响应记录</div>';return}
+  let h='';
+  const sIcon={'success':'✅','pending_confirm':'⚠️','partial_failure':'❌','no_match':'⏭️'};
+  [...rx.recent].reverse().forEach(r=>{
+    h+='<div class="evi"><span class="t">'+(r.ts||'').slice(11,16)+'</span><span style="font-size:.85em">'+(sIcon[r.status]||'❓')+'</span><span class="ev">['+r.pb+'] → '+r.status+'</span></div>';
+  });
+  el.innerHTML=h;
+  // 剧本成功率
+  const pbEl=document.getElementById('pb-bars');
+  if(!rx.playbooks||!rx.playbooks.length){pbEl.innerHTML='<div style="color:#666;padding:10px;text-align:center">无剧本数据</div>';return}
+  const mx=Math.max(...rx.playbooks.map(p=>p.total),1);
+  let bh='';
+  rx.playbooks.forEach((p,i)=>{
+    const pct=p.total>0?Math.max(p.rate/100*100,8):0;
+    const c=p.rate>=80?'#22c55e':p.rate>=50?'#eab308':'#ef4444';
+    bh+='<div class="br" style="animation-delay:'+(.1+i*.05)+'s"><span class="name">'+p.id.replace(/_/g,' ')+'</span><div class="track"><div class="fill" style="width:'+pct+'%;background:'+c+'">'+(p.total>0?p.rate+'%':'')+'</div></div><span class="val">'+p.success+'/'+p.total+'</span></div>';
+  });
+  pbEl.innerHTML=bh;
+}
+
+function mkEvo2(ev){
+  document.getElementById('evo2-score').textContent=ev.v2_score.toFixed(2);
+  document.getElementById('evo2-grade').textContent=ev.grade.toUpperCase();
+  const block=document.getElementById('evo2-block');
+  block.className='num-block '+(ev.grade==='healthy'?'green':ev.grade==='degraded'?'yellow':'red');
+  document.getElementById('evo2-base').textContent=ev.base.toFixed(2);
+  document.getElementById('evo2-reactor').textContent=ev.reactor.toFixed(2);
+  const d=ev.detail||{};
+  document.getElementById('evo2-fix').textContent=((d.auto_fix_rate||0)*100).toFixed(0)+'%';
+  document.getElementById('evo2-fp').textContent=((d.false_positive_rate||0)*100).toFixed(0)+'%';
+  document.getElementById('evo2-close').textContent=((d.auto_close_rate||0)*100).toFixed(0)+'%';
+}
+
+function mkPipeline(pl){
+  document.getElementById('pl-runs').textContent=pl.total_runs;
+  const last=pl.recent&&pl.recent.length?pl.recent[pl.recent.length-1]:null;
+  document.getElementById('pl-last-ms').textContent=last?last.ms:'—';
+  const el=document.getElementById('pl-history');
+  if(!pl.recent||!pl.recent.length){el.innerHTML='<div style="color:#666;padding:10px;text-align:center">无运行记录</div>';return}
+  let h='';
+  const gIcon={'healthy':'🟢','degraded':'🟡','critical':'🔴'};
+  [...pl.recent].reverse().forEach(r=>{
+    h+='<div class="evi"><span class="t">'+(r.ts||'').slice(11,16)+'</span><span style="font-size:.85em">'+(gIcon[r.grade]||'⚪')+'</span><span class="ev">'+r.ms+'ms'+(r.errors>0?' · ⚠️'+r.errors+'错误':'')+'</span></div>';
+  });
   el.innerHTML=h;
 }
 </script>

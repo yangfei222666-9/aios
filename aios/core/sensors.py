@@ -275,8 +275,12 @@ class NetworkProbe:
 
 def scan_all(watch_paths: list[str] = None,
              process_names: list[str] = None,
-             network_targets: list[str] = None) -> dict:
-    """一次性跑所有探针，返回汇总"""
+             network_targets: list[str] = None,
+             enable_screen: bool = False) -> dict:
+    """一次性跑所有探针，返回汇总
+    
+    enable_screen: 是否启用屏幕感知（默认关闭，按需开启）
+    """
     results = {}
 
     fw = FileWatcher(watch_paths or [
@@ -293,6 +297,14 @@ def scan_all(watch_paths: list[str] = None,
 
     np = NetworkProbe(network_targets)
     results["network"] = np.scan()
+
+    # 屏幕感知（可选）
+    if enable_screen:
+        try:
+            from core.screen_sensor import scan_screen
+            results["screen_changes"] = scan_screen(interval=30, threshold=0.05)
+        except Exception as e:
+            results["screen_changes"] = {"error": str(e)[:100]}
 
     return results
 

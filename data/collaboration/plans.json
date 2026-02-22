@@ -1,0 +1,59 @@
+[
+  {
+    "plan_id": "test_report",
+    "task": "报告测试",
+    "subtasks": [
+      {
+        "id": "t1",
+        "description": "成功任务",
+        "prompt": "成功任务",
+        "role": "coder",
+        "model": "",
+        "timeout": 120,
+        "depends_on": [],
+        "session_label": "c_t1",
+        "status": "done",
+        "result": "成功的结果",
+        "spawned_at": 1771729441.624152,
+        "finished_at": 1771729441.6246526,
+        "failure_type": "",
+        "retry_count": 0,
+        "error_message": ""
+      },
+      {
+        "id": "t2",
+        "description": "失败任务",
+        "prompt": "失败任务",
+        "role": "researcher",
+        "model": "",
+        "timeout": 120,
+        "depends_on": [],
+        "session_label": "c_t2",
+        "status": "failed",
+        "result": "EXHAUSTED: gateway_502 after 4 retries (502 Bad Gateway from API)",
+        "spawned_at": 1771729441.6246526,
+        "finished_at": 1771729441.626156,
+        "failure_type": "gateway_502",
+        "retry_count": 4,
+        "error_message": "502 Bad Gateway from API"
+      }
+    ],
+    "status": "degraded",
+    "created_at": 1771729441.624152,
+    "finished_at": 1771729441.626156,
+    "consensus_result": {},
+    "final_report": "",
+    "degraded": true,
+    "failed_agents": [
+      "t2"
+    ],
+    "confidence": 0.35,
+    "sla": {
+      "required_roles": [
+        "coder"
+      ],
+      "max_failures": 1,
+      "total_timeout": 180
+    }
+  }
+]

@@ -12,6 +12,9 @@ Things like:
 - Device nicknames
 - Anything environment-specific
 
+## 应用路径
+- QQ音乐 → E:\QQMusic\QQMusic.exe
+
 ## Examples
 
 ```markdown

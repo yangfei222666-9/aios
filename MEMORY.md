@@ -65,6 +65,44 @@
 - 每日报告 cron 9AM 自动发 Telegram
 - 结构：core/{config,engine,policies,event_bus,sensors,dispatcher} + learning/{analyze,apply,baseline,tickets} + plugins/aram/{matcher,data_adapter,rules}
 
+## AIOS Collaboration Layer v0.1.0 → v0.2.0 (2026-02-22)
+- 多 Agent 协作架构，解决：单体带宽瓶颈、专业化分工、互相校验、长任务不阻塞
+- registry.py：Agent 注册/发现/能力匹配/心跳/过期清理
+- messenger.py：文件队列消息传递（REQUEST/RESPONSE/BROADCAST/HEARTBEAT）
+- delegator.py：任务拆分→依赖图→自动分配→进度追踪→结果聚合
+- consensus.py：多 Agent 投票（MAJORITY/UNANIMOUS/WEIGHTED/QUORUM）+ cross_check 便捷函数
+- pool.py：Agent 生命周期管理 + 4 个内置模板（coder/researcher/reviewer/monitor）
+- v0.2.0 orchestrator.py 生产级升级：
+  - 降级判定：部分成功为一等公民，degraded 状态 + confidence 降级规则
+  - 失败策略：3次重试 + 指数退避(2/4/8s) + 熔断窗口(5min/5次) + 失败分类(502/timeout/rate_limit/parse/auth)
+  - 执行 SLA：required_roles 最小成功集 + max_failures 容忍 + total_timeout 总超时
+  - failure_log.jsonl 失败审计日志
+  - 真实 sessions_spawn 验证：3 Agent 并行（coder 42s + reviewer 55s + researcher 502失败），降级交付成功
+- 39 + 38 = 77 测试全绿
+- 路径：aios/collaboration/
+
+## AIOS v0.5.0 (2026-02-22)
+- P0 watcher.py：watchdog 实时文件监听 + 系统资源/网络/进程监控，替代 mtime 轮询
+- P1 tracker.py：任务状态机（TODO→IN_PROGRESS→BLOCKED→DONE）+ deadline 检查 + CLI
+- P2 decision_log.py：决策审计（context/options/chosen/reason/confidence/outcome）+ 统计
+- P3 budget.py：Token 预算追踪 + 心跳时间预算 + 三级告警（ok/warn/crit）
+- P4 orchestrator.py：子任务编排（enqueue/dequeue/progress/timeouts）+ 伪并发
+- P5 integrations.py：外部系统集成注册表 + 内置模板（system_info/git_status/browser）
+- 6 个模块全部 CLI 可用，支持 --format telegram
+
+## AIOS v0.4.0 (2026-02-22)
+- Plugin Registry：可插拔插件系统，自动发现 + BasePlugin 基类 + 三种加载方式
+- Dashboard v2.0：WebSocket 实时推送（ws://9091），优雅降级到 HTTP 轮询
+- CLI: `python -m aios.core.registry [list|health|summary]`
+
+## AIOS v0.3.1 (2026-02-22)
+- trend_weekly.py：逐日指标快照 + 错误收敛/发散分析 + sparkline 火花图
+- memory_gaps.py：记忆盲区检测 + 高频盲区告警 + 修复建议
+- deadloop_breaker.py：死循环检测 + 自动熔断（认知死循环 + 快速重复失败）
+- alerts.py 规则6 升级 v2：接入 deadloop_breaker 替换简单检测
+- HEARTBEAT.md 集成：每周趋势报告 + 每3天盲区扫描
+- CLI: `python -m aios.scripts.trend_weekly` / `python -m aios.scripts.memory_gaps` / `python -m aios.core.deadloop_breaker`
+
 ## AIOS v0.3 感知层 (2026-02-20)
 - EventBus: 进程内 pub/sub + 通配符 + 文件队列跨会话
 - Sensors: FileWatcher(mtime对比) + ProcessMonitor + SystemHealth(磁盘/内存) + NetworkProbe(连通性)

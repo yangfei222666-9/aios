@@ -17,6 +17,8 @@ HISTORY_FILE = os.path.join(WS, 'memory', 'alerts_history.jsonl')
 
 SLA_HOURS = {"CRIT": 1, "WARN": 24, "INFO": 72}
 AUTO_RESOLVE_COUNT = 2  # 连续恢复 N 次自动 RESOLVED
+AUTO_CONVERGE_WINDOWS = 3  # 连续 N 个健康窗口后建议关闭
+CONVERGE_FILE = os.path.join(WS, 'memory', 'alerts_converge.json')
 
 # --- Storage ---
 
@@ -53,6 +55,7 @@ def open_alert(rule_id, severity, message, scope="default", owner="小九"):
         alert['hit_count'] = alert.get('hit_count', 1) + 1
         alert['last_hit'] = datetime.now().isoformat()
         alert['recovery_streak'] = 0  # 重置恢复计数
+        reset_converge(alert['id'])  # 复发重置收敛计数
         if alert['status'] == 'ACK':
             # ACK -> OPEN 反开
             alert['status'] = 'OPEN'
@@ -211,6 +214,67 @@ def stats():
                     continue
     return s
 
+# --- Auto-Convergence ---
+
+def _load_converge():
+    if os.path.exists(CONVERGE_FILE):
+        with open(CONVERGE_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def _save_converge(data):
+    with open(CONVERGE_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def record_healthy_window():
+    """每次健康检查通过时调用，累计连续健康窗口数"""
+    alerts = load_active()
+    converge = _load_converge()
+    suggestions = []
+
+    for fp, alert in alerts.items():
+        if alert['status'] not in ('OPEN', 'ACK'):
+            continue
+        aid = alert['id']
+        if aid not in converge:
+            converge[aid] = {'healthy_streak': 0, 'last_check': None}
+        converge[aid]['healthy_streak'] += 1
+        converge[aid]['last_check'] = datetime.now().isoformat()
+
+        streak = converge[aid]['healthy_streak']
+        if streak >= AUTO_CONVERGE_WINDOWS:
+            if alert['severity'] in ('CRIT', 'WARN'):
+                # high-risk: 仅建议，不自动关
+                suggestions.append({
+                    'alert_id': aid,
+                    'severity': alert['severity'],
+                    'message': alert['message'],
+                    'healthy_streak': streak,
+                    'action': 'suggest_resolve',
+                    'reason': f'连续 {streak} 个健康窗口无复发，建议关闭'
+                })
+            else:
+                # INFO: 自动关闭
+                resolve_alert(aid, f'auto-converge: {streak} consecutive healthy windows, no recurrence')
+                suggestions.append({
+                    'alert_id': aid,
+                    'severity': alert['severity'],
+                    'message': alert['message'],
+                    'healthy_streak': streak,
+                    'action': 'auto_resolved',
+                    'reason': f'连续 {streak} 个健康窗口，自动关闭'
+                })
+
+    _save_converge(converge)
+    return suggestions
+
+def reset_converge(alert_id):
+    """告警复发时重置健康计数"""
+    converge = _load_converge()
+    if alert_id in converge:
+        converge[alert_id]['healthy_streak'] = 0
+        _save_converge(converge)
+
 # --- CLI ---
 
 def cli():
@@ -235,6 +299,15 @@ def cli():
             else:
                 sla_left = "⚠️ SLA已超时"
             print(f"[{a['id']}] {a['severity']} {a['status']} | {a['message']} | {sla_left} | 命中{a['hit_count']}次")
+
+    elif cmd == 'converge':
+        suggestions = record_healthy_window()
+        if not suggestions:
+            print("✅ 无收敛建议")
+        else:
+            for s in suggestions:
+                icon = "🔔" if s['action'] == 'suggest_resolve' else "✅"
+                print(f"{icon} [{s['alert_id']}] {s['severity']} | {s['reason']}")
 
     elif cmd == 'ack':
         if len(sys.argv) < 3:

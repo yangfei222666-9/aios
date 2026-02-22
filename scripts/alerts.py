@@ -22,6 +22,13 @@ try:
     HAS_DISPATCHER = True
 except ImportError:
     HAS_DISPATCHER = False
+
+# 导入 Reactor（自动响应）
+try:
+    from core.reactor import scan_and_react
+    HAS_REACTOR = True
+except ImportError:
+    HAS_REACTOR = False
 PYTHON = r'C:\Program Files\Python312\python.exe'
 ALERTS_STATE = os.path.join(WS, 'memory', 'alerts_state.json')
 ALERTS_LOG = os.path.join(WS, 'memory', 'alerts_log.jsonl')
@@ -178,73 +185,30 @@ def check_backup():
     return "INFO", f"备份正常: {latest} ({round(size/1024/1024, 2)} MB, {int(age_hours)}h ago)"
 
 def check_event_severity():
-    """规则6: 事件严重度标准化 — fatal/死循环检测"""
-    events_file = os.path.join(WS, 'aios', 'events', 'events.jsonl')
-    if not os.path.exists(events_file):
-        return "INFO", "无事件文件"
-
-    now = time.time()
-    cutoff = now - 86400  # 最近24h
-    fatal_count = 0
-    loop_candidates = []  # (event_name, epoch) 用于检测重复
-
+    """规则6: 事件严重度 + 死循环检测 + 自动熔断（v2: 接入 deadloop_breaker）"""
     try:
-        with open(events_file, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    ev = json.loads(line)
-                except:
-                    continue
-                epoch = ev.get("epoch", 0)
-                if epoch < cutoff:
-                    continue
-
-                status = ev.get("status", "ok")
-                event_name = ev.get("event", "")
-                layer = ev.get("layer", "")
-
-                # fatal 检测：SEC层err + 特定关键词
-                if status == "err" and (
-                    "fatal" in event_name.lower() or
-                    "circuit_breaker" in event_name.lower() or
-                    (layer == "SEC" and "runtime_error" in event_name)
-                ):
-                    fatal_count += 1
-
-                # 死循环检测：同一命令短时间内重复执行
-                if status == "err" and layer == "TOOL":
-                    loop_candidates.append((event_name, epoch))
-
-        # 死循环判定：同一 event_name 在 DEDUP_WINDOW_SECONDS 内出现 >= 3 次
-        loop_detected = []
-        from collections import Counter
-        if loop_candidates:
-            # 按 event_name 分组，检查时间窗口内的密度
-            by_name = {}
-            for name, ep in loop_candidates:
-                by_name.setdefault(name, []).append(ep)
-            for name, epochs in by_name.items():
-                epochs.sort()
-                for i in range(len(epochs) - 2):
-                    if epochs[i+2] - epochs[i] <= DEDUP_WINDOW_SECONDS:
-                        loop_detected.append(name)
-                        break
+        sys.path.insert(0, os.path.join(WS, 'aios'))
+        from core.deadloop_breaker import check as deadloop_check
+        result = deadloop_check(scan_hours=1)
 
         issues = []
-        if fatal_count > 0:
-            issues.append(f"fatal事件 {fatal_count} 个")
-        if loop_detected:
-            issues.append(f"疑似死循环: {', '.join(loop_detected[:3])}")
+        if result.cognitive_loops:
+            issues.append(f"认知死循环 {len(result.cognitive_loops)} 处")
+        if result.rapid_failures:
+            issues.append(f"快速重复失败 {len(result.rapid_failures)} 个命令")
+        if result.tripped_breakers:
+            issues.append(f"新触发熔断 {len(result.tripped_breakers)} 个")
+        if result.existing_breakers:
+            issues.append(f"活跃熔断 {len(result.existing_breakers)} 个")
 
-        if fatal_count > 0 or loop_detected:
-            return "CRIT", f"事件异常: {'; '.join(issues)}"
-        return "INFO", "事件严重度正常"
+        if result.cognitive_loops or result.rapid_failures:
+            return "CRIT", f"死循环检测异常: {'; '.join(issues)}"
+        if result.existing_breakers:
+            return "WARN", f"有活跃熔断: {'; '.join(issues)}"
+        return "INFO", "事件严重度正常，无死循环"
 
     except Exception as e:
-        return "WARN", f"事件检查异常: {e}"
+        return "WARN", f"死循环检测异常: {e}"
 
 def check_executor_bypass():
     """规则7: 执行器绕过检测 — 命令执行事件未走 execute() 入口"""
@@ -458,3 +422,17 @@ if __name__ == '__main__':
             'notifications': notifications,
             'results': results
         })
+
+        # 自动响应：扫描活跃告警并执行匹配的 playbook
+        if HAS_REACTOR:
+            try:
+                reactions = scan_and_react(mode="auto")
+                if reactions:
+                    acted = [r for r in reactions if r.get('status') not in ('no_match',)]
+                    if acted:
+                        print(f"\n⚡ 自动响应: {len(acted)} 条")
+                        for r in acted:
+                            icon = "✅" if r.get('status') == 'success' else "⚠️"
+                            print(f"  {icon} [{r.get('playbook_id')}] → {r.get('status')}")
+            except Exception as e:
+                print(f"\n⚠️ Reactor 异常: {str(e)[:80]}")

@@ -1,0 +1,343 @@
+#!/usr/bin/env python3
+# aios/pipeline.py - AIOS 日常流水线 v0.7
+"""
+一条龙流水线，心跳调一次全跑完：
+
+  sensors → alerts → reactor → verifier → feedback → evolution → report
+
+每个阶段独立 try/except，一个挂了不影响后续。
+输出：结构化报告（可选 telegram 格式推送）。
+"""
+import json, sys, io, time, subprocess
+from pathlib import Path
+from datetime import datetime
+
+if __name__ == '__main__':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
+AIOS_ROOT = Path(__file__).resolve().parent
+WS = AIOS_ROOT.parent if AIOS_ROOT.name == 'aios' else AIOS_ROOT
+PYTHON = r"C:\Program Files\Python312\python.exe"
+
+sys.path.insert(0, str(AIOS_ROOT))
+sys.path.insert(0, str(WS / "scripts"))
+
+# ── 阶段执行器 ──
+
+def _run_stage(name, fn):
+    """执行一个阶段，返回 (ok, result, elapsed_ms)"""
+    t0 = time.time()
+    try:
+        result = fn()
+        elapsed = int((time.time() - t0) * 1000)
+        return True, result, elapsed
+    except Exception as e:
+        elapsed = int((time.time() - t0) * 1000)
+        return False, str(e)[:200], elapsed
+
+
+# ── 各阶段 ──
+
+def stage_sensors():
+    """感知扫描"""
+    try:
+        from core.dispatcher import dispatch as aios_dispatch, get_pending_actions, clear_actions
+        aios_dispatch(run_sensors=True)
+        actions = get_pending_actions()
+        count = len(actions)
+        high = sum(1 for a in actions if a.get('priority') == 'high')
+        if actions:
+            clear_actions()
+        return {"pending_actions": count, "high_priority": high}
+    except ImportError:
+        return {"skip": "dispatcher not available"}
+
+
+def stage_alerts():
+    """告警检查"""
+    import alert_fsm
+    # 运行 alerts 检查规则
+    try:
+        from scripts_alerts_runner import run_checks, format_summary
+        results, notifications = run_checks()
+        summary = format_summary(results)
+    except:
+        results = {}
+        notifications = []
+        summary = "alerts check skipped"
+
+    # 告警统计
+    stats = alert_fsm.stats()
+    overdue = alert_fsm.check_sla()
+
+    return {
+        "open": stats.get('open', 0),
+        "ack": stats.get('ack', 0),
+        "overdue": stats.get('overdue', 0),
+        "resolved_today": stats.get('resolved_today', 0),
+        "notifications": len(notifications),
+        "notification_texts": notifications[:3]  # 最多3条
+    }
+
+
+def stage_reactor():
+    """自动响应"""
+    from core.reactor import scan_and_react, dashboard_metrics
+    results = scan_and_react(mode="auto")
+    acted = [r for r in results if r.get('status') not in ('no_match',)]
+    success = [r for r in acted if r.get('status') == 'success']
+    pending = [r for r in acted if r.get('status') == 'pending_confirm']
+
+    return {
+        "total_matched": len(acted),
+        "auto_executed": len(success),
+        "pending_confirm": len(pending),
+        "details": [
+            {"pb": r.get('playbook_id'), "status": r.get('status')}
+            for r in acted[:5]
+        ]
+    }
+
+
+def stage_verifier():
+    """执行后验证（对刚执行的 reaction 验证）"""
+    from core.verifier import verify_reaction
+    from core.reactor import REACTION_LOG
+
+    if not REACTION_LOG.exists():
+        return {"skip": "no reactions to verify"}
+
+    # 读最近的 success reaction（最近 2 分钟内）
+    with open(REACTION_LOG, 'r', encoding='utf-8') as f:
+        lines = [l.strip() for l in f if l.strip()]
+
+    if not lines:
+        return {"skip": "empty reaction log"}
+
+    from datetime import timedelta
+    cutoff = (datetime.now() - timedelta(minutes=2)).isoformat()
+    recent = []
+    for line in lines[-5:]:
+        try:
+            r = json.loads(line)
+            if r.get('status') == 'success' and r.get('ts', '') >= cutoff:
+                recent.append(r)
+        except:
+            continue
+
+    if not recent:
+        return {"skip": "no recent reactions to verify"}
+
+    verified = 0
+    passed = 0
+    for r in recent:
+        result = verify_reaction(r)
+        verified += 1
+        if result.get('passed'):
+            passed += 1
+
+    return {"verified": verified, "passed": passed, "failed": verified - passed}
+
+
+def stage_feedback():
+    """反馈分析"""
+    from core.feedback_loop import analyze_playbook_patterns, generate_suggestions
+    patterns = analyze_playbook_patterns(168)
+    suggestions = generate_suggestions(168)
+
+    high_priority = [s for s in suggestions if s.get('priority') == 'high']
+
+    return {
+        "playbooks_analyzed": len(patterns),
+        "suggestions": len(suggestions),
+        "high_priority": len(high_priority),
+        "high_details": [
+            {"pb": s.get('playbook_id'), "type": s.get('type'), "reason": s.get('reason', '')[:60]}
+            for s in high_priority[:3]
+        ]
+    }
+
+
+def stage_evolution():
+    """进化评分"""
+    from core.evolution import compute_evolution_v2
+    result = compute_evolution_v2()
+    return {
+        "v2_score": result['evolution_v2'],
+        "grade": result['grade'],
+        "base": result['base_score'],
+        "reactor": result['reactor_score']
+    }
+
+
+def stage_convergence():
+    """告警收敛检查"""
+    try:
+        sys.path.insert(0, str(WS / "scripts"))
+        from alert_fsm import record_healthy_window
+        suggestions = record_healthy_window()
+        return {
+            "converge_suggestions": len(suggestions),
+            "details": [
+                {"id": s.get('alert_id'), "action": s.get('action')}
+                for s in suggestions[:3]
+            ]
+        }
+    except Exception as e:
+        return {"skip": str(e)[:100]}
+
+
+# ── 主流水线 ──
+
+def run_pipeline(fmt="default"):
+    """执行完整流水线"""
+    stages = [
+        ("sensors", stage_sensors),
+        ("alerts", stage_alerts),
+        ("reactor", stage_reactor),
+        ("verifier", stage_verifier),
+        ("convergence", stage_convergence),
+        ("feedback", stage_feedback),
+        ("evolution", stage_evolution),
+    ]
+
+    report = {
+        "ts": datetime.now().isoformat(),
+        "stages": {},
+        "total_ms": 0,
+        "errors": []
+    }
+
+    total_t0 = time.time()
+
+    for name, fn in stages:
+        ok, result, elapsed = _run_stage(name, fn)
+        report["stages"][name] = {
+            "ok": ok,
+            "result": result,
+            "ms": elapsed
+        }
+        if not ok:
+            report["errors"].append(f"{name}: {result}")
+
+    report["total_ms"] = int((time.time() - total_t0) * 1000)
+
+    # 保存报告
+    _save_report(report)
+
+    return report
+
+
+def _save_report(report):
+    report_dir = Path(AIOS_ROOT) / "data"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    log_file = report_dir / "pipeline_runs.jsonl"
+    with open(log_file, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(report, ensure_ascii=False) + '\n')
+
+
+# ── 格式化 ──
+
+def format_report(report, fmt="default"):
+    """格式化报告"""
+    stages = report.get("stages", {})
+    errors = report.get("errors", [])
+    total_ms = report.get("total_ms", 0)
+
+    if fmt == "telegram":
+        return _format_telegram(stages, errors, total_ms)
+    else:
+        return _format_default(stages, errors, total_ms)
+
+
+def _format_default(stages, errors, total_ms):
+    lines = [f"🔄 AIOS Pipeline — {datetime.now().strftime('%H:%M')} ({total_ms}ms)"]
+    lines.append("=" * 40)
+
+    for name, s in stages.items():
+        icon = "✅" if s['ok'] else "❌"
+        lines.append(f"{icon} {name} ({s['ms']}ms)")
+        r = s['result']
+        if isinstance(r, dict):
+            for k, v in r.items():
+                if k not in ('details', 'high_details', 'notification_texts', 'skip'):
+                    lines.append(f"    {k}: {v}")
+                elif k == 'skip':
+                    lines.append(f"    ⏭️ {v}")
+        elif isinstance(r, str):
+            lines.append(f"    {r[:80]}")
+
+    if errors:
+        lines.append(f"\n⚠️ {len(errors)} 个阶段异常:")
+        for e in errors:
+            lines.append(f"  ❌ {e}")
+
+    return "\n".join(lines)
+
+
+def _format_telegram(stages, errors, total_ms):
+    evo = stages.get('evolution', {}).get('result', {})
+    alerts = stages.get('alerts', {}).get('result', {})
+    reactor = stages.get('reactor', {}).get('result', {})
+    feedback = stages.get('feedback', {}).get('result', {})
+
+    grade = evo.get('grade', '?')
+    grade_icon = {"healthy": "🟢", "degraded": "🟡", "critical": "🔴"}.get(grade, "⚪")
+
+    lines = [
+        f"🔄 AIOS Pipeline ({total_ms}ms)",
+        f"{grade_icon} Evolution v2: {evo.get('v2_score', '?')} ({grade})",
+        f"📋 告警: OPEN={alerts.get('open',0)} 超SLA={alerts.get('overdue',0)}",
+        f"⚡ 响应: 执行={reactor.get('auto_executed',0)} 待确认={reactor.get('pending_confirm',0)}",
+    ]
+
+    high = feedback.get('high_priority', 0)
+    if high > 0:
+        lines.append(f"💡 高优建议: {high} 条")
+
+    if errors:
+        lines.append(f"⚠️ 异常: {len(errors)}")
+
+    # 阶段耗时
+    stage_times = " / ".join(f"{n}:{s.get('ms',0)}" for n, s in stages.items())
+    lines.append(f"⏱️ {stage_times}")
+
+    return "\n".join(lines)
+
+
+# ── CLI ──
+
+def cli():
+    if len(sys.argv) < 2:
+        fmt = "default"
+    else:
+        fmt = sys.argv[1]
+
+    if fmt in ('run', 'default'):
+        report = run_pipeline()
+        print(format_report(report, "default"))
+    elif fmt == 'telegram':
+        report = run_pipeline()
+        print(format_report(report, "telegram"))
+    elif fmt == 'history':
+        log_file = Path(AIOS_ROOT) / "data" / "pipeline_runs.jsonl"
+        if not log_file.exists():
+            print("无历史记录")
+            return
+        with open(log_file, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        recent = lines[-5:] if len(lines) > 5 else lines
+        for line in recent:
+            r = json.loads(line.strip())
+            ts = r.get('ts', '?')[:16]
+            ms = r.get('total_ms', 0)
+            errs = len(r.get('errors', []))
+            evo = r.get('stages', {}).get('evolution', {}).get('result', {})
+            grade = evo.get('grade', '?')
+            print(f"  {ts} | {ms}ms | {grade} | errors={errs}")
+    else:
+        print("用法: python pipeline.py [run|telegram|history]")
+
+
+if __name__ == '__main__':
+    cli()

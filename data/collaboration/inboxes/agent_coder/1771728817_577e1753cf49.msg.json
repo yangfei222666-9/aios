@@ -1,0 +1,1 @@
+{"msg_id": "577e1753cf49", "msg_type": "request", "sender": "orchestrator", "receiver": "agent_coder", "payload": {"action": "execute_task", "task_id": "bb49da06d5_0", "description": "扫描代码结构，统计文件/函数/类数量", "delegation_id": "bb49da06d5"}, "timestamp": 1771728816.8455534, "reply_to": "", "ttl": 300}

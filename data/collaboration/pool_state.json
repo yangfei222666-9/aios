@@ -1,0 +1,53 @@
+[
+  {
+    "agent_id": "agent_coder",
+    "agent_type": "on_demand",
+    "session_key": "session_coder",
+    "label": "",
+    "model": "claude-sonnet-4-5",
+    "capabilities": [
+      "code",
+      "debug",
+      "test"
+    ],
+    "spawned_at": 1771728816.8280094,
+    "last_active": 1771728816.8280094,
+    "task_count": 0,
+    "max_tasks": 0,
+    "status": "ready"
+  },
+  {
+    "agent_id": "agent_reviewer",
+    "agent_type": "on_demand",
+    "session_key": "session_reviewer",
+    "label": "",
+    "model": "claude-sonnet-4-5",
+    "capabilities": [
+      "review",
+      "validate",
+      "audit"
+    ],
+    "spawned_at": 1771728816.8290133,
+    "last_active": 1771728816.8290133,
+    "task_count": 0,
+    "max_tasks": 0,
+    "status": "ready"
+  },
+  {
+    "agent_id": "agent_researcher",
+    "agent_type": "on_demand",
+    "session_key": "session_researcher",
+    "label": "",
+    "model": "claude-sonnet-4-5",
+    "capabilities": [
+      "research",
+      "search",
+      "analyze"
+    ],
+    "spawned_at": 1771728816.830016,
+    "last_active": 1771728816.830016,
+    "task_count": 0,
+    "max_tasks": 0,
+    "status": "ready"
+  }
+]

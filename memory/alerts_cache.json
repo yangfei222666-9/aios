@@ -1,7 +1,7 @@
 {
-  "cached_at": 1771674505.8866813,
+  "cached_at": 1771733063.3973172,
   "data": {
-    "summary": "🔍 异常检查 2026-02-21 19:48\nCRIT: 0 | WARN: 1 | INFO: 6\n\n🟡 WARN:\n  [备份状态] 最近备份已超过 51h (autolearn_backup_20260219_160934.zip)\n\n📋 告警状态: OPEN=1 ACK=0 超SLA=0",
+    "summary": "🔍 异常检查 2026-02-22 12:04\nCRIT: 0 | WARN: 0 | INFO: 7\n🟢 全部正常\n\n📋 告警状态: OPEN=1 ACK=0 超SLA=0",
     "notifications": [],
     "results": {
       "INFO": [
@@ -9,12 +9,11 @@
         "[数据量骤降] ARAM 数据库 172 英雄，正常",
         "[关键文件缺失] 关键文件完整",
         "[API超时/评分] AIOS 评分 healthy (0.400)",
-        "[事件严重度/死循环] 事件严重度正常",
+        "[备份状态] 备份正常: autolearn_backup_20260222_075043.zip (0.06 MB, 4h ago)",
+        "[事件严重度/死循环] 事件严重度正常，无死循环",
         "[执行器绕过] 无执行事件"
       ],
-      "WARN": [
-        "[备份状态] 最近备份已超过 51h (autolearn_backup_20260219_160934.zip)"
-      ],
+      "WARN": [],
       "CRIT": []
     }
   }

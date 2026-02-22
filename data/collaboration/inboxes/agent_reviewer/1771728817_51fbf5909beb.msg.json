@@ -1,0 +1,1 @@
+{"msg_id": "51fbf5909beb", "msg_type": "request", "sender": "orchestrator", "receiver": "agent_reviewer", "payload": {"action": "execute_task", "task_id": "bb49da06d5_2", "description": "审查代码风格、安全漏洞、性能问题", "delegation_id": "bb49da06d5"}, "timestamp": 1771728816.8465545, "reply_to": "", "ttl": 300}
