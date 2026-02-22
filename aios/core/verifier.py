@@ -37,9 +37,9 @@ sys.path.insert(0, str(WS / "scripts"))
 VERIFY_RULES = {
     "backup_expired": {
         "type": "command_check",
-        "command": f'& "{PYTHON}" -X utf8 -c "import json, pathlib; d=pathlib.Path(r\'{WS / "memory" / "alerts_active.json"}\'); alerts=json.loads(d.read_text(encoding=\'utf-8\')) if d.exists() else {{}}; backup_alerts=[a for a in alerts.values() if a.get(\'rule_id\')==\'backup\' and a.get(\'status\')==\'OPEN\']; print(\'PASS\' if not backup_alerts else \'FAIL\')"',
+        "command": f'& "{PYTHON}" -X utf8 -c "from pathlib import Path; from datetime import datetime, timedelta; backup_dir = Path(r\'{WS / "autolearn" / "backups"}\'); recent = [f for f in backup_dir.glob(\'*.zip\') if (datetime.now() - datetime.fromtimestamp(f.stat().st_mtime)) < timedelta(hours=1)]; print(\'PASS\' if recent else \'FAIL\')"',
         "expect": "PASS",
-        "delay_sec": 5
+        "delay_sec": 10
     },
     "disk_full": {
         "type": "command_check",

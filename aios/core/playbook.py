@@ -83,7 +83,7 @@ BUILTIN_PLAYBOOKS = [
             }
         ],
         "cooldown_min": 360,
-        "enabled": True,
+        "enabled": False,
         "require_confirm": False
     },
     {
