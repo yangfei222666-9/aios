@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-22T12:56:59.193103",
+  "generated_at": "2026-02-22T13:34:00.629930",
   "overview": {
     "evolution_score": 0.4,
     "grade": "healthy",
@@ -285,102 +285,40 @@
       "tsr": 1.0,
       "cr": 0,
       "events": 46
+    },
+    {
+      "ts": "2026-02-22T12:58:49",
+      "score": 0.4,
+      "grade": "healthy",
+      "tsr": 1.0,
+      "cr": 0,
+      "events": 46
     }
   ],
   "events": {
     "by_layer": {
-      "KERNEL": 89,
+      "KERNEL": 90,
       "COMMS": 8,
       "TOOL": 48,
-      "MEM": 369,
+      "MEM": 378,
       "SEC": 16
     },
     "by_severity": {
-      "INFO": 523,
+      "INFO": 533,
       "WARN": 6,
       "CRIT": 1
     },
     "by_status": {
-      "ok": 514,
+      "ok": 524,
       "err": 16
     },
     "daily": {
       "2026-02-19": 47,
       "2026-02-20": 197,
       "2026-02-21": 59,
-      "2026-02-22": 227
+      "2026-02-22": 237
     },
     "recent": [
-      {
-        "ts": "2026-02-22T12:26:25.209898",
-        "layer": "MEM",
-        "event": "sensor.file.created",
-        "status": "ok",
-        "severity": "INFO"
-      },
-      {
-        "ts": "2026-02-22T12:26:25.210399",
-        "layer": "MEM",
-        "event": "sensor.file.created",
-        "status": "ok",
-        "severity": "INFO"
-      },
-      {
-        "ts": "2026-02-22T12:26:25.210399",
-        "layer": "MEM",
-        "event": "sensor.file.created",
-        "status": "ok",
-        "severity": "INFO"
-      },
-      {
-        "ts": "2026-02-22T12:26:25.210904",
-        "layer": "MEM",
-        "event": "sensor.file.created",
-        "status": "ok",
-        "severity": "INFO"
-      },
-      {
-        "ts": "2026-02-22T12:26:25.210904",
-        "layer": "MEM",
-        "event": "sensor.file.created",
-        "status": "ok",
-        "severity": "INFO"
-      },
-      {
-        "ts": "2026-02-22T12:26:25.210904",
-        "layer": "MEM",
-        "event": "sensor.file.modified",
-        "status": "ok",
-        "severity": "INFO"
-      },
-      {
-        "ts": "2026-02-22T12:26:25.210904",
-        "layer": "MEM",
-        "event": "sensor.file.created",
-        "status": "ok",
-        "severity": "INFO"
-      },
-      {
-        "ts": "2026-02-22T12:26:25.211410",
-        "layer": "MEM",
-        "event": "sensor.file.modified",
-        "status": "ok",
-        "severity": "INFO"
-      },
-      {
-        "ts": "2026-02-22T12:26:25.211410",
-        "layer": "MEM",
-        "event": "sensor.file.modified",
-        "status": "ok",
-        "severity": "INFO"
-      },
-      {
-        "ts": "2026-02-22T12:26:25.211410",
-        "layer": "MEM",
-        "event": "sensor.file.modified",
-        "status": "ok",
-        "severity": "INFO"
-      },
       {
         "ts": "2026-02-22T12:26:25.211909",
         "layer": "MEM",
@@ -448,6 +386,76 @@
         "ts": "2026-02-22T12:27:39.743117",
         "layer": "MEM",
         "event": "sensor.file.created",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.368202",
+        "layer": "MEM",
+        "event": "sensor.file.modified",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.368202",
+        "layer": "MEM",
+        "event": "sensor.file.modified",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.368202",
+        "layer": "MEM",
+        "event": "sensor.file.modified",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.369207",
+        "layer": "MEM",
+        "event": "sensor.file.modified",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.369207",
+        "layer": "MEM",
+        "event": "sensor.file.modified",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.369207",
+        "layer": "MEM",
+        "event": "sensor.file.modified",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.369711",
+        "layer": "MEM",
+        "event": "sensor.file.modified",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.369711",
+        "layer": "MEM",
+        "event": "sensor.file.modified",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.369711",
+        "layer": "MEM",
+        "event": "sensor.file.modified",
+        "status": "ok",
+        "severity": "INFO"
+      },
+      {
+        "ts": "2026-02-22T12:58:49.770842",
+        "layer": "KERNEL",
+        "event": "sensor.system.health",
         "status": "ok",
         "severity": "INFO"
       }
@@ -611,18 +619,18 @@
     ]
   },
   "evolution_v2": {
-    "v2_score": 0.3,
+    "v2_score": 0.316,
     "grade": "degraded",
     "base": 0.4,
-    "reactor": 0.15,
+    "reactor": 0.19,
     "detail": {
-      "reactor_score": 0.15,
+      "reactor_score": 0.19,
       "auto_fix_rate": 0.5,
       "false_positive_rate": 0.3333,
-      "auto_close_rate": 0.0,
+      "auto_close_rate": 0.2,
       "total_reactions": 6,
       "total_verifications": 9,
-      "total_resolved": 4
+      "total_resolved": 5
     },
     "trend": [
       {
@@ -666,11 +674,18 @@
         "base": 0.4,
         "reactor": 0.15,
         "grade": "degraded"
+      },
+      {
+        "ts": "2026-02-22T12:58",
+        "v2": 0.316,
+        "base": 0.4,
+        "reactor": 0.19,
+        "grade": "degraded"
       }
     ]
   },
   "pipeline": {
-    "total_runs": 4,
+    "total_runs": 5,
     "recent": [
       {
         "ts": "2026-02-22T12:26",
@@ -693,6 +708,12 @@
       {
         "ts": "2026-02-22T12:28",
         "ms": 481,
+        "errors": 0,
+        "grade": "degraded"
+      },
+      {
+        "ts": "2026-02-22T12:58",
+        "ms": 514,
         "errors": 0,
         "grade": "degraded"
       }

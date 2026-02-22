@@ -12,6 +12,18 @@
     "daily-briefing": {
       "version": "1.0.5",
       "installedAt": 1771672553099
+    },
+    "sysadmin-toolbox": {
+      "version": "1.1.0",
+      "installedAt": 1771736509290
+    },
+    "windows-ui-automation": {
+      "version": "1.0.0",
+      "installedAt": 1771736866511
+    },
+    "system-resource-monitor": {
+      "version": "1.0.0",
+      "installedAt": 1771736929769
     }
   }
 }

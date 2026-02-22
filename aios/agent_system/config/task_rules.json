@@ -1,0 +1,83 @@
+{
+  "task_types": {
+    "code": {
+      "keywords": [
+        "写代码", "写", "编写", "实现", "开发", "创建",
+        "调试", "debug", "修复", "bug", "fix",
+        "重构", "优化代码", "改进", "refactor",
+        "函数", "类", "模块", "API", "接口",
+        "测试", "单元测试", "爬虫", "脚本", "程序"
+      ],
+      "agent_template": "coder",
+      "model": "claude-opus-4-6",
+      "priority": "high"
+    },
+    "analysis": {
+      "keywords": [
+        "分析", "统计", "数据",
+        "趋势", "模式", "规律",
+        "报告", "总结", "汇总",
+        "对比", "比较", "评估"
+      ],
+      "agent_template": "analyst",
+      "model": "claude-sonnet-4-5",
+      "priority": "medium"
+    },
+    "monitor": {
+      "keywords": [
+        "监控", "检查", "状态",
+        "健康", "性能", "资源",
+        "CPU", "内存", "磁盘",
+        "进程", "服务", "系统"
+      ],
+      "agent_template": "monitor",
+      "model": "claude-sonnet-4-5",
+      "priority": "medium"
+    },
+    "research": {
+      "keywords": [
+        "搜索", "查找", "查询",
+        "研究", "调研", "了解",
+        "资料", "信息", "文档",
+        "什么是", "如何", "为什么"
+      ],
+      "agent_template": "researcher",
+      "model": "claude-sonnet-4-5",
+      "priority": "low"
+    },
+    "design": {
+      "keywords": [
+        "设计", "架构", "方案",
+        "规划", "蓝图", "框架",
+        "系统设计", "技术选型",
+        "数据库设计", "API设计"
+      ],
+      "agent_template": "coder",
+      "model": "claude-opus-4-6",
+      "priority": "high"
+    }
+  },
+  "complexity_indicators": {
+    "high": [
+      "复杂", "困难", "挑战",
+      "多步骤", "长期", "大型",
+      "架构", "系统", "完整"
+    ],
+    "medium": [
+      "中等", "一般", "标准",
+      "常规", "普通"
+    ],
+    "low": [
+      "简单", "快速", "小",
+      "基础", "入门"
+    ]
+  },
+  "auto_create_rules": {
+    "enabled": true,
+    "max_agents_per_type": 3,
+    "create_threshold": {
+      "task_queue_length": 2,
+      "agent_busy_rate": 0.8
+    }
+  }
+}

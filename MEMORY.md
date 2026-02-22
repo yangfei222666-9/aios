@@ -27,6 +27,8 @@
 - Whisper 语音转文字（本地 CPU 运行）
 - ARAM 大乱斗助手 (C:\Users\A\Desktop\ARAM-Helper\)
 - Autolearn v1.0 自主学习系统 (C:\Users\A\.openclaw\workspace\autolearn\)
+- AIOS Agent System v1.0 自主 Agent 管理系统 (2026-02-22)
+- 模型成本优化 + 智能路由系统 (2026-02-22)
 
 ## Autolearn v1.0 (2026-02-19)
 - 状态：已完成，10/10 测试全绿，可复刻可发布
@@ -193,3 +195,16 @@
 - DDragon 版本需要动态获取（当前自动拉取，已修复写死问题）
 - 腾讯服英雄名字可能跟 DDragon 不一致（如 904 亚恒）
 - web_search 工具有 ByteString 编码 bug，中文搜索全部失败
+
+## AIOS Agent System v1.0 (2026-02-22)
+- 状态：✅ MVP 完成，所有测试通过
+- 智能任务路由：基于关键词识别任务类型（code/analysis/monitor/research/design）
+- 自动 Agent 管理：按需创建、负载均衡、统计追踪、闲置清理
+- 4 种内置模板：coder（opus）、analyst（sonnet）、monitor（sonnet）、researcher（sonnet）
+- 数据持久化：agents.jsonl + system.log
+- CLI: python -m aios.agent_system [status|list|create|route|cleanup]
+- Python API: AgentSystem().handle_task(message, auto_create=True)
+- 测试：4 个测试场景全部通过
+- 路径：aios/agent_system/
+- 文档：README.md（架构）、USAGE.md（使用）、COMPLETION_REPORT.md（完成报告）
+

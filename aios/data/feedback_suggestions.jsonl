@@ -20,3 +20,7 @@
 {"ts": "2026-02-22T12:28:05.933701", "playbook_id": "disk_full", "type": "disable", "reason": "成功率仅 0% (n=3)，建议禁用并排查", "confidence": 0.8, "priority": "high"}
 {"ts": "2026-02-22T12:28:05.933701", "playbook_id": "disk_full", "type": "upgrade_risk", "reason": "连续失败 3 次，建议升级为 require_confirm", "confidence": 0.85, "priority": "high"}
 {"ts": "2026-02-22T12:28:05.933701", "playbook_id": "disk_full", "type": "review_risk_level", "reason": "全部 3 次都需确认，从未自动执行，检查风险分级是否过严", "confidence": 0.6, "priority": "low"}
+{"ts": "2026-02-22T12:58:49.866362", "playbook_id": "backup_expired", "type": "review_verifier", "reason": "验证通过率 0%，执行成功但验证失败，检查验证规则", "confidence": 0.7, "priority": "medium"}
+{"ts": "2026-02-22T12:58:49.866362", "playbook_id": "disk_full", "type": "disable", "reason": "成功率仅 0% (n=3)，建议禁用并排查", "confidence": 0.8, "priority": "high"}
+{"ts": "2026-02-22T12:58:49.866362", "playbook_id": "disk_full", "type": "upgrade_risk", "reason": "连续失败 3 次，建议升级为 require_confirm", "confidence": 0.85, "priority": "high"}
+{"ts": "2026-02-22T12:58:49.866362", "playbook_id": "disk_full", "type": "review_risk_level", "reason": "全部 3 次都需确认，从未自动执行，检查风险分级是否过严", "confidence": 0.6, "priority": "low"}
