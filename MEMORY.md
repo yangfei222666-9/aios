@@ -173,9 +173,10 @@
 - 原则：简单机制 > 复杂机制，先跑起来再迭代，别过度设计
 - v3 伪代码留作参考，等 v2 暴露实际问题再升级
 
-## GitHub 登录 (2026-02-21)
-- gh auth login 设备流已启动，验证码 018B-7F05，珊瑚海当时困了没完成
-- 下次提醒继续完成 GitHub 认证
+## GitHub 登录 (2026-02-22)
+- gh auth login 完成，账号 yangfei222666-9
+- Token scopes: gist, read:org, repo, workflow
+- gh.exe 路径: C:\Program Files\GitHub CLI\gh.exe（已加入用户 PATH）
 
 ## 珊瑚海的偏好
 - 数据质量：宁缺毋滥，不接受编造或模板凑数
