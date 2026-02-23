@@ -83,7 +83,74 @@
 - 39 + 38 = 77 测试全绿
 - 路径：aios/collaboration/
 
-## AIOS v0.5.0 (2026-02-22)
+## AIOS 开源打包完成 (2026-02-23)
+
+### PyPI 打包 (18:14-18:22)
+- ✅ setup.py + pyproject.toml
+- ✅ __init__.py (AIOS 类)
+- ✅ LICENSE (MIT)
+- ✅ .gitignore
+- ✅ README v2.0 (开源友好版)
+- ✅ PACKAGING.md + DEMO_SCRIPT.md
+- ✅ 本地测试通过，构建成功 (248KB wheel)
+- Git commit: 32ec3a7
+
+### 开源包装 (18:22-18:28)
+- ✅ CHANGELOG.md (版本历史 + 升级指南 + Roadmap)
+- ✅ CONTRIBUTING.md (贡献指南)
+- ✅ SECURITY.md (安全政策)
+- ✅ EXAMPLES.md (代码示例)
+- ✅ setup.cfg (flake8/mypy/pytest 配置)
+- ✅ GitHub Actions (CI/CD + PyPI 自动发布)
+- ✅ Issue/PR 模板
+- ✅ README 徽章 (PyPI/Python/License/Stars)
+- ✅ 项目主页 (docs/index.html，漂亮的落地页)
+- Git commit: 7eadf17 + baec717
+
+### 包装清单
+**文档：**
+- README.md (开源友好版，带徽章)
+- CHANGELOG.md (版本历史)
+- CONTRIBUTING.md (贡献指南)
+- SECURITY.md (安全政策)
+- EXAMPLES.md (代码示例)
+- PACKAGING.md (打包文档)
+- DEMO_SCRIPT.md (视频脚本)
+
+**GitHub：**
+- .github/workflows/ci.yml (CI 测试)
+- .github/workflows/publish.yml (PyPI 自动发布)
+- .github/ISSUE_TEMPLATE.md (Issue 模板)
+- .github/PULL_REQUEST_TEMPLATE.md (PR 模板)
+
+**配置：**
+- setup.py + pyproject.toml (打包配置)
+- setup.cfg (工具配置)
+- .gitignore (排除文件)
+
+**主页：**
+- docs/index.html (项目落地页，可用 GitHub Pages)
+
+### 开源就绪度：9/10
+- ✅ 核心功能完整
+- ✅ README 专业
+- ✅ 文档齐全
+- ✅ CI/CD 配置
+- ✅ 社区模板
+- ✅ 安全政策
+- ✅ 项目主页
+- ⏳ 测试覆盖不够（需要补集成测试）
+- ⏳ 还没发布到 PyPI（等测试完成）
+
+### 下一步
+1. 补充集成测试
+2. 测试 PyPI 发布流程（TestPyPI）
+3. 正式发布到 PyPI
+4. 录制 demo 视频
+5. 推广（HN/Reddit/Twitter/知乎）
+
+### 战略意义
+AIOS 从"内部工具"完全变成"开源产品"，所有开源项目该有的东西都有了。距离正式发布只差测试和推广。
 - P0 watcher.py：watchdog 实时文件监听 + 系统资源/网络/进程监控，替代 mtime 轮询
 - P1 tracker.py：任务状态机（TODO→IN_PROGRESS→BLOCKED→DONE）+ deadline 检查 + CLI
 - P2 decision_log.py：决策审计（context/options/chosen/reason/confidence/outcome）+ 统计

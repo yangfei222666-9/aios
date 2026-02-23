@@ -53,7 +53,38 @@ Issues = "https://github.com/yangfei222666-9/aios/issues"
 aios = "aios.__main__:main"
 
 [tool.setuptools]
-packages = {find = {}}
+packages = [
+    "aios",
+    "aios.agent_system",
+    "aios.agent_system.core",
+    "aios.collaboration",
+    "aios.core",
+    "aios.dashboard",
+    "aios.learning",
+    "aios.learning.feedback",
+    "aios.learning.habits",
+    "aios.plugins",
+    "aios.plugins.aram",
+    "aios.plugins.gateway",
+    "aios.scripts",
+    "aios.tests",
+]
+
+[tool.setuptools.package-dir]
+"aios" = "."
+"aios.agent_system" = "agent_system"
+"aios.agent_system.core" = "agent_system/core"
+"aios.collaboration" = "collaboration"
+"aios.core" = "core"
+"aios.dashboard" = "dashboard"
+"aios.learning" = "learning"
+"aios.learning.feedback" = "learning/feedback"
+"aios.learning.habits" = "learning/habits"
+"aios.plugins" = "plugins"
+"aios.plugins.aram" = "plugins/aram"
+"aios.plugins.gateway" = "plugins/gateway"
+"aios.scripts" = "scripts"
+"aios.tests" = "tests"
 
 [tool.setuptools.package-data]
 "*" = [
