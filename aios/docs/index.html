@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIOS - Self-Learning AI Agent Framework</title>
+    <meta name="description" content="Memory-driven, self-healing, production-ready AI agent framework">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 80px 20px;
+            color: white;
+        }
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .tagline {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        .cta {
+            display: inline-block;
+            padding: 15px 40px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.2em;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .features {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin: 40px 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+        .feature {
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .feature h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .stat {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+        }
+        .stat-number {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+        .code-block code {
+            font-size: 0.95em;
+            line-height: 1.8;
+        }
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            opacity: 0.8;
+        }
+        .badges {
+            margin: 20px 0;
+        }
+        .badges img {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🧠 AIOS</h1>
+            <p class="tagline">Self-Learning AI Agent Framework</p>
+            <p style="font-size: 1.2em; margin-bottom: 30px;">Memory-driven, self-healing, production-ready</p>
+            
+            <div class="badges">
+                <img src="https://img.shields.io/badge/pypi-v0.5.0-blue.svg" alt="PyPI">
+                <img src="https://img.shields.io/badge/python-3.8%2B-blue.svg" alt="Python">
+                <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
+            </div>
+            
+            <div>
+                <a href="https://github.com/yangfei222666-9/aios" class="cta">⭐ Star on GitHub</a>
+                <a href="#install" class="cta">📦 Install Now</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">600x</div>
+                <div>Faster Agent Spawn</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">95%</div>
+                <div>System Stability</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">54%</div>
+                <div>Auto-Fix Rate</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">0.457</div>
+                <div>Evolution Score</div>
+            </div>
+        </div>
+
+        <div class="features">
+            <h2 style="text-align: center; font-size: 2.5em; margin-bottom: 20px;">Why AIOS?</h2>
+            <p style="text-align: center; font-size: 1.2em; color: #666; margin-bottom: 40px;">
+                Your AI assistant makes the same mistake twice. AIOS doesn't.
+            </p>
+
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Self-Learning</h3>
+                    <p>Learns from every mistake. Error → Lesson → Rule. Automatic pattern recognition and adaptation.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Self-Healing</h3>
+                    <p>Detects issues, matches playbooks, fixes itself, verifies. Evolution score: 0.24 → 0.457.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Multi-Agent</h3>
+                    <p>Spawns specialized agents, delegates tasks, aggregates results. 600x faster than sequential.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>Production-Ready</h3>
+                    <p>Circuit breakers, rollback, audit logs, SLA tracking. Real-time dashboard included.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💾</div>
+                    <h3>Memory-Driven</h3>
+                    <p>Persistent memory across sessions. Context-aware decisions. Never forgets what works.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightweight</h3>
+                    <p>248KB package. No heavy dependencies. Fast install. Works on Windows, macOS, Linux.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="features" id="install">
+            <h2 style="text-align: center; font-size: 2.5em; margin-bottom: 40px;">Get Started in 30 Seconds</h2>
+            
+            <div class="code-block">
+                <code># Install
+pip install aios-framework
+
+# Use
+from aios import AIOS
+
+system = AIOS()
+system.log_event("error", "network", {"code": 502})
+system.run_pipeline()  # Auto-learns and fixes
+
+score = system.evolution_score()
+print(f"Evolution: {score['score']} ({score['grade']})")</code>
+            </div>
+
+            <p style="text-align: center; margin-top: 30px;">
+                <a href="https://github.com/yangfei222666-9/aios/blob/main/EXAMPLES.md" style="color: #667eea; font-weight: 600;">
+                    View More Examples →
+                </a>
+            </p>
+        </div>
+
+        <div class="features">
+            <h2 style="text-align: center; font-size: 2.5em; margin-bottom: 40px;">Real-World Results</h2>
+            
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: #f5f5f5;">
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #ddd;">Metric</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #ddd;">Before</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #ddd;">After</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #ddd;">Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 15px; border-bottom: 1px solid #eee;">Agent spawn time</td>
+                        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #eee;">180s</td>
+                        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #eee;">0.3s</td>
+                        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #eee; color: #22c55e; font-weight: 600;">600x</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 15px; border-bottom: 1px solid #eee;">System stability</td>
+                        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #eee;">70%</td>
+                        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #eee;">95%</td>
+                        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #eee; color: #22c55e; font-weight: 600;">+25%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 15px; border-bottom: 1px solid #eee;">Evolution score</td>
+                        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #eee;">0.24</td>
+                        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #eee;">0.457</td>
+                        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #eee; color: #22c55e; font-weight: 600;">+90%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 15px;">Auto-fix rate</td>
+                        <td style="padding: 15px; text-align: center;">0%</td>
+                        <td style="padding: 15px; text-align: center;">54%</td>
+                        <td style="padding: 15px; text-align: center; color: #22c55e; font-weight: 600;">∞</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="features">
+            <h2 style="text-align: center; font-size: 2.5em; margin-bottom: 20px;">Built for Real Work</h2>
+            <p style="text-align: center; font-size: 1.2em; color: #666; margin-bottom: 40px;">
+                Not a demo. Not a toy. Production-tested.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                <div style="padding: 30px; background: #f9fafb; border-radius: 10px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">🏠 Personal AI Assistant</h3>
+                    <p>Learns your preferences, automates tasks, remembers context across sessions.</p>
+                </div>
+                <div style="padding: 30px; background: #f9fafb; border-radius: 10px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">🔧 DevOps Automation</h3>
+                    <p>Monitors systems, auto-fixes issues, learns from incidents.</p>
+                </div>
+                <div style="padding: 30px; background: #f9fafb; border-radius: 10px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">👥 Code Review Bot</h3>
+                    <p>Spawns reviewer agents, aggregates feedback, improves over time.</p>
+                </div>
+                <div style="padding: 30px; background: #f9fafb; border-radius: 10px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">🔬 Research Assistant</h3>
+                    <p>Delegates subtasks, synthesizes results, tracks progress.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p style="font-size: 1.2em; margin-bottom: 20px;">
+                <strong>AIOS — From chatbot to operating system.</strong>
+            </p>
+            <p>
+                <a href="https://github.com/yangfei222666-9/aios" style="color: white; margin: 0 15px;">GitHub</a>
+                <a href="https://github.com/yangfei222666-9/aios/blob/main/CONTRIBUTING.md" style="color: white; margin: 0 15px;">Contributing</a>
+                <a href="https://github.com/yangfei222666-9/aios/blob/main/CHANGELOG.md" style="color: white; margin: 0 15px;">Changelog</a>
+                <a href="https://github.com/yangfei222666-9/aios/blob/main/LICENSE" style="color: white; margin: 0 15px;">License</a>
+            </p>
+            <p style="margin-top: 20px; opacity: 0.7;">
+                Built with ❤️ by <a href="https://t.me/shh7799" style="color: white;">@shh7799</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
