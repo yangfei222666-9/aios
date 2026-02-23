@@ -42,6 +42,12 @@
 - 记录到 memory/YYYY-MM-DD.md（学了什么、装了什么、能干什么）
 - 不打扰珊瑚海，除非发现特别好用的才主动推荐
 
+### 每天 9:00：Agent 定时任务检查
+- 运行 `& "C:\Program Files\Python312\python.exe" C:\Users\A\.openclaw\workspace\aios\agent_system\auto_dispatcher.py cron`
+- 触发每日/每周/每小时定时任务（代码审查、性能报告、待办检查）
+- 任务自动入队，等心跳时处理
+- 静默执行，除非有重要发现
+
 ### 执行规则
 - 深夜(23:00-08:00)不执行，等下次心跳
 - 每次只执行1个到期任务，避免耗时过长
@@ -54,3 +60,17 @@
 - 如果有 high_priority 建议，简要提醒
 - 如果 reactor 有 pending_confirm，告知珊瑚海确认
 - 其他情况静默（HEARTBEAT_OK）
+
+### 每次心跳：Agent 任务队列
+- 运行 `& "C:\Program Files\Python312\python.exe" C:\Users\A\.openclaw\workspace\aios\agent_system\auto_dispatcher.py heartbeat`
+- 处理最多 5 个排队任务
+- 自动路由到合适的 Agent（coder/analyst/monitor/researcher）
+- 静默执行，除非有失败需要人工介入
+
+### 每次心跳：Agent Spawn 请求处理（异步模式）
+- 检查 aios/agent_system/spawn_requests.jsonl
+- 如果有待处理请求，批量创建子 Agent（不等待完成）
+- 使用 sessions_spawn(..., cleanup="keep") 保持会话
+- 记录 spawn 状态到 spawn_results.jsonl（spawned_at + session_key）
+- 通过 subagents list 异步查询结果
+- 静默执行，除非有失败需要人工介入
