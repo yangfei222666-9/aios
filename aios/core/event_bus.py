@@ -11,6 +11,7 @@
 - 不引入线程/异步，保持简单（OpenClaw 本身是单线程）
 - 通过文件队列实现跨会话通信
 """
+
 import json, time, fnmatch
 from pathlib import Path
 from typing import Callable, Optional
@@ -28,8 +29,13 @@ QUEUE_DIR = Path(__file__).resolve().parent.parent / "events" / "queue"
 class Event:
     __slots__ = ("topic", "payload", "priority", "ts", "source")
 
-    def __init__(self, topic: str, payload: dict = None,
-                 priority: int = PRIORITY_NORMAL, source: str = ""):
+    def __init__(
+        self,
+        topic: str,
+        payload: dict = None,
+        priority: int = PRIORITY_NORMAL,
+        source: str = "",
+    ):
         self.topic = topic
         self.payload = payload or {}
         self.priority = priority
@@ -47,8 +53,12 @@ class Event:
 
     @classmethod
     def from_dict(cls, d: dict) -> "Event":
-        e = cls(d["topic"], d.get("payload", {}),
-                d.get("priority", PRIORITY_NORMAL), d.get("source", ""))
+        e = cls(
+            d["topic"],
+            d.get("payload", {}),
+            d.get("priority", PRIORITY_NORMAL),
+            d.get("source", ""),
+        )
         e.ts = d.get("ts", time.time())
         return e
 
@@ -57,12 +67,15 @@ class EventBus:
     """进程内事件总线 + 文件队列"""
 
     def __init__(self, persist: bool = True):
-        self._subs: list[tuple[str, Callable, int]] = []  # (pattern, handler, min_priority)
+        self._subs: list[tuple[str, Callable, int]] = (
+            []
+        )  # (pattern, handler, min_priority)
         self._persist = persist
         self._history: list[Event] = []
 
-    def subscribe(self, pattern: str, handler: Callable,
-                  min_priority: int = PRIORITY_LOW):
+    def subscribe(
+        self, pattern: str, handler: Callable, min_priority: int = PRIORITY_LOW
+    ):
         """订阅事件。pattern 支持通配符（如 sensor.*）"""
         self._subs.append((pattern, handler, min_priority))
 
@@ -85,16 +98,27 @@ class EventBus:
                     triggered += 1
                 except Exception as e:
                     # handler 异常不阻塞其他订阅者
-                    self._persist_event(Event(
-                        "bus.handler_error",
-                        {"handler": handler.__name__, "error": str(e)[:200],
-                         "original_topic": event.topic},
-                        PRIORITY_HIGH, "event_bus"
-                    ))
+                    self._persist_event(
+                        Event(
+                            "bus.handler_error",
+                            {
+                                "handler": handler.__name__,
+                                "error": str(e)[:200],
+                                "original_topic": event.topic,
+                            },
+                            PRIORITY_HIGH,
+                            "event_bus",
+                        )
+                    )
         return triggered
 
-    def emit(self, topic: str, payload: dict = None,
-             priority: int = PRIORITY_NORMAL, source: str = "") -> int:
+    def emit(
+        self,
+        topic: str,
+        payload: dict = None,
+        priority: int = PRIORITY_NORMAL,
+        source: str = "",
+    ) -> int:
         """便捷发布"""
         return self.publish(Event(topic, payload, priority, source))
 
@@ -146,11 +170,13 @@ class EventBus:
         path = QUEUE_DIR / "pending.jsonl"
         if not path.exists():
             return 0
-        return sum(1 for l in path.read_text(encoding="utf-8").splitlines() if l.strip())
+        return sum(
+            1 for l in path.read_text(encoding="utf-8").splitlines() if l.strip()
+        )
 
     def recent(self, limit: int = 10, topic_filter: str = None) -> list[dict]:
         """最近的事件（内存中）"""
-        out = self._history[-limit * 3:]
+        out = self._history[-limit * 3 :]
         if topic_filter:
             out = [e for e in out if fnmatch.fnmatch(e.topic, topic_filter)]
         return [e.to_dict() for e in out[-limit:]]
@@ -158,6 +184,7 @@ class EventBus:
 
 # 全局单例
 _bus: Optional[EventBus] = None
+
 
 def get_bus() -> EventBus:
     global _bus

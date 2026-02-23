@@ -87,3 +87,13 @@
 {"ts": "2026-02-23T16:59:18.721624", "reaction_id": "0e4f87bc", "alert_id": "4e833507", "playbook_id": "pb-007-gpu-overheat", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
 {"ts": "2026-02-23T16:59:18.721624", "reaction_id": "05b28b5a", "alert_id": "4e833507", "playbook_id": "pb-012-gpu-critical-alert", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
 {"ts": "2026-02-23T16:59:18.721624", "reaction_id": "d304e1bc", "alert_id": "4e833507", "playbook_id": "pb-013-app-crash-monitor", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:31:27.132031", "reaction_id": "1350a99a", "alert_id": "4e833507", "playbook_id": "pb-012-gpu-critical-alert", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:31:27.132530", "reaction_id": "2b80b84f", "alert_id": "4e833507", "playbook_id": "pb-013-app-crash-monitor", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:31:27.132530", "reaction_id": "f69d02f3", "alert_id": "4e833507", "playbook_id": "pb-015-model-fallback", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:31:27.132530", "reaction_id": "0fef3126", "alert_id": "4e833507", "playbook_id": "pb-017-network-speed-test", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:31:27.132530", "reaction_id": "625c6ffb", "alert_id": "4e833507", "playbook_id": "pb-018-aios-health-check", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:32:26.460404", "reaction_id": "1350a99a", "alert_id": "4e833507", "playbook_id": "pb-012-gpu-critical-alert", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:32:26.460404", "reaction_id": "2b80b84f", "alert_id": "4e833507", "playbook_id": "pb-013-app-crash-monitor", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:32:26.460910", "reaction_id": "f69d02f3", "alert_id": "4e833507", "playbook_id": "pb-015-model-fallback", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:32:26.460910", "reaction_id": "0fef3126", "alert_id": "4e833507", "playbook_id": "pb-017-network-speed-test", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T18:32:26.460910", "reaction_id": "625c6ffb", "alert_id": "4e833507", "playbook_id": "pb-018-aios-health-check", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}

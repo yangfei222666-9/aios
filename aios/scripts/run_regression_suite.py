@@ -3,6 +3,7 @@
 验证 AIOS 所有核心模块正常工作。
 python scripts/run_regression_suite.py
 """
+
 import sys, json, time, traceback
 from pathlib import Path
 
@@ -28,8 +29,10 @@ def test(name, fn):
 
 # === core ===
 
+
 def test_config():
     from core.config import load, get, get_path, get_float, get_bool, get_int
+
     cfg = load()
     assert len(cfg) > 0, "config empty"
     assert get("config.name") == "AIOS"
@@ -40,7 +43,14 @@ def test_config():
 
 
 def test_engine_log_and_load():
-    from core.engine import log_event, load_events, log_tool_event, append_jsonl, count_by_type
+    from core.engine import (
+        log_event,
+        load_events,
+        log_tool_event,
+        append_jsonl,
+        count_by_type,
+    )
+
     ev = log_event("test", "regression", "test event", {"key": "value"})
     assert ev["type"] == "test"
     assert ev["ts"] > 0
@@ -58,6 +68,7 @@ def test_engine_log_and_load():
 
 def test_policies():
     from core.policies import apply_alias_suggestion
+
     alias_map = {}
     item = {"input": "卡特", "suggested": "卡莎", "confidence": 0.9}
     applied, why = apply_alias_suggestion(alias_map, item, 0.8, True)
@@ -81,8 +92,10 @@ def test_policies():
 
 # === learning ===
 
+
 def test_analyze_metrics():
     from learning.analyze import compute_metrics
+
     m = compute_metrics(days=1)
     assert "counts" in m
     assert "quality" in m
@@ -91,7 +104,12 @@ def test_analyze_metrics():
 
 
 def test_analyze_suggestions():
-    from learning.analyze import compute_alias_suggestions, compute_tool_suggestions, compute_threshold_warnings
+    from learning.analyze import (
+        compute_alias_suggestions,
+        compute_tool_suggestions,
+        compute_threshold_warnings,
+    )
+
     # 这些不应该崩
     compute_alias_suggestions(days=1)
     compute_tool_suggestions(days=1)
@@ -100,6 +118,7 @@ def test_analyze_suggestions():
 
 def test_analyze_full_report():
     from learning.analyze import generate_full_report
+
     r = generate_full_report(days=1)
     assert "ts" in r
     assert "window" in r
@@ -110,6 +129,7 @@ def test_analyze_full_report():
 
 def test_analyze_daily_report():
     from learning.analyze import generate_daily_report
+
     text = generate_daily_report(days=1)
     assert "AIOS Daily Report" in text
     assert "Evolution Score" in text
@@ -117,6 +137,7 @@ def test_analyze_daily_report():
 
 def test_baseline_snapshot():
     from learning.baseline import snapshot, load_history, evolution_score
+
     r = snapshot(days=1)
     assert "correction_rate" in r
     assert "tool_success_rate" in r
@@ -133,10 +154,19 @@ def test_baseline_snapshot():
 
 def test_tickets():
     from learning.tickets import ingest, load_tickets, summary
-    result = ingest([{
-        "level": "L2", "name": "test_tool", "action": "monitor",
-        "reason": "regression_test", "confidence": 0.5, "evidence": {},
-    }])
+
+    result = ingest(
+        [
+            {
+                "level": "L2",
+                "name": "test_tool",
+                "action": "monitor",
+                "reason": "regression_test",
+                "confidence": 0.5,
+                "evidence": {},
+            }
+        ]
+    )
     assert result["created"] >= 0
     s = summary()
     assert isinstance(s, str)
@@ -144,6 +174,7 @@ def test_tickets():
 
 def test_apply():
     from learning.apply import load_suggestions, load_learned
+
     # 不崩就行
     load_suggestions()
     load_learned()
@@ -151,14 +182,17 @@ def test_apply():
 
 # === plugins ===
 
+
 def test_aram_matcher():
     from plugins.aram.data_adapter import load_champions, champion_count
+
     count = champion_count()
     # 可能没数据文件，跳过
     if count == 0:
         return
 
     from plugins.aram.matcher import match
+
     results = match("亚索")
     assert len(results) >= 1
     assert results[0]["score"] > 0
@@ -166,6 +200,7 @@ def test_aram_matcher():
 
 def test_aram_rules():
     from plugins.aram.rules import BUILTIN_ALIASES
+
     assert "卡特" in BUILTIN_ALIASES
     assert "盲僧" in BUILTIN_ALIASES
     assert BUILTIN_ALIASES["vn"] == "67"
@@ -173,6 +208,7 @@ def test_aram_rules():
 
 def test_aram_data_adapter():
     from plugins.aram.data_adapter import load_aliases, save_aliases
+
     # round-trip
     aliases = load_aliases()
     assert isinstance(aliases, dict)
@@ -180,8 +216,10 @@ def test_aram_data_adapter():
 
 # === gateway collector ===
 
+
 def test_gateway_collector():
     from plugins.gateway.collector import record_tool, daily_summary
+
     record_tool("exec", True, 100)
     s = daily_summary()
     assert "tools" in s
@@ -190,8 +228,10 @@ def test_gateway_collector():
 
 # === replay ===
 
+
 def test_replay():
     from scripts.replay import replay
+
     now = int(time.time())
     r = replay(now - 3600, now, days=1)
     assert "events_count" in r
@@ -223,6 +263,7 @@ def _load_last_n_jsonl(path: Path, n: int) -> list:
 def run_metrics_regression() -> tuple:
     """对比最近两次 baseline，检查是否退化"""
     from core.config import get_path
+
     hist = get_path("paths.metrics_history")
     if not hist:
         hist = Path(__file__).resolve().parent.parent / "learning" / "baseline.jsonl"
@@ -261,7 +302,9 @@ def run_metrics_regression() -> tuple:
             RESULTS.append(("PASS", f"metrics:{name}"))
             print(f"  ✓ {name}: {a} → {b} {arrow}")
         else:
-            RESULTS.append(("FAIL", f"metrics:{name}", f"{a} → {b} (expected {direction})"))
+            RESULTS.append(
+                ("FAIL", f"metrics:{name}", f"{a} → {b} (expected {direction})")
+            )
             print(f"  ✗ {name}: {a} → {b} {arrow} (expected {direction})")
 
     return (ok, total)
@@ -299,7 +342,7 @@ if __name__ == "__main__":
     print("\n[metrics regression]")
     metrics_ok, metrics_total = run_metrics_regression()
     PASS += metrics_ok
-    FAIL += (metrics_total - metrics_ok)
+    FAIL += metrics_total - metrics_ok
 
     print(f"\n{'='*40}")
     print(f"Results: {PASS} passed, {FAIL} failed, {PASS+FAIL} total")

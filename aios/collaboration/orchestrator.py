@@ -28,6 +28,7 @@ FAILURE_LOG = DATA_DIR / "failure_log.jsonl"
 
 # ── 失败分类 ──
 
+
 class FailureType:
     GATEWAY_502 = "gateway_502"
     TIMEOUT = "timeout"
@@ -55,9 +56,11 @@ class FailureType:
 
 # ── 重试策略 ──
 
+
 @dataclass
 class RetryPolicy:
     """指数退避重试策略"""
+
     max_retries: int = 3
     base_delay: float = 2.0  # 秒
     max_delay: float = 30.0
@@ -68,15 +71,17 @@ class RetryPolicy:
 
     def delay_for_attempt(self, attempt: int) -> float:
         """第 N 次重试的等待时间"""
-        delay = self.base_delay * (self.backoff_factor ** attempt)
+        delay = self.base_delay * (self.backoff_factor**attempt)
         return min(delay, self.max_delay)
 
 
 # ── 执行 SLA ──
 
+
 @dataclass
 class ExecutionSLA:
     """执行服务等级协议"""
+
     # 最小成功集：这些角色必须成功，否则整体失败
     required_roles: list = field(default_factory=lambda: ["coder", "reviewer"])
     # 最大允许失败数
@@ -91,9 +96,11 @@ class ExecutionSLA:
 
 # ── 子任务 ──
 
+
 @dataclass
 class SubTaskSpec:
     """子任务规格"""
+
     id: str
     description: str
     prompt: str
@@ -115,9 +122,11 @@ class SubTaskSpec:
 
 # ── 计划 ──
 
+
 @dataclass
 class Plan:
     """执行计划"""
+
     plan_id: str
     task: str
     subtasks: list = field(default_factory=list)
@@ -135,6 +144,7 @@ class Plan:
 
 # ── 熔断器 ──
 
+
 class CircuitBreaker:
     """简单的滑动窗口熔断器"""
 
@@ -144,12 +154,14 @@ class CircuitBreaker:
     def record_failure(self, failure_type: str):
         self._failures.append({"type": failure_type, "ts": time.time()})
 
-    def is_tripped(self, failure_type: str, threshold: int = 5,
-                   window: float = 300.0) -> bool:
+    def is_tripped(
+        self, failure_type: str, threshold: int = 5, window: float = 300.0
+    ) -> bool:
         """检查某类失败是否触发熔断"""
         cutoff = time.time() - window
-        recent = [f for f in self._failures
-                  if f["type"] == failure_type and f["ts"] > cutoff]
+        recent = [
+            f for f in self._failures if f["type"] == failure_type and f["ts"] > cutoff
+        ]
         return len(recent) >= threshold
 
     def clear_old(self, window: float = 600.0):
@@ -158,6 +170,7 @@ class CircuitBreaker:
 
 
 # ── 编排器 ──
+
 
 class Orchestrator:
     """生产级多 Agent 编排器"""
@@ -191,13 +204,20 @@ class Orchestrator:
 
     def _save(self):
         PLANS_FILE.write_text(
-            json.dumps([asdict(p) for p in self._plans.values()],
-                       ensure_ascii=False, indent=2),
+            json.dumps(
+                [asdict(p) for p in self._plans.values()], ensure_ascii=False, indent=2
+            ),
             encoding="utf-8",
         )
 
-    def _log_failure(self, plan_id: str, task_id: str, failure_type: str,
-                     error: str, retry_count: int):
+    def _log_failure(
+        self,
+        plan_id: str,
+        task_id: str,
+        failure_type: str,
+        error: str,
+        retry_count: int,
+    ):
         """追加失败日志"""
         FAILURE_LOG.parent.mkdir(parents=True, exist_ok=True)
         entry = {
@@ -213,8 +233,9 @@ class Orchestrator:
 
     # ── 创建计划 ──
 
-    def create_plan(self, plan_id: str, task: str, subtasks: list[dict],
-                    sla: Optional[dict] = None) -> Plan:
+    def create_plan(
+        self, plan_id: str, task: str, subtasks: list[dict], sla: Optional[dict] = None
+    ) -> Plan:
         """
         创建执行计划。
 
@@ -308,8 +329,9 @@ class Orchestrator:
         self._evaluate_completion(plan)
         self._save()
 
-    def mark_failed(self, plan_id: str, task_id: str, error: str,
-                    retry: bool = False) -> dict:
+    def mark_failed(
+        self, plan_id: str, task_id: str, error: str, retry: bool = False
+    ) -> dict:
         """
         标记任务失败。
 
@@ -333,8 +355,7 @@ class Orchestrator:
 
             # 记录失败
             self._breaker.record_failure(failure_type)
-            self._log_failure(plan_id, task_id, failure_type, error,
-                              st["retry_count"])
+            self._log_failure(plan_id, task_id, failure_type, error, st["retry_count"])
 
             # 判定：熔断？
             if self._breaker.is_tripped(
@@ -358,7 +379,9 @@ class Orchestrator:
 
             # 重试耗尽
             st["status"] = "failed"
-            st["result"] = f"EXHAUSTED: {failure_type} after {st['retry_count']} retries ({error[:200]})"
+            st["result"] = (
+                f"EXHAUSTED: {failure_type} after {st['retry_count']} retries ({error[:200]})"
+            )
             st["finished_at"] = time.time()
             result["action"] = "degrade"
             break
@@ -418,7 +441,7 @@ class Orchestrator:
                 "degraded": False,
                 "failed_agents": failed_ids,
                 "reason": f"进行中: {len(done_tasks)}/{total} 完成, "
-                          f"{len(running_tasks)} 运行中, {len(pending_tasks)} 等待",
+                f"{len(running_tasks)} 运行中, {len(pending_tasks)} 等待",
             }
 
         # 全部结束，判定结果
@@ -457,12 +480,10 @@ class Orchestrator:
         confidence = sla.get("degraded_confidence", 0.7)
         # 按失败比例进一步降低 confidence
         fail_ratio = len(failed_tasks) / total
-        confidence = max(confidence * (1 - fail_ratio),
-                         sla.get("min_confidence", 0.3))
+        confidence = max(confidence * (1 - fail_ratio), sla.get("min_confidence", 0.3))
 
         fail_details = [
-            st["id"] + "(" + st.get("failure_type", "?") + ")"
-            for st in failed_tasks
+            st["id"] + "(" + st.get("failure_type", "?") + ")" for st in failed_tasks
         ]
         return {
             "verdict": "degraded",
@@ -474,9 +495,7 @@ class Orchestrator:
 
     def _evaluate_completion(self, plan: Plan):
         """内部：检查计划是否可以结束"""
-        all_terminal = all(
-            st["status"] in ("done", "failed") for st in plan.subtasks
-        )
+        all_terminal = all(st["status"] in ("done", "failed") for st in plan.subtasks)
         if not all_terminal:
             return
 
@@ -546,7 +565,10 @@ class Orchestrator:
 
         verdict = self.evaluate(plan_id)
         status_emoji = {
-            "done": "✅", "degraded": "⚠️", "failed": "❌", "abort": "🛑",
+            "done": "✅",
+            "degraded": "⚠️",
+            "failed": "❌",
+            "abort": "🛑",
         }
         emoji = status_emoji.get(verdict["verdict"], "❓")
 
@@ -563,8 +585,12 @@ class Orchestrator:
         lines.append("")
 
         for st in plan.subtasks:
-            st_emoji = {"done": "✅", "failed": "❌", "spawned": "⏳",
-                        "pending": "⏸️"}.get(st["status"], "?")
+            st_emoji = {
+                "done": "✅",
+                "failed": "❌",
+                "spawned": "⏳",
+                "pending": "⏸️",
+            }.get(st["status"], "?")
             elapsed = ""
             if st.get("spawned_at") and st.get("finished_at"):
                 elapsed = f" ({st['finished_at'] - st['spawned_at']:.1f}s)"
@@ -645,19 +671,25 @@ class Orchestrator:
 
 # ── CLI ──
 
+
 def main():
     import sys
+
     orch = Orchestrator()
 
     if len(sys.argv) < 2:
-        print("Usage: orchestrator.py [plans|status <id>|evaluate <id>|report <id>|failures]")
+        print(
+            "Usage: orchestrator.py [plans|status <id>|evaluate <id>|report <id>|failures]"
+        )
         return
 
     cmd = sys.argv[1]
     if cmd == "plans":
         for pid, p in orch._plans.items():
-            print(f"  {pid}  status={p.status}  degraded={p.degraded}  "
-                  f"confidence={p.confidence:.0%}")
+            print(
+                f"  {pid}  status={p.status}  degraded={p.degraded}  "
+                f"confidence={p.confidence:.0%}"
+            )
     elif cmd == "status" and len(sys.argv) > 2:
         s = orch.get_status(sys.argv[2])
         print(json.dumps(s, indent=2, ensure_ascii=False))

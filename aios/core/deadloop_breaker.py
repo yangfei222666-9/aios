@@ -7,39 +7,50 @@ AIOS 死循环检测 + 自动熔断 v1.0
 用法:
   from aios.core.deadloop_breaker import check, DeadloopResult
   result = check()  # 返回检测结果
-  
+
   # 或 CLI
   python -m aios.core.deadloop_breaker          # 检测
   python -m aios.core.deadloop_breaker --status  # 查看熔断状态
   python -m aios.core.deadloop_breaker --reset   # 重置所有熔断
 """
+
 import json, sys, time, io
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from core.engine import load_events, emit, LAYER_SEC, LAYER_KERNEL, LAYER_TOOL, VALID_LAYERS
+from core.engine import (
+    load_events,
+    emit,
+    LAYER_SEC,
+    LAYER_KERNEL,
+    LAYER_TOOL,
+    VALID_LAYERS,
+)
 
 # ── 配置 ──
-CONSECUTIVE_KERNEL_THRESHOLD = 5   # 连续 N 个 KERNEL 无 TOOL = 疑似卡住
-RAPID_FAIL_WINDOW_SEC = 120        # 快速失败窗口（秒）
-RAPID_FAIL_THRESHOLD = 3           # 窗口内同命令失败 >= N 次触发
-BREAKER_COOLDOWN_SEC = 3600        # 熔断冷却 1 小时
-RECOVERY_WATCH_SEC = 1800          # 恢复后观测窗口 30 分钟
-SCAN_HOURS = 1                     # 扫描最近 N 小时
+CONSECUTIVE_KERNEL_THRESHOLD = 5  # 连续 N 个 KERNEL 无 TOOL = 疑似卡住
+RAPID_FAIL_WINDOW_SEC = 120  # 快速失败窗口（秒）
+RAPID_FAIL_THRESHOLD = 3  # 窗口内同命令失败 >= N 次触发
+BREAKER_COOLDOWN_SEC = 3600  # 熔断冷却 1 小时
+RECOVERY_WATCH_SEC = 1800  # 恢复后观测窗口 30 分钟
+SCAN_HOURS = 1  # 扫描最近 N 小时
 
 # 熔断状态文件
-BREAKER_STATE_FILE = Path(__file__).resolve().parent.parent / "events" / "deadloop_breaker_state.json"
+BREAKER_STATE_FILE = (
+    Path(__file__).resolve().parent.parent / "events" / "deadloop_breaker_state.json"
+)
 
 
 @dataclass
 class DeadloopResult:
     """检测结果"""
-    cognitive_loops: list = field(default_factory=list)   # 认知死循环
-    rapid_failures: list = field(default_factory=list)    # 快速重复失败
+
+    cognitive_loops: list = field(default_factory=list)  # 认知死循环
+    rapid_failures: list = field(default_factory=list)  # 快速重复失败
     tripped_breakers: list = field(default_factory=list)  # 本次触发的熔断
-    existing_breakers: list = field(default_factory=list) # 已有的熔断
+    existing_breakers: list = field(default_factory=list)  # 已有的熔断
     recovery_watches: list = field(default_factory=list)  # 恢复观测中的熔断
     clean: bool = True
 
@@ -49,6 +60,7 @@ class DeadloopResult:
 
 
 # ── 熔断状态管理 ──
+
 
 def _load_breaker_state() -> dict:
     if BREAKER_STATE_FILE.exists():
@@ -80,19 +92,29 @@ def _is_tripped(sig: str) -> bool:
             trip["recovery_watch_until"] = int(now) + RECOVERY_WATCH_SEC
             _save_breaker_state(state)
             # 记录恢复事件
-            emit(LAYER_SEC, "deadloop_breaker_recovered", "ok", payload={
-                "sig": sig,
-                "reason": trip["reason"],
-                "watch_until": trip["recovery_watch_until"],
-            })
+            emit(
+                LAYER_SEC,
+                "deadloop_breaker_recovered",
+                "ok",
+                payload={
+                    "sig": sig,
+                    "reason": trip["reason"],
+                    "watch_until": trip["recovery_watch_until"],
+                },
+            )
         # 观测窗口也过了，彻底清除
         if now > trip.get("recovery_watch_until", 0):
             del state["tripped"][sig]
             _save_breaker_state(state)
-            emit(LAYER_SEC, "deadloop_recovery_confirmed", "ok", payload={
-                "sig": sig,
-                "verdict": "clean",
-            })
+            emit(
+                LAYER_SEC,
+                "deadloop_recovery_confirmed",
+                "ok",
+                payload={
+                    "sig": sig,
+                    "verdict": "clean",
+                },
+            )
         return False
     return True
 
@@ -109,12 +131,17 @@ def _trip_breaker(sig: str, reason: str, details: dict = None):
     _save_breaker_state(state)
 
     # 记录事件到 AIOS 事件流
-    emit(LAYER_SEC, "deadloop_breaker_tripped", "err", payload={
-        "sig": sig,
-        "reason": reason,
-        "cooldown_sec": BREAKER_COOLDOWN_SEC,
-        **(details or {}),
-    })
+    emit(
+        LAYER_SEC,
+        "deadloop_breaker_tripped",
+        "err",
+        payload={
+            "sig": sig,
+            "reason": reason,
+            "cooldown_sec": BREAKER_COOLDOWN_SEC,
+            **(details or {}),
+        },
+    )
 
 
 def _reset_all():
@@ -123,6 +150,7 @@ def _reset_all():
 
 
 # ── 检测逻辑 ──
+
 
 def _detect_cognitive_loops(events: list) -> list:
     """
@@ -150,17 +178,22 @@ def _detect_cognitive_loops(events: list) -> list:
         if consecutive_kernel >= CONSECUTIVE_KERNEL_THRESHOLD:
             # 排除部署窗口
             is_deploy = all(
-                any(k in (ev.get("event", "").lower()) for k in ("deploy", "restart", "rollout"))
+                any(
+                    k in (ev.get("event", "").lower())
+                    for k in ("deploy", "restart", "rollout")
+                )
                 for ev in kernel_window
             )
             if not is_deploy:
-                loops.append({
-                    "type": "cognitive_loop",
-                    "count": consecutive_kernel,
-                    "start_ts": kernel_window[0].get("ts", "?"),
-                    "end_ts": kernel_window[-1].get("ts", "?"),
-                    "events": [ev.get("event", "?") for ev in kernel_window[-5:]],
-                })
+                loops.append(
+                    {
+                        "type": "cognitive_loop",
+                        "count": consecutive_kernel,
+                        "start_ts": kernel_window[0].get("ts", "?"),
+                        "end_ts": kernel_window[-1].get("ts", "?"),
+                        "events": [ev.get("event", "?") for ev in kernel_window[-5:]],
+                    }
+                )
             consecutive_kernel = 0
             kernel_window = []
 
@@ -191,19 +224,24 @@ def _detect_rapid_failures(events: list) -> list:
             window_end = epochs[i] + RAPID_FAIL_WINDOW_SEC
             count = sum(1 for ep in epochs[i:] if ep <= window_end)
             if count >= RAPID_FAIL_THRESHOLD:
-                rapid.append({
-                    "type": "rapid_failure",
-                    "command": name,
-                    "count": count,
-                    "window_sec": RAPID_FAIL_WINDOW_SEC,
-                    "first_fail": time.strftime("%H:%M:%S", time.localtime(epochs[i])),
-                })
+                rapid.append(
+                    {
+                        "type": "rapid_failure",
+                        "command": name,
+                        "count": count,
+                        "window_sec": RAPID_FAIL_WINDOW_SEC,
+                        "first_fail": time.strftime(
+                            "%H:%M:%S", time.localtime(epochs[i])
+                        ),
+                    }
+                )
                 break  # 每个命令只报一次
 
     return rapid
 
 
 # ── 主检测入口 ──
+
 
 def check(scan_hours: int = None) -> DeadloopResult:
     """
@@ -212,7 +250,7 @@ def check(scan_hours: int = None) -> DeadloopResult:
     """
     hours = scan_hours or SCAN_HOURS
     # load_events 接受 days，转换一下
-    days = max(hours / 24, 1/24)  # 至少 1 小时
+    days = max(hours / 24, 1 / 24)  # 至少 1 小时
     events = load_events(days=1)  # 加载最近 1 天，后面按时间过滤
 
     # 按时间过滤到指定窗口
@@ -237,7 +275,11 @@ def check(scan_hours: int = None) -> DeadloopResult:
     for fail in result.rapid_failures:
         sig = f"rapid_fail_{fail['command']}"
         if not _is_tripped(sig):
-            _trip_breaker(sig, f"快速重复失败：{fail['command']} {fail['count']}次/{fail['window_sec']}s", fail)
+            _trip_breaker(
+                sig,
+                f"快速重复失败：{fail['command']} {fail['count']}次/{fail['window_sec']}s",
+                fail,
+            )
             result.tripped_breakers.append(sig)
 
     # 4. 列出已有熔断 + 恢复观测
@@ -260,12 +302,14 @@ def check(scan_hours: int = None) -> DeadloopResult:
                 if f"rapid_fail_{fail['command']}" == sig:
                     relapsed = True
 
-            result.recovery_watches.append({
-                "sig": sig,
-                "reason": info["reason"],
-                "remaining_watch_min": remaining_watch,
-                "relapsed": relapsed,
-            })
+            result.recovery_watches.append(
+                {
+                    "sig": sig,
+                    "reason": info["reason"],
+                    "remaining_watch_min": remaining_watch,
+                    "relapsed": relapsed,
+                }
+            )
             if relapsed:
                 # 复发：重新熔断，延长冷却
                 info["ts"] = int(now)
@@ -274,20 +318,31 @@ def check(scan_hours: int = None) -> DeadloopResult:
                 info.pop("recovery_watch_until", None)
                 info["relapse_count"] = info.get("relapse_count", 0) + 1
                 _save_breaker_state(state)
-                emit(LAYER_SEC, "deadloop_breaker_relapsed", "err", payload={
-                    "sig": sig,
-                    "relapse_count": info["relapse_count"],
-                })
+                emit(
+                    LAYER_SEC,
+                    "deadloop_breaker_relapsed",
+                    "err",
+                    payload={
+                        "sig": sig,
+                        "relapse_count": info["relapse_count"],
+                    },
+                )
                 result.tripped_breakers.append(f"{sig} (复发#{info['relapse_count']})")
         elif expires > now:
             remaining = round((expires - now) / 60)
-            result.existing_breakers.append({
-                "sig": sig,
-                "reason": info["reason"],
-                "remaining_min": remaining,
-            })
+            result.existing_breakers.append(
+                {
+                    "sig": sig,
+                    "reason": info["reason"],
+                    "remaining_min": remaining,
+                }
+            )
 
-    result.clean = not result.has_issues and not result.existing_breakers and not result.recovery_watches
+    result.clean = (
+        not result.has_issues
+        and not result.existing_breakers
+        and not result.recovery_watches
+    )
     return result
 
 
@@ -335,7 +390,9 @@ def format_result(result: DeadloopResult, compact: bool = False) -> str:
             lines.append(f"\n👁️ 恢复观测中: {len(result.recovery_watches)}")
             for w in result.recovery_watches:
                 status = "🔴 复发!" if w["relapsed"] else "✅ 正常"
-                lines.append(f"  {w['sig']} ({status}, 观测剩余 {w['remaining_watch_min']}min)")
+                lines.append(
+                    f"  {w['sig']} ({status}, 观测剩余 {w['remaining_watch_min']}min)"
+                )
 
         return "\n".join(lines)
 
@@ -361,7 +418,9 @@ def format_result(result: DeadloopResult, compact: bool = False) -> str:
     if result.rapid_failures:
         lines.append("## 快速重复失败")
         for f in result.rapid_failures:
-            lines.append(f"- {f['command']}: {f['count']} 次失败 / {f['window_sec']}s 窗口")
+            lines.append(
+                f"- {f['command']}: {f['count']} 次失败 / {f['window_sec']}s 窗口"
+            )
             lines.append(f"  首次失败: {f['first_fail']}")
         lines.append("")
 
@@ -374,23 +433,29 @@ def format_result(result: DeadloopResult, compact: bool = False) -> str:
     if result.existing_breakers:
         lines.append("## 活跃熔断")
         for b in result.existing_breakers:
-            lines.append(f"- 🟡 {b['sig']}: {b['reason']} (剩余 {b['remaining_min']}min)")
+            lines.append(
+                f"- 🟡 {b['sig']}: {b['reason']} (剩余 {b['remaining_min']}min)"
+            )
 
     if result.recovery_watches:
         lines.append("")
         lines.append("## 恢复观测")
         for w in result.recovery_watches:
             status = "🔴 复发!" if w["relapsed"] else "✅ 运行正常"
-            lines.append(f"- 👁️ {w['sig']}: {status} (观测剩余 {w['remaining_watch_min']}min)")
+            lines.append(
+                f"- 👁️ {w['sig']}: {status} (观测剩余 {w['remaining_watch_min']}min)"
+            )
 
     return "\n".join(lines)
 
 
 # ── CLI ──
 
+
 def main():
     import argparse
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
     p = argparse.ArgumentParser(description="AIOS 死循环检测 + 自动熔断")
     p.add_argument("--status", action="store_true", help="查看熔断状态")

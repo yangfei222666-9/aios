@@ -8,24 +8,26 @@
 每个阶段独立 try/except，一个挂了不影响后续。
 输出：结构化报告（可选 telegram 格式推送）。
 """
+
 import json, sys, io, time, subprocess, os
 from pathlib import Path
 from datetime import datetime
 
 # 强制 UTF-8 环境
-os.environ['PYTHONIOENCODING'] = 'utf-8'
-if __name__ == '__main__':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+os.environ["PYTHONIOENCODING"] = "utf-8"
+if __name__ == "__main__":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 AIOS_ROOT = Path(__file__).resolve().parent
-WS = AIOS_ROOT.parent if AIOS_ROOT.name == 'aios' else AIOS_ROOT
+WS = AIOS_ROOT.parent if AIOS_ROOT.name == "aios" else AIOS_ROOT
 PYTHON = r"C:\Program Files\Python312\python.exe"
 
 sys.path.insert(0, str(AIOS_ROOT))
 sys.path.insert(0, str(WS / "scripts"))
 
 # ── 阶段执行器 ──
+
 
 def _run_stage(name, fn):
     """执行一个阶段，返回 (ok, result, elapsed_ms)"""
@@ -41,27 +43,34 @@ def _run_stage(name, fn):
 
 # ── 各阶段 ──
 
+
 def stage_sensors():
     """感知扫描"""
     try:
-        from core.dispatcher import dispatch as aios_dispatch, get_pending_actions, clear_actions
+        from core.dispatcher import (
+            dispatch as aios_dispatch,
+            get_pending_actions,
+            clear_actions,
+        )
+
         aios_dispatch(run_sensors=True)
         actions = get_pending_actions()
         count = len(actions)
-        high = sum(1 for a in actions if a.get('priority') == 'high')
+        high = sum(1 for a in actions if a.get("priority") == "high")
         if actions:
             clear_actions()
-        
+
         # 检查是否需要生成每日汇总
         try:
             from learning.habits.tracker import check_and_generate_summary
+
             summary = check_and_generate_summary()
             if summary:
                 # 生成了新的汇总
                 pass
         except Exception:
             pass
-        
+
         return {"pending_actions": count, "high_priority": high}
     except ImportError:
         return {"skip": "dispatcher not available"}
@@ -70,9 +79,11 @@ def stage_sensors():
 def stage_alerts():
     """告警检查"""
     import alert_fsm
+
     # 运行 alerts 检查规则
     try:
         from scripts_alerts_runner import run_checks, format_summary
+
         results, notifications = run_checks()
         summary = format_summary(results)
     except:
@@ -85,31 +96,31 @@ def stage_alerts():
     overdue = alert_fsm.check_sla()
 
     return {
-        "open": stats.get('open', 0),
-        "ack": stats.get('ack', 0),
-        "overdue": stats.get('overdue', 0),
-        "resolved_today": stats.get('resolved_today', 0),
+        "open": stats.get("open", 0),
+        "ack": stats.get("ack", 0),
+        "overdue": stats.get("overdue", 0),
+        "resolved_today": stats.get("resolved_today", 0),
         "notifications": len(notifications),
-        "notification_texts": notifications[:3]  # 最多3条
+        "notification_texts": notifications[:3],  # 最多3条
     }
 
 
 def stage_reactor():
     """自动响应"""
     from core.reactor import scan_and_react, dashboard_metrics
+
     results = scan_and_react(mode="auto")
-    acted = [r for r in results if r.get('status') not in ('no_match',)]
-    success = [r for r in acted if r.get('status') == 'success']
-    pending = [r for r in acted if r.get('status') == 'pending_confirm']
+    acted = [r for r in results if r.get("status") not in ("no_match",)]
+    success = [r for r in acted if r.get("status") == "success"]
+    pending = [r for r in acted if r.get("status") == "pending_confirm"]
 
     return {
         "total_matched": len(acted),
         "auto_executed": len(success),
         "pending_confirm": len(pending),
         "details": [
-            {"pb": r.get('playbook_id'), "status": r.get('status')}
-            for r in acted[:5]
-        ]
+            {"pb": r.get("playbook_id"), "status": r.get("status")} for r in acted[:5]
+        ],
     }
 
 
@@ -122,19 +133,20 @@ def stage_verifier():
         return {"skip": "no reactions to verify"}
 
     # 读最近的 success reaction（最近 2 分钟内）
-    with open(REACTION_LOG, 'r', encoding='utf-8') as f:
+    with open(REACTION_LOG, "r", encoding="utf-8") as f:
         lines = [l.strip() for l in f if l.strip()]
 
     if not lines:
         return {"skip": "empty reaction log"}
 
     from datetime import timedelta
+
     cutoff = (datetime.now() - timedelta(minutes=2)).isoformat()
     recent = []
     for line in lines[-5:]:
         try:
             r = json.loads(line)
-            if r.get('status') == 'success' and r.get('ts', '') >= cutoff:
+            if r.get("status") == "success" and r.get("ts", "") >= cutoff:
                 recent.append(r)
         except:
             continue
@@ -147,7 +159,7 @@ def stage_verifier():
     for r in recent:
         result = verify_reaction(r)
         verified += 1
-        if result.get('passed'):
+        if result.get("passed"):
             passed += 1
 
     return {"verified": verified, "passed": passed, "failed": verified - passed}
@@ -156,31 +168,37 @@ def stage_verifier():
 def stage_feedback():
     """反馈分析"""
     from core.feedback_loop import analyze_playbook_patterns, generate_suggestions
+
     patterns = analyze_playbook_patterns(168)
     suggestions = generate_suggestions(168)
 
-    high_priority = [s for s in suggestions if s.get('priority') == 'high']
+    high_priority = [s for s in suggestions if s.get("priority") == "high"]
 
     return {
         "playbooks_analyzed": len(patterns),
         "suggestions": len(suggestions),
         "high_priority": len(high_priority),
         "high_details": [
-            {"pb": s.get('playbook_id'), "type": s.get('type'), "reason": s.get('reason', '')[:60]}
+            {
+                "pb": s.get("playbook_id"),
+                "type": s.get("type"),
+                "reason": s.get("reason", "")[:60],
+            }
             for s in high_priority[:3]
-        ]
+        ],
     }
 
 
 def stage_evolution():
     """进化评分"""
     from core.evolution import compute_evolution_v2
+
     result = compute_evolution_v2()
     return {
-        "v2_score": result['evolution_v2'],
-        "grade": result['grade'],
-        "base": result['base_score'],
-        "reactor": result['reactor_score']
+        "v2_score": result["evolution_v2"],
+        "grade": result["grade"],
+        "base": result["base_score"],
+        "reactor": result["reactor_score"],
     }
 
 
@@ -189,19 +207,21 @@ def stage_convergence():
     try:
         sys.path.insert(0, str(WS / "scripts"))
         from alert_fsm import record_healthy_window
+
         suggestions = record_healthy_window()
         return {
             "converge_suggestions": len(suggestions),
             "details": [
-                {"id": s.get('alert_id'), "action": s.get('action')}
+                {"id": s.get("alert_id"), "action": s.get("action")}
                 for s in suggestions[:3]
-            ]
+            ],
         }
     except Exception as e:
         return {"skip": str(e)[:100]}
 
 
 # ── 主流水线 ──
+
 
 def run_pipeline(fmt="default"):
     """执行完整流水线"""
@@ -219,18 +239,14 @@ def run_pipeline(fmt="default"):
         "ts": datetime.now().isoformat(),
         "stages": {},
         "total_ms": 0,
-        "errors": []
+        "errors": [],
     }
 
     total_t0 = time.time()
 
     for name, fn in stages:
         ok, result, elapsed = _run_stage(name, fn)
-        report["stages"][name] = {
-            "ok": ok,
-            "result": result,
-            "ms": elapsed
-        }
+        report["stages"][name] = {"ok": ok, "result": result, "ms": elapsed}
         if not ok:
             report["errors"].append(f"{name}: {result}")
 
@@ -246,11 +262,12 @@ def _save_report(report):
     report_dir = Path(AIOS_ROOT) / "data"
     report_dir.mkdir(parents=True, exist_ok=True)
     log_file = report_dir / "pipeline_runs.jsonl"
-    with open(log_file, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(report, ensure_ascii=False) + '\n')
+    with open(log_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(report, ensure_ascii=False) + "\n")
 
 
 # ── 格式化 ──
+
 
 def format_report(report, fmt="default"):
     """格式化报告"""
@@ -269,14 +286,14 @@ def _format_default(stages, errors, total_ms):
     lines.append("=" * 40)
 
     for name, s in stages.items():
-        icon = "✅" if s['ok'] else "❌"
+        icon = "✅" if s["ok"] else "❌"
         lines.append(f"{icon} {name} ({s['ms']}ms)")
-        r = s['result']
+        r = s["result"]
         if isinstance(r, dict):
             for k, v in r.items():
-                if k not in ('details', 'high_details', 'notification_texts', 'skip'):
+                if k not in ("details", "high_details", "notification_texts", "skip"):
                     lines.append(f"    {k}: {v}")
-                elif k == 'skip':
+                elif k == "skip":
                     lines.append(f"    ⏭️ {v}")
         elif isinstance(r, str):
             lines.append(f"    {r[:80]}")
@@ -290,12 +307,12 @@ def _format_default(stages, errors, total_ms):
 
 
 def _format_telegram(stages, errors, total_ms):
-    evo = stages.get('evolution', {}).get('result', {})
-    alerts = stages.get('alerts', {}).get('result', {})
-    reactor = stages.get('reactor', {}).get('result', {})
-    feedback = stages.get('feedback', {}).get('result', {})
+    evo = stages.get("evolution", {}).get("result", {})
+    alerts = stages.get("alerts", {}).get("result", {})
+    reactor = stages.get("reactor", {}).get("result", {})
+    feedback = stages.get("feedback", {}).get("result", {})
 
-    grade = evo.get('grade', '?')
+    grade = evo.get("grade", "?")
     grade_icon = {"healthy": "🟢", "degraded": "🟡", "critical": "🔴"}.get(grade, "⚪")
 
     lines = [
@@ -305,7 +322,7 @@ def _format_telegram(stages, errors, total_ms):
         f"⚡ 响应: 执行={reactor.get('auto_executed',0)} 待确认={reactor.get('pending_confirm',0)}",
     ]
 
-    high = feedback.get('high_priority', 0)
+    high = feedback.get("high_priority", 0)
     if high > 0:
         lines.append(f"💡 高优建议: {high} 条")
 
@@ -315,11 +332,12 @@ def _format_telegram(stages, errors, total_ms):
     # 生成 AI 摘要（使用路由器）
     try:
         from core.llm_helper import generate_summary
+
         summary_data = {
-            "evolution_score": evo.get('v2_score', 0),
+            "evolution_score": evo.get("v2_score", 0),
             "grade": grade,
-            "alerts_open": alerts.get('open', 0),
-            "reactor_executed": reactor.get('auto_executed', 0)
+            "alerts_open": alerts.get("open", 0),
+            "reactor_executed": reactor.get("auto_executed", 0),
         }
         ai_summary = generate_summary(summary_data, task_type="summarize_short")
         lines.append(f"\n🤖 {ai_summary}")
@@ -335,37 +353,38 @@ def _format_telegram(stages, errors, total_ms):
 
 # ── CLI ──
 
+
 def cli():
     if len(sys.argv) < 2:
         fmt = "default"
     else:
         fmt = sys.argv[1]
 
-    if fmt in ('run', 'default'):
+    if fmt in ("run", "default"):
         report = run_pipeline()
         print(format_report(report, "default"))
-    elif fmt == 'telegram':
+    elif fmt == "telegram":
         report = run_pipeline()
         print(format_report(report, "telegram"))
-    elif fmt == 'history':
+    elif fmt == "history":
         log_file = Path(AIOS_ROOT) / "data" / "pipeline_runs.jsonl"
         if not log_file.exists():
             print("无历史记录")
             return
-        with open(log_file, 'r', encoding='utf-8') as f:
+        with open(log_file, "r", encoding="utf-8") as f:
             lines = f.readlines()
         recent = lines[-5:] if len(lines) > 5 else lines
         for line in recent:
             r = json.loads(line.strip())
-            ts = r.get('ts', '?')[:16]
-            ms = r.get('total_ms', 0)
-            errs = len(r.get('errors', []))
-            evo = r.get('stages', {}).get('evolution', {}).get('result', {})
-            grade = evo.get('grade', '?')
+            ts = r.get("ts", "?")[:16]
+            ms = r.get("total_ms", 0)
+            errs = len(r.get("errors", []))
+            evo = r.get("stages", {}).get("evolution", {}).get("result", {})
+            grade = evo.get("grade", "?")
             print(f"  {ts} | {ms}ms | {grade} | errors={errs}")
     else:
         print("用法: python pipeline.py [run|telegram|history]")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

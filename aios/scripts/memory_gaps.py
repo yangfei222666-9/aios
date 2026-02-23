@@ -9,6 +9,7 @@ AIOS 记忆盲区分析 v1.0
   python -m aios.scripts.memory_gaps --format telegram  # 精简版
   python -m aios.scripts.memory_gaps --save             # 保存报告
 """
+
 import json, sys, time, argparse
 from collections import Counter, defaultdict
 from datetime import datetime
@@ -21,7 +22,9 @@ from core.config import get_path
 WORKSPACE = Path.home() / ".openclaw" / "workspace"
 MEMORY_DIR = WORKSPACE / "memory"
 REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"
-SUGGESTIONS_LOG = Path(__file__).resolve().parent.parent / "events" / "gap_suggestions.jsonl"
+SUGGESTIONS_LOG = (
+    Path(__file__).resolve().parent.parent / "events" / "gap_suggestions.jsonl"
+)
 
 # 阈值
 ALERT_THRESHOLD = 3  # 盲区数 >= 3 时触发提醒
@@ -40,8 +43,14 @@ def _extract_topic(e: dict) -> str:
     """从 MEM 事件中提取知识主题"""
     p = _payload(e)
     # 尝试多种字段
-    topic = (p.get("query") or p.get("topic") or p.get("key") or
-             p.get("_v1_summary") or p.get("search_term") or "")
+    topic = (
+        p.get("query")
+        or p.get("topic")
+        or p.get("key")
+        or p.get("_v1_summary")
+        or p.get("search_term")
+        or ""
+    )
     if not topic:
         # 从事件名推断
         name = _event_name(e)
@@ -156,9 +165,13 @@ def analyze_gaps(days: int = 7) -> dict:
         name = _event_name(e)
         if any(k in name for k in ("miss", "not_found", "gap")):
             misses.append(e)
-        elif any(k in name for k in ("recall", "match", "confirm", "load", "search", "read")):
+        elif any(
+            k in name for k in ("recall", "match", "confirm", "load", "search", "read")
+        ):
             reads.append(e)
-        elif any(k in name for k in ("store", "correction", "lesson", "write", "update")):
+        elif any(
+            k in name for k in ("store", "correction", "lesson", "write", "update")
+        ):
             writes.append(e)
 
     # 提取盲区主题
@@ -168,11 +181,13 @@ def analyze_gaps(days: int = 7) -> dict:
         topic = _extract_topic(e)
         if topic:
             gap_topics[topic] += 1
-            gap_details[topic].append({
-                "ts": e.get("ts", "?"),
-                "context": _extract_context(e),
-                "event": _event_name(e),
-            })
+            gap_details[topic].append(
+                {
+                    "ts": e.get("ts", "?"),
+                    "context": _extract_context(e),
+                    "event": _event_name(e),
+                }
+            )
 
     # 高频盲区（同一主题 miss 多次）
     high_freq = {t: c for t, c in gap_topics.items() if c >= REPEAT_THRESHOLD}
@@ -198,29 +213,35 @@ def analyze_gaps(days: int = 7) -> dict:
         contexts = [d["context"] for d in details if d["context"]]
         ctx_str = f"（来源: {contexts[0]}）" if contexts else ""
         if count >= REPEAT_THRESHOLD:
-            suggestions.append({
-                "priority": "高",
-                "topic": topic,
-                "reason": f"重复 miss {count} 次{ctx_str}",
-                "action": f"将「{topic}」相关知识补录到 MEMORY.md 或 lessons.json",
-            })
+            suggestions.append(
+                {
+                    "priority": "高",
+                    "topic": topic,
+                    "reason": f"重复 miss {count} 次{ctx_str}",
+                    "action": f"将「{topic}」相关知识补录到 MEMORY.md 或 lessons.json",
+                }
+            )
         else:
-            suggestions.append({
-                "priority": "中",
-                "topic": topic,
-                "reason": f"miss {count} 次{ctx_str}",
-                "action": f"下次遇到时主动记录「{topic}」",
-            })
+            suggestions.append(
+                {
+                    "priority": "中",
+                    "topic": topic,
+                    "reason": f"miss {count} 次{ctx_str}",
+                    "action": f"下次遇到时主动记录「{topic}」",
+                }
+            )
 
     # 读多写少的潜在盲区
     for topic in sorted(read_only):
         if topic and read_topics[topic] >= 3:
-            suggestions.append({
-                "priority": "低",
-                "topic": topic,
-                "reason": f"读取 {read_topics[topic]} 次但从未写入",
-                "action": f"考虑将「{topic}」的常用知识固化到记忆文件",
-            })
+            suggestions.append(
+                {
+                    "priority": "低",
+                    "topic": topic,
+                    "reason": f"读取 {read_topics[topic]} 次但从未写入",
+                    "action": f"考虑将「{topic}」的常用知识固化到记忆文件",
+                }
+            )
 
     # 是否需要告警
     needs_alert = miss_count >= ALERT_THRESHOLD or len(high_freq) > 0
@@ -260,14 +281,20 @@ def format_report(result: dict, compact: bool = False) -> str:
         if result["high_freq_gaps"]:
             lines.append("")
             lines.append("⚠️ 高频盲区:")
-            for topic, count in sorted(result["high_freq_gaps"].items(), key=lambda x: -x[1]):
+            for topic, count in sorted(
+                result["high_freq_gaps"].items(), key=lambda x: -x[1]
+            ):
                 lines.append(f"  🔴 {topic} ({count}次)")
 
         if result["suggestions"]:
             lines.append("")
             lines.append("📋 修复建议:")
             for s in result["suggestions"][:5]:
-                icon = "🔴" if s["priority"] == "高" else "🟡" if s["priority"] == "中" else "🔵"
+                icon = (
+                    "🔴"
+                    if s["priority"] == "高"
+                    else "🟡" if s["priority"] == "中" else "🔵"
+                )
                 lines.append(f"  {icon} {s['action']}")
 
         if not result["gap_topics"]:
@@ -276,7 +303,9 @@ def format_report(result: dict, compact: bool = False) -> str:
         # 命中率
         hr = result.get("hit_rate", {})
         if hr.get("total_suggested", 0) > 0:
-            lines.append(f"\n📈 修复命中率: {hr['hit_rate_pct']}% ({hr['fixed']}修复/{hr['total_suggested']}建议, {hr['still_open']}未修)")
+            lines.append(
+                f"\n📈 修复命中率: {hr['hit_rate_pct']}% ({hr['fixed']}修复/{hr['total_suggested']}建议, {hr['still_open']}未修)"
+            )
 
         return "\n".join(lines)
 
@@ -296,77 +325,95 @@ def format_report(result: dict, compact: bool = False) -> str:
     ]
 
     mi = result["memory_info"]
-    lines.extend([
-        "",
-        "## 2. 记忆文件状态",
-        "",
-        f"- MEMORY.md: {'✅' if mi['memory_md_exists'] else '❌'} ({mi['memory_md_size']} bytes)",
-        f"- 日志文件: {len(mi['daily_files'])} 个 ({mi['total_daily_size']} bytes)",
-        f"- lessons.json: {'✅' if mi['lessons_exists'] else '❌'}",
-        f"- corrections.json: {'✅' if mi['corrections_exists'] else '❌'}",
-    ])
+    lines.extend(
+        [
+            "",
+            "## 2. 记忆文件状态",
+            "",
+            f"- MEMORY.md: {'✅' if mi['memory_md_exists'] else '❌'} ({mi['memory_md_size']} bytes)",
+            f"- 日志文件: {len(mi['daily_files'])} 个 ({mi['total_daily_size']} bytes)",
+            f"- lessons.json: {'✅' if mi['lessons_exists'] else '❌'}",
+            f"- corrections.json: {'✅' if mi['corrections_exists'] else '❌'}",
+        ]
+    )
 
     if result["gap_topics"]:
-        lines.extend([
-            "",
-            "## 3. 盲区详情",
-            "",
-            "| 主题 | 次数 | 优先级 |",
-            "| :--- | ---: | :--- |",
-        ])
+        lines.extend(
+            [
+                "",
+                "## 3. 盲区详情",
+                "",
+                "| 主题 | 次数 | 优先级 |",
+                "| :--- | ---: | :--- |",
+            ]
+        )
         for topic, count in sorted(result["gap_topics"].items(), key=lambda x: -x[1]):
             pri = "🔴 高" if count >= REPEAT_THRESHOLD else "🟡 中"
             lines.append(f"| {topic} | {count} | {pri} |")
 
     if result["read_only_topics"]:
-        lines.extend([
-            "",
-            "## 4. 潜在盲区（读多写少）",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                "## 4. 潜在盲区（读多写少）",
+                "",
+            ]
+        )
         for t in result["read_only_topics"][:10]:
             lines.append(f"- {t}")
 
     if result["suggestions"]:
-        lines.extend([
-            "",
-            "## 5. 修复建议",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                "## 5. 修复建议",
+                "",
+            ]
+        )
         for s in result["suggestions"]:
-            icon = "🔴" if s["priority"] == "高" else "🟡" if s["priority"] == "中" else "🔵"
+            icon = (
+                "🔴"
+                if s["priority"] == "高"
+                else "🟡" if s["priority"] == "中" else "🔵"
+            )
             lines.append(f"- {icon} [{s['priority']}] {s['action']}")
             lines.append(f"  原因: {s['reason']}")
 
     if not result["gap_topics"] and not result["read_only_topics"]:
-        lines.extend(["", "✅ 过去 {} 天无记忆盲区，知识覆盖良好".format(result["days"])])
+        lines.extend(
+            ["", "✅ 过去 {} 天无记忆盲区，知识覆盖良好".format(result["days"])]
+        )
 
     # 修复命中率
     hr = result.get("hit_rate", {})
     if hr.get("total_suggested", 0) > 0:
-        lines.extend([
-            "",
-            "## 6. 修复命中率",
-            "",
-            f"| 指标 | 值 |",
-            f"| :--- | ---: |",
-            f"| 历史建议数 | {hr['total_suggested']} |",
-            f"| 已修复 | {hr['fixed']} |",
-            f"| 未修复 | {hr['still_open']} |",
-            f"| 命中率 | {hr['hit_rate_pct']}% |",
-        ])
+        lines.extend(
+            [
+                "",
+                "## 6. 修复命中率",
+                "",
+                f"| 指标 | 值 |",
+                f"| :--- | ---: |",
+                f"| 历史建议数 | {hr['total_suggested']} |",
+                f"| 已修复 | {hr['fixed']} |",
+                f"| 未修复 | {hr['still_open']} |",
+                f"| 命中率 | {hr['hit_rate_pct']}% |",
+            ]
+        )
 
-    lines.extend([
-        "",
-        "---",
-        f"*Generated by AIOS Memory Gaps v1.0 | {now}*",
-    ])
+    lines.extend(
+        [
+            "",
+            "---",
+            f"*Generated by AIOS Memory Gaps v1.0 | {now}*",
+        ]
+    )
 
     return "\n".join(lines)
 
 
 def main():
-    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stdout.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser(description="AIOS 记忆盲区分析")
     p.add_argument("--days", type=int, default=7, help="分析窗口（天）")
     p.add_argument("--format", choices=["markdown", "telegram"], default="markdown")

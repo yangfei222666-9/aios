@@ -3,6 +3,7 @@
 从 events.jsonl 抽一段时间，重跑 analyze，对比新旧 suggestions。
 用途：调阈值/改策略后验证效果。
 """
+
 import json, time, sys, tempfile, shutil
 from pathlib import Path
 
@@ -29,12 +30,14 @@ def replay(start_ts: int, end_ts: int, days: int = 30) -> dict:
 
     # monkey-patch events path
     import core.engine as engine
+
     original_path = engine._events_path
 
     engine._events_path = lambda: tmp_events
 
     try:
         from learning.analyze import generate_full_report
+
         report = generate_full_report(days=days)
     finally:
         engine._events_path = original_path

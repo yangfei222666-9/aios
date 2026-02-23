@@ -3,6 +3,7 @@
 从 events.jsonl 分析，产出结构化报告：
   metrics / top_issues / alias_suggestions / tool_suggestions / threshold_warnings
 """
+
 import json, time, sys, math
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -34,10 +35,16 @@ def compute_metrics(days: int = 1) -> dict:
 
     # v0.2: 按层分类（兼容 v0.1 旧格式）
     layer_map = {
-        "tool": "TOOL", "task": "TOOL",
-        "match": "MEM", "correction": "MEM", "confirm": "MEM", "lesson": "MEM",
-        "error": "SEC", "http_error": "SEC",
-        "health": "KERNEL", "deploy": "KERNEL",
+        "tool": "TOOL",
+        "task": "TOOL",
+        "match": "MEM",
+        "correction": "MEM",
+        "confirm": "MEM",
+        "lesson": "MEM",
+        "error": "SEC",
+        "http_error": "SEC",
+        "health": "KERNEL",
+        "deploy": "KERNEL",
     }
 
     by_layer = {"KERNEL": [], "COMMS": [], "TOOL": [], "MEM": [], "SEC": []}
@@ -112,6 +119,7 @@ def compute_metrics(days: int = 1) -> dict:
 
 # ── v0.2 辅助函数：统一从新旧 schema 提取字段 ──
 
+
 def _event_name(e: dict) -> str:
     """提取事件名（兼容 v0.1 type 和 v0.2 event）"""
     name = e.get("event", "")
@@ -135,7 +143,9 @@ def _is_ok(e: dict) -> bool:
 def _tool_name(e: dict) -> str:
     """提取工具名"""
     payload = e.get("payload", e.get("data", {}))
-    return payload.get("name", payload.get("tool", e.get("source", e.get("event", "?"))))
+    return payload.get(
+        "name", payload.get("tool", e.get("source", e.get("event", "?")))
+    )
 
 
 def _latency(e: dict) -> int:
@@ -155,24 +165,37 @@ def _payload(e: dict) -> dict:
 def compute_top_issues(days: int = 7) -> dict:
     events = load_events(days)
     corrections = [e for e in events if _event_name(e) == "correction"]
-    errors = [e for e in events if e.get("status") == "err" or
-              _event_name(e) in ("runtime_error", "http_error")]
-    failed_tools = [e for e in events if
-                    e.get("layer", e.get("type")) in ("TOOL", "tool", "task")
-                    and not _is_ok(e)]
+    errors = [
+        e
+        for e in events
+        if e.get("status") == "err" or _event_name(e) in ("runtime_error", "http_error")
+    ]
+    failed_tools = [
+        e
+        for e in events
+        if e.get("layer", e.get("type")) in ("TOOL", "tool", "task") and not _is_ok(e)
+    ]
 
     return {
-        "top_corrected_inputs": dict(Counter(
-            _payload(e).get("query", _payload(e).get("input", "?")) for e in corrections
-        ).most_common(10)),
-        "top_failed_tools": dict(Counter(
-            _tool_name(e) for e in failed_tools
-        ).most_common(5)),
-        "top_error_types": dict(Counter(
-            f"http_{_payload(e).get('status_code', '?')}" if _event_name(e) == "http_error"
-            else _payload(e).get("error", e.get("event", "?"))[:50]
-            for e in errors
-        ).most_common(5)),
+        "top_corrected_inputs": dict(
+            Counter(
+                _payload(e).get("query", _payload(e).get("input", "?"))
+                for e in corrections
+            ).most_common(10)
+        ),
+        "top_failed_tools": dict(
+            Counter(_tool_name(e) for e in failed_tools).most_common(5)
+        ),
+        "top_error_types": dict(
+            Counter(
+                (
+                    f"http_{_payload(e).get('status_code', '?')}"
+                    if _event_name(e) == "http_error"
+                    else _payload(e).get("error", e.get("event", "?"))[:50]
+                )
+                for e in errors
+            ).most_common(5)
+        ),
     }
 
 
@@ -199,17 +222,19 @@ def compute_alias_suggestions(days: int = 7) -> list:
         tc = Counter(tlist)
         top, count = tc.most_common(1)[0]
         if count >= CORRECTION_THRESHOLD:
-            suggestions.append({
-                "level": "L1",
-                "input": inp,
-                "suggested": top,
-                "confidence": round(count / len(tlist), 2),
-                "evidence": {
-                    "corrections": count,
-                    "examples": examples[inp][:3],
-                },
-                "reason": f"corrected>={count}",
-            })
+            suggestions.append(
+                {
+                    "level": "L1",
+                    "input": inp,
+                    "suggested": top,
+                    "confidence": round(count / len(tlist), 2),
+                    "evidence": {
+                        "corrections": count,
+                        "examples": examples[inp][:3],
+                    },
+                    "reason": f"corrected>={count}",
+                }
+            )
 
     return suggestions
 
@@ -217,9 +242,20 @@ def compute_alias_suggestions(days: int = 7) -> list:
 def compute_tool_suggestions(days: int = 7) -> list:
     """L2: tool 建议 — 失败驱动 + 性能驱动"""
     events = load_events(days)
-    tool_events = [e for e in events if e.get("layer") == "TOOL" or e.get("type") in ("tool", "task")]
-    failed = [e for e in events if not _is_ok(e) and
-              (e.get("layer") in ("TOOL", "SEC") or e.get("type") in ("tool", "task", "error", "http_error"))]
+    tool_events = [
+        e
+        for e in events
+        if e.get("layer") == "TOOL" or e.get("type") in ("tool", "task")
+    ]
+    failed = [
+        e
+        for e in events
+        if not _is_ok(e)
+        and (
+            e.get("layer") in ("TOOL", "SEC")
+            or e.get("type") in ("tool", "task", "error", "http_error")
+        )
+    ]
 
     # --- Failure Learner ---
     by_tool_fail = defaultdict(list)
@@ -239,14 +275,16 @@ def compute_tool_suggestions(days: int = 7) -> list:
             err_types[str(code) if code else err[:50] or "unknown"] += 1
         top_err, _ = err_types.most_common(1)[0]
 
-        suggestions.append({
-            "level": "L2",
-            "name": tool,
-            "action": "cooldown_10m" if len(errs) >= 3 else "monitor",
-            "confidence": round(min(len(errs) / 5, 1.0), 2),
-            "evidence": {"fails": len(errs), "top_err": top_err},
-            "reason": f"repeat_fail>={len(errs)}",
-        })
+        suggestions.append(
+            {
+                "level": "L2",
+                "name": tool,
+                "action": "cooldown_10m" if len(errs) >= 3 else "monitor",
+                "confidence": round(min(len(errs) / 5, 1.0), 2),
+                "evidence": {"fails": len(errs), "top_err": top_err},
+                "reason": f"repeat_fail>={len(errs)}",
+            }
+        )
 
     # --- Perf Learner ---
     by_tool_perf = defaultdict(list)
@@ -265,14 +303,20 @@ def compute_tool_suggestions(days: int = 7) -> list:
         median = times_sorted[len(times_sorted) // 2]
 
         if p95 > 5000:  # p95 > 5s
-            suggestions.append({
-                "level": "L2",
-                "name": tool,
-                "action": "optimize_or_cache",
-                "confidence": round(min(p95 / 10000, 1.0), 2),
-                "evidence": {"p95_ms": p95, "median_ms": median, "samples": len(times)},
-                "reason": f"p95>{p95}ms",
-            })
+            suggestions.append(
+                {
+                    "level": "L2",
+                    "name": tool,
+                    "action": "optimize_or_cache",
+                    "confidence": round(min(p95 / 10000, 1.0), 2),
+                    "evidence": {
+                        "p95_ms": p95,
+                        "median_ms": median,
+                        "samples": len(times),
+                    },
+                    "reason": f"p95>{p95}ms",
+                }
+            )
 
     return suggestions
 
@@ -288,23 +332,31 @@ def compute_threshold_warnings(days: int = 7) -> list:
     if total > 0:
         cr = len(corrections) / total
         if cr > 0.15:
-            warnings.append({
-                "field": "correction_rate",
-                "current": round(cr, 2),
-                "suggested": 0.10,
-                "reason": "high_correction_rate",
-            })
+            warnings.append(
+                {
+                    "field": "correction_rate",
+                    "current": round(cr, 2),
+                    "suggested": 0.10,
+                    "reason": "high_correction_rate",
+                }
+            )
 
     if matches:
-        low = [m for m in matches if (m.get("data") or {}).get("score", 1.0) < LOW_SCORE_THRESHOLD]
+        low = [
+            m
+            for m in matches
+            if (m.get("data") or {}).get("score", 1.0) < LOW_SCORE_THRESHOLD
+        ]
         lsr = len(low) / len(matches)
         if lsr > 0.15:
-            warnings.append({
-                "field": "low_score_rate",
-                "current": round(lsr, 2),
-                "suggested": 0.10,
-                "reason": "too_many_low_score_matches",
-            })
+            warnings.append(
+                {
+                    "field": "low_score_rate",
+                    "current": round(lsr, 2),
+                    "suggested": 0.10,
+                    "reason": "too_many_low_score_matches",
+                }
+            )
 
     return warnings
 
@@ -312,10 +364,17 @@ def compute_threshold_warnings(days: int = 7) -> list:
 def _get_git_commit() -> str:
     try:
         import subprocess, os
+
         git_exe = r"C:\Program Files\Git\cmd\git.exe"
-        r = subprocess.run([git_exe, "rev-parse", "--short", "HEAD"],
-                          capture_output=True, text=True, timeout=3,
-                          cwd=os.path.join(os.environ.get("USERPROFILE", ""), ".openclaw", "workspace"))
+        r = subprocess.run(
+            [git_exe, "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=3,
+            cwd=os.path.join(
+                os.environ.get("USERPROFILE", ""), ".openclaw", "workspace"
+            ),
+        )
         return r.stdout.strip() if r.returncode == 0 else "unknown"
     except Exception:
         return "unknown"
@@ -327,7 +386,9 @@ AIOS_VERSION = "0.2.0"
 def generate_full_report(days: int = 7) -> dict:
     """完整结构化报告"""
     now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    window_from = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() - days * 86400))
+    window_from = time.strftime(
+        "%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() - days * 86400)
+    )
 
     metrics = compute_metrics(days)
 
@@ -346,16 +407,21 @@ def generate_full_report(days: int = 7) -> dict:
     # 写 suggestions.json
     sug = {
         "generated_at": now,
-        "alias_suggestions": [{
-            "input": s["input"],
-            "suggested": s["suggested"],
-            "reason": s["reason"],
-            "confidence": s["confidence"],
-        } for s in report["alias_suggestions"]],
+        "alias_suggestions": [
+            {
+                "input": s["input"],
+                "suggested": s["suggested"],
+                "reason": s["reason"],
+                "confidence": s["confidence"],
+            }
+            for s in report["alias_suggestions"]
+        ],
         "threshold_warnings": report["threshold_warnings"],
         "route_suggestions": [],
     }
-    (LEARNING_DIR / "suggestions.json").write_text(json.dumps(sug, ensure_ascii=False, indent=2), encoding="utf-8")
+    (LEARNING_DIR / "suggestions.json").write_text(
+        json.dumps(sug, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
     return report
 
@@ -366,6 +432,7 @@ def generate_daily_report(days: int = 1) -> str:
     # 基线固化
     try:
         from learning.baseline import snapshot
+
         snapshot(days)
     except Exception:
         pass
@@ -376,19 +443,27 @@ def generate_daily_report(days: int = 1) -> str:
         from learning.guardrail import guardrail_from_history
         from learning.baseline import load_history
         from learning.tickets import ingest
+
         history = load_history(30)
         gate_tickets = guardrail_from_history(history)
         if gate_tickets:
-            ingest([{
-                "level": t.level,
-                "name": t.title,
-                "action": "investigate",
-                "reason": t.evidence.get("rule", ""),
-                "confidence": 0.8,
-                "evidence": t.evidence,
-            } for t in gate_tickets])
+            ingest(
+                [
+                    {
+                        "level": t.level,
+                        "name": t.title,
+                        "action": "investigate",
+                        "reason": t.evidence.get("rule", ""),
+                        "confidence": 0.8,
+                        "evidence": t.evidence,
+                    }
+                    for t in gate_tickets
+                ]
+            )
         gate_result = {
-            "alerts": [{"title": t.title, "evidence": t.evidence} for t in gate_tickets],
+            "alerts": [
+                {"title": t.title, "evidence": t.evidence} for t in gate_tickets
+            ],
             "status": "regression_detected" if gate_tickets else "gate_passed",
         }
     except Exception:
@@ -397,6 +472,7 @@ def generate_daily_report(days: int = 1) -> str:
     # L2 → 工单
     try:
         from learning.tickets import ingest
+
         ingest(r.get("tool_suggestions", []))
     except Exception:
         pass
@@ -425,29 +501,36 @@ def generate_daily_report(days: int = 1) -> str:
 
     lines.append("\n## B. Top Issues")
     for inp, cnt in r["top_issues"].get("top_corrected_inputs", {}).items():
-        lines.append(f"- corrected: \"{inp}\" x{cnt}")
+        lines.append(f'- corrected: "{inp}" x{cnt}')
     for t, cnt in r["top_issues"].get("top_failed_tools", {}).items():
         lines.append(f"- failed: {t} x{cnt}")
 
     lines.append("\n## C. Alias Suggestions (L1)")
     for s in r["alias_suggestions"]:
-        lines.append(f"- \"{s['input']}\" → \"{s['suggested']}\" conf={s['confidence']} ({s['reason']})")
+        lines.append(
+            f"- \"{s['input']}\" → \"{s['suggested']}\" conf={s['confidence']} ({s['reason']})"
+        )
 
     lines.append("\n## D. Tool Suggestions (L2)")
     for s in r["tool_suggestions"]:
-        lines.append(f"- {s['name']}: {s['action']} conf={s['confidence']} ({s['reason']})")
+        lines.append(
+            f"- {s['name']}: {s['action']} conf={s['confidence']} ({s['reason']})"
+        )
 
     if r["threshold_warnings"]:
         lines.append("\n## E. Threshold Warnings")
         for w in r["threshold_warnings"]:
             lines.append(f"- {w['field']}: {w['current']} → {w['suggested']}")
 
-    if not any([r["alias_suggestions"], r["tool_suggestions"], r["threshold_warnings"]]):
+    if not any(
+        [r["alias_suggestions"], r["tool_suggestions"], r["threshold_warnings"]]
+    ):
         lines.append("\n- No suggestions")
 
     # evolution score
     try:
         from learning.baseline import evolution_score
+
         evo = evolution_score()
         lines.append(f"\n## F. Evolution Score")
         lines.append(f"- score: {evo['score']}  grade: {evo['grade']}")
@@ -477,7 +560,10 @@ if __name__ == "__main__":
         print(json.dumps(generate_full_report(), ensure_ascii=False, indent=2))
     elif action == "suggestions":
         r = generate_full_report()
-        sug = {k: r[k] for k in ("alias_suggestions", "tool_suggestions", "threshold_warnings")}
+        sug = {
+            k: r[k]
+            for k in ("alias_suggestions", "tool_suggestions", "threshold_warnings")
+        }
         sug["generated_at"] = r["generated_at"]
         print(json.dumps(sug, ensure_ascii=False, indent=2))
     elif action == "report":

@@ -7,20 +7,35 @@ v0.2: 覆盖 TOOL + COMMS + SEC 三层。
   1. live: 实时记录（bridge 调用）
   2. batch: 从 session 日志批量导入
 """
+
 import json, time, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from core.engine import (
-    log_tool_event, emit, load_events,
-    LAYER_TOOL, LAYER_COMMS, LAYER_SEC,
+    log_tool_event,
+    emit,
+    load_events,
+    LAYER_TOOL,
+    LAYER_COMMS,
+    LAYER_SEC,
 )
 
 # 需要追踪的 tool 名单
 TRACKED_TOOLS = {
-    "web_fetch", "web_search", "exec", "read", "write", "edit",
-    "browser", "image", "tts", "message", "cron",
-    "memory_search", "memory_get",
+    "web_fetch",
+    "web_search",
+    "exec",
+    "read",
+    "write",
+    "edit",
+    "browser",
+    "image",
+    "tts",
+    "message",
+    "cron",
+    "memory_search",
+    "memory_get",
 }
 
 
@@ -37,23 +52,44 @@ def record_tool(name: str, ok: bool, ms: int, err: str = None, meta: dict = None
 
 def record_user_input(msg_len: int, channel: str = "telegram", msg_type: str = "text"):
     """记录用户输入 → COMMS 层"""
-    return emit(LAYER_COMMS, "user_input", "ok", payload={
-        "msg_len": msg_len, "channel": channel, "msg_type": msg_type,
-    })
+    return emit(
+        LAYER_COMMS,
+        "user_input",
+        "ok",
+        payload={
+            "msg_len": msg_len,
+            "channel": channel,
+            "msg_type": msg_type,
+        },
+    )
 
 
 def record_agent_response(msg_len: int, channel: str = "telegram", latency_ms: int = 0):
     """记录 agent 回复 → COMMS 层"""
-    return emit(LAYER_COMMS, "agent_response", "ok", latency_ms, payload={
-        "msg_len": msg_len, "channel": channel,
-    })
+    return emit(
+        LAYER_COMMS,
+        "agent_response",
+        "ok",
+        latency_ms,
+        payload={
+            "msg_len": msg_len,
+            "channel": channel,
+        },
+    )
 
 
 def record_error(source: str, error: str, traceback: str = ""):
     """记录运行时错误 → SEC 层"""
-    return emit(LAYER_SEC, "runtime_error", "err", payload={
-        "source": source, "error": error[:300], "traceback": traceback[:500],
-    })
+    return emit(
+        LAYER_SEC,
+        "runtime_error",
+        "err",
+        payload={
+            "source": source,
+            "error": error[:300],
+            "traceback": traceback[:500],
+        },
+    )
 
 
 def infer_task_context(name: str, meta: dict = None) -> str:
@@ -99,9 +135,15 @@ def batch_import(session_log: list) -> dict:
         if msg.get("role") == "user":
             content = msg.get("content", "")
             if isinstance(content, str) and content.strip():
-                emit(LAYER_COMMS, "user_input", "ok", payload={
-                    "msg_len": len(content), "source": "batch_import",
-                })
+                emit(
+                    LAYER_COMMS,
+                    "user_input",
+                    "ok",
+                    payload={
+                        "msg_len": len(content),
+                        "source": "batch_import",
+                    },
+                )
                 imported += 1
             continue
 
@@ -111,9 +153,15 @@ def batch_import(session_log: list) -> dict:
         # assistant 消息 → COMMS
         content = msg.get("content", "")
         if isinstance(content, str) and content.strip():
-            emit(LAYER_COMMS, "agent_response", "ok", payload={
-                "msg_len": len(content), "source": "batch_import",
-            })
+            emit(
+                LAYER_COMMS,
+                "agent_response",
+                "ok",
+                payload={
+                    "msg_len": len(content),
+                    "source": "batch_import",
+                },
+            )
             imported += 1
 
         # tool 调用 → TOOL

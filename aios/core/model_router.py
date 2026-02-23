@@ -5,6 +5,7 @@ aios/core/model_router.py - 智能模型路由
 - 简单任务 → Ollama 本地模型（免费、快速）
 - 复杂任务 → Claude API（效果好）
 """
+
 import requests
 from typing import Literal, Optional
 
@@ -12,30 +13,28 @@ from typing import Literal, Optional
 TASK_COMPLEXITY = {
     # 简单任务（可以用本地模型）
     "simple": [
-        "greeting",           # 打招呼
-        "translation",        # 简单翻译
-        "summarize_short",    # 短文本摘要
-        "classification",     # 文本分类
-        "keyword_extraction", # 关键词提取
-        "simple_qa",          # 简单问答
+        "greeting",  # 打招呼
+        "translation",  # 简单翻译
+        "summarize_short",  # 短文本摘要
+        "classification",  # 文本分类
+        "keyword_extraction",  # 关键词提取
+        "simple_qa",  # 简单问答
     ],
-    
     # 中等任务（优先本地，失败时用 Claude）
     "medium": [
-        "code_completion",    # 代码补全
-        "text_generation",    # 文本生成
-        "data_analysis",      # 数据分析
-        "summarize_long",     # 长文本摘要
+        "code_completion",  # 代码补全
+        "text_generation",  # 文本生成
+        "data_analysis",  # 数据分析
+        "summarize_long",  # 长文本摘要
     ],
-    
     # 复杂任务（必须用 Claude）
     "complex": [
-        "reasoning",          # 复杂推理
-        "planning",           # 任务规划
-        "code_review",        # 代码审查
-        "creative_writing",   # 创意写作
-        "decision_making",    # 决策支持
-    ]
+        "reasoning",  # 复杂推理
+        "planning",  # 任务规划
+        "code_review",  # 代码审查
+        "creative_writing",  # 创意写作
+        "decision_making",  # 决策支持
+    ],
 }
 
 
@@ -48,35 +47,33 @@ def is_ollama_available() -> bool:
         return False
 
 
-def call_ollama(prompt: str, model: str = "qwen2.5:3b", timeout: int = 30) -> Optional[str]:
+def call_ollama(
+    prompt: str, model: str = "qwen2.5:3b", timeout: int = 30
+) -> Optional[str]:
     """
     调用 Ollama 本地模型
-    
+
     Args:
         prompt: 提示词
         model: 模型名称
         timeout: 超时时间（秒）
-    
+
     Returns:
         模型回复，失败返回 None
     """
     try:
         response = requests.post(
             "http://localhost:11434/api/generate",
-            json={
-                "model": model,
-                "prompt": prompt,
-                "stream": False
-            },
-            timeout=timeout
+            json={"model": model, "prompt": prompt, "stream": False},
+            timeout=timeout,
         )
-        
+
         if response.status_code == 200:
             result = response.json()
             return result.get("response", "")
         else:
             return None
-    
+
     except Exception as e:
         print(f"Ollama 调用失败: {e}")
         return None
@@ -85,16 +82,16 @@ def call_ollama(prompt: str, model: str = "qwen2.5:3b", timeout: int = 30) -> Op
 def route_model(
     task_type: str,
     prompt: str,
-    force_model: Optional[Literal["ollama", "claude"]] = None
+    force_model: Optional[Literal["ollama", "claude"]] = None,
 ) -> dict:
     """
     智能路由模型
-    
+
     Args:
         task_type: 任务类型（见 TASK_COMPLEXITY）
         prompt: 提示词
         force_model: 强制使用指定模型
-    
+
     Returns:
         {
             "model": "ollama" | "claude",
@@ -109,9 +106,9 @@ def route_model(
         "response": None,
         "success": False,
         "fallback": False,
-        "cost": 0.0
+        "cost": 0.0,
     }
-    
+
     # 强制使用指定模型
     if force_model == "ollama":
         response = call_ollama(prompt)
@@ -121,7 +118,7 @@ def route_model(
             result["success"] = True
             result["cost"] = 0.0
         return result
-    
+
     if force_model == "claude":
         # 这里应该调用 Claude API，暂时返回占位
         result["model"] = "claude"
@@ -129,10 +126,10 @@ def route_model(
         result["success"] = True
         result["cost"] = 0.01  # 估算
         return result
-    
+
     # 自动路由
     complexity = _get_task_complexity(task_type)
-    
+
     if complexity == "simple":
         # 简单任务：优先本地
         if is_ollama_available():
@@ -143,7 +140,7 @@ def route_model(
                 result["success"] = True
                 result["cost"] = 0.0
                 return result
-        
+
         # 本地失败，降级到 Claude
         result["model"] = "claude"
         result["response"] = "[Claude API 调用]"
@@ -151,7 +148,7 @@ def route_model(
         result["fallback"] = True
         result["cost"] = 0.01
         return result
-    
+
     elif complexity == "medium":
         # 中等任务：尝试本地，失败时用 Claude
         if is_ollama_available():
@@ -162,7 +159,7 @@ def route_model(
                 result["success"] = True
                 result["cost"] = 0.0
                 return result
-        
+
         # 降级到 Claude
         result["model"] = "claude"
         result["response"] = "[Claude API 调用]"
@@ -170,7 +167,7 @@ def route_model(
         result["fallback"] = True
         result["cost"] = 0.01
         return result
-    
+
     else:  # complex
         # 复杂任务：直接用 Claude
         result["model"] = "claude"
@@ -191,19 +188,14 @@ def _get_task_complexity(task_type: str) -> str:
 def get_model_stats() -> dict:
     """获取模型使用统计"""
     # TODO: 从日志中统计
-    return {
-        "ollama_calls": 0,
-        "claude_calls": 0,
-        "total_cost": 0.0,
-        "cost_saved": 0.0
-    }
+    return {"ollama_calls": 0, "claude_calls": 0, "total_cost": 0.0, "cost_saved": 0.0}
 
 
 if __name__ == "__main__":
     # 测试
     print("测试 Ollama 可用性...")
     print(f"Ollama 可用: {is_ollama_available()}")
-    
+
     print("\n测试简单任务...")
     result = route_model("greeting", "你好，介绍一下自己")
     print(f"使用模型: {result['model']}")

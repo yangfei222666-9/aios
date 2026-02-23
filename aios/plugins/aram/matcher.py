@@ -19,7 +19,7 @@ def _matched_keywords(query: str, target: str) -> list:
     q_chars = set(query.lower())
     t_chars = set(target.lower())
     # 中文按字符匹配，英文按 token
-    overlap = q_chars & t_chars - {' ', ',', '.'}
+    overlap = q_chars & t_chars - {" ", ",", "."}
     return sorted(overlap) if overlap else []
 
 
@@ -38,17 +38,36 @@ def match(query: str, top_n: int = 3) -> list:
         cid = aliases[query]
         if cid in data:
             info = data[cid]
-            results.append(_result(cid, info, 1.0, "learned", f"learned: {query} → {info.get('title','')}", query))
+            results.append(
+                _result(
+                    cid,
+                    info,
+                    1.0,
+                    "learned",
+                    f"learned: {query} → {info.get('title','')}",
+                    query,
+                )
+            )
             _emit(query, results[0])
             return results
 
     # 1. builtin aliases (from rules)
     from plugins.aram.rules import BUILTIN_ALIASES
+
     if query in BUILTIN_ALIASES:
         cid = BUILTIN_ALIASES[query]
         if cid in data:
             info = data[cid]
-            results.append(_result(cid, info, 1.0, "alias_exact", f"alias: {query} → {info.get('title','')}", query))
+            results.append(
+                _result(
+                    cid,
+                    info,
+                    1.0,
+                    "alias_exact",
+                    f"alias: {query} → {info.get('title','')}",
+                    query,
+                )
+            )
             _emit(query, results[0])
             return results
 
@@ -58,7 +77,16 @@ def match(query: str, top_n: int = 3) -> list:
         title = info.get("title", "")
         if query in name or query in title:
             score = 0.95 if query == title else 0.90
-            results.append(_result(cid, info, score, "contains", f"contains: '{query}' in '{title}/{name}'", query))
+            results.append(
+                _result(
+                    cid,
+                    info,
+                    score,
+                    "contains",
+                    f"contains: '{query}' in '{title}/{name}'",
+                    query,
+                )
+            )
 
     # 3. fuzzy
     for cid, info in data.items():
@@ -68,7 +96,9 @@ def match(query: str, top_n: int = 3) -> list:
         title = info.get("title", "")
         best = max(_sim(query, name), _sim(query, title))
         if best >= LOW_SCORE:
-            results.append(_result(cid, info, round(best, 2), "fuzzy", f"fuzzy: {best:.2f}", query))
+            results.append(
+                _result(cid, info, round(best, 2), "fuzzy", f"fuzzy: {best:.2f}", query)
+            )
 
     # dedup + sort
     seen = {}
@@ -97,11 +127,23 @@ def feedback(query: str, correct_id: str):
 
     # 事件
     from core.engine import log_mem
-    log_mem("correction", status="err", source="aram.matcher",
-            query=query, wrong=wrong_title,
-            correct=correct_title, correct_id=correct_id)
 
-    return {"input": query, "matched": wrong_title, "corrected": True, "correct_target": correct_title}
+    log_mem(
+        "correction",
+        status="err",
+        source="aram.matcher",
+        query=query,
+        wrong=wrong_title,
+        correct=correct_title,
+        correct_id=correct_id,
+    )
+
+    return {
+        "input": query,
+        "matched": wrong_title,
+        "corrected": True,
+        "correct_target": correct_title,
+    }
 
 
 def _result(cid, info, score, match_type, reason, query=""):
@@ -122,14 +164,21 @@ def _result(cid, info, score, match_type, reason, query=""):
 
 def _emit(query, top, alternatives=None):
     from core.engine import log_mem
+
     alt_names = [a["title"] for a in (alternatives or [])[:3]]
-    log_mem("memory_recall", source="aram.matcher",
-            query=query, hit_count=1 + len(alt_names),
-            matched=top["title"], matched_id=top["champion_id"],
-            score=top["score"], match_type=top["match_type"],
-            matched_keywords=top.get("matched_keywords", []),
-            confidence=top.get("confidence", ""),
-            alternatives=alt_names)
+    log_mem(
+        "memory_recall",
+        source="aram.matcher",
+        query=query,
+        hit_count=1 + len(alt_names),
+        matched=top["title"],
+        matched_id=top["champion_id"],
+        score=top["score"],
+        match_type=top["match_type"],
+        matched_keywords=top.get("matched_keywords", []),
+        confidence=top.get("confidence", ""),
+        alternatives=alt_names,
+    )
 
 
 if __name__ == "__main__":
@@ -138,5 +187,15 @@ if __name__ == "__main__":
         print(json.dumps(feedback(sys.argv[2], sys.argv[3]), ensure_ascii=False))
     else:
         for r in match(q):
-            print(json.dumps({"input": q, "matched": r["title"], "champion_id": r["champion_id"],
-                              "score": r["score"], "reasons": [r["match_type"]]}, ensure_ascii=False))
+            print(
+                json.dumps(
+                    {
+                        "input": q,
+                        "matched": r["title"],
+                        "champion_id": r["champion_id"],
+                        "score": r["score"],
+                        "reasons": [r["match_type"]],
+                    },
+                    ensure_ascii=False,
+                )
+            )

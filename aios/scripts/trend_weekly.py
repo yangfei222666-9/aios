@@ -9,6 +9,7 @@ AIOS 周趋势分析 v1.0
   python -m aios.scripts.trend_weekly --format telegram  # 精简版
   python -m aios.scripts.trend_weekly --save             # 保存到 reports/
 """
+
 import json, math, sys, time, argparse
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
@@ -22,6 +23,7 @@ REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"
 
 
 # ── 工具函数 ──
+
 
 def _day_key(epoch: float) -> str:
     return time.strftime("%m-%d", time.localtime(epoch))
@@ -40,9 +42,16 @@ def _layer(e: dict) -> str:
     if l in VALID_LAYERS:
         return l
     t = e.get("type", "")
-    mapping = {"tool": "TOOL", "task": "TOOL", "match": "MEM",
-               "correction": "MEM", "error": "SEC", "http_error": "SEC",
-               "health": "KERNEL", "deploy": "KERNEL"}
+    mapping = {
+        "tool": "TOOL",
+        "task": "TOOL",
+        "match": "MEM",
+        "correction": "MEM",
+        "error": "SEC",
+        "http_error": "SEC",
+        "health": "KERNEL",
+        "deploy": "KERNEL",
+    }
     return mapping.get(t, "TOOL")
 
 
@@ -75,8 +84,10 @@ def _trend_arrow(values: list) -> str:
     """根据序列趋势返回方向箭头"""
     if len(values) < 2:
         return "→"
-    first_half = sum(values[:len(values)//2]) / max(len(values)//2, 1)
-    second_half = sum(values[len(values)//2:]) / max(len(values) - len(values)//2, 1)
+    first_half = sum(values[: len(values) // 2]) / max(len(values) // 2, 1)
+    second_half = sum(values[len(values) // 2 :]) / max(
+        len(values) - len(values) // 2, 1
+    )
     if first_half == 0:
         return "→" if second_half == 0 else "↑"
     pct = (second_half - first_half) / first_half * 100
@@ -98,6 +109,7 @@ def _sparkline(values: list) -> str:
 
 
 # ── 核心分析 ──
+
 
 def compute_daily_metrics(events: list, days: int) -> list:
     """按天分桶，计算每天的指标"""
@@ -137,18 +149,20 @@ def compute_daily_metrics(events: list, days: int) -> list:
         mem_events = [e for e in day_events if _layer(e) == "MEM"]
         misses = sum(1 for e in mem_events if "miss" in _event_name(e))
 
-        result.append({
-            "date": day,
-            "date_short": day[5:],  # MM-DD
-            "total": total,
-            "tsr": round(tsr, 1),
-            "layer_counts": dict(layer_counts),
-            "avg_latency": avg_lat,
-            "p95_latency": p95_lat,
-            "errors": dict(error_types),
-            "error_count": len(errors),
-            "mem_misses": misses,
-        })
+        result.append(
+            {
+                "date": day,
+                "date_short": day[5:],  # MM-DD
+                "total": total,
+                "tsr": round(tsr, 1),
+                "layer_counts": dict(layer_counts),
+                "avg_latency": avg_lat,
+                "p95_latency": p95_lat,
+                "errors": dict(error_types),
+                "error_count": len(errors),
+                "mem_misses": misses,
+            }
+        )
 
     return result
 
@@ -176,14 +190,16 @@ def analyze_error_convergence(daily: list) -> list:
         else:
             status = "稳定"
 
-        results.append({
-            "type": err_type,
-            "total": total,
-            "trend": trend,
-            "status": status,
-            "daily": counts,
-            "spark": _sparkline(counts),
-        })
+        results.append(
+            {
+                "type": err_type,
+                "total": total,
+                "trend": trend,
+                "status": status,
+                "daily": counts,
+                "spark": _sparkline(counts),
+            }
+        )
 
     # 按严重程度排序：发散 > 稳定 > 收敛 > 已消除
     priority = {"发散中": 0, "稳定": 1, "收敛中": 2, "已消除": 3}
@@ -234,12 +250,16 @@ def generate_weekly_report(days: int = 7, compact: bool = False) -> str:
             lines.append("")
             lines.append("⚠️ 发散中的错误:")
             for e in diverging[:5]:
-                lines.append(f"  {e['trend']} {e['type']} ({e['total']}次) {e['spark']}")
+                lines.append(
+                    f"  {e['trend']} {e['type']} ({e['total']}次) {e['spark']}"
+                )
         if converging:
             lines.append("")
             lines.append("✅ 收敛中的错误:")
             for e in converging[:5]:
-                lines.append(f"  {e['trend']} {e['type']} ({e['total']}次) {e['spark']}")
+                lines.append(
+                    f"  {e['trend']} {e['type']} ({e['total']}次) {e['spark']}"
+                )
 
         if not error_conv:
             lines.append("\n✅ 无错误事件")
@@ -260,17 +280,23 @@ def generate_weekly_report(days: int = 7, compact: bool = False) -> str:
     ]
     if lat_values:
         avg_lat = round(sum(lat_values) / len(lat_values))
-        lines.append(f"| 平均延迟 | {avg_lat}ms | {lat_trend} | {_sparkline(lat_values)} |")
-    lines.append(f"| 记忆盲区 | {sum(miss_values)}次 | {miss_trend} | {_sparkline(miss_values)} |")
+        lines.append(
+            f"| 平均延迟 | {avg_lat}ms | {lat_trend} | {_sparkline(lat_values)} |"
+        )
+    lines.append(
+        f"| 记忆盲区 | {sum(miss_values)}次 | {miss_trend} | {_sparkline(miss_values)} |"
+    )
 
     # 逐日明细
-    lines.extend([
-        "",
-        "## 2. 逐日明细",
-        "",
-        "| 日期 | 事件 | TSR | 错误 | 盲区 | 延迟(avg) |",
-        "| :--- | ---: | ---: | ---: | ---: | ---: |",
-    ])
+    lines.extend(
+        [
+            "",
+            "## 2. 逐日明细",
+            "",
+            "| 日期 | 事件 | TSR | 错误 | 盲区 | 延迟(avg) |",
+            "| :--- | ---: | ---: | ---: | ---: | ---: |",
+        ]
+    )
     for d in daily:
         lines.append(
             f"| {d['date_short']} | {d['total']} | {d['tsr']}% | "
@@ -278,11 +304,13 @@ def generate_weekly_report(days: int = 7, compact: bool = False) -> str:
         )
 
     # 错误收敛分析
-    lines.extend([
-        "",
-        "## 3. 错误收敛分析",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "## 3. 错误收敛分析",
+            "",
+        ]
+    )
     if error_conv:
         lines.append("| 错误类型 | 总次数 | 趋势 | 状态 | 分布 |")
         lines.append("| :--- | ---: | :---: | :--- | :--- |")
@@ -294,26 +322,32 @@ def generate_weekly_report(days: int = 7, compact: bool = False) -> str:
         lines.append("✅ 过去 {days} 天无错误事件")
 
     # 层分布趋势
-    lines.extend([
-        "",
-        "## 4. 层分布趋势",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "## 4. 层分布趋势",
+            "",
+        ]
+    )
     for layer_name in ["KERNEL", "COMMS", "TOOL", "MEM", "SEC"]:
         vals = [d["layer_counts"].get(layer_name, 0) for d in daily]
-        lines.append(f"- {layer_name}: {_sparkline(vals)} {_trend_arrow(vals)} (总{sum(vals)})")
+        lines.append(
+            f"- {layer_name}: {_sparkline(vals)} {_trend_arrow(vals)} (总{sum(vals)})"
+        )
 
-    lines.extend([
-        "",
-        "---",
-        f"*Generated by AIOS Trend Weekly v1.0 | {now}*",
-    ])
+    lines.extend(
+        [
+            "",
+            "---",
+            f"*Generated by AIOS Trend Weekly v1.0 | {now}*",
+        ]
+    )
 
     return "\n".join(lines)
 
 
 def main():
-    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stdout.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser(description="AIOS 周趋势分析")
     p.add_argument("--days", type=int, default=7, help="分析窗口（天）")
     p.add_argument("--format", choices=["markdown", "telegram"], default="markdown")

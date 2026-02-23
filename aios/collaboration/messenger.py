@@ -53,8 +53,14 @@ class Messenger:
         self.inbox = self.base_dir / agent_id
         self.inbox.mkdir(parents=True, exist_ok=True)
 
-    def send(self, receiver: str, msg_type: MsgType, payload: dict,
-             reply_to: str = "", ttl: int = 300) -> Message:
+    def send(
+        self,
+        receiver: str,
+        msg_type: MsgType,
+        payload: dict,
+        reply_to: str = "",
+        ttl: int = 300,
+    ) -> Message:
         """Send a message to another agent (or '*' for broadcast)."""
         msg = Message(
             msg_id=uuid.uuid4().hex[:12],
@@ -93,7 +99,7 @@ class Messenger:
         messages = []
         files = sorted(self.inbox.glob("*.msg.json"))
 
-        for f in files[:limit * 2]:  # read extra to account for expired
+        for f in files[: limit * 2]:  # read extra to account for expired
             try:
                 data = json.loads(f.read_text(encoding="utf-8"))
                 msg = Message(**data)
@@ -152,10 +158,14 @@ class Messenger:
 
 # ── CLI ──
 
+
 def main():
     import sys
+
     if len(sys.argv) < 3:
-        print("Usage: messenger.py <agent_id> [inbox|peek|count|purge|send <to> <json_payload>]")
+        print(
+            "Usage: messenger.py <agent_id> [inbox|peek|count|purge|send <to> <json_payload>]"
+        )
         return
 
     agent_id = sys.argv[1]

@@ -7,7 +7,9 @@
 """
 
 
-def apply_alias_suggestion(alias_map: dict, item: dict, min_conf: float, no_overwrite: bool) -> tuple:
+def apply_alias_suggestion(
+    alias_map: dict, item: dict, min_conf: float, no_overwrite: bool
+) -> tuple:
     """
     单条 alias 建议应用逻辑。
     返回 (applied: bool, why: str)

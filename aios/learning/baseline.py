@@ -3,6 +3,7 @@
 每次 analyze 后追加一条基线快照，用于画趋势。
 缓存机制: snapshot/score 结果缓存5分钟，减少重复计算开销
 """
+
 import json, time, sys, math, os
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -12,51 +13,52 @@ from core.engine import load_events, append_jsonl
 from core.config import get_path
 
 LEARNING_DIR = Path(__file__).resolve().parent
-HISTORY_FILE = get_path("paths.metrics_history") or (LEARNING_DIR / "metrics_history.jsonl")
+HISTORY_FILE = get_path("paths.metrics_history") or (
+    LEARNING_DIR / "metrics_history.jsonl"
+)
 CACHE_FILE = LEARNING_DIR / "baseline_cache.json"
 CACHE_TTL_SECONDS = 300  # 5分钟缓存
 
 # --- Cache Management ---
 
+
 def load_cache(action):
     """加载缓存，如果未过期则返回结果"""
     if not CACHE_FILE.exists():
         return None
-    
+
     try:
-        with open(CACHE_FILE, 'r', encoding='utf-8') as f:
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
             cache = json.load(f)
-        
+
         if action not in cache:
             return None
-        
+
         entry = cache[action]
-        cached_at = entry.get('cached_at', 0)
+        cached_at = entry.get("cached_at", 0)
         age = time.time() - cached_at
-        
+
         if age < CACHE_TTL_SECONDS:
-            return entry.get('data')
+            return entry.get("data")
         else:
             return None
     except:
         return None
+
 
 def save_cache(action, data):
     """保存结果到缓存"""
     cache = {}
     if CACHE_FILE.exists():
         try:
-            with open(CACHE_FILE, 'r', encoding='utf-8') as f:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
                 cache = json.load(f)
         except:
             pass
-    
-    cache[action] = {
-        'cached_at': time.time(),
-        'data': data
-    }
-    
-    with open(CACHE_FILE, 'w', encoding='utf-8') as f:
+
+    cache[action] = {"cached_at": time.time(), "data": data}
+
+    with open(CACHE_FILE, "w", encoding="utf-8") as f:
         json.dump(cache, f, ensure_ascii=False, indent=2)
 
 
@@ -123,6 +125,7 @@ def _classify(e: dict) -> str:
     layer_map = {"TOOL": "tool", "MEM": "match", "SEC": "http_error"}
     return layer_map.get(layer, "")
 
+
 def _tool_name_ms(e: dict) -> tuple:
     """从 v0.1 或 v0.2 事件中提取 (tool_name, ms, ok)"""
     # v0.2: payload.name / payload.ms
@@ -142,14 +145,19 @@ def _tool_name_ms(e: dict) -> tuple:
         ms = e.get("latency_ms", 0)
     return name, ms, ok
 
+
 def snapshot(days: int = 1) -> dict:
     events = load_events(days)
-    
+
     matches = [e for e in events if _classify(e) in ("match", "memory_recall")]
     corrections = [e for e in events if _classify(e) == "correction"]
     tools = [e for e in events if _classify(e) == "tool" or e.get("layer") == "TOOL"]
-    http_errors = [e for e in events if _classify(e) == "http_error" or
-                   (e.get("layer") == "SEC" and "http" in e.get("event", ""))]
+    http_errors = [
+        e
+        for e in events
+        if _classify(e) == "http_error"
+        or (e.get("layer") == "SEC" and "http" in e.get("event", ""))
+    ]
 
     total_match = len(matches) + len(corrections)
     correction_rate = len(corrections) / total_match if total_match > 0 else 0
@@ -172,7 +180,9 @@ def snapshot(days: int = 1) -> dict:
             tool_p95[name] = s[idx]
 
     # http error rates
-    http_codes = Counter((e.get("data") or {}).get("status_code", 0) for e in http_errors)
+    http_codes = Counter(
+        (e.get("data") or {}).get("status_code", 0) for e in http_errors
+    )
     total_http = sum(http_codes.values())
 
     record = {
@@ -195,7 +205,13 @@ def snapshot(days: int = 1) -> dict:
     record["grade"] = evo["grade"]
 
     # Schema 校验：必须字段齐全才入正式快照
-    REQUIRED_KEYS = {"ts", "correction_rate", "tool_success_rate", "evolution_score", "grade"}
+    REQUIRED_KEYS = {
+        "ts",
+        "correction_rate",
+        "tool_success_rate",
+        "evolution_score",
+        "grade",
+    }
     missing_keys = REQUIRED_KEYS - set(record.keys())
     if missing_keys:
         record["_schema_warning"] = f"missing keys: {sorted(missing_keys)}"
@@ -228,13 +244,20 @@ def trend_summary(limit: int = 7) -> str:
     lines = [f"Trend ({len(history)} snapshots):"]
 
     cr_delta = last["correction_rate"] - first["correction_rate"]
-    lines.append(f"  correction_rate: {first['correction_rate']:.2%} → {last['correction_rate']:.2%} ({'+' if cr_delta >= 0 else ''}{cr_delta:.2%})")
+    lines.append(
+        f"  correction_rate: {first['correction_rate']:.2%} → {last['correction_rate']:.2%} ({'+' if cr_delta >= 0 else ''}{cr_delta:.2%})"
+    )
 
     ts_delta = last["tool_success_rate"] - first["tool_success_rate"]
-    lines.append(f"  tool_success_rate: {first['tool_success_rate']:.2%} → {last['tool_success_rate']:.2%} ({'+' if ts_delta >= 0 else ''}{ts_delta:.2%})")
+    lines.append(
+        f"  tool_success_rate: {first['tool_success_rate']:.2%} → {last['tool_success_rate']:.2%} ({'+' if ts_delta >= 0 else ''}{ts_delta:.2%})"
+    )
 
     # p95 trend per tool
-    all_tools = set(list(first.get("tool_p95_ms", {}).keys()) + list(last.get("tool_p95_ms", {}).keys()))
+    all_tools = set(
+        list(first.get("tool_p95_ms", {}).keys())
+        + list(last.get("tool_p95_ms", {}).keys())
+    )
     for t in sorted(all_tools):
         p_first = first.get("tool_p95_ms", {}).get(t)
         p_last = last.get("tool_p95_ms", {}).get(t)
@@ -247,12 +270,12 @@ def trend_summary(limit: int = 7) -> str:
 def evolution_score(limit: int = 7) -> dict:
     """
     进化评分：基于最新 baseline 快照直接计算。
-    
+
     score = tool_success_rate * 0.4
           - correction_rate * 0.2
           - http_502_rate * 0.2
           - p95_slow_ratio * 0.2
-    
+
     p95_slow_ratio = 超过 5000ms 的 tool 占比
     score: 0.0 (最差) ~ 1.0 (完美)
     """
@@ -301,22 +324,23 @@ def evolution_score(limit: int = 7) -> dict:
 def regression_gate(limit: int = 5) -> dict:
     """门禁检测：委托给 guardrail.py"""
     from learning.guardrail import run_guardrail
+
     history = load_history(limit)
     return run_guardrail(history)
 
 
 if __name__ == "__main__":
     action = sys.argv[1] if len(sys.argv) > 1 else "snapshot"
-    
+
     # 可缓存的操作
     cacheable = ["snapshot", "score"]
-    
+
     if action in cacheable:
         cached = load_cache(action)
         if cached:
             print(json.dumps(cached, ensure_ascii=False, indent=2))
             sys.exit(0)
-    
+
     # 缓存未命中，执行实际操作
     if action == "snapshot":
         r = snapshot()

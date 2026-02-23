@@ -64,12 +64,16 @@ class Consensus:
     def __init__(self):
         VOTES_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    def create_request(self, question: str, options: list,
-                       protocol: Protocol = Protocol.MAJORITY,
-                       required_voters: list = None,
-                       min_voters: int = 2,
-                       weights: dict = None,
-                       timeout: int = 300) -> ConsensusRequest:
+    def create_request(
+        self,
+        question: str,
+        options: list,
+        protocol: Protocol = Protocol.MAJORITY,
+        required_voters: list = None,
+        min_voters: int = 2,
+        weights: dict = None,
+        timeout: int = 300,
+    ) -> ConsensusRequest:
         now = time.time()
         req = ConsensusRequest(
             request_id=uuid.uuid4().hex[:10],
@@ -85,8 +89,14 @@ class Consensus:
         self._append(req)
         return req
 
-    def cast_vote(self, request: ConsensusRequest, voter: str,
-                  choice: str, confidence: float = 1.0, reasoning: str = "") -> bool:
+    def cast_vote(
+        self,
+        request: ConsensusRequest,
+        voter: str,
+        choice: str,
+        confidence: float = 1.0,
+        reasoning: str = "",
+    ) -> bool:
         """Cast a vote. Returns True if accepted."""
         if request.status != "open":
             return False
@@ -97,8 +107,11 @@ class Consensus:
             return False
 
         vote = Vote(
-            voter=voter, choice=choice, confidence=confidence,
-            reasoning=reasoning, timestamp=time.time()
+            voter=voter,
+            choice=choice,
+            confidence=confidence,
+            reasoning=reasoning,
+            timestamp=time.time(),
         )
         request.votes.append(asdict(vote))
         self._append(request)
@@ -183,8 +196,12 @@ class Consensus:
             "votes_cast": len(votes),
             "tally": tally,
             "details": [
-                {"voter": v.voter, "choice": v.choice,
-                 "confidence": v.confidence, "reasoning": v.reasoning}
+                {
+                    "voter": v.voter,
+                    "choice": v.choice,
+                    "confidence": v.confidence,
+                    "reasoning": v.reasoning,
+                }
                 for v in votes
             ],
         }
@@ -196,8 +213,10 @@ class Consensus:
 
 # ── convenience: quick 2-agent cross-check ──
 
-def cross_check(question: str, agent_results: dict[str, str],
-                protocol: Protocol = Protocol.MAJORITY) -> dict:
+
+def cross_check(
+    question: str, agent_results: dict[str, str], protocol: Protocol = Protocol.MAJORITY
+) -> dict:
     """
     Quick cross-check: pass in {agent_id: answer} dict, get consensus result.
     Useful for validation without full async flow.

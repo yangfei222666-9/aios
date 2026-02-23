@@ -36,7 +36,9 @@ class AgentProfile:
         return all(c in self.capabilities for c in required_caps)
 
     def staleness_seconds(self) -> float:
-        return time.time() - self.last_heartbeat if self.last_heartbeat else float("inf")
+        return (
+            time.time() - self.last_heartbeat if self.last_heartbeat else float("inf")
+        )
 
 
 class AgentRegistry:
@@ -64,7 +66,9 @@ class AgentRegistry:
 
     def _save(self):
         self.path.write_text(
-            json.dumps([asdict(a) for a in self._agents.values()], ensure_ascii=False, indent=2),
+            json.dumps(
+                [asdict(a) for a in self._agents.values()], ensure_ascii=False, indent=2
+            ),
             encoding="utf-8",
         )
 
@@ -104,7 +108,10 @@ class AgentRegistry:
         now = time.time()
         changed = False
         for agent in self._agents.values():
-            if agent.status != "offline" and (now - agent.last_heartbeat) > self.STALE_THRESHOLD:
+            if (
+                agent.status != "offline"
+                and (now - agent.last_heartbeat) > self.STALE_THRESHOLD
+            ):
                 agent.status = "offline"
                 changed = True
         if changed:
@@ -112,7 +119,9 @@ class AgentRegistry:
 
     # ── discovery ──
 
-    def find_by_capability(self, caps: list, only_available: bool = True) -> list[AgentProfile]:
+    def find_by_capability(
+        self, caps: list, only_available: bool = True
+    ) -> list[AgentProfile]:
         """Find agents that have ALL required capabilities."""
         self.sweep_stale()
         results = []
@@ -133,8 +142,10 @@ class AgentRegistry:
 
 # ── CLI ──
 
+
 def main():
     import sys
+
     reg = AgentRegistry()
 
     if len(sys.argv) < 2:
@@ -147,7 +158,9 @@ def main():
         if not agents:
             print("No agents registered.")
         for a in agents:
-            print(f"  {a.agent_id:20s}  status={a.status:8s}  load={a.load:.1f}  caps={a.capabilities}")
+            print(
+                f"  {a.agent_id:20s}  status={a.status:8s}  load={a.load:.1f}  caps={a.capabilities}"
+            )
     elif cmd == "get" and len(sys.argv) > 2:
         a = reg.get(sys.argv[2])
         print(json.dumps(asdict(a), indent=2, ensure_ascii=False) if a else "Not found")

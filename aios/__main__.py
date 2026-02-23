@@ -30,6 +30,7 @@ def cmd_health(args) -> int:
         issues.append(("WARN", "no events yet"))
 
     from pathlib import Path
+
     aram = Path(r"C:\Users\A\Desktop\ARAM-Helper\aram_data.json")
     if aram.exists():
         data = json.loads(aram.read_text(encoding="utf-8"))
@@ -71,6 +72,7 @@ def _parse_since(since: str) -> int:
 def cmd_analyze(args) -> int:
     days = _parse_since(args.since)
     from learning.analyze import generate_full_report
+
     r = generate_full_report(days)
     print(json.dumps(r, ensure_ascii=False, indent=2))
     return 0
@@ -79,6 +81,7 @@ def cmd_analyze(args) -> int:
 def cmd_report(args) -> int:
     days = _parse_since(args.since)
     from learning.analyze import generate_daily_report
+
     print(generate_daily_report(days))
     return 0
 
@@ -86,17 +89,25 @@ def cmd_report(args) -> int:
 def cmd_apply(args) -> int:
     if args.dry_run:
         from learning.apply import run
+
         run(mode="show")
     else:
         from learning.apply import run
+
         run(mode="auto")
     return 0
 
 
 def cmd_replay(args) -> int:
     import time
-    hours = int(args.since.rstrip("h")) if args.since.endswith("h") else int(args.since.rstrip("d")) * 24
+
+    hours = (
+        int(args.since.rstrip("h"))
+        if args.since.endswith("h")
+        else int(args.since.rstrip("d")) * 24
+    )
     from scripts.replay import replay
+
     now = int(time.time())
     r = replay(now - hours * 3600, now)
     print(json.dumps(r, ensure_ascii=False, indent=2))
@@ -105,6 +116,7 @@ def cmd_replay(args) -> int:
 
 def cmd_tickets(args) -> int:
     from learning.tickets import load_tickets, summary
+
     if args.status == "all":
         for t in load_tickets():
             print(json.dumps(t, ensure_ascii=False))
@@ -118,12 +130,14 @@ def cmd_tickets(args) -> int:
 
 def cmd_score(args) -> int:
     from learning.baseline import evolution_score
+
     print(json.dumps(evolution_score(), ensure_ascii=False, indent=2))
     return 0
 
 
 def cmd_gate(args) -> int:
     from learning.baseline import regression_gate
+
     r = regression_gate()
     print(json.dumps(r, ensure_ascii=False, indent=2))
     return 1 if r.get("alerts") else 0
@@ -131,18 +145,21 @@ def cmd_gate(args) -> int:
 
 def cmd_test(args) -> int:
     import subprocess
+
     suite = os.path.join(AIOS_ROOT, "scripts", "run_regression_suite.py")
     return subprocess.call([sys.executable, suite])
 
 
 def cmd_insight(args) -> int:
     from scripts.insight import generate_insight
+
     compact = args.format == "telegram"
     report = generate_insight(days=_parse_since(args.since), compact=compact)
     print(report)
     if args.save and not compact:
         import time
         from pathlib import Path
+
         date_str = time.strftime("%Y-%m-%d")
         out_path = Path(AIOS_ROOT) / "learning" / f"insight_{date_str}.md"
         out_path.write_text(report, encoding="utf-8")
@@ -153,6 +170,7 @@ def cmd_insight(args) -> int:
 def cmd_reflect(args) -> int:
     if args.inject:
         from scripts.reflect import load_today_strategies, format_strategies_for_prompt
+
         strategies = load_today_strategies()
         if strategies:
             print(format_strategies_for_prompt(strategies))
@@ -160,22 +178,26 @@ def cmd_reflect(args) -> int:
             print("今天暂无策略。")
     else:
         from scripts.reflect import analyze_and_reflect, save_strategies
+
         strategies = analyze_and_reflect(_parse_since(args.since))
         save_strategies(strategies)
         for s in strategies:
-            icon = {"critical": "🚨", "high": "⚠️", "medium": "📋", "low": "✅"}.get(s["priority"], "📋")
+            icon = {"critical": "🚨", "high": "⚠️", "medium": "📋", "low": "✅"}.get(
+                s["priority"], "📋"
+            )
             print(f"  {icon} [{s['rule']}] {s['content']}")
     return 0
 
 
 def cmd_version(args) -> int:
     from learning.analyze import AIOS_VERSION, _get_git_commit
+
     print(f"AIOS {AIOS_VERSION} (commit: {_get_git_commit()})")
     return 0
 
 
 def main(argv: list[str] | None = None) -> int:
-    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stdout.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser(prog="aios", description="AIOS — 个人 AI 操作系统")
     sub = p.add_subparsers(dest="cmd")
 
@@ -194,7 +216,9 @@ def main(argv: list[str] | None = None) -> int:
     prel.add_argument("--since", default="24h", help="回放窗口: 24h, 48h")
 
     pt = sub.add_parser("tickets", help="列出 L2 工单")
-    pt.add_argument("--status", default="open", choices=["open", "done", "wontfix", "all"])
+    pt.add_argument(
+        "--status", default="open", choices=["open", "done", "wontfix", "all"]
+    )
 
     pi = sub.add_parser("insight", help="每日健康简报 (穷人版 ClickHouse)")
     pi.add_argument("--since", default="24h", help="时间窗口: 24h, 7d, all")

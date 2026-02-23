@@ -2,6 +2,7 @@
 """
 读写 ARAM 数据，隔离文件路径细节。
 """
+
 import json
 from pathlib import Path
 import sys
@@ -41,7 +42,9 @@ def save_aliases(aliases: dict):
     if not ALIAS_FILE:
         return
     ALIAS_FILE.parent.mkdir(exist_ok=True)
-    ALIAS_FILE.write_text(json.dumps(aliases, ensure_ascii=False, indent=2), encoding="utf-8")
+    ALIAS_FILE.write_text(
+        json.dumps(aliases, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 def champion_count() -> int:

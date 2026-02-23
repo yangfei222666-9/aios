@@ -4,6 +4,7 @@ L2 建议不自动应用，变成工单追踪。
 tickets.jsonl: {id, ts, suggestion, evidence, status, owner}
 status: open | done | wontfix
 """
+
 import json, time, sys, hashlib
 from pathlib import Path
 
@@ -74,7 +75,11 @@ def ingest(suggestions: list) -> dict:
         created += 1
 
     _save_all(existing)
-    return {"created": created, "total": len(existing), "open": sum(1 for t in existing if t["status"] == "open")}
+    return {
+        "created": created,
+        "total": len(existing),
+        "open": sum(1 for t in existing if t["status"] == "open"),
+    }
 
 
 def update_status(ticket_id: str, status: str) -> bool:
@@ -96,7 +101,9 @@ def summary() -> str:
     done_t = [t for t in tickets if t["status"] == "done"]
     wontfix_t = [t for t in tickets if t["status"] == "wontfix"]
 
-    lines = [f"Tickets: {len(open_t)} open, {len(done_t)} done, {len(wontfix_t)} wontfix"]
+    lines = [
+        f"Tickets: {len(open_t)} open, {len(done_t)} done, {len(wontfix_t)} wontfix"
+    ]
     for t in open_t:
         s = t["suggestion"]
         lines.append(f"  [{t['id']}] {s['name']}: {s['action']} ({s['reason']})")

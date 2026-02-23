@@ -89,14 +89,21 @@ class AgentPool:
     def _save(self):
         POOL_FILE.parent.mkdir(parents=True, exist_ok=True)
         POOL_FILE.write_text(
-            json.dumps([asdict(a) for a in self._pool.values()], ensure_ascii=False, indent=2),
+            json.dumps(
+                [asdict(a) for a in self._pool.values()], ensure_ascii=False, indent=2
+            ),
             encoding="utf-8",
         )
 
-    def spawn_spec(self, agent_id: str, template: str = "",
-                   agent_type: AgentType = AgentType.ON_DEMAND,
-                   capabilities: list = None, model: str = "",
-                   max_tasks: int = 0) -> dict:
+    def spawn_spec(
+        self,
+        agent_id: str,
+        template: str = "",
+        agent_type: AgentType = AgentType.ON_DEMAND,
+        capabilities: list = None,
+        model: str = "",
+        max_tasks: int = 0,
+    ) -> dict:
         """
         Generate spawn specification (to be executed by orchestrator via sessions_spawn).
         Returns dict with task prompt, model, label for sessions_spawn call.
@@ -119,12 +126,14 @@ class AgentPool:
         self._pool[agent_id] = pa
 
         # register in agent registry
-        self.registry.register(AgentProfile(
-            agent_id=agent_id,
-            name=agent_id,
-            capabilities=caps,
-            status="idle",
-        ))
+        self.registry.register(
+            AgentProfile(
+                agent_id=agent_id,
+                name=agent_id,
+                capabilities=caps,
+                status="idle",
+            )
+        )
 
         self._save()
 
@@ -198,8 +207,10 @@ class AgentPool:
 
 # ── CLI ──
 
+
 def main():
     import sys
+
     reg = AgentRegistry()
     pool = AgentPool(reg)
 
@@ -213,7 +224,9 @@ def main():
         if not agents:
             print("No active agents in pool.")
         for a in agents:
-            print(f"  {a.agent_id:20s}  type={a.agent_type:12s}  status={a.status:10s}  tasks={a.task_count}")
+            print(
+                f"  {a.agent_id:20s}  type={a.agent_type:12s}  status={a.status:10s}  tasks={a.task_count}"
+            )
     elif cmd == "stats":
         s = pool.stats()
         print(json.dumps(s, indent=2))

@@ -8,6 +8,7 @@
 终态：SUCCESS / NOOP_ALREADY_RUNNING / NOOP_DEDUP / FAILED_RETRYABLE / FAILED_NON_RETRYABLE
 每次执行结果写入 execution_log.jsonl 供审计。
 """
+
 import json, time, re, subprocess, sys
 from pathlib import Path
 from typing import Optional
@@ -23,15 +24,15 @@ DEFAULT_DEDUP_WINDOW = 60  # 秒
 
 # 不可重试的错误模式（正则）
 NON_RETRYABLE_PATTERNS = [
-    r"WnsUniversalSDK",           # 环境/依赖错误
-    r"FileNotFoundError",          # 文件不存在
-    r"ModuleNotFoundError",        # 模块缺失
-    r"PermissionError",            # 权限不足
-    r"Access is denied",           # Windows 权限
-    r"not recognized as.*command", # 命令不存在
+    r"WnsUniversalSDK",  # 环境/依赖错误
+    r"FileNotFoundError",  # 文件不存在
+    r"ModuleNotFoundError",  # 模块缺失
+    r"PermissionError",  # 权限不足
+    r"Access is denied",  # Windows 权限
+    r"not recognized as.*command",  # 命令不存在
     r"No such file or directory",  # 路径不存在
-    r"ImportError",                # 导入失败
-    r"SyntaxError",                # 语法错误
+    r"ImportError",  # 导入失败
+    r"SyntaxError",  # 语法错误
 ]
 
 # ── 终态常量 ──
@@ -45,8 +46,14 @@ FAILED_NON_RETRYABLE = "FAILED_NON_RETRYABLE"
 
 # ── 执行日志 ──
 
-def _log_execution(command_key: str, terminal_state: str, reason_code: str,
-                   detail: str = "", latency_ms: int = 0):
+
+def _log_execution(
+    command_key: str,
+    terminal_state: str,
+    reason_code: str,
+    detail: str = "",
+    latency_ms: int = 0,
+):
     """写入 execution_log.jsonl + emit 事件"""
     record = {
         "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -62,14 +69,22 @@ def _log_execution(command_key: str, terminal_state: str, reason_code: str,
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     # 同步 emit 到事件流
-    status = "ok" if terminal_state in (SUCCESS, NOOP_ALREADY_RUNNING, NOOP_DEDUP) else "err"
-    emit(LAYER_TOOL, f"exec_{command_key}", status, latency_ms,
-         {"terminal_state": terminal_state, "reason_code": reason_code})
+    status = (
+        "ok" if terminal_state in (SUCCESS, NOOP_ALREADY_RUNNING, NOOP_DEDUP) else "err"
+    )
+    emit(
+        LAYER_TOOL,
+        f"exec_{command_key}",
+        status,
+        latency_ms,
+        {"terminal_state": terminal_state, "reason_code": reason_code},
+    )
 
     return record
 
 
 # ── 1. 幂等去重 ──
+
 
 def _load_dedup() -> dict:
     if DEDUP_STATE.exists():
@@ -82,10 +97,14 @@ def _load_dedup() -> dict:
 
 def _save_dedup(state: dict):
     DEDUP_STATE.parent.mkdir(parents=True, exist_ok=True)
-    DEDUP_STATE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    DEDUP_STATE.write_text(
+        json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
-def idempotency_guard(command_key: str, window: int = DEFAULT_DEDUP_WINDOW) -> Optional[dict]:
+def idempotency_guard(
+    command_key: str, window: int = DEFAULT_DEDUP_WINDOW
+) -> Optional[dict]:
     """
     检查 command_key 是否在 window 秒内已执行过。
     如果是 → 返回 NOOP_DEDUP 结果（调用方应短路）。
@@ -99,8 +118,12 @@ def idempotency_guard(command_key: str, window: int = DEFAULT_DEDUP_WINDOW) -> O
 
     last = state.get(command_key, 0)
     if now - last < window:
-        result = _log_execution(command_key, NOOP_DEDUP, "dedup_window",
-                                f"上次执行 {int(now - last)}s 前，窗口 {window}s")
+        result = _log_execution(
+            command_key,
+            NOOP_DEDUP,
+            "dedup_window",
+            f"上次执行 {int(now - last)}s 前，窗口 {window}s",
+        )
         _save_dedup(state)
         return result
 
@@ -112,6 +135,7 @@ def idempotency_guard(command_key: str, window: int = DEFAULT_DEDUP_WINDOW) -> O
 
 # ── 2. 预检 ──
 
+
 def preflight_check(action: str, process_name: str = None) -> Optional[dict]:
     """
     执行前预检。当前支持：
@@ -122,8 +146,12 @@ def preflight_check(action: str, process_name: str = None) -> Optional[dict]:
     """
     if process_name:
         if _is_process_running(process_name):
-            return _log_execution(action, NOOP_ALREADY_RUNNING, "process_exists",
-                                  f"{process_name} 已在运行")
+            return _log_execution(
+                action,
+                NOOP_ALREADY_RUNNING,
+                "process_exists",
+                f"{process_name} 已在运行",
+            )
     return None
 
 
@@ -132,7 +160,9 @@ def _is_process_running(name: str) -> bool:
     try:
         r = subprocess.run(
             ["tasklist", "/FI", f"IMAGENAME eq {name}", "/NH"],
-            capture_output=True, text=True, timeout=5
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         # tasklist 输出包含进程名 = 正在运行
         return name.lower() in r.stdout.lower()
@@ -141,6 +171,7 @@ def _is_process_running(name: str) -> bool:
 
 
 # ── 3. 错误分类 ──
+
 
 def classify_error(err: str) -> str:
     """
@@ -160,10 +191,15 @@ def classify_error(err: str) -> str:
 
 # ── 4. 统一执行入口 ──
 
-def execute(command_key: str, fn, *args,
-            dedup_window: int = DEFAULT_DEDUP_WINDOW,
-            process_name: str = None,
-            **kwargs) -> dict:
+
+def execute(
+    command_key: str,
+    fn,
+    *args,
+    dedup_window: int = DEFAULT_DEDUP_WINDOW,
+    process_name: str = None,
+    **kwargs,
+) -> dict:
     """
     通用执行入口，自动串联：去重 → 预检 → 执行 → 错误分类 → 终态回写。
 
@@ -195,14 +231,20 @@ def execute(command_key: str, fn, *args,
         else:
             # Step 4: 错误分类
             err_class = classify_error(detail)
-            terminal = FAILED_NON_RETRYABLE if err_class == "NON_RETRYABLE" else FAILED_RETRYABLE
+            terminal = (
+                FAILED_NON_RETRYABLE
+                if err_class == "NON_RETRYABLE"
+                else FAILED_RETRYABLE
+            )
             return _log_execution(command_key, terminal, err_class, detail, ms)
 
     except Exception as e:
         ms = round((time.monotonic() - t0) * 1000)
         err_str = str(e)
         err_class = classify_error(err_str)
-        terminal = FAILED_NON_RETRYABLE if err_class == "NON_RETRYABLE" else FAILED_RETRYABLE
+        terminal = (
+            FAILED_NON_RETRYABLE if err_class == "NON_RETRYABLE" else FAILED_RETRYABLE
+        )
         return _log_execution(command_key, terminal, err_class, err_str, ms)
 
 
@@ -244,7 +286,9 @@ if __name__ == "__main__":
             for line in lines[-10:]:
                 try:
                     r = json.loads(line)
-                    print(f"[{r['ts']}] {r['command_key']}: {r['terminal_state']} ({r['reason_code']})")
+                    print(
+                        f"[{r['ts']}] {r['command_key']}: {r['terminal_state']} ({r['reason_code']})"
+                    )
                 except:
                     pass
         else:

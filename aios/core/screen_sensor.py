@@ -11,6 +11,7 @@
 
 依赖: mss, Pillow
 """
+
 import json
 import time
 import base64
@@ -51,7 +52,9 @@ def _load_state() -> dict:
 def _save_state(state: dict):
     """保存传感器状态"""
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    STATE_FILE.write_text(
+        json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 def _is_cooled_down(state: dict, topic: str, key: str = "default") -> bool:
@@ -79,19 +82,23 @@ class ScreenCapture:
 
     def capture(self, monitor: int = 0, region: tuple = None) -> Path:
         """截取屏幕，保存到 aios/events/screenshots/，返回路径
-        
+
         Args:
             monitor: 0=全屏, 1=主显示器, 2=第二显示器
             region: (left, top, width, height) 可选区域截取
-            
+
         Returns:
             截图文件路径
         """
         try:
             # 选择监视器
             if region:
-                mon = {"left": region[0], "top": region[1], 
-                       "width": region[2], "height": region[3]}
+                mon = {
+                    "left": region[0],
+                    "top": region[1],
+                    "width": region[2],
+                    "height": region[3],
+                }
             elif monitor == 0:
                 mon = self.sct.monitors[0]  # 全屏（所有显示器）
             else:
@@ -117,19 +124,23 @@ class ScreenCapture:
 
     def capture_base64(self, monitor: int = 0, region: tuple = None) -> str:
         """截屏并返回 base64 编码（用于直接传给视觉模型）
-        
+
         Args:
             monitor: 0=全屏, 1=主显示器, 2=第二显示器
             region: (left, top, width, height) 可选区域截取
-            
+
         Returns:
             base64 编码的 PNG 图片
         """
         try:
             # 选择监视器
             if region:
-                mon = {"left": region[0], "top": region[1], 
-                       "width": region[2], "height": region[3]}
+                mon = {
+                    "left": region[0],
+                    "top": region[1],
+                    "width": region[2],
+                    "height": region[3],
+                }
             elif monitor == 0:
                 mon = self.sct.monitors[0]
             else:
@@ -150,12 +161,12 @@ class ScreenCapture:
 
     def diff(self, img1_path: Path, img2_path: Path, threshold: float = 0.05) -> dict:
         """对比两张截图差异
-        
+
         Args:
             img1_path: 第一张图片路径
             img2_path: 第二张图片路径
             threshold: 像素变化比例阈值
-            
+
         Returns:
             {"changed": bool, "diff_ratio": float, "diff_regions": [...]}
         """
@@ -169,13 +180,13 @@ class ScreenCapture:
                     "changed": True,
                     "diff_ratio": 1.0,
                     "diff_regions": [],
-                    "reason": "size_mismatch"
+                    "reason": "size_mismatch",
                 }
 
             # 计算像素差异
             diff = ImageChops.difference(img1, img2)
             diff_gray = diff.convert("L")
-            
+
             # 统计变化像素
             pixels = np.array(diff_gray)
             total_pixels = pixels.size
@@ -188,13 +199,15 @@ class ScreenCapture:
             return {
                 "changed": diff_ratio > threshold,
                 "diff_ratio": round(diff_ratio, 4),
-                "diff_regions": diff_regions
+                "diff_regions": diff_regions,
             }
 
         except Exception as e:
             raise RuntimeError(f"图片对比失败: {e}") from e
 
-    def _detect_diff_regions(self, diff_gray: Image.Image, block_size: int = 100) -> list[dict]:
+    def _detect_diff_regions(
+        self, diff_gray: Image.Image, block_size: int = 100
+    ) -> list[dict]:
         """检测变化区域（分块检测）"""
         width, height = diff_gray.size
         regions = []
@@ -208,18 +221,16 @@ class ScreenCapture:
                 ratio = changed / block_array.size if block_array.size > 0 else 0
 
                 if ratio > 0.1:  # 区块内10%以上像素变化
-                    regions.append({
-                        "region": box,
-                        "change_ratio": round(ratio, 3)
-                    })
+                    regions.append({"region": box, "change_ratio": round(ratio, 3)})
 
         return regions
 
     def _cleanup_old_screenshots(self, keep: int = 50):
         """清理旧截图，保留最近 keep 张"""
         try:
-            screenshots = sorted(SCREENSHOT_DIR.glob("screen_*.png"), 
-                               key=lambda p: p.stat().st_mtime)
+            screenshots = sorted(
+                SCREENSHOT_DIR.glob("screen_*.png"), key=lambda p: p.stat().st_mtime
+            )
             if len(screenshots) > keep:
                 for old_file in screenshots[:-keep]:
                     old_file.unlink(missing_ok=True)
@@ -242,9 +253,9 @@ class ScreenMonitor:
 
     def scan(self) -> list[dict]:
         """单次扫描（心跳调用），对比上次截图
-        
+
         如果变化超阈值，发布 sensor.screen.changed 事件
-        
+
         Returns:
             变化列表
         """
@@ -259,24 +270,29 @@ class ScreenMonitor:
 
             # 截取当前屏幕
             current_path = self.capture.capture(monitor=1)  # 主显示器
-            
+
             # 发布截图事件
             bus = get_bus()
-            bus.emit("sensor.screen.captured", 
-                    {"path": str(current_path)}, 
-                    PRIORITY_NORMAL, "screen_monitor")
+            bus.emit(
+                "sensor.screen.captured",
+                {"path": str(current_path)},
+                PRIORITY_NORMAL,
+                "screen_monitor",
+            )
 
             # 对比上次截图
             last_path = state.get("last_screenshot_path")
             if last_path and Path(last_path).exists():
-                diff_result = self.capture.diff(Path(last_path), current_path, self.threshold)
-                
+                diff_result = self.capture.diff(
+                    Path(last_path), current_path, self.threshold
+                )
+
                 if diff_result["changed"]:
                     change_event = {
                         "current": str(current_path),
                         "previous": last_path,
                         "diff_ratio": diff_result["diff_ratio"],
-                        "regions": diff_result["diff_regions"]
+                        "regions": diff_result["diff_regions"],
                     }
                     changes.append(change_event)
 
@@ -291,9 +307,15 @@ class ScreenMonitor:
                     if notifications:
                         notif_topic = "sensor.screen.notification"
                         if _is_cooled_down(state, notif_topic):
-                            bus.emit(notif_topic, 
-                                   {"notifications": notifications, "screenshot": str(current_path)},
-                                   PRIORITY_HIGH, "screen_monitor")
+                            bus.emit(
+                                notif_topic,
+                                {
+                                    "notifications": notifications,
+                                    "screenshot": str(current_path),
+                                },
+                                PRIORITY_HIGH,
+                                "screen_monitor",
+                            )
                             _mark_fired(state, notif_topic)
 
             # 更新状态
@@ -304,20 +326,23 @@ class ScreenMonitor:
         except Exception as e:
             # 扫描失败不崩溃，记录错误
             bus = get_bus()
-            bus.emit("sensor.screen.error", 
-                    {"error": str(e)[:200]}, 
-                    PRIORITY_HIGH, "screen_monitor")
+            bus.emit(
+                "sensor.screen.error",
+                {"error": str(e)[:200]},
+                PRIORITY_HIGH,
+                "screen_monitor",
+            )
 
         return changes
 
     def detect_notification(self, img_path: Path) -> list[dict]:
         """检测屏幕上的通知弹窗区域（右下角/右上角）
-        
+
         基于像素分析，不依赖 OCR
-        
+
         Args:
             img_path: 截图路径
-            
+
         Returns:
             [{"region": (x,y,w,h), "type": "notification", "position": "bottom-right"}]
         """
@@ -328,22 +353,27 @@ class ScreenMonitor:
 
             # 检测区域：右下角和右上角
             check_regions = [
-                {"name": "bottom-right", "box": (width - 400, height - 200, width, height)},
+                {
+                    "name": "bottom-right",
+                    "box": (width - 400, height - 200, width, height),
+                },
                 {"name": "top-right", "box": (width - 400, 0, width, 200)},
             ]
 
             for region_info in check_regions:
                 box = region_info["box"]
                 region = img.crop(box)
-                
+
                 # 简单的通知检测：检查区域内是否有明显的矩形边界
                 # 通过检测边缘像素的一致性
                 if self._has_notification_pattern(region):
-                    notifications.append({
-                        "region": box,
-                        "type": "notification",
-                        "position": region_info["name"]
-                    })
+                    notifications.append(
+                        {
+                            "region": box,
+                            "type": "notification",
+                            "position": region_info["name"],
+                        }
+                    )
 
             return notifications
 
@@ -352,7 +382,7 @@ class ScreenMonitor:
 
     def _has_notification_pattern(self, region: Image.Image) -> bool:
         """检测区域是否有通知弹窗特征
-        
+
         通知弹窗通常有：
         1. 明显的矩形边界
         2. 与背景色差异较大
@@ -362,7 +392,7 @@ class ScreenMonitor:
             # 转灰度
             gray = region.convert("L")
             pixels = np.array(gray)
-            
+
             if pixels.size == 0:
                 return False
 
@@ -385,7 +415,7 @@ class ScreenMonitor:
             edges.append(np.array(gray.crop((0, height - 5, width, height))))  # 下边
             edges.append(np.array(gray.crop((0, 0, 5, height))))  # 左边
             edges.append(np.array(gray.crop((width - 5, 0, width, height))))  # 右边
-            
+
             edge_pixels = np.concatenate([e.flatten() for e in edges])
             edge_std = np.std(edge_pixels)
 
@@ -432,7 +462,9 @@ if __name__ == "__main__":
                 if changes:
                     print(f"[{time.strftime('%H:%M:%S')}] 检测到变化:")
                     for c in changes:
-                        print(f"  - 变化率: {c['diff_ratio']:.2%}, 区域数: {len(c['regions'])}")
+                        print(
+                            f"  - 变化率: {c['diff_ratio']:.2%}, 区域数: {len(c['regions'])}"
+                        )
                 time.sleep(5)
         except KeyboardInterrupt:
             print("\n监控已停止")
@@ -444,7 +476,7 @@ if __name__ == "__main__":
         if not img1.exists() or not img2.exists():
             print("错误: 图片文件不存在")
             sys.exit(1)
-        
+
         cap = ScreenCapture()
         result = cap.diff(img1, img2)
         print(json.dumps(result, ensure_ascii=False, indent=2))

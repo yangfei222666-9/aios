@@ -13,6 +13,7 @@ v0.2 Schema:
 
 向后兼容: 旧的 log_event/log_tool_event 仍可用，自动映射到新 schema。
 """
+
 import json, time, os, sys
 from pathlib import Path
 
@@ -21,15 +22,18 @@ from core.config import get_path
 
 # ── 5层架构常量 ──
 LAYER_KERNEL = "KERNEL"
-LAYER_COMMS  = "COMMS"
-LAYER_TOOL   = "TOOL"
-LAYER_MEM    = "MEM"
-LAYER_SEC    = "SEC"
+LAYER_COMMS = "COMMS"
+LAYER_TOOL = "TOOL"
+LAYER_MEM = "MEM"
+LAYER_SEC = "SEC"
 VALID_LAYERS = {LAYER_KERNEL, LAYER_COMMS, LAYER_TOOL, LAYER_MEM, LAYER_SEC}
 
 
 def _events_path() -> Path:
-    return get_path("paths.events") or Path(__file__).resolve().parent.parent / "events" / "events.jsonl"
+    return (
+        get_path("paths.events")
+        or Path(__file__).resolve().parent.parent / "events" / "events.jsonl"
+    )
 
 
 def append_jsonl(path: Path, obj: dict):
@@ -40,6 +44,7 @@ def append_jsonl(path: Path, obj: dict):
 
 
 # ── 严重度标准化 ──
+
 
 def _classify_severity(layer: str, event: str, status: str) -> str:
     """
@@ -62,11 +67,17 @@ def _classify_severity(layer: str, event: str, status: str) -> str:
 
 # ── v0.2 核心: emit ──
 
-def emit(layer: str, event: str, status: str = "ok",
-         latency_ms: int = None, payload: dict = None) -> dict:
+
+def emit(
+    layer: str,
+    event: str,
+    status: str = "ok",
+    latency_ms: int = None,
+    payload: dict = None,
+) -> dict:
     """
     v0.2 统一事件发射器。所有事件都走这里。
-    
+
     layer: KERNEL / COMMS / TOOL / MEM / SEC
     event: 具体事件名 (如 tool_exec, memory_recall, loop_start)
     status: ok / err
@@ -95,6 +106,7 @@ def emit(layer: str, event: str, status: str = "ok",
 
 # ── v0.1 兼容层 (映射到 emit) ──
 
+
 def log_event(event_type: str, source: str, summary: str, data: dict = None) -> dict:
     """v0.1 兼容: 自动映射 type→layer"""
     layer_map = {
@@ -121,11 +133,14 @@ def log_event(event_type: str, source: str, summary: str, data: dict = None) -> 
     if data:
         payload.update(data)
 
-    return emit(layer, f"{event_type}_{source}" if source else event_type,
-                status, ms, payload)
+    return emit(
+        layer, f"{event_type}_{source}" if source else event_type, status, ms, payload
+    )
 
 
-def log_tool_event(name: str, ok: bool, ms: int, err: str = None, meta: dict = None) -> dict:
+def log_tool_event(
+    name: str, ok: bool, ms: int, err: str = None, meta: dict = None
+) -> dict:
     """v0.1 兼容: tool 事件 → emit(TOOL, ...)"""
     payload = {"name": name, "ok": ok, "ms": ms}
     if not ok and err:
@@ -136,6 +151,7 @@ def log_tool_event(name: str, ok: bool, ms: int, err: str = None, meta: dict = N
 
 
 # ── v0.2 便捷方法: 各层专用 ──
+
 
 def log_kernel(event: str, status: str = "ok", latency_ms: int = None, **kw) -> dict:
     """内核层事件: loop_start, context_prune, token_usage"""
@@ -161,17 +177,18 @@ def log_sec(event: str, status: str = "ok", latency_ms: int = None, **kw) -> dic
 
 from contextlib import contextmanager
 
+
 @contextmanager
 def trace_span(layer: str, event: str, **extra_payload):
     """
     自动计时的事件探针。用法：
-    
+
         with trace_span("KERNEL", "loop_iteration", loop_id=1):
             do_work()
-    
+
     自动记录 status(ok/err) + latency_ms，异常会继续抛出。
     yield 一个 dict，可在 with 块内追加 payload：
-    
+
         with trace_span("MEM", "memory_recall") as ctx:
             results = search(...)
             ctx["hit_count"] = len(results)
@@ -188,6 +205,7 @@ def trace_span(layer: str, event: str, **extra_payload):
     finally:
         ms = round((time.monotonic() - t0) * 1000)
         emit(layer, event, status, ms, ctx or None)
+
 
 def load_events(days: int = 30, event_type: str = None, layer: str = None) -> list:
     """加载事件，支持 v0.1 type 过滤和 v0.2 layer 过滤"""

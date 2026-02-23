@@ -9,6 +9,7 @@ AIOS 趋势对比 v1.0
   python trend.py --save           # 保存报告到 reports/
   python trend.py --format telegram  # Telegram 格式
 """
+
 import json, time, sys, argparse
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -18,10 +19,10 @@ from core.config import get_path
 
 # ── 阈值配置 ──
 THRESHOLDS = {
-    "event_volume_pct": 30,      # 事件量偏差 > ±30%
+    "event_volume_pct": 30,  # 事件量偏差 > ±30%
     "tool_ratio_spike_pct": 20,  # TOOL 占比突增 > 20%
-    "tsr_min": 0.98,             # TSR < 98%
-    "latency_spike_pct": 50,     # 时延上升 > 50%
+    "tsr_min": 0.98,  # TSR < 98%
+    "latency_spike_pct": 50,  # 时延上升 > 50%
 }
 
 LAYERS = ["KERNEL", "COMMS", "TOOL", "MEM", "SEC"]
@@ -94,38 +95,51 @@ def compare(recent, baseline):
         vol_pct = ((recent["total"] - baseline["total"]) / baseline["total"]) * 100
         if abs(vol_pct) > THRESHOLDS["event_volume_pct"]:
             direction = "偏高" if vol_pct > 0 else "偏低"
-            alerts.append({
-                "dim": "事件量",
-                "level": "WARN",
-                "msg": f"24h={recent['total']} vs 日均={baseline['total']:.0f}，{direction} {abs(vol_pct):.0f}%",
-            })
+            alerts.append(
+                {
+                    "dim": "事件量",
+                    "level": "WARN",
+                    "msg": f"24h={recent['total']} vs 日均={baseline['total']:.0f}，{direction} {abs(vol_pct):.0f}%",
+                }
+            )
 
     # 2. TOOL 占比突增
-    tool_diff = (recent["layer_ratios"].get("TOOL", 0) - baseline["layer_ratios"].get("TOOL", 0)) * 100
+    tool_diff = (
+        recent["layer_ratios"].get("TOOL", 0) - baseline["layer_ratios"].get("TOOL", 0)
+    ) * 100
     if tool_diff > THRESHOLDS["tool_ratio_spike_pct"]:
-        alerts.append({
-            "dim": "结构占比",
-            "level": "WARN",
-            "msg": f"TOOL 占比 {recent['layer_ratios']['TOOL']*100:.0f}% → 突增 {tool_diff:.0f}%",
-        })
+        alerts.append(
+            {
+                "dim": "结构占比",
+                "level": "WARN",
+                "msg": f"TOOL 占比 {recent['layer_ratios']['TOOL']*100:.0f}% → 突增 {tool_diff:.0f}%",
+            }
+        )
 
     # 3. TSR
     if recent["tsr"] < THRESHOLDS["tsr_min"]:
-        alerts.append({
-            "dim": "成功质量",
-            "level": "CRIT" if recent["tsr"] < 0.95 else "WARN",
-            "msg": f"TSR={recent['tsr']*100:.1f}% (阈值 {THRESHOLDS['tsr_min']*100:.0f}%)",
-        })
+        alerts.append(
+            {
+                "dim": "成功质量",
+                "level": "CRIT" if recent["tsr"] < 0.95 else "WARN",
+                "msg": f"TSR={recent['tsr']*100:.1f}% (阈值 {THRESHOLDS['tsr_min']*100:.0f}%)",
+            }
+        )
 
     # 4. 时延上升
     if baseline["avg_latency_ms"] > 0:
-        lat_pct = ((recent["avg_latency_ms"] - baseline["avg_latency_ms"]) / baseline["avg_latency_ms"]) * 100
+        lat_pct = (
+            (recent["avg_latency_ms"] - baseline["avg_latency_ms"])
+            / baseline["avg_latency_ms"]
+        ) * 100
         if lat_pct > THRESHOLDS["latency_spike_pct"]:
-            alerts.append({
-                "dim": "成功质量",
-                "level": "WARN",
-                "msg": f"平均时延 {recent['avg_latency_ms']}ms → 上升 {lat_pct:.0f}% (基线 {baseline['avg_latency_ms']}ms)",
-            })
+            alerts.append(
+                {
+                    "dim": "成功质量",
+                    "level": "WARN",
+                    "msg": f"平均时延 {recent['avg_latency_ms']}ms → 上升 {lat_pct:.0f}% (基线 {baseline['avg_latency_ms']}ms)",
+                }
+            )
 
     return alerts
 
@@ -159,8 +173,12 @@ def format_report(recent, baseline, alerts, fmt="markdown"):
 
     # 维度3: 成功质量
     lines.append(f"{'✅' if is_tg else '###'} 成功质量")
-    lines.append(f"  TSR: {recent['tsr']*100:.1f}% | 重试率: {recent['retry_rate']*100:.1f}%")
-    lines.append(f"  平均时延: {recent['avg_latency_ms']}ms | P95: {recent['p95_latency_ms']}ms")
+    lines.append(
+        f"  TSR: {recent['tsr']*100:.1f}% | 重试率: {recent['retry_rate']*100:.1f}%"
+    )
+    lines.append(
+        f"  平均时延: {recent['avg_latency_ms']}ms | P95: {recent['p95_latency_ms']}ms"
+    )
     lines.append("")
 
     # 告警
@@ -178,7 +196,9 @@ def format_report(recent, baseline, alerts, fmt="markdown"):
 def run(args=None):
     parser = argparse.ArgumentParser(description="AIOS 趋势对比")
     parser.add_argument("--save", action="store_true", help="保存报告")
-    parser.add_argument("--format", choices=["markdown", "telegram"], default="markdown")
+    parser.add_argument(
+        "--format", choices=["markdown", "telegram"], default="markdown"
+    )
     opts = parser.parse_args(args)
 
     # 加载数据
@@ -204,7 +224,9 @@ def run(args=None):
             "retry_rate": baseline_raw["retry_rate"],
             "avg_latency_ms": baseline_raw["avg_latency_ms"],
             "p95_latency_ms": baseline_raw["p95_latency_ms"],
-            "layer_counts": {k: v / span_days for k, v in baseline_raw["layer_counts"].items()},
+            "layer_counts": {
+                k: v / span_days for k, v in baseline_raw["layer_counts"].items()
+            },
             "layer_ratios": baseline_raw["layer_ratios"],
         }
     else:

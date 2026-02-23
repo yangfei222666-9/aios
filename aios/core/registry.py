@@ -14,6 +14,7 @@ AIOS Plugin Registry v1.0
   registry.list_plugins()       # 列出所有插件
   registry.call("aram", "match", query="盖伦")  # 调用插件方法
 """
+
 import importlib
 import json
 import sys
@@ -121,8 +122,11 @@ class PluginRegistry:
             # 找到 BasePlugin 子类
             for attr_name in dir(mod):
                 attr = getattr(mod, attr_name)
-                if (isinstance(attr, type) and issubclass(attr, BasePlugin)
-                        and attr is not BasePlugin):
+                if (
+                    isinstance(attr, type)
+                    and issubclass(attr, BasePlugin)
+                    and attr is not BasePlugin
+                ):
                     instance = attr()
                     instance.on_load()
                     self._plugins[name] = instance
@@ -185,8 +189,11 @@ class PluginRegistry:
 
     def find_by_capability(self, capability: str) -> List[BasePlugin]:
         """按能力查找插件"""
-        return [p for p in self._plugins.values()
-                if capability in p.capabilities and p.enabled]
+        return [
+            p
+            for p in self._plugins.values()
+            if capability in p.capabilities and p.enabled
+        ]
 
     def call(self, plugin_name: str, method: str, **kwargs) -> Any:
         """调用插件方法"""
@@ -252,7 +259,8 @@ registry = PluginRegistry()
 # CLI
 def main():
     import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
     registry.discover()
 

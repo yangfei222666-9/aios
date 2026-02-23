@@ -2,6 +2,7 @@
 """
 系统可以进化，但不允许自毁。
 """
+
 import json, sys, time
 from pathlib import Path
 
@@ -19,7 +20,9 @@ PENDING_FILE = LEARNING_DIR / "pending_review.json"
 
 alias_path_cfg = get_path("paths.alias")
 if alias_path_cfg is None:
-    raise FileNotFoundError(f"alias file not configured (set paths.alias in {CONFIG_PATH})")
+    raise FileNotFoundError(
+        f"alias file not configured (set paths.alias in {CONFIG_PATH})"
+    )
 LEARNED_FILE = alias_path_cfg
 
 MIN_CONF = get_float("policy.alias_min_confidence", 0.80)
@@ -46,7 +49,9 @@ def load_learned() -> dict:
 
 def save_learned(aliases: dict):
     LEARNED_FILE.parent.mkdir(exist_ok=True)
-    LEARNED_FILE.write_text(json.dumps(aliases, ensure_ascii=False, indent=2), encoding="utf-8")
+    LEARNED_FILE.write_text(
+        json.dumps(aliases, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 def run(mode: str = "show") -> dict:
@@ -69,9 +74,13 @@ def run(mode: str = "show") -> dict:
         learned = load_learned()
         for s in alias_sug:
             tag = "AUTO" if s["input"] not in learned else "EXISTS"
-            print(f"  [{tag}] alias: \"{s['input']}\" -> \"{s['suggested']}\" (confidence: {s['confidence']})")
+            print(
+                f"  [{tag}] alias: \"{s['input']}\" -> \"{s['suggested']}\" (confidence: {s['confidence']})"
+            )
         for s in threshold_warn:
-            print(f"  [NEEDS REVIEW] threshold: {s['field']} {s['current']} -> {s['suggested']}")
+            print(
+                f"  [NEEDS REVIEW] threshold: {s['field']} {s['current']} -> {s['suggested']}"
+            )
         for s in route_sug:
             print(f"  [NEEDS REVIEW] route: HTTP {s['status_code']} x{s['count']}")
         return {"total": total}
@@ -84,15 +93,20 @@ def run(mode: str = "show") -> dict:
         for s in alias_sug:
             applied, why = apply_alias_suggestion(learned, s, MIN_CONF, NO_OVERWRITE)
             if applied:
-                applied_list.append({
-                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                    "alias": {s["input"]: s["suggested"]},
-                    "confidence": s.get("confidence", 0),
-                    "reason": why,
-                })
-                log_event("suggestion_applied", "apply",
-                          f"alias: {s['input']} -> {s['suggested']}",
-                          {"input": s["input"], "applied": s["suggested"]})
+                applied_list.append(
+                    {
+                        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                        "alias": {s["input"]: s["suggested"]},
+                        "confidence": s.get("confidence", 0),
+                        "reason": why,
+                    }
+                )
+                log_event(
+                    "suggestion_applied",
+                    "apply",
+                    f"alias: {s['input']} -> {s['suggested']}",
+                    {"input": s["input"], "applied": s["suggested"]},
+                )
                 print(f"  APPLIED: \"{s['input']}\" -> \"{s['suggested']}\" ({why})")
             else:
                 pending_alias.append(s)
@@ -100,7 +114,9 @@ def run(mode: str = "show") -> dict:
 
         if applied_list:
             save_learned(learned)
-            APPLIED_LOG.write_text(json.dumps(applied_list, ensure_ascii=False, indent=2), encoding="utf-8")
+            APPLIED_LOG.write_text(
+                json.dumps(applied_list, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
 
         # threshold + route -> pending
         pending = {
@@ -116,9 +132,13 @@ def run(mode: str = "show") -> dict:
             print(f"  PENDING: route HTTP {s['status_code']} (needs human review)")
 
         if pending_alias or threshold_warn or route_sug:
-            PENDING_FILE.write_text(json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8")
+            PENDING_FILE.write_text(
+                json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
 
-        SUGGESTIONS_FILE.write_text(json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8")
+        SUGGESTIONS_FILE.write_text(
+            json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
 
         pending_count = len(pending_alias) + len(threshold_warn) + len(route_sug)
         print(f"\nApplied: {len(applied_list)}, Pending review: {pending_count}")

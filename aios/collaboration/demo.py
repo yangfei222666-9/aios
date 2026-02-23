@@ -45,10 +45,14 @@ def demo():
     # 用模板生成 3 个专业 Agent
     agents = {}
     for name in ["coder", "reviewer", "researcher"]:
-        spec = pool.spawn_spec(f"agent_{name}", template=name, agent_type=AgentType.ON_DEMAND)
+        spec = pool.spawn_spec(
+            f"agent_{name}", template=name, agent_type=AgentType.ON_DEMAND
+        )
         pool.mark_ready(f"agent_{name}", session_key=f"session_{name}")
         agents[name] = spec
-        print(f"  ✅ {spec['agent_id']:20s}  能力={spec['capabilities']}  模型={spec['model']}")
+        print(
+            f"  ✅ {spec['agent_id']:20s}  能力={spec['capabilities']}  模型={spec['model']}"
+        )
 
     print(f"\n  Registry 总计: {len(registry.list_all())} agents")
 
@@ -62,7 +66,9 @@ def demo():
     m_reviewer = Messenger("agent_reviewer")
 
     # orchestrator 给 coder 发请求
-    msg = m_orchestrator.request("agent_coder", {"action": "analyze", "target": "main.py"})
+    msg = m_orchestrator.request(
+        "agent_coder", {"action": "analyze", "target": "main.py"}
+    )
     print(f"  📤 orchestrator → agent_coder: {msg.payload}")
 
     # orchestrator 广播通知
@@ -128,9 +134,24 @@ def demo():
 
     # 模拟各 agent 完成任务
     results = {
-        0: {"files": 42, "functions": 156, "classes": 23, "lines": 4800, "test_coverage": "78%"},
-        1: {"benchmarks": ["Google Style Guide", "PEP 8", "OWASP Top 10"], "score": "B+"},
-        2: {"issues": 7, "critical": 1, "warnings": 6, "style_score": 85, "security_score": 92},
+        0: {
+            "files": 42,
+            "functions": 156,
+            "classes": 23,
+            "lines": 4800,
+            "test_coverage": "78%",
+        },
+        1: {
+            "benchmarks": ["Google Style Guide", "PEP 8", "OWASP Top 10"],
+            "score": "B+",
+        },
+        2: {
+            "issues": 7,
+            "critical": 1,
+            "warnings": 6,
+            "style_score": 85,
+            "security_score": 92,
+        },
     }
 
     for i in range(3):
@@ -141,7 +162,9 @@ def demo():
         time.sleep(0.1)  # 模拟耗时
         delegator.update_task(task_id, "done", result=results[i])
         pool.mark_done(task.assigned_to)
-        print(f"  ✅ {task.assigned_to} 完成! 结果: {json.dumps(results[i], ensure_ascii=False)[:60]}...")
+        print(
+            f"  ✅ {task.assigned_to} 完成! 结果: {json.dumps(results[i], ensure_ascii=False)[:60]}..."
+        )
 
     # 查看状态
     status = delegator.get_status(dlg.delegation_id)
@@ -184,15 +207,35 @@ def demo():
         weights={"agent_coder": 2.0, "agent_reviewer": 1.5, "agent_researcher": 0.5},
     )
 
-    consensus.cast_vote(req, "agent_coder", "部分重构", confidence=0.9, reasoning="核心逻辑OK，边缘模块需要清理")
-    consensus.cast_vote(req, "agent_reviewer", "部分重构", confidence=0.8, reasoning="安全问题集中在2个模块")
-    consensus.cast_vote(req, "agent_researcher", "重构", confidence=0.6, reasoning="业界趋势倾向微服务化")
+    consensus.cast_vote(
+        req,
+        "agent_coder",
+        "部分重构",
+        confidence=0.9,
+        reasoning="核心逻辑OK，边缘模块需要清理",
+    )
+    consensus.cast_vote(
+        req,
+        "agent_reviewer",
+        "部分重构",
+        confidence=0.8,
+        reasoning="安全问题集中在2个模块",
+    )
+    consensus.cast_vote(
+        req,
+        "agent_researcher",
+        "重构",
+        confidence=0.6,
+        reasoning="业界趋势倾向微服务化",
+    )
 
     wr = consensus.get_result(req)
     print(f"  🏷️ 问题: {wr['question']}")
     print(f"  📊 投票详情:")
     for d in wr["details"]:
-        print(f"      {d['voter']:20s} → {d['choice']:8s}  信心={d['confidence']:.1f}  理由: {d['reasoning']}")
+        print(
+            f"      {d['voter']:20s} → {d['choice']:8s}  信心={d['confidence']:.1f}  理由: {d['reasoning']}"
+        )
     print(f"  🏆 加权决定: {wr['decision']}")
 
     # ── Step 7: Pool 统计 ──

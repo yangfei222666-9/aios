@@ -19,24 +19,26 @@ def process_spawn_requests_for_heartbeat():
     """
     if not SPAWN_FILE.exists():
         return []
-    
+
     # 读取所有请求
     requests = []
     with open(SPAWN_FILE, "r", encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 requests.append(json.loads(line))
-    
+
     if not requests:
         return []
-    
+
     # 清空请求文件
     SPAWN_FILE.write_text("", encoding="utf-8")
-    
+
     return requests
 
 
-def record_spawn_result(task_id: str, label: str, model: str, session_key: str = None, error: str = None):
+def record_spawn_result(
+    task_id: str, label: str, model: str, session_key: str = None, error: str = None
+):
     """记录 spawn 结果"""
     result = {
         "task_id": task_id,
@@ -45,9 +47,9 @@ def record_spawn_result(task_id: str, label: str, model: str, session_key: str =
         "status": "success" if session_key else "error",
         "session_key": session_key,
         "error": error,
-        "spawned_at": datetime.now().isoformat()
+        "spawned_at": datetime.now().isoformat(),
     }
-    
+
     RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(RESULTS_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(result, ensure_ascii=False) + "\n")

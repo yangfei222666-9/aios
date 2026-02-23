@@ -16,12 +16,13 @@
   >= 0.2  degraded
   < 0.2   critical
 """
+
 import json, sys, io
 from pathlib import Path
 from datetime import datetime, timedelta
 
-if __name__ == '__main__':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if __name__ == "__main__":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 AIOS_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = AIOS_ROOT / "data"
@@ -35,8 +36,9 @@ def compute_base_score():
     """原有 evolution_score（从 baseline 获取）"""
     try:
         from learning.baseline import snapshot
+
         result = snapshot()
-        return result.get('evolution_score', 0.4)
+        return result.get("evolution_score", 0.4)
     except:
         return 0.4  # 默认 healthy
 
@@ -51,15 +53,15 @@ def compute_reactor_score():
     total_reactions = 0
     success_reactions = 0
     if reaction_log.exists():
-        with open(reaction_log, 'r', encoding='utf-8') as f:
+        with open(reaction_log, "r", encoding="utf-8") as f:
             for line in f:
                 if not line.strip():
                     continue
                 try:
                     r = json.loads(line)
-                    if r.get('status') != 'no_match':
+                    if r.get("status") != "no_match":
                         total_reactions += 1
-                        if r.get('status') == 'success':
+                        if r.get("status") == "success":
                             success_reactions += 1
                 except:
                     continue
@@ -70,14 +72,14 @@ def compute_reactor_score():
     v_total = 0
     v_failed = 0
     if verify_log.exists():
-        with open(verify_log, 'r', encoding='utf-8') as f:
+        with open(verify_log, "r", encoding="utf-8") as f:
             for line in f:
                 if not line.strip():
                     continue
                 try:
                     v = json.loads(line)
                     v_total += 1
-                    if not v.get('passed'):
+                    if not v.get("passed"):
                         v_failed += 1
                 except:
                     continue
@@ -88,16 +90,16 @@ def compute_reactor_score():
     auto_closed = 0
     total_resolved = 0
     if alerts_history.exists():
-        with open(alerts_history, 'r', encoding='utf-8') as f:
+        with open(alerts_history, "r", encoding="utf-8") as f:
             for line in f:
                 if not line.strip():
                     continue
                 try:
                     h = json.loads(line)
-                    if h.get('to') == 'RESOLVED':
+                    if h.get("to") == "RESOLVED":
                         total_resolved += 1
-                        reason = h.get('reason', '')
-                        if 'auto' in reason.lower() or 'reactor' in reason.lower():
+                        reason = h.get("reason", "")
+                        if "auto" in reason.lower() or "reactor" in reason.lower():
                             auto_closed += 1
                 except:
                     continue
@@ -105,7 +107,9 @@ def compute_reactor_score():
     auto_close_rate = auto_closed / total_resolved if total_resolved > 0 else 0
 
     # reactor_score = fix_rate * 0.5 - false_positive * 0.3 + auto_close * 0.2
-    reactor_score = auto_fix_rate * 0.5 - false_positive_rate * 0.3 + auto_close_rate * 0.2
+    reactor_score = (
+        auto_fix_rate * 0.5 - false_positive_rate * 0.3 + auto_close_rate * 0.2
+    )
     reactor_score = max(0, min(1.0, reactor_score))
 
     return {
@@ -115,7 +119,7 @@ def compute_reactor_score():
         "auto_close_rate": round(auto_close_rate, 4),
         "total_reactions": total_reactions,
         "total_verifications": v_total,
-        "total_resolved": total_resolved
+        "total_resolved": total_resolved,
     }
 
 
@@ -123,7 +127,7 @@ def compute_evolution_v2():
     """综合进化评分 v2"""
     base = compute_base_score()
     reactor = compute_reactor_score()
-    r_score = reactor['reactor_score']
+    r_score = reactor["reactor_score"]
 
     # 加权合成
     v2_score = base * 0.6 + r_score * 0.4
@@ -143,7 +147,7 @@ def compute_evolution_v2():
         "grade": grade,
         "base_score": round(base, 4),
         "reactor_score": r_score,
-        "detail": reactor
+        "detail": reactor,
     }
 
     # 持久化
@@ -154,8 +158,8 @@ def compute_evolution_v2():
 
 def _log_evolution(entry):
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    with open(EVOLUTION_LOG, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+    with open(EVOLUTION_LOG, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
 def get_trend(days=7):
@@ -164,13 +168,13 @@ def get_trend(days=7):
         return []
     cutoff = (datetime.now() - timedelta(days=days)).isoformat()
     records = []
-    with open(EVOLUTION_LOG, 'r', encoding='utf-8') as f:
+    with open(EVOLUTION_LOG, "r", encoding="utf-8") as f:
         for line in f:
             if not line.strip():
                 continue
             try:
                 r = json.loads(line)
-                if r.get('ts', '') >= cutoff:
+                if r.get("ts", "") >= cutoff:
                     records.append(r)
             except:
                 continue
@@ -179,6 +183,7 @@ def get_trend(days=7):
 
 # ── CLI ──
 
+
 def cli():
     if len(sys.argv) < 2:
         print("用法: python evolution.py [score|trend|detail]")
@@ -186,24 +191,40 @@ def cli():
 
     cmd = sys.argv[1]
 
-    if cmd == 'score':
+    if cmd == "score":
         result = compute_evolution_v2()
-        grade_icon = {"healthy": "🟢", "degraded": "🟡", "critical": "🔴"}.get(result['grade'], "⚪")
-        print(f"{grade_icon} Evolution v2: {result['evolution_v2']} ({result['grade']})")
-        print(f"  基础分: {result['base_score']} | Reactor分: {result['reactor_score']}")
+        grade_icon = {"healthy": "🟢", "degraded": "🟡", "critical": "🔴"}.get(
+            result["grade"], "⚪"
+        )
+        print(
+            f"{grade_icon} Evolution v2: {result['evolution_v2']} ({result['grade']})"
+        )
+        print(
+            f"  基础分: {result['base_score']} | Reactor分: {result['reactor_score']}"
+        )
 
-    elif cmd == 'detail':
+    elif cmd == "detail":
         result = compute_evolution_v2()
-        grade_icon = {"healthy": "🟢", "degraded": "🟡", "critical": "🔴"}.get(result['grade'], "⚪")
-        d = result['detail']
-        print(f"{grade_icon} Evolution v2: {result['evolution_v2']} ({result['grade']})")
+        grade_icon = {"healthy": "🟢", "degraded": "🟡", "critical": "🔴"}.get(
+            result["grade"], "⚪"
+        )
+        d = result["detail"]
+        print(
+            f"{grade_icon} Evolution v2: {result['evolution_v2']} ({result['grade']})"
+        )
         print(f"  基础分: {result['base_score']}")
         print(f"  Reactor分: {result['reactor_score']}")
-        print(f"    自动修复率: {d['auto_fix_rate']:.0%} ({d['total_reactions']} reactions)")
-        print(f"    误报率: {d['false_positive_rate']:.0%} ({d['total_verifications']} verifications)")
-        print(f"    自动关闭率: {d['auto_close_rate']:.0%} ({d['total_resolved']} resolved)")
+        print(
+            f"    自动修复率: {d['auto_fix_rate']:.0%} ({d['total_reactions']} reactions)"
+        )
+        print(
+            f"    误报率: {d['false_positive_rate']:.0%} ({d['total_verifications']} verifications)"
+        )
+        print(
+            f"    自动关闭率: {d['auto_close_rate']:.0%} ({d['total_resolved']} resolved)"
+        )
 
-    elif cmd == 'trend':
+    elif cmd == "trend":
         days = int(sys.argv[2]) if len(sys.argv) > 2 else 7
         records = get_trend(days)
         if not records:
@@ -211,13 +232,17 @@ def cli():
             return
         print(f"📈 最近 {days} 天进化趋势 ({len(records)} 条):")
         for r in records[-10:]:
-            ts = r.get('ts', '?')[:16]
-            grade_icon = {"healthy": "🟢", "degraded": "🟡", "critical": "🔴"}.get(r.get('grade'), "⚪")
-            print(f"  {grade_icon} {ts} v2={r.get('evolution_v2')} (base={r.get('base_score')} reactor={r.get('reactor_score')})")
+            ts = r.get("ts", "?")[:16]
+            grade_icon = {"healthy": "🟢", "degraded": "🟡", "critical": "🔴"}.get(
+                r.get("grade"), "⚪"
+            )
+            print(
+                f"  {grade_icon} {ts} v2={r.get('evolution_v2')} (base={r.get('base_score')} reactor={r.get('reactor_score')})"
+            )
 
     else:
         print(f"未知命令: {cmd}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

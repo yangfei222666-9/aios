@@ -2,6 +2,7 @@
 """
 从 events.jsonl 中提取 aram.matcher 相关事件，产出 ARAM 专项报告。
 """
+
 import json, time, sys
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -15,8 +16,16 @@ CORRECTION_THRESHOLD = get_int("analysis.correction_threshold", 3)
 
 def aram_metrics(days: int = 7) -> dict:
     events = load_events(days)
-    matches = [e for e in events if e.get("source") == "aram.matcher" and e.get("type") == "match"]
-    corrections = [e for e in events if e.get("source") == "aram.matcher" and e.get("type") == "correction"]
+    matches = [
+        e
+        for e in events
+        if e.get("source") == "aram.matcher" and e.get("type") == "match"
+    ]
+    corrections = [
+        e
+        for e in events
+        if e.get("source") == "aram.matcher" and e.get("type") == "correction"
+    ]
 
     total = len(matches) + len(corrections)
     correction_rate = len(corrections) / total if total > 0 else 0
@@ -25,7 +34,11 @@ def aram_metrics(days: int = 7) -> dict:
     type_dist = Counter((e.get("data") or {}).get("match_type", "?") for e in matches)
 
     # 平均 score
-    scores = [(e.get("data") or {}).get("score", 0) for e in matches if (e.get("data") or {}).get("score")]
+    scores = [
+        (e.get("data") or {}).get("score", 0)
+        for e in matches
+        if (e.get("data") or {}).get("score")
+    ]
     avg_score = sum(scores) / len(scores) if scores else 0
 
     return {
@@ -40,10 +53,16 @@ def aram_metrics(days: int = 7) -> dict:
 
 def aram_top_issues(days: int = 7) -> dict:
     events = load_events(days)
-    corrections = [e for e in events if e.get("source") == "aram.matcher" and e.get("type") == "correction"]
+    corrections = [
+        e
+        for e in events
+        if e.get("source") == "aram.matcher" and e.get("type") == "correction"
+    ]
 
     # 最常被纠正的输入
-    corrected_inputs = Counter((e.get("data") or {}).get("input", "?") for e in corrections)
+    corrected_inputs = Counter(
+        (e.get("data") or {}).get("input", "?") for e in corrections
+    )
 
     # 纠正流向：input → correct_target
     flows = defaultdict(Counter)
@@ -72,12 +91,16 @@ def aram_alias_suggestions(days: int = 7) -> list:
 
     for inp, flow in issues["correction_flows"].items():
         if flow["count"] >= CORRECTION_THRESHOLD:
-            suggestions.append({
-                "input": inp,
-                "suggested": flow["target"],
-                "reason": f"corrected_{flow['count']}_times",
-                "confidence": 1.0 if flow["count"] >= 5 else round(flow["count"] / 5, 2),
-            })
+            suggestions.append(
+                {
+                    "input": inp,
+                    "suggested": flow["target"],
+                    "reason": f"corrected_{flow['count']}_times",
+                    "confidence": (
+                        1.0 if flow["count"] >= 5 else round(flow["count"] / 5, 2)
+                    ),
+                }
+            )
 
     return suggestions
 
@@ -107,12 +130,14 @@ def report(days: int = 7) -> str:
         for inp, cnt in issues["top_corrected"].items():
             flow = issues["correction_flows"].get(inp, {})
             target = flow.get("target", "?")
-            lines.append(f"- \"{inp}\" x{cnt} → {target}")
+            lines.append(f'- "{inp}" x{cnt} → {target}')
 
     if sug:
         lines.append("\n## Alias Suggestions")
         for s in sug:
-            lines.append(f"- \"{s['input']}\" → \"{s['suggested']}\" (confidence: {s['confidence']})")
+            lines.append(
+                f"- \"{s['input']}\" → \"{s['suggested']}\" (confidence: {s['confidence']})"
+            )
 
     return "\n".join(lines)
 

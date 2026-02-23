@@ -1,31 +1,31 @@
 {
   "pb-001-network-retry": {
-    "total": 19,
-    "success": 19,
+    "total": 20,
+    "success": 20,
     "fail": 0,
     "last_fail": null
   },
   "pb-002-disk-cleanup": {
-    "total": 6,
-    "success": 6,
+    "total": 7,
+    "success": 7,
     "fail": 0,
     "last_fail": null
   },
   "pb-003-process-restart": {
-    "total": 16,
-    "success": 16,
+    "total": 17,
+    "success": 17,
     "fail": 0,
     "last_fail": null
   },
   "pb-004-api-rate-limit": {
-    "total": 14,
-    "success": 14,
+    "total": 15,
+    "success": 15,
     "fail": 0,
     "last_fail": null
   },
   "pb-005-memory-leak": {
-    "total": 11,
-    "success": 11,
+    "total": 12,
+    "success": 12,
     "fail": 0,
     "last_fail": null
   },
@@ -36,8 +36,8 @@
     "last_fail": null
   },
   "pb-007-gpu-overheat": {
-    "total": 6,
-    "success": 6,
+    "total": 7,
+    "success": 7,
     "fail": 0,
     "last_fail": null
   },
@@ -54,14 +54,32 @@
     "last_fail": null
   },
   "pb-012-gpu-critical-alert": {
-    "total": 8,
-    "success": 8,
+    "total": 9,
+    "success": 9,
     "fail": 0,
     "last_fail": null
   },
   "pb-013-app-crash-monitor": {
-    "total": 4,
-    "success": 4,
+    "total": 5,
+    "success": 5,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-015-model-fallback": {
+    "total": 1,
+    "success": 1,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-017-network-speed-test": {
+    "total": 1,
+    "success": 1,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-018-aios-health-check": {
+    "total": 1,
+    "success": 1,
     "fail": 0,
     "last_fail": null
   }

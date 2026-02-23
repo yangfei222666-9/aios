@@ -31,6 +31,7 @@ Schema (action_queue.jsonl):
   "executor": "shell|http|tool"
 }
 """
+
 import json, time, hashlib, uuid, subprocess, sys, io
 from pathlib import Path
 from typing import Optional, Callable, Any
@@ -80,14 +81,19 @@ def _get_guardrail(key: str, default: int | float):
 
 # ── 幂等键 ──
 
+
 def action_hash(action_type: str, target: str, params: dict) -> str:
     """基于 type + target + params 的 SHA256 前 16 位"""
-    raw = json.dumps({"type": action_type, "target": target, "params": params},
-                     sort_keys=True, ensure_ascii=False)
+    raw = json.dumps(
+        {"type": action_type, "target": target, "params": params},
+        sort_keys=True,
+        ensure_ascii=False,
+    )
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 
 # ── ActionResult ──
+
 
 @dataclass
 class ActionResult:
@@ -98,8 +104,10 @@ class ActionResult:
 
 # ── Executor Registry ──
 
+
 class BaseExecutor:
     """执行器基类"""
+
     name: str = "base"
 
     def execute(self, action: dict) -> ActionResult:
@@ -108,6 +116,7 @@ class BaseExecutor:
 
 class ShellExecutor(BaseExecutor):
     """Shell 命令执行器"""
+
     name = "shell"
 
     def execute(self, action: dict) -> ActionResult:
@@ -117,14 +126,23 @@ class ShellExecutor(BaseExecutor):
         t0 = time.monotonic()
         try:
             r = subprocess.run(
-                cmd, shell=True, capture_output=True, text=True, timeout=30,
-                encoding="utf-8", errors="replace"
+                cmd,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                encoding="utf-8",
+                errors="replace",
             )
             ms = round((time.monotonic() - t0) * 1000)
             if r.returncode == 0:
-                return ActionResult(ok=True, detail=r.stdout[:500].strip(), latency_ms=ms)
+                return ActionResult(
+                    ok=True, detail=r.stdout[:500].strip(), latency_ms=ms
+                )
             else:
-                return ActionResult(ok=False, detail=(r.stderr or r.stdout)[:500].strip(), latency_ms=ms)
+                return ActionResult(
+                    ok=False, detail=(r.stderr or r.stdout)[:500].strip(), latency_ms=ms
+                )
         except subprocess.TimeoutExpired:
             ms = round((time.monotonic() - t0) * 1000)
             return ActionResult(ok=False, detail="timeout (30s)", latency_ms=ms)
@@ -135,6 +153,7 @@ class ShellExecutor(BaseExecutor):
 
 class HttpExecutor(BaseExecutor):
     """HTTP 请求执行器"""
+
     name = "http"
 
     def execute(self, action: dict) -> ActionResult:
@@ -147,6 +166,7 @@ class HttpExecutor(BaseExecutor):
         try:
             import urllib.request
             import urllib.error
+
             req = urllib.request.Request(url, method=method)
             body = params.get("body")
             if body:
@@ -158,10 +178,16 @@ class HttpExecutor(BaseExecutor):
                 ms = round((time.monotonic() - t0) * 1000)
                 status = resp.status
                 data = resp.read(2048).decode("utf-8", errors="replace")
-                return ActionResult(ok=(200 <= status < 400), detail=f"{status}: {data[:300]}", latency_ms=ms)
+                return ActionResult(
+                    ok=(200 <= status < 400),
+                    detail=f"{status}: {data[:300]}",
+                    latency_ms=ms,
+                )
         except urllib.error.HTTPError as e:
             ms = round((time.monotonic() - t0) * 1000)
-            return ActionResult(ok=False, detail=f"HTTP {e.code}: {str(e)[:300]}", latency_ms=ms)
+            return ActionResult(
+                ok=False, detail=f"HTTP {e.code}: {str(e)[:300]}", latency_ms=ms
+            )
         except Exception as e:
             ms = round((time.monotonic() - t0) * 1000)
             return ActionResult(ok=False, detail=str(e)[:500], latency_ms=ms)
@@ -169,6 +195,7 @@ class HttpExecutor(BaseExecutor):
 
 class ToolExecutor(BaseExecutor):
     """Tool 执行器（调用 aios 内部模块）"""
+
     name = "tool"
 
     def __init__(self):
@@ -231,6 +258,7 @@ def get_registry() -> ExecutorRegistry:
 
 # ── 队列持久化 ──
 
+
 def _ensure_dirs():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     PENDING_ACTIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -267,6 +295,7 @@ def _append_queue(record: dict):
 
 # ── 风险分级 ──
 
+
 def classify_risk(action: dict) -> str:
     """
     对 action 进行风险分级。
@@ -286,6 +315,7 @@ def classify_risk(action: dict) -> str:
 
 
 # ── 护栏检查 ──
+
 
 def _hourly_exec_count(queue: list[dict]) -> int:
     """过去一小时内成功执行的 action 数"""
@@ -333,7 +363,9 @@ def _consecutive_failures(queue: list[dict]) -> int:
     return count
 
 
-def check_guardrails(queue: list[dict], action_hash_val: str, risk: str) -> Optional[str]:
+def check_guardrails(
+    queue: list[dict], action_hash_val: str, risk: str
+) -> Optional[str]:
     """
     检查四大护栏，返回 skip_reason 或 None（通过）。
     """
@@ -349,7 +381,9 @@ def check_guardrails(queue: list[dict], action_hash_val: str, risk: str) -> Opti
         return f"cooldown ({cooldown}s)"
 
     # 3. 连续失败熔断
-    breaker = _get_guardrail("consecutive_fail_circuit_breaker", CONSECUTIVE_FAIL_CIRCUIT_BREAKER)
+    breaker = _get_guardrail(
+        "consecutive_fail_circuit_breaker", CONSECUTIVE_FAIL_CIRCUIT_BREAKER
+    )
     if _consecutive_failures(queue) >= breaker:
         return f"circuit_breaker ({breaker} consecutive failures)"
 
@@ -364,6 +398,7 @@ def check_guardrails(queue: list[dict], action_hash_val: str, risk: str) -> Opti
 
 
 # ── 入队 ──
+
 
 def enqueue(action: dict) -> Optional[dict]:
     """
@@ -404,9 +439,12 @@ def enqueue(action: dict) -> Optional[dict]:
 
     _append_queue(record)
 
-    emit(LAYER_TOOL, "action_enqueued", "ok", payload={
-        "id": record["id"], "type": a_type, "risk": risk, "hash": h
-    })
+    emit(
+        LAYER_TOOL,
+        "action_enqueued",
+        "ok",
+        payload={"id": record["id"], "type": a_type, "risk": risk, "hash": h},
+    )
 
     return record
 
@@ -426,6 +464,7 @@ def _infer_executor(action_type: str, params: dict) -> str:
 
 
 # ── 从 dispatcher 导入 ──
+
 
 def ingest_pending_actions() -> int:
     """
@@ -455,6 +494,7 @@ def ingest_pending_actions() -> int:
 
 
 # ── 执行一轮 ──
+
 
 def run_queue(limit: int = 10) -> list[dict]:
     """
@@ -491,9 +531,12 @@ def run_queue(limit: int = 10) -> list[dict]:
             record["status"] = STATUS_SKIPPED
             record["skip_reason"] = "needs_approval"
             record["ts_done"] = time.strftime("%Y-%m-%dT%H:%M:%S")
-            emit(LAYER_SEC, "action_skipped_high_risk", "ok", payload={
-                "id": record["id"], "type": record["type"]
-            })
+            emit(
+                LAYER_SEC,
+                "action_skipped_high_risk",
+                "ok",
+                payload={"id": record["id"], "type": record["type"]},
+            )
             processed.append(record)
             continue
 
@@ -503,9 +546,12 @@ def run_queue(limit: int = 10) -> list[dict]:
             record["status"] = STATUS_SKIPPED
             record["skip_reason"] = skip_reason
             record["ts_done"] = time.strftime("%Y-%m-%dT%H:%M:%S")
-            emit(LAYER_SEC, "action_skipped_guardrail", "ok", payload={
-                "id": record["id"], "reason": skip_reason
-            })
+            emit(
+                LAYER_SEC,
+                "action_skipped_guardrail",
+                "ok",
+                payload={"id": record["id"], "reason": skip_reason},
+            )
             processed.append(record)
             continue
 
@@ -520,13 +566,23 @@ def run_queue(limit: int = 10) -> list[dict]:
             medium_auto_count += 1
             # 发送通知
             bus = get_bus()
-            bus.emit("action.medium_risk_auto", {
-                "id": record["id"], "type": record["type"],
-                "target": record["target"], "summary": f"自动执行 medium-risk: {record['type']}"
-            }, PRIORITY_HIGH, "action_engine")
-            emit(LAYER_COMMS, "action_medium_notify", "ok", payload={
-                "id": record["id"], "type": record["type"]
-            })
+            bus.emit(
+                "action.medium_risk_auto",
+                {
+                    "id": record["id"],
+                    "type": record["type"],
+                    "target": record["target"],
+                    "summary": f"自动执行 medium-risk: {record['type']}",
+                },
+                PRIORITY_HIGH,
+                "action_engine",
+            )
+            emit(
+                LAYER_COMMS,
+                "action_medium_notify",
+                "ok",
+                payload={"id": record["id"], "type": record["type"]},
+            )
 
         # 执行
         record["status"] = STATUS_EXECUTING
@@ -544,15 +600,27 @@ def run_queue(limit: int = 10) -> list[dict]:
         if result.ok:
             record["status"] = STATUS_SUCCEEDED
             record["result"] = result.detail
-            emit(LAYER_TOOL, "action_succeeded", "ok", latency_ms=result.latency_ms, payload={
-                "id": record["id"], "type": record["type"]
-            })
+            emit(
+                LAYER_TOOL,
+                "action_succeeded",
+                "ok",
+                latency_ms=result.latency_ms,
+                payload={"id": record["id"], "type": record["type"]},
+            )
         else:
             record["status"] = STATUS_FAILED
             record["result"] = result.detail
-            emit(LAYER_TOOL, "action_failed", "err", latency_ms=result.latency_ms, payload={
-                "id": record["id"], "type": record["type"], "error": result.detail[:200]
-            })
+            emit(
+                LAYER_TOOL,
+                "action_failed",
+                "err",
+                latency_ms=result.latency_ms,
+                payload={
+                    "id": record["id"],
+                    "type": record["type"],
+                    "error": result.detail[:200],
+                },
+            )
 
         processed.append(record)
 
@@ -569,6 +637,7 @@ def run_queue(limit: int = 10) -> list[dict]:
 
 
 # ── 查询 API ──
+
 
 def get_status() -> dict:
     """队列状态摘要"""
@@ -607,6 +676,7 @@ def get_queued() -> list[dict]:
 
 # ── 格式化输出 ──
 
+
 def _format_status(status: dict, fmt: str = "default") -> str:
     if fmt == "telegram":
         return (
@@ -638,7 +708,9 @@ def _format_history(records: list[dict], fmt: str = "default") -> str:
     if fmt == "telegram":
         lines = []
         for r in records:
-            icon = {"succeeded": "✅", "failed": "❌", "skipped": "⏭️"}.get(r["status"], "❓")
+            icon = {"succeeded": "✅", "failed": "❌", "skipped": "⏭️"}.get(
+                r["status"], "❓"
+            )
             skip = f" ({r['skip_reason']})" if r.get("skip_reason") else ""
             lines.append(f"{icon} [{r['id']}] {r['type']}{skip}")
             if r.get("result"):
@@ -647,7 +719,9 @@ def _format_history(records: list[dict], fmt: str = "default") -> str:
 
     lines = []
     for r in records:
-        lines.append(f"[{r.get('ts_done', '?')}] {r['id']} | {r['type']} → {r['status']}")
+        lines.append(
+            f"[{r.get('ts_done', '?')}] {r['id']} | {r['type']} → {r['status']}"
+        )
         if r.get("skip_reason"):
             lines.append(f"  skip: {r['skip_reason']}")
         if r.get("result"):
@@ -663,7 +737,9 @@ def _format_run_result(processed: list[dict], fmt: str = "default") -> str:
     if fmt == "telegram":
         lines = [f"⚙️ 本轮处理 {len(processed)} 个 action:"]
         for r in processed:
-            icon = {"succeeded": "✅", "failed": "❌", "skipped": "⏭️"}.get(r["status"], "❓")
+            icon = {"succeeded": "✅", "failed": "❌", "skipped": "⏭️"}.get(
+                r["status"], "❓"
+            )
             lines.append(f"{icon} {r['type']} → {r['status']}")
         return "\n".join(lines)
 
@@ -679,18 +755,23 @@ def _format_run_result(processed: list[dict], fmt: str = "default") -> str:
 
 # ── CLI ──
 
+
 def main():
     import argparse
 
     if sys.platform == "win32":
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
     parser = argparse.ArgumentParser(description="AIOS Action Engine v0.6")
-    parser.add_argument("action", choices=["status", "run", "history", "ingest"],
-                        help="status=队列状态, run=消费一轮, history=执行历史, ingest=导入pending")
+    parser.add_argument(
+        "action",
+        choices=["status", "run", "history", "ingest"],
+        help="status=队列状态, run=消费一轮, history=执行历史, ingest=导入pending",
+    )
     parser.add_argument("--limit", type=int, default=10, help="处理/显示数量上限")
-    parser.add_argument("--format", choices=["default", "telegram"], default="default",
-                        help="输出格式")
+    parser.add_argument(
+        "--format", choices=["default", "telegram"], default="default", help="输出格式"
+    )
     args = parser.parse_args()
 
     if args.action == "status":

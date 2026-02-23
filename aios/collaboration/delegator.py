@@ -100,8 +100,9 @@ class Delegator:
 
     # ── create delegation ──
 
-    def create_delegation(self, description: str, subtask_specs: list[dict],
-                          requester: str = "user") -> Delegation:
+    def create_delegation(
+        self, description: str, subtask_specs: list[dict], requester: str = "user"
+    ) -> Delegation:
         """
         Create a delegation with subtasks.
 
@@ -146,14 +147,19 @@ class Delegator:
         if not dlg or dlg.status != "active":
             return []
 
-        completed = {tid for tid, t in self._tasks.items()
-                     if t.parent_id == delegation_id and t.status == "done"}
+        completed = {
+            tid
+            for tid, t in self._tasks.items()
+            if t.parent_id == delegation_id and t.status == "done"
+        }
 
         assigned = []
-        pending = [self._tasks[f"{delegation_id}_{i}"]
-                   for i in range(len(dlg.subtasks))
-                   if self._tasks.get(f"{delegation_id}_{i}")
-                   and self._tasks[f"{delegation_id}_{i}"].status == "pending"]
+        pending = [
+            self._tasks[f"{delegation_id}_{i}"]
+            for i in range(len(dlg.subtasks))
+            if self._tasks.get(f"{delegation_id}_{i}")
+            and self._tasks[f"{delegation_id}_{i}"].status == "pending"
+        ]
 
         # sort by priority
         pending.sort(key=lambda t: t.priority)
@@ -172,20 +178,29 @@ class Delegator:
 
             # notify agent
             self.messenger.send(
-                agent.agent_id, MsgType.REQUEST,
-                {"action": "execute_task", "task_id": task.task_id,
-                 "description": task.description, "delegation_id": delegation_id}
+                agent.agent_id,
+                MsgType.REQUEST,
+                {
+                    "action": "execute_task",
+                    "task_id": task.task_id,
+                    "description": task.description,
+                    "delegation_id": delegation_id,
+                },
             )
 
             # update agent load
-            self.registry.heartbeat(agent.agent_id, load=min(agent.load + 0.3, 1.0), status="busy")
+            self.registry.heartbeat(
+                agent.agent_id, load=min(agent.load + 0.3, 1.0), status="busy"
+            )
             assigned.append(task)
 
         return assigned
 
     # ── progress tracking ──
 
-    def update_task(self, task_id: str, status: str, result: dict = None, error: str = ""):
+    def update_task(
+        self, task_id: str, status: str, result: dict = None, error: str = ""
+    ):
         task = self._tasks.get(task_id)
         if not task:
             return
@@ -201,9 +216,11 @@ class Delegator:
         # check if delegation is complete
         dlg = self._delegations.get(task.parent_id)
         if dlg:
-            all_tasks = [self._tasks[f"{dlg.delegation_id}_{i}"]
-                         for i in range(len(dlg.subtasks))
-                         if self._tasks.get(f"{dlg.delegation_id}_{i}")]
+            all_tasks = [
+                self._tasks[f"{dlg.delegation_id}_{i}"]
+                for i in range(len(dlg.subtasks))
+                if self._tasks.get(f"{dlg.delegation_id}_{i}")
+            ]
 
             if all(t.status == "done" for t in all_tasks):
                 dlg.status = "completed"
@@ -212,9 +229,17 @@ class Delegator:
             elif any(t.status == "failed" for t in all_tasks):
                 # check if failed task has no dependents still pending
                 failed_ids = {t.task_id for t in all_tasks if t.status == "failed"}
-                blocked = [t for t in all_tasks if t.status == "pending"
-                           and any(d in failed_ids for d in t.depends_on)]
-                if blocked and all(t.status in ("done", "failed") for t in all_tasks if t not in blocked):
+                blocked = [
+                    t
+                    for t in all_tasks
+                    if t.status == "pending"
+                    and any(d in failed_ids for d in t.depends_on)
+                ]
+                if blocked and all(
+                    t.status in ("done", "failed")
+                    for t in all_tasks
+                    if t not in blocked
+                ):
                     dlg.status = "failed"
                     dlg.finished_at = time.time()
 
@@ -234,7 +259,8 @@ class Delegator:
         return {
             "subtask_count": len(tasks),
             "results": {t.task_id: t.result for t in tasks},
-            "total_time": max(t.finished_at for t in tasks) - min(t.created_at for t in tasks),
+            "total_time": max(t.finished_at for t in tasks)
+            - min(t.created_at for t in tasks),
         }
 
     # ── query ──
@@ -247,8 +273,9 @@ class Delegator:
         if not dlg:
             return {"error": "not found"}
 
-        tasks = [self._tasks.get(f"{delegation_id}_{i}")
-                 for i in range(len(dlg.subtasks))]
+        tasks = [
+            self._tasks.get(f"{delegation_id}_{i}") for i in range(len(dlg.subtasks))
+        ]
         tasks = [t for t in tasks if t]
 
         return {
@@ -256,21 +283,30 @@ class Delegator:
             "status": dlg.status,
             "progress": f"{sum(1 for t in tasks if t.status == 'done')}/{len(tasks)}",
             "subtasks": [
-                {"id": t.task_id, "status": t.status, "assigned_to": t.assigned_to,
-                 "description": t.description[:60]}
+                {
+                    "id": t.task_id,
+                    "status": t.status,
+                    "assigned_to": t.assigned_to,
+                    "description": t.description[:60],
+                }
                 for t in tasks
             ],
         }
 
     def list_active(self) -> list[dict]:
-        return [self.get_status(d.delegation_id)
-                for d in self._delegations.values() if d.status == "active"]
+        return [
+            self.get_status(d.delegation_id)
+            for d in self._delegations.values()
+            if d.status == "active"
+        ]
 
 
 # ── CLI ──
 
+
 def main():
     import sys
+
     reg = AgentRegistry()
     dlg = Delegator(reg)
 
