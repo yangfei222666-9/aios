@@ -543,6 +543,20 @@
             return AGENT_TYPE_MAP[template] || template;
         }
 
+        // 转换 Agent 名称（处理英文名称）
+        function getAgentDisplayName(agent) {
+            const name = agent.name || agent.id;
+            
+            // 如果名称是 "Xxx Agent" 格式，转换为中文
+            const match = name.match(/^(Coder|Analyst|Monitor|Researcher) Agent$/i);
+            if (match) {
+                const type = match[1].toLowerCase();
+                return AGENT_TYPE_MAP[type] || name;
+            }
+            
+            return name;
+        }
+
         // 切换标签页
         function switchTab(tab) {
             currentTab = tab;
@@ -623,7 +637,7 @@
                 container.innerHTML = agents.map(agent => `
                     <div class="agent-card" onclick="viewAgentDetail('${agent.id}')">
                         <div class="agent-header">
-                            <div class="agent-name">${agent.name || agent.id}</div>
+                            <div class="agent-name">${getAgentDisplayName(agent)}</div>
                             <div class="agent-badge ${agent.template}">${getAgentTypeName(agent.template)}</div>
                         </div>
                         <div style="font-size: 12px; color: #8b92a7; margin-bottom: 10px;">
@@ -680,7 +694,7 @@
                 <div style="margin-bottom: 20px;">
                     <select id="evolution-agent-select" onchange="loadAgentEvolution(this.value)" style="padding: 10px; background: #1a2332; border: 1px solid #2a3547; border-radius: 8px; color: #e0e6ed; font-size: 14px; width: 300px;">
                         <option value="">选择 Agent...</option>
-                        ${agents.map(a => `<option value="${a.id}">${a.name || a.id}</option>`).join('')}
+                        ${agents.map(a => `<option value="${a.id}">${getAgentDisplayName(a)}</option>`).join('')}
                     </select>
                 </div>
                 <div id="evolution-timeline"></div>
@@ -791,7 +805,8 @@
                     
                     if (result.success) {
                         document.body.removeChild(modal);
-                        alert(`✅ Agent 创建成功!\n\nID: ${result.agent.id}\n名称: ${result.agent.name}\n类型: ${getAgentTypeName(result.agent.template)}`);
+                        const displayName = getAgentDisplayName(result.agent);
+                        alert(`✅ Agent 创建成功!\n\nID: ${result.agent.id}\n名称: ${displayName}\n类型: ${getAgentTypeName(result.agent.template)}`);
                         loadDashboardData();
                         if (currentTab === 'agents') {
                             loadAgentsList();
@@ -867,7 +882,7 @@
                             <div style="display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #2a3547;">
                                 <div style="font-size: 24px; width: 50px;">${medal}</div>
                                 <div style="flex: 1;">
-                                    <div style="font-weight: 600; margin-bottom: 5px;">${agent.name || agent.id}</div>
+                                    <div style="font-weight: 600; margin-bottom: 5px;">${getAgentDisplayName(agent)}</div>
                                     <div style="font-size: 12px; color: #8b92a7;">
                                         ${stats.tasks_completed || 0} 任务 · ${(stats.success_rate * 100 || 0).toFixed(0)}% 成功率 · ${(stats.avg_duration_sec || 0).toFixed(1)}s 平均耗时
                                     </div>
@@ -883,7 +898,7 @@
                 // 填充进化 Agent 选择框
                 const evolveSelect = document.getElementById('evolve-agent-select');
                 evolveSelect.innerHTML = '<option value="">选择 Agent...</option>' +
-                    agents.map(a => `<option value="${a.id}">${a.name || a.id}</option>`).join('');
+                    agents.map(a => `<option value="${a.id}">${getAgentDisplayName(a)}</option>`).join('');
 
                 // 加载进化事件
                 loadEvolutionEvents();
