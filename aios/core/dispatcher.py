@@ -37,6 +37,10 @@ def _default_handlers() -> dict[str, Callable]:
         "sensor.process.stopped": _handle_process_stopped,
         "sensor.system.health": _handle_system_health,
         "sensor.network.unreachable": _handle_network_unreachable,
+        "sensor.app.started": _handle_app_event,
+        "sensor.app.stopped": _handle_app_event,
+        "sensor.lol.version_updated": _handle_lol_update,
+        "sensor.gpu.critical": _handle_gpu_critical,
     }
 
 
@@ -101,6 +105,47 @@ def _handle_network_unreachable(event: Event):
         "priority": "high",
         "summary": f"网络不可达: {target}",
         "detail": event.payload,
+    })
+
+
+def _handle_app_event(event: Event):
+    """处理应用启动/关闭事件，记录到习惯追踪器"""
+    app = event.payload.get("app", "")
+    status = event.payload.get("status", "")
+    
+    # 导入习惯追踪器
+    try:
+        from learning.habits.tracker import track_app_event
+        track_app_event(app, status, event.timestamp)
+    except Exception as e:
+        # 静默失败，不影响主流程
+        pass
+
+
+def _handle_lol_update(event: Event):
+    """处理 LOL 版本更新事件"""
+    old_ver = event.payload.get("old_version", "")
+    new_ver = event.payload.get("new_version", "")
+    _append_action({
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "trace_id": _current_trace_id,
+        "type": "lol_update",
+        "priority": "high",
+        "summary": f"LOL 版本更新: {old_ver} → {new_ver}",
+        "detail": "建议运行 ARAM 数据刷新",
+    })
+
+
+def _handle_gpu_critical(event: Event):
+    """处理 GPU 严重过热事件"""
+    temp = event.payload.get("temp", 0)
+    _append_action({
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "trace_id": _current_trace_id,
+        "type": "gpu_critical",
+        "priority": "critical",
+        "summary": f"GPU 温度严重过热: {temp}°C",
+        "detail": "建议立即检查散热系统",
     })
 
 

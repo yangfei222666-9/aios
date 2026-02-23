@@ -49,5 +49,39 @@
     "task_count": 0,
     "max_tasks": 0,
     "status": "ready"
+  },
+  {
+    "agent_id": "test-coder-001",
+    "agent_type": "on_demand",
+    "session_key": "",
+    "label": "",
+    "model": "claude-sonnet-4-5",
+    "capabilities": [
+      "code",
+      "debug",
+      "test"
+    ],
+    "spawned_at": 1771779296.3834426,
+    "last_active": 1771779296.3834426,
+    "task_count": 0,
+    "max_tasks": 0,
+    "status": "starting"
+  },
+  {
+    "agent_id": "smart-coder-001",
+    "agent_type": "on_demand",
+    "session_key": "",
+    "label": "",
+    "model": "claude-sonnet-4-5",
+    "capabilities": [
+      "code",
+      "debug",
+      "test"
+    ],
+    "spawned_at": 1771779312.8899555,
+    "last_active": 1771779312.8899555,
+    "task_count": 0,
+    "max_tasks": 0,
+    "status": "starting"
   }
 ]

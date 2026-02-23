@@ -26,9 +26,9 @@
     }
   },
   "snapshot": {
-    "cached_at": 1771732371.3028772,
+    "cached_at": 1771809605.4191144,
     "data": {
-      "ts": "2026-02-22T11:52:51",
+      "ts": "2026-02-23T09:20:05",
       "period_days": 1,
       "correction_rate": 0,
       "tool_success_rate": 1.0,
@@ -38,11 +38,11 @@
       "http_error_count": 7,
       "http_502_rate": 0.0,
       "http_404_rate": 0.0,
-      "total_events": 46,
+      "total_events": 47,
       "severity_counts": {
         "CRIT": 1,
         "WARN": 0,
-        "INFO": 39,
+        "INFO": 40,
         "ERR": 6
       },
       "evolution_score": 0.4,

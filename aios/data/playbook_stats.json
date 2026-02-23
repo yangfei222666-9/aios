@@ -1,1 +1,68 @@
-{}
+{
+  "pb-001-network-retry": {
+    "total": 19,
+    "success": 19,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-002-disk-cleanup": {
+    "total": 6,
+    "success": 6,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-003-process-restart": {
+    "total": 16,
+    "success": 16,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-004-api-rate-limit": {
+    "total": 14,
+    "success": 14,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-005-memory-leak": {
+    "total": 11,
+    "success": 11,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-006-log-rotation": {
+    "total": 1,
+    "success": 1,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-007-gpu-overheat": {
+    "total": 6,
+    "success": 6,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-008-cache-cleanup": {
+    "total": 1,
+    "success": 1,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-011-lol-version-update": {
+    "total": 1,
+    "success": 1,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-012-gpu-critical-alert": {
+    "total": 8,
+    "success": 8,
+    "fail": 0,
+    "last_fail": null
+  },
+  "pb-013-app-crash-monitor": {
+    "total": 4,
+    "success": 4,
+    "fail": 0,
+    "last_fail": null
+  }
+}

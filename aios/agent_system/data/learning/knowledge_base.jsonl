@@ -1,0 +1,3 @@
+{"ts": "2026-02-22T20:27:43.272844", "agent_id": "test-agent", "task_type": "general", "error_type": "network", "error": "Network error: 502 Bad Gateway", "lesson": "网络请求失败时应该增加重试机制（至少3次），并使用指数退避策略", "confidence": 0.7}
+{"ts": "2026-02-22T20:27:43.273342", "agent_id": "test-agent", "task_type": "coding", "error_type": "rate_limit", "error": "API rate limit exceeded: 429", "lesson": "遇到限流时应该降低请求频率，在请求之间增加延迟（至少1秒）", "confidence": 0.7}
+{"ts": "2026-02-23T00:54:56.387440", "agent_id": "test-coder-001", "task_type": "general", "error_type": "network", "error": "Network error: 502 Bad Gateway", "lesson": "网络请求失败时应该增加重试机制（至少3次），并使用指数退避策略", "confidence": 0.7}

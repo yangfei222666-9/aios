@@ -1,0 +1,28 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.15,
+    "archive_date":  "2026-02-22",
+    "files_count":  3,
+    "total_size_bytes":  13912,
+    "timestamp":  "2026-02-22 23:00:01",
+    "files":  [
+                  {
+                      "Path":  "aios\\agent_system\\data\\system.log",
+                      "Type":  "temp",
+                      "Size":  369
+                  },
+                  {
+                      "Path":  "experiments\\mnist\\train.log",
+                      "Type":  "temp",
+                      "Size":  2478
+                  },
+                  {
+                      "Path":  "projects\\weather_crawler\\weather_crawler.log",
+                      "Type":  "temp",
+                      "Size":  2856
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-02-22",
+    "total_size_mb":  0.01
+}

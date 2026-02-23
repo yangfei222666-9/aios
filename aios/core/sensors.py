@@ -29,6 +29,11 @@ DEFAULT_COOLDOWNS = {
     "sensor.process.stopped": 300,
     "sensor.system.health": 1800,    # 系统健康告警 30 分钟
     "sensor.network.unreachable": 600,  # 网络不可达 10 分钟
+    "sensor.gpu.warn": 1800,         # GPU 温度告警 30 分钟
+    "sensor.gpu.critical": 600,      # GPU 严重过热 10 分钟
+    "sensor.app.started": 300,       # 应用启动 5 分钟
+    "sensor.app.stopped": 300,       # 应用关闭 5 分钟
+    "sensor.lol.version_updated": 0, # LOL 版本更新立即通知
 }
 
 
@@ -135,7 +140,7 @@ class ProcessMonitor:
             result = subprocess.run(
                 ["powershell", "-NoProfile", "-Command",
                  "Get-Process | Select-Object -ExpandProperty Name -Unique"],
-                capture_output=True, text=True, timeout=10
+                capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace'
             )
             current_all = set(result.stdout.strip().split("\n")) if result.returncode == 0 else set()
         except Exception:
@@ -194,7 +199,7 @@ class SystemHealth:
                 ["powershell", "-NoProfile", "-Command",
                  "(Get-CimInstance Win32_OperatingSystem | "
                  "Select-Object @{N='pct';E={[math]::Round(($_.TotalVisibleMemorySize - $_.FreePhysicalMemory) / $_.TotalVisibleMemorySize * 100, 1)}}).pct"],
-                capture_output=True, text=True, timeout=10
+                capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace'
             )
             if result.returncode == 0 and result.stdout.strip():
                 metrics["memory_pct"] = float(result.stdout.strip())
@@ -243,7 +248,7 @@ class NetworkProbe:
                 # Windows ping: -n 1 = 1次, -w 2000 = 超时2秒
                 result = subprocess.run(
                     ["ping", "-n", "1", "-w", "2000", target],
-                    capture_output=True, text=True, timeout=5
+                    capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace'
                 )
                 reachable = (result.returncode == 0)
                 results[target] = {"reachable": reachable, "error": None}
@@ -276,10 +281,16 @@ class NetworkProbe:
 def scan_all(watch_paths: list[str] = None,
              process_names: list[str] = None,
              network_targets: list[str] = None,
-             enable_screen: bool = False) -> dict:
+             enable_screen: bool = False,
+             enable_gpu: bool = True,
+             enable_app_monitor: bool = True,
+             enable_lol_version: bool = True) -> dict:
     """一次性跑所有探针，返回汇总
     
     enable_screen: 是否启用屏幕感知（默认关闭，按需开启）
+    enable_gpu: 是否启用 GPU 监控（默认开启）
+    enable_app_monitor: 是否启用应用监控（默认开启）
+    enable_lol_version: 是否启用 LOL 版本监控（默认开启）
     """
     results = {}
 
@@ -298,6 +309,21 @@ def scan_all(watch_paths: list[str] = None,
     np = NetworkProbe(network_targets)
     results["network"] = np.scan()
 
+    # GPU 监控
+    if enable_gpu:
+        gm = GPUMonitor(temp_warn=75, temp_crit=85)
+        results["gpu"] = gm.scan()
+
+    # 应用监控
+    if enable_app_monitor:
+        am = AppMonitor()
+        results["apps"] = am.scan()
+
+    # LOL 版本监控
+    if enable_lol_version:
+        lvm = LOLVersionMonitor()
+        results["lol_version"] = lvm.scan()
+
     # 屏幕感知（可选）
     if enable_screen:
         try:
@@ -307,6 +333,179 @@ def scan_all(watch_paths: list[str] = None,
             results["screen_changes"] = {"error": str(e)[:100]}
 
     return results
+
+
+class AppMonitor:
+    """应用启动状态监控"""
+    def __init__(self, apps: dict = None):
+        """
+        apps: {app_name: executable_name}
+        例如: {"QQ音乐": "QQMusic", "英雄联盟": "LeagueClient"}
+        """
+        self.apps = apps or {
+            "QQ音乐": "QQMusic",
+            "英雄联盟": "LeagueClient",
+            "WeGame": "WeGame"
+        }
+    
+    def scan(self) -> dict:
+        state = _load_state()
+        prev_apps = state.get("app_status", {})
+        current_apps = {}
+        events = []
+        bus = get_bus()
+        
+        try:
+            result = subprocess.run(
+                ["powershell", "-NoProfile", "-Command",
+                 "Get-Process | Select-Object -ExpandProperty Name -Unique"],
+                capture_output=True, text=True, timeout=10, encoding='utf-8', errors='replace'
+            )
+            running_procs = set(result.stdout.strip().split("\n")) if result.returncode == 0 else set()
+        except Exception:
+            running_procs = set()
+        
+        for app_name, exe_name in self.apps.items():
+            is_running = any(exe_name.lower() in proc.strip().lower() for proc in running_procs)
+            current_apps[app_name] = is_running
+            
+            prev_status = prev_apps.get(app_name, False)
+            
+            if is_running and not prev_status:
+                # 应用启动
+                topic = "sensor.app.started"
+                if _is_cooled_down(state, topic, app_name):
+                    ev = {"app": app_name, "status": "started"}
+                    bus.emit(topic, ev, PRIORITY_NORMAL, "app_monitor")
+                    _mark_fired(state, topic, app_name)
+                    events.append(ev)
+            
+            elif not is_running and prev_status:
+                # 应用关闭
+                topic = "sensor.app.stopped"
+                if _is_cooled_down(state, topic, app_name):
+                    ev = {"app": app_name, "status": "stopped"}
+                    bus.emit(topic, ev, PRIORITY_NORMAL, "app_monitor")
+                    _mark_fired(state, topic, app_name)
+                    events.append(ev)
+        
+        state["app_status"] = current_apps
+        _save_state(state)
+        return {"apps": current_apps, "events": events}
+
+
+class LOLVersionMonitor:
+    """LOL 版本更新检测"""
+    def __init__(self, lol_path: str = None):
+        self.lol_path = lol_path or "E:\\WeGameApps\\英雄联盟"
+    
+    def scan(self) -> dict:
+        state = _load_state()
+        bus = get_bus()
+        result = {"version": None, "updated": False, "error": None}
+        
+        try:
+            # 从 LeagueClient.exe 读取版本（最可靠）
+            exe_path = Path(self.lol_path) / "LeagueClient" / "LeagueClient.exe"
+            if not exe_path.exists():
+                result["error"] = f"LOL not found at {self.lol_path}"
+                return result
+            
+            ps_cmd = f"(Get-Item '{exe_path}').VersionInfo.FileVersion"
+            ps_result = subprocess.run(
+                ["powershell", "-NoProfile", "-Command", ps_cmd],
+                capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace'
+            )
+            
+            if ps_result.returncode != 0 or not ps_result.stdout.strip():
+                result["error"] = "Cannot read LOL version"
+                return result
+            
+            current_version = ps_result.stdout.strip()
+            result["version"] = current_version
+            prev_version = state.get("lol_version")
+            
+            if prev_version and prev_version != current_version:
+                # 版本更新
+                topic = "sensor.lol.version_updated"
+                ev = {
+                    "old_version": prev_version,
+                    "new_version": current_version,
+                    "message": f"LOL updated: {prev_version} → {current_version}"
+                }
+                bus.emit(topic, ev, PRIORITY_HIGH, "lol_version_monitor")
+                result["updated"] = True
+            
+            state["lol_version"] = current_version
+            _save_state(state)
+            
+        except Exception as e:
+            result["error"] = str(e)[:100]
+        
+        return result
+
+
+class GPUMonitor:
+    """GPU 温度和使用率监控（NVIDIA GPU）"""
+    def __init__(self, temp_warn=75, temp_crit=85):
+        self.temp_warn = temp_warn
+        self.temp_crit = temp_crit
+    
+    def scan(self) -> dict:
+        results = {"available": False, "temp": None, "usage": None, "error": None}
+        state = _load_state()
+        bus = get_bus()
+        
+        try:
+            # 使用 nvidia-smi 查询 GPU 信息
+            result = subprocess.run(
+                ["nvidia-smi", "--query-gpu=temperature.gpu,utilization.gpu", "--format=csv,noheader,nounits"],
+                capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace'
+            )
+            
+            if result.returncode == 0 and result.stdout.strip():
+                parts = result.stdout.strip().split(',')
+                if len(parts) >= 2:
+                    temp = int(parts[0].strip())
+                    usage = int(parts[1].strip())
+                    
+                    results["available"] = True
+                    results["temp"] = temp
+                    results["usage"] = usage
+                    
+                    # 温度告警
+                    prev_temp = state.get("gpu_temp", 0)
+                    
+                    if temp >= self.temp_crit:
+                        topic = "sensor.gpu.critical"
+                        if _is_cooled_down(state, topic, "gpu0"):
+                            bus.emit(topic, {
+                                "temp": temp, 
+                                "usage": usage,
+                                "message": f"GPU temperature critical: {temp}C"
+                            }, PRIORITY_CRITICAL, "gpu_monitor")
+                            state.setdefault("cooldowns", {})[f"{topic}:gpu0"] = time.time()
+                    
+                    elif temp >= self.temp_warn and prev_temp < self.temp_warn:
+                        topic = "sensor.gpu.warn"
+                        if _is_cooled_down(state, topic, "gpu0"):
+                            bus.emit(topic, {
+                                "temp": temp,
+                                "usage": usage, 
+                                "message": f"GPU temperature high: {temp}C"
+                            }, PRIORITY_HIGH, "gpu_monitor")
+                            state.setdefault("cooldowns", {})[f"{topic}:gpu0"] = time.time()
+                    
+                    state["gpu_temp"] = temp
+                    state["gpu_usage"] = usage
+                    
+        except FileNotFoundError:
+            results["error"] = "nvidia-smi not found (NVIDIA GPU drivers not installed)"
+        except Exception as e:
+            results["error"] = str(e)[:100]
+        
+        _save_state(state)
+        return results
 
 
 if __name__ == "__main__":

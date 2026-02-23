@@ -7,3 +7,5 @@
 {"ts": "2026-02-21T09:15:07", "date": "2026-02-21", "topic": "daily_strategy", "rule": "all_clear", "priority": "low", "content": "昨天表现良好，各项指标正常。保持节奏，继续进化。", "evidence": {}}
 {"ts": "2026-02-21T09:39:32", "date": "2026-02-21", "topic": "daily_strategy", "rule": "all_clear", "priority": "low", "content": "昨天表现良好，各项指标正常。保持节奏，继续进化。", "evidence": {}}
 {"ts": "2026-02-22T09:15:08", "date": "2026-02-22", "topic": "daily_strategy", "rule": "all_clear", "priority": "low", "content": "昨天表现良好，各项指标正常。保持节奏，继续进化。", "evidence": {}}
+{"ts": "2026-02-23T09:15:17", "date": "2026-02-23", "topic": "daily_strategy", "rule": "low_tsr", "priority": "high", "content": "TSR=84.2%，action_failed 失败 6 次。今天使用 action_failed 前先检查参数有效性，失败时立即换备选方案。", "evidence": {"tsr": 84.2, "worst_tool": "action_failed", "fail_count": 6}}
+{"ts": "2026-02-23T09:15:56", "date": "2026-02-23", "topic": "daily_strategy", "rule": "low_tsr", "priority": "high", "content": "TSR=84.2%，action_failed 失败 6 次。今天使用 action_failed 前先检查参数有效性，失败时立即换备选方案。", "evidence": {"tsr": 84.2, "worst_tool": "action_failed", "fail_count": 6}}

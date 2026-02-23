@@ -1,0 +1,82 @@
+[
+  {
+    "query_city": "Beijing",
+    "query_time": "2026-02-22 15:49:12",
+    "observation_time": "2026-02-22 03:01 PM",
+    "temperature": {
+      "current_c": 9,
+      "current_f": 48,
+      "feels_like_c": 5,
+      "feels_like_f": 42
+    },
+    "weather": {
+      "description": "Sunny",
+      "code": "113",
+      "cloud_cover_pct": 0
+    },
+    "humidity_pct": 7,
+    "wind": {
+      "speed_kmph": 29,
+      "speed_mph": 18,
+      "direction": "NW",
+      "degree": 318
+    },
+    "precipitation": {
+      "current_mm": 0.0,
+      "current_inches": 0.0,
+      "chance_of_rain_pct": 0,
+      "chance_of_snow_pct": 0
+    },
+    "extras": {
+      "visibility_km": 10,
+      "pressure_mb": 1018,
+      "uv_index": 1
+    },
+    "location": {
+      "area": "Beijing",
+      "country": "China",
+      "latitude": "39.929",
+      "longitude": "116.388"
+    }
+  },
+  {
+    "query_city": "Shanghai",
+    "query_time": "2026-02-22 15:50:09",
+    "observation_time": "2026-02-22 03:20 PM",
+    "temperature": {
+      "current_c": 17,
+      "current_f": 63,
+      "feels_like_c": 17,
+      "feels_like_f": 63
+    },
+    "weather": {
+      "description": "Sunny",
+      "code": "113",
+      "cloud_cover_pct": 0
+    },
+    "humidity_pct": 19,
+    "wind": {
+      "speed_kmph": 24,
+      "speed_mph": 15,
+      "direction": "N",
+      "degree": 10
+    },
+    "precipitation": {
+      "current_mm": 0.0,
+      "current_inches": 0.0,
+      "chance_of_rain_pct": 0,
+      "chance_of_snow_pct": 0
+    },
+    "extras": {
+      "visibility_km": 8,
+      "pressure_mb": 1016,
+      "uv_index": 2
+    },
+    "location": {
+      "area": "Pootung",
+      "country": "China",
+      "latitude": "31.239",
+      "longitude": "121.504"
+    }
+  }
+]

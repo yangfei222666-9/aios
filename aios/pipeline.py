@@ -8,12 +8,15 @@
 每个阶段独立 try/except，一个挂了不影响后续。
 输出：结构化报告（可选 telegram 格式推送）。
 """
-import json, sys, io, time, subprocess
+import json, sys, io, time, subprocess, os
 from pathlib import Path
 from datetime import datetime
 
+# 强制 UTF-8 环境
+os.environ['PYTHONIOENCODING'] = 'utf-8'
 if __name__ == '__main__':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 AIOS_ROOT = Path(__file__).resolve().parent
 WS = AIOS_ROOT.parent if AIOS_ROOT.name == 'aios' else AIOS_ROOT
@@ -48,6 +51,17 @@ def stage_sensors():
         high = sum(1 for a in actions if a.get('priority') == 'high')
         if actions:
             clear_actions()
+        
+        # 检查是否需要生成每日汇总
+        try:
+            from learning.habits.tracker import check_and_generate_summary
+            summary = check_and_generate_summary()
+            if summary:
+                # 生成了新的汇总
+                pass
+        except Exception:
+            pass
+        
         return {"pending_actions": count, "high_priority": high}
     except ImportError:
         return {"skip": "dispatcher not available"}
@@ -297,6 +311,20 @@ def _format_telegram(stages, errors, total_ms):
 
     if errors:
         lines.append(f"⚠️ 异常: {len(errors)}")
+
+    # 生成 AI 摘要（使用路由器）
+    try:
+        from core.llm_helper import generate_summary
+        summary_data = {
+            "evolution_score": evo.get('v2_score', 0),
+            "grade": grade,
+            "alerts_open": alerts.get('open', 0),
+            "reactor_executed": reactor.get('auto_executed', 0)
+        }
+        ai_summary = generate_summary(summary_data, task_type="summarize_short")
+        lines.append(f"\n🤖 {ai_summary}")
+    except Exception:
+        pass  # 静默失败，不影响报告
 
     # 阶段耗时
     stage_times = " / ".join(f"{n}:{s.get('ms',0)}" for n, s in stages.items())

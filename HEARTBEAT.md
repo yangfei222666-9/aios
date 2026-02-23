@@ -59,6 +59,7 @@
 - 如果 evolution grade 是 critical，主动告知珊瑚海
 - 如果有 high_priority 建议，简要提醒
 - 如果 reactor 有 pending_confirm，告知珊瑚海确认
+- **从每次执行中学习**：记录成功的 playbook、失败的原因、性能瓶颈
 - 其他情况静默（HEARTBEAT_OK）
 
 ### 每次心跳：Agent 任务队列

@@ -1,0 +1,3 @@
+{"ts": "2026-02-22T20:27:43.272844", "agent_id": "test-agent", "task": "编写一个 Python 脚本", "success": false, "error": "Network error: 502 Bad Gateway", "result": {"duration_sec": 10}, "duration_sec": 10}
+{"ts": "2026-02-22T20:27:43.273342", "agent_id": "test-agent", "task": "测试代码功能", "success": false, "error": "API rate limit exceeded: 429", "result": {"duration_sec": 5}, "duration_sec": 5}
+{"ts": "2026-02-23T00:54:56.386939", "agent_id": "test-coder-001", "task": "编写 Python 爬虫", "success": false, "error": "Network error: 502 Bad Gateway", "result": {"duration_sec": 10}, "duration_sec": 10}

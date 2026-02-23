@@ -1,1 +1,17 @@
-{}
+{
+  "gpu_overheat:test:2026-02-23": {
+    "id": "4e833507",
+    "fingerprint": "gpu_overheat:test:2026-02-23",
+    "rule_id": "gpu_overheat",
+    "severity": "WARN",
+    "message": "GPU temperature high: 85C detected",
+    "scope": "test",
+    "owner": "小九",
+    "status": "OPEN",
+    "created_at": "2026-02-23T13:57:26.194434",
+    "last_hit": "2026-02-23T13:57:26.194434",
+    "hit_count": 1,
+    "recovery_streak": 0,
+    "sla_deadline": "2026-02-24T13:57:26.194434"
+  }
+}

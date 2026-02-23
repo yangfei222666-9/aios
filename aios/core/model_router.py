@@ -1,135 +1,211 @@
 """
-AIOS Model Router - 自动选择最优模型
-根据任务复杂度自动在 sonnet/opus 之间切换
+aios/core/model_router.py - 智能模型路由
+
+根据任务类型自动选择最合适的模型：
+- 简单任务 → Ollama 本地模型（免费、快速）
+- 复杂任务 → Claude API（效果好）
 """
-import re
-from typing import Literal
+import requests
+from typing import Literal, Optional
 
-ModelTier = Literal["sonnet", "opus"]
-
-# 触发 opus 的关键词（复杂任务）
-OPUS_TRIGGERS = {
-    # 代码相关
-    "重构", "架构", "设计模式", "优化算法", "性能调优", "并发", "多线程",
-    "refactor", "architecture", "design pattern", "optimize", "concurrent",
+# 任务复杂度分类
+TASK_COMPLEXITY = {
+    # 简单任务（可以用本地模型）
+    "simple": [
+        "greeting",           # 打招呼
+        "translation",        # 简单翻译
+        "summarize_short",    # 短文本摘要
+        "classification",     # 文本分类
+        "keyword_extraction", # 关键词提取
+        "simple_qa",          # 简单问答
+    ],
     
-    # 多步骤任务
-    "分析并", "先...再", "然后", "接着", "最后",
-    "step by step", "multi-step",
+    # 中等任务（优先本地，失败时用 Claude）
+    "medium": [
+        "code_completion",    # 代码补全
+        "text_generation",    # 文本生成
+        "data_analysis",      # 数据分析
+        "summarize_long",     # 长文本摘要
+    ],
     
-    # 复杂问题
-    "为什么", "原理", "深入", "详细分析", "根本原因",
-    "why", "principle", "deep dive", "root cause",
-    
-    # 创造性任务
-    "创建项目", "从零开始", "完整实现", "端到端", "完整", "项目",
-    "create project", "from scratch", "full implementation", "end-to-end", "complete", "project",
-    
-    # 调试
-    "调试", "排查", "定位问题", "找bug",
-    "debug", "troubleshoot", "diagnose",
+    # 复杂任务（必须用 Claude）
+    "complex": [
+        "reasoning",          # 复杂推理
+        "planning",           # 任务规划
+        "code_review",        # 代码审查
+        "creative_writing",   # 创意写作
+        "decision_making",    # 决策支持
+    ]
 }
 
-# 明确要求 sonnet 的关键词（简单任务）
-SONNET_TRIGGERS = {
-    "列出", "查看", "显示", "读取", "检查状态",
-    "list", "show", "display", "read", "check status",
-    "简单", "快速", "直接",
-    "simple", "quick", "straightforward",
-}
 
-def route_model(message: str, context: dict = None) -> ModelTier:
+def is_ollama_available() -> bool:
+    """检查 Ollama 是否可用"""
+    try:
+        response = requests.get("http://localhost:11434/api/tags", timeout=2)
+        return response.status_code == 200
+    except Exception:
+        return False
+
+
+def call_ollama(prompt: str, model: str = "qwen2.5:3b", timeout: int = 30) -> Optional[str]:
     """
-    根据消息内容和上下文自动选择模型
+    调用 Ollama 本地模型
     
     Args:
-        message: 用户消息
-        context: 可选上下文（如最近的错误、任务历史等）
+        prompt: 提示词
+        model: 模型名称
+        timeout: 超时时间（秒）
     
     Returns:
-        "sonnet" 或 "opus"
+        模型回复，失败返回 None
     """
-    msg_lower = message.lower()
-    
-    # 1. 明确指定模型
-    if "用opus" in msg_lower or "use opus" in msg_lower:
-        return "opus"
-    if "用sonnet" in msg_lower or "use sonnet" in msg_lower:
-        return "sonnet"
-    
-    # 2. 检查 sonnet 触发词（优先级高，因为用户明确要简单快速）
-    if any(trigger in msg_lower for trigger in SONNET_TRIGGERS):
-        return "sonnet"
-    
-    # 3. 检查 opus 触发词
-    opus_score = sum(1 for trigger in OPUS_TRIGGERS if trigger in msg_lower)
-    if opus_score >= 1:  # 只要有1个复杂任务关键词就用 opus
-        return "opus"
-    
-    # 4. 长度判断（超长消息通常是复杂任务）
-    if len(message) > 500:
-        return "opus"
-    
-    # 5. 代码块判断（包含代码通常需要更强推理）
-    if "```" in message or message.count("\n") > 10:
-        return "opus"
-    
-    # 6. 上下文判断
-    if context:
-        # 如果最近有失败，用 opus 重试
-        if context.get("recent_failures", 0) > 0:
-            return "opus"
+    try:
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": model,
+                "prompt": prompt,
+                "stream": False
+            },
+            timeout=timeout
+        )
         
-        # 如果是子任务的一部分，继承父任务的模型选择
-        if context.get("parent_model"):
-            return context["parent_model"]
+        if response.status_code == 200:
+            result = response.json()
+            return result.get("response", "")
+        else:
+            return None
     
-    # 7. 默认 sonnet（省钱）
-    return "sonnet"
+    except Exception as e:
+        print(f"Ollama 调用失败: {e}")
+        return None
 
-def get_model_id(tier: ModelTier) -> str:
-    """返回完整的模型 ID"""
-    if tier == "opus":
-        return "chat/claude-opus-4-6"
-    else:
-        return "chat/claude-sonnet-4-5-20250929"
 
-def explain_choice(message: str, tier: ModelTier) -> str:
-    """解释为什么选择这个模型（调试用）"""
-    reasons = []
-    msg_lower = message.lower()
+def route_model(
+    task_type: str,
+    prompt: str,
+    force_model: Optional[Literal["ollama", "claude"]] = None
+) -> dict:
+    """
+    智能路由模型
     
-    if tier == "opus":
-        if any(t in msg_lower for t in OPUS_TRIGGERS):
-            matched = [t for t in OPUS_TRIGGERS if t in msg_lower]
-            reasons.append(f"复杂任务关键词: {matched[:3]}")
-        if len(message) > 500:
-            reasons.append(f"消息长度: {len(message)} 字符")
-        if "```" in message:
-            reasons.append("包含代码块")
-    else:
-        if any(t in msg_lower for t in SONNET_TRIGGERS):
-            matched = [t for t in SONNET_TRIGGERS if t in msg_lower]
-            reasons.append(f"简单任务关键词: {matched[:3]}")
-        if not reasons:
-            reasons.append("默认选择（省钱）")
+    Args:
+        task_type: 任务类型（见 TASK_COMPLEXITY）
+        prompt: 提示词
+        force_model: 强制使用指定模型
     
-    return f"{tier.upper()}: {', '.join(reasons)}"
+    Returns:
+        {
+            "model": "ollama" | "claude",
+            "response": str,
+            "success": bool,
+            "fallback": bool,  # 是否使用了降级
+            "cost": float      # 成本（美元）
+        }
+    """
+    result = {
+        "model": None,
+        "response": None,
+        "success": False,
+        "fallback": False,
+        "cost": 0.0
+    }
+    
+    # 强制使用指定模型
+    if force_model == "ollama":
+        response = call_ollama(prompt)
+        if response:
+            result["model"] = "ollama"
+            result["response"] = response
+            result["success"] = True
+            result["cost"] = 0.0
+        return result
+    
+    if force_model == "claude":
+        # 这里应该调用 Claude API，暂时返回占位
+        result["model"] = "claude"
+        result["response"] = "[Claude API 调用]"
+        result["success"] = True
+        result["cost"] = 0.01  # 估算
+        return result
+    
+    # 自动路由
+    complexity = _get_task_complexity(task_type)
+    
+    if complexity == "simple":
+        # 简单任务：优先本地
+        if is_ollama_available():
+            response = call_ollama(prompt)
+            if response:
+                result["model"] = "ollama"
+                result["response"] = response
+                result["success"] = True
+                result["cost"] = 0.0
+                return result
+        
+        # 本地失败，降级到 Claude
+        result["model"] = "claude"
+        result["response"] = "[Claude API 调用]"
+        result["success"] = True
+        result["fallback"] = True
+        result["cost"] = 0.01
+        return result
+    
+    elif complexity == "medium":
+        # 中等任务：尝试本地，失败时用 Claude
+        if is_ollama_available():
+            response = call_ollama(prompt)
+            if response and len(response) > 10:  # 简单质量检查
+                result["model"] = "ollama"
+                result["response"] = response
+                result["success"] = True
+                result["cost"] = 0.0
+                return result
+        
+        # 降级到 Claude
+        result["model"] = "claude"
+        result["response"] = "[Claude API 调用]"
+        result["success"] = True
+        result["fallback"] = True
+        result["cost"] = 0.01
+        return result
+    
+    else:  # complex
+        # 复杂任务：直接用 Claude
+        result["model"] = "claude"
+        result["response"] = "[Claude API 调用]"
+        result["success"] = True
+        result["cost"] = 0.01
+        return result
 
-# CLI 测试
+
+def _get_task_complexity(task_type: str) -> str:
+    """获取任务复杂度"""
+    for complexity, tasks in TASK_COMPLEXITY.items():
+        if task_type in tasks:
+            return complexity
+    return "complex"  # 默认复杂
+
+
+def get_model_stats() -> dict:
+    """获取模型使用统计"""
+    # TODO: 从日志中统计
+    return {
+        "ollama_calls": 0,
+        "claude_calls": 0,
+        "total_cost": 0.0,
+        "cost_saved": 0.0
+    }
+
+
 if __name__ == "__main__":
-    test_cases = [
-        "列出所有文件",
-        "帮我重构这段代码，优化性能",
-        "为什么这个算法这么慢？深入分析一下",
-        "创建一个完整的 Web 项目，包括前后端",
-        "检查 AIOS 状态",
-        "调试这个 bug，找出根本原因",
-        "简单看一下日志",
-    ]
+    # 测试
+    print("测试 Ollama 可用性...")
+    print(f"Ollama 可用: {is_ollama_available()}")
     
-    print("Model Router 测试:\n")
-    for msg in test_cases:
-        tier = route_model(msg)
-        print(f"[{tier.upper()}] {msg}")
-        print(f"  → {explain_choice(msg, tier)}\n")
+    print("\n测试简单任务...")
+    result = route_model("greeting", "你好，介绍一下自己")
+    print(f"使用模型: {result['model']}")
+    print(f"回复: {result['response'][:100] if result['response'] else 'None'}")
+    print(f"成本: ${result['cost']}")

@@ -40,5 +40,33 @@
     "max_concurrent": 1,
     "last_heartbeat": 1771728817.048576,
     "metadata": {}
+  },
+  {
+    "agent_id": "test-coder-001",
+    "name": "test-coder-001",
+    "capabilities": [
+      "code",
+      "debug",
+      "test"
+    ],
+    "status": "idle",
+    "load": 0.0,
+    "max_concurrent": 1,
+    "last_heartbeat": 1771779296.3834426,
+    "metadata": {}
+  },
+  {
+    "agent_id": "smart-coder-001",
+    "name": "smart-coder-001",
+    "capabilities": [
+      "code",
+      "debug",
+      "test"
+    ],
+    "status": "idle",
+    "load": 0.0,
+    "max_concurrent": 1,
+    "last_heartbeat": 1771779312.8899555,
+    "metadata": {}
   }
 ]
