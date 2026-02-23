@@ -1,5 +1,10 @@
 # AIOS — Self-Learning AI Agent Framework
 
+[![PyPI version](https://img.shields.io/badge/pypi-v0.5.0-blue.svg)](https://pypi.org/project/aios-framework/)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/yangfei222666-9/aios?style=social)](https://github.com/yangfei222666-9/aios)
+
 > **Memory-driven, self-healing, production-ready.**
 
 An autonomous agent system that learns from mistakes, fixes itself, and gets smarter over time.
@@ -132,10 +137,13 @@ Sensors → Alerts → Reactor → Verifier → Feedback → Evolution
 
 ## 📚 Documentation
 
-- [Quick Start Guide](docs/QUICKSTART.md) *(coming soon)*
-- [Architecture Deep Dive](docs/ARCHITECTURE.md) *(coming soon)*
-- [API Reference](docs/API.md) *(coming soon)*
-- [Deployment Guide](docs/DEPLOYMENT.md) *(coming soon)*
+- [Examples](EXAMPLES.md) — Code examples and CLI usage
+- [Changelog](CHANGELOG.md) — Version history and upgrade guide
+- [Contributing](CONTRIBUTING.md) — How to contribute
+- Quick Start Guide *(coming soon)*
+- Architecture Deep Dive *(coming soon)*
+- API Reference *(coming soon)*
+- Deployment Guide *(coming soon)*
 
 ---
 
@@ -160,15 +168,11 @@ Sensors → Alerts → Reactor → Verifier → Feedback → Evolution
 
 ## 🤝 Contributing
 
-AIOS is not yet open-source, but we're preparing for launch. Stay tuned!
-
----
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📝 License
 
-*(To be determined)*
-
----
+MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
