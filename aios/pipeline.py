@@ -78,31 +78,39 @@ def stage_sensors():
 
 def stage_alerts():
     """告警检查"""
-    import alert_fsm
-
-    # 运行 alerts 检查规则
     try:
-        from scripts_alerts_runner import run_checks, format_summary
+        # 动态导入 alert_fsm
+        scripts_path = WS / "scripts"
+        if str(scripts_path) not in sys.path:
+            sys.path.insert(0, str(scripts_path))
+        
+        import alert_fsm
 
-        results, notifications = run_checks()
-        summary = format_summary(results)
-    except:
-        results = {}
-        notifications = []
-        summary = "alerts check skipped"
+        # 运行 alerts 检查规则
+        try:
+            from scripts_alerts_runner import run_checks, format_summary
 
-    # 告警统计
-    stats = alert_fsm.stats()
-    overdue = alert_fsm.check_sla()
+            results, notifications = run_checks()
+            summary = format_summary(results)
+        except:
+            results = {}
+            notifications = []
+            summary = "alerts check skipped"
 
-    return {
-        "open": stats.get("open", 0),
-        "ack": stats.get("ack", 0),
+        # 告警统计
+        stats = alert_fsm.stats()
+        overdue = alert_fsm.check_sla()
+
+        return {
+            "open": stats.get("open", 0),
+            "ack": stats.get("ack", 0),
         "overdue": stats.get("overdue", 0),
         "resolved_today": stats.get("resolved_today", 0),
         "notifications": len(notifications),
         "notification_texts": notifications[:3],  # 最多3条
     }
+    except Exception as e:
+        return {"error": str(e)[:200]}
 
 
 def stage_reactor():
@@ -205,7 +213,11 @@ def stage_evolution():
 def stage_convergence():
     """告警收敛检查"""
     try:
-        sys.path.insert(0, str(WS / "scripts"))
+        # 动态导入 alert_fsm
+        scripts_path = WS / "scripts"
+        if str(scripts_path) not in sys.path:
+            sys.path.insert(0, str(scripts_path))
+        
         from alert_fsm import record_healthy_window
 
         suggestions = record_healthy_window()
@@ -220,6 +232,93 @@ def stage_convergence():
         return {"skip": str(e)[:100]}
 
 
+def stage_scheduler_summary():
+    """调度器状态摘要"""
+    try:
+        from core.scheduler_v2 import SchedulerV2, Priority
+
+        # 读取最近的调度决策日志
+        decision_log = AIOS_ROOT / "data" / "scheduler_decisions.jsonl"
+        recent_decisions = []
+        if decision_log.exists():
+            with open(decision_log, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            cutoff = (datetime.now() - __import__("datetime").timedelta(hours=1)).isoformat()
+            for line in lines[-50:]:
+                try:
+                    d = json.loads(line.strip())
+                    if d.get("ts", "") >= cutoff:
+                        recent_decisions.append(d)
+                except:
+                    continue
+
+        # 统计优先级分布
+        p0 = sum(1 for d in recent_decisions if d.get("priority") == 0)
+        p1 = sum(1 for d in recent_decisions if d.get("priority") == 1)
+        p2 = sum(1 for d in recent_decisions if d.get("priority", 2) == 2)
+
+        # 读取队列状态（从最近的 pipeline_runs 推断）
+        runs_file = AIOS_ROOT / "data" / "pipeline_runs.jsonl"
+        last_run_ms = 0
+        if runs_file.exists():
+            with open(runs_file, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            if lines:
+                try:
+                    last = json.loads(lines[-1].strip())
+                    last_run_ms = last.get("total_ms", 0)
+                except:
+                    pass
+
+        return {
+            "decisions_1h": len(recent_decisions),
+            "p0_urgent": p0,
+            "p1_high": p1,
+            "p2_normal": p2,
+            "last_pipeline_ms": last_run_ms,
+        }
+    except Exception as e:
+        return {"skip": str(e)[:200]}
+
+
+def stage_agent_health():
+    """Agent 健康检查"""
+    try:
+        agent_data = AIOS_ROOT / "agent_system" / "data" / "agents.json"
+        if not agent_data.exists():
+            return {"skip": "agents.json not found"}
+
+        with open(agent_data, "r", encoding="utf-8") as f:
+            data = json.loads(f.read())
+
+        agents = data if isinstance(data, list) else data.get("agents", [])
+        total = len(agents)
+        active = sum(1 for a in agents if a.get("status") == "active")
+        degraded = sum(1 for a in agents if a.get("status") == "degraded")
+        failed = sum(1 for a in agents if a.get("status") == "failed")
+
+        # 计算整体成功率
+        total_tasks = 0
+        success_tasks = 0
+        for a in agents:
+            stats = a.get("stats", {})
+            total_tasks += stats.get("tasks_completed", 0) + stats.get("tasks_failed", 0)
+            success_tasks += stats.get("tasks_completed", 0)
+
+        success_rate = (success_tasks / total_tasks * 100) if total_tasks > 0 else 0
+
+        return {
+            "total": total,
+            "active": active,
+            "degraded": degraded,
+            "failed": failed,
+            "overall_success_rate": round(success_rate, 1),
+            "total_tasks": total_tasks,
+        }
+    except Exception as e:
+        return {"skip": str(e)[:200]}
+
+
 # ── 主流水线 ──
 
 
@@ -231,6 +330,8 @@ def run_pipeline(fmt="default"):
         ("reactor", stage_reactor),
         ("verifier", stage_verifier),
         ("convergence", stage_convergence),
+        ("scheduler", stage_scheduler_summary),
+        ("agent_health", stage_agent_health),
         ("feedback", stage_feedback),
         ("evolution", stage_evolution),
     ]
@@ -311,6 +412,8 @@ def _format_telegram(stages, errors, total_ms):
     alerts = stages.get("alerts", {}).get("result", {})
     reactor = stages.get("reactor", {}).get("result", {})
     feedback = stages.get("feedback", {}).get("result", {})
+    sched = stages.get("scheduler", {}).get("result", {})
+    agent_hp = stages.get("agent_health", {}).get("result", {})
 
     grade = evo.get("grade", "?")
     grade_icon = {"healthy": "🟢", "degraded": "🟡", "critical": "🔴"}.get(grade, "⚪")
@@ -321,6 +424,18 @@ def _format_telegram(stages, errors, total_ms):
         f"📋 告警: OPEN={alerts.get('open',0)} 超SLA={alerts.get('overdue',0)}",
         f"⚡ 响应: 执行={reactor.get('auto_executed',0)} 待确认={reactor.get('pending_confirm',0)}",
     ]
+
+    # 调度摘要
+    if not sched.get("skip"):
+        p0 = sched.get("p0_urgent", 0)
+        lines.append(f"📅 调度: 决策={sched.get('decisions_1h',0)} P0={p0} P1={sched.get('p1_high',0)}")
+
+    # Agent 健康
+    if not agent_hp.get("skip"):
+        degraded = agent_hp.get("degraded", 0)
+        failed = agent_hp.get("failed", 0)
+        agent_icon = "🔴" if failed > 0 else ("🟡" if degraded > 0 else "🟢")
+        lines.append(f"{agent_icon} Agents: {agent_hp.get('active',0)}/{agent_hp.get('total',0)}活跃 成功率={agent_hp.get('overall_success_rate',0)}%")
 
     high = feedback.get("high_priority", 0)
     if high > 0:
