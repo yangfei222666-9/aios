@@ -56,23 +56,27 @@
 
         .top-cards {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .top-cards > .evolution-card {
-            grid-column: span 2;
+            grid-column: span 1;
         }
 
         .big-card {
             background: linear-gradient(135deg, #1e2847 0%, #151b33 100%);
             border-radius: 12px;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
             border: 1px solid #2a3555;
             position: relative;
             cursor: help;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .big-card:hover {
@@ -103,13 +107,13 @@
         }
 
         .big-number {
-            font-size: 64px;
+            font-size: 42px;
             font-weight: 700;
-            margin: 10px 0;
+            margin: 8px 0;
         }
 
         .big-label {
-            font-size: 14px;
+            font-size: 12px;
             color: #8b92a7;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -170,30 +174,28 @@
         }
 
         .evolution-card {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: #fff;
             text-align: center;
-            padding: 40px;
+            padding: 20px;
         }
 
         .evolution-score {
-            font-size: 96px;
+            font-size: 48px;
             font-weight: 700;
-            margin: 20px 0;
+            margin: 8px 0;
         }
 
         .evolution-grade {
-            font-size: 18px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+            opacity: 0.9;
         }
 
         .evolution-breakdown {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 30px;
+            display: none;
         }
 
         .evolution-item {
@@ -207,7 +209,7 @@
         }
 
         .evolution-item-value {
-            font-size: 28px;
+            font-size: 22px;
             font-weight: 700;
         }
 
@@ -364,6 +366,56 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #2563eb;
         }
+
+        /* Heartbeat Tasks Styles */
+        .heartbeat-task {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .heartbeat-task.overdue {
+            border-left-color: #ef4444;
+        }
+
+        .heartbeat-task.never-run {
+            border-left-color: #f59e0b;
+        }
+
+        .heartbeat-task-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .heartbeat-task-interval {
+            font-size: 12px;
+            color: #8b92a7;
+            margin-bottom: 8px;
+        }
+
+        .heartbeat-task-status {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .heartbeat-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .heartbeat-status-dot.overdue {
+            background: #ef4444;
+        }
+
+        .heartbeat-status-dot.never-run {
+            background: #f59e0b;
+        }
     </style>
 </head>
 <body>
@@ -373,22 +425,28 @@
             <span>AIOS 控制台</span>
         </div>
         <div class="header-right">
+            <button onclick="forceRefresh()" style="
+                background: #3b82f6;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+            ">🔄 刷新</button>
             <span>最后更新: <span id="last-update">--:--</span></span>
-            <span id="connection-status">🔴 离线</span>
+            <span id="connection-status">🟢 就绪</span>
         </div>
     </div>
 
     <div class="container">
         <!-- Top Big Cards -->
         <div class="top-cards">
-            <div class="big-card evolution-card" style="grid-column: span 2;">
-                <div class="evolution-grade" id="evolution-grade">健康</div>
+            <div class="big-card evolution-card">
+                <div class="big-label">系统进化分数</div>
                 <div class="evolution-score" id="evolution-score">0.00</div>
-                <div style="font-size: 14px; opacity: 0.9; margin-top: 10px;">系统进化分数（综合评估系统自我改进能力）</div>
-                <div class="evolution-breakdown" style="margin-top: 20px;">
-                    <div class="evolution-item">
-                        <div class="evolution-item-label">基线分（工具成功率）</div>
-                        <div class="evolution-item-value" id="evolution-base">0.00</div>
+                <div class="evolution-grade" id="evolution-grade">健康</div>
+            </div>
                     </div>
                     <div class="evolution-item">
                         <div class="evolution-item-label">Reactor分（自动修复能力）</div>
@@ -406,24 +464,90 @@
             </div>
             <div class="big-card">
                 <div class="big-label">系统状态</div>
-                <div class="big-number" id="system-status">--</div>
-                <div class="status-badge status-healthy" id="status-badge">健康</div>
-                <div class="card-tooltip">系统整体健康度：基于错误率和事件量评估</div>
+                <div class="big-number" id="system-status" style="font-size: 14px; margin: 12px 0;">空闲</div>
+                <div class="status-badge status-idle" id="status-badge">空闲</div>
+                
+                <div style="margin-top: 15px; font-size: 11px; color: #8b92a7; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>Provider:</span>
+                        <span id="system-provider" style="color: #e0e6ed; font-weight: 600;">--</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>熔断器:</span>
+                        <span id="system-breaker" style="color: #10b981; font-weight: 600;">CLOSED</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>最近心跳:</span>
+                        <span id="system-heartbeat" style="font-weight: 600;">--</span>
+                    </div>
+                </div>
             </div>
             <div class="big-card">
                 <div class="big-label">事件 (1小时)</div>
                 <div class="big-number" id="events-1h">0</div>
-                <div class="card-tooltip">最近1小时内系统产生的所有事件数量</div>
+                
+                <div style="margin-top: 15px; font-size: 11px; color: #8b92a7; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>错误事件:</span>
+                        <span id="events-errors" style="color: #ef4444; font-weight: 600;">0</span>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 10px;">
+                        <div style="color: #8b92a7; margin-bottom: 5px;">Top3 类型:</div>
+                        <div id="events-top3" style="color: #e0e6ed; line-height: 1.6;">
+                            <div style="opacity: 0.6;">暂无数据</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="big-card">
-                <div class="big-label">活跃 Agent</div>
+                <div class="big-label">活跃 AGENT</div>
                 <div class="big-number" id="active-agents">0</div>
-                <div class="card-tooltip">当前正在运行的 Agent 数量（1小时内活跃）</div>
+                
+                <div style="margin-top: 15px; font-size: 11px; color: #8b92a7; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>Running / Waiting:</span>
+                        <span id="agent-status" style="color: #e0e6ed; font-weight: 600;">0 / 0</span>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 10px;">
+                        <div style="color: #8b92a7; margin-bottom: 5px;">当前 Agent:</div>
+                        <div id="agent-current" style="color: #e0e6ed; line-height: 1.6;">
+                            <div style="opacity: 0.6;">无</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="big-card">
                 <div class="big-label">待处理告警</div>
-                <div class="big-number" id="open-alerts">0</div>
-                <div class="card-tooltip">需要人工确认或处理的告警数量</div>
+                <div class="big-number" id="pending-alerts">0</div>
+                
+                <div style="margin-top: 15px; font-size: 11px; color: #8b92a7; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>CRIT / WARN:</span>
+                        <span id="alert-breakdown" style="color: #e0e6ed; font-weight: 600;">0 / 0</span>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 10px;">
+                        <div style="color: #8b92a7; margin-bottom: 5px;">超期告警:</div>
+                        <div id="alert-overdue" style="color: #ef4444; font-weight: 600;">
+                            无
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Heartbeat Tasks Widget -->
+        <div style="
+            background: linear-gradient(135deg, #1e2847 0%, #151b33 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #2a3555;
+            margin-bottom: 20px;
+        ">
+            <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #e0e6ed;">
+                ⏱️ 心跳任务状态
+            </h3>
+            <div id="heartbeat-tasks" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                <!-- Tasks will be inserted here -->
             </div>
         </div>
 
@@ -483,8 +607,96 @@
             </div>
         </div>
 
-        <!-- Middle Row -->
-        <div class="grid-3">
+        <!-- Middle Row: Scheduler & Reactor -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">🧠</span>
+                    <span>SCHEDULER 调度总览</span>
+                </div>
+                <div class="reactor-grid">
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">📊</div>
+                        <div class="reactor-value" id="scheduler-decisions">0</div>
+                        <div class="reactor-label">总决策数（1小时）</div>
+                    </div>
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">✅</div>
+                        <div class="reactor-value" id="scheduler-executed">0%</div>
+                        <div class="reactor-label">执行率（决策后实际执行的比例）</div>
+                    </div>
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">⏱️</div>
+                        <div class="reactor-value" id="scheduler-latency">0</div>
+                        <div class="reactor-label">平均延迟（ms）</div>
+                    </div>
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">🎯</div>
+                        <div class="reactor-value" id="scheduler-top-action">--</div>
+                        <div class="reactor-label">最常见决策</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">⚡</span>
+                    <span>REACTOR 自动响应</span>
+                </div>
+                <div class="reactor-grid">
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">🎯</div>
+                        <div class="reactor-value" id="reactor-exec">0%</div>
+                        <div class="reactor-label">自动执行率（匹配后自动执行的比例）</div>
+                    </div>
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">✅</div>
+                        <div class="reactor-value" id="reactor-verify">0%</div>
+                        <div class="reactor-label">验证通过率（执行后验证成功的比例）</div>
+                    </div>
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">📦</div>
+                        <div class="reactor-value" id="reactor-playbooks">0</div>
+                        <div class="reactor-label">总剧本数（可用的自动修复规则）</div>
+                    </div>
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">🔒</div>
+                        <div class="reactor-value" id="reactor-breakers">0</div>
+                        <div class="reactor-label">熔断器（当前触发熔断的数量）</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pipeline & Agent Row -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">🧠</span>
+                    <span>SCHEDULER 调度总览</span>
+                </div>
+                <div class="reactor-grid">
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">📊</div>
+                        <div class="reactor-value" id="scheduler-decisions">0</div>
+                        <div class="reactor-label">总决策数（1小时）</div>
+                    </div>
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">✅</div>
+                        <div class="reactor-value" id="scheduler-executed">0%</div>
+                        <div class="reactor-label">执行率（决策后实际执行的比例）</div>
+                    </div>
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">⏱️</div>
+                        <div class="reactor-value" id="scheduler-latency">0</div>
+                        <div class="reactor-label">平均延迟（ms）</div>
+                    </div>
+                    <div class="reactor-stat">
+                        <div class="reactor-icon">🎯</div>
+                        <div class="reactor-value" id="scheduler-top-action">--</div>
+                        <div class="reactor-label">最常见决策</div>
+                    </div>
+                </div>
+            </div>
             <div class="card">
                 <div class="card-header">
                     <span class="card-icon">⚡</span>
@@ -523,31 +735,6 @@
                     <div class="no-data">暂无数据</div>
                 </div>
             </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-icon">🤖</span>
-                    <span>Agent 状态</span>
-                </div>
-                <div id="agent-summary" style="padding: 20px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 14px; color: #8b92a7; margin-bottom: 10px;">总数</div>
-                            <div style="font-size: 48px; font-weight: 700; color: #3b82f6;" id="agent-total">0</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 14px; color: #8b92a7; margin-bottom: 10px;">已归档</div>
-                            <div style="font-size: 48px; font-weight: 700; color: #6b7280;" id="agent-archived">0</div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #2a3555;">
-                        <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                            <span style="color: #8b92a7;">完成任务:</span>
-                            <span style="color: #e0e6ed;" id="agent-tasks">0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Bottom Row -->
@@ -565,6 +752,26 @@
                 <div class="card-header">
                     <span class="card-icon">🔴</span>
                     <span>事件流（实时滚动，最近20条）</span>
+                    <div style="margin-left: auto; display: flex; gap: 8px;">
+                        <button onclick="filterEvents('all')" id="filter-all" style="
+                            background: #3b82f6;
+                            color: white;
+                            border: none;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 10px;
+                        ">全部</button>
+                        <button onclick="filterEvents('error')" id="filter-error" style="
+                            background: #374151;
+                            color: white;
+                            border: none;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-size: 10px;
+                        ">只看错误</button>
+                    </div>
                 </div>
                 <div class="event-stream" id="event-stream">
                     <div class="no-data">等待事件...</div>
@@ -747,31 +954,95 @@
 
             // Agent 状态
             const agents = data.agents || {};
-            document.getElementById('active-agents').textContent = agents.active || 0;
+            
+            console.log('Agent stats:', agents); // 调试日志
+            
+            const activeAgents = agents.active || 0;
+            const totalAgents = agents.total || 0;
+            const archivedAgents = agents.archived || 0;
+            const totalTasks = agents.total_tasks || 0;
+            
+            document.getElementById('active-agents').textContent = activeAgents;
             
             // Agent 详细统计
             const agentTotalElement = document.getElementById('agent-total');
             const agentArchivedElement = document.getElementById('agent-archived');
             const agentTasksElement = document.getElementById('agent-tasks');
             
-            if (agentTotalElement) agentTotalElement.textContent = agents.total || 0;
-            if (agentArchivedElement) agentArchivedElement.textContent = agents.archived || 0;
-            if (agentTasksElement) agentTasksElement.textContent = agents.total_tasks || 0;
+            if (agentTotalElement) agentTotalElement.textContent = totalAgents;
+            if (agentArchivedElement) agentArchivedElement.textContent = archivedAgents;
+            if (agentTasksElement) agentTasksElement.textContent = totalTasks;
+            
+            console.log('Updated Agent UI:', {activeAgents, totalAgents, archivedAgents, totalTasks}); // 调试日志
 
             // 告警
             const alerts = data.alerts || {};
             document.getElementById('open-alerts').textContent = alerts.open || 0;
+            
+            // 新增：系统状态详情
+            const lastEvent = health.last_event;
+            if (lastEvent) {
+                const eventTime = new Date(lastEvent.ts);
+                const elapsed = Math.floor((Date.now() - eventTime.getTime()) / 1000);
+                const heartbeatText = elapsed < 60 ? `${elapsed}秒前` : 
+                                     elapsed < 3600 ? `${Math.floor(elapsed/60)}分钟前` : 
+                                     `${Math.floor(elapsed/3600)}小时前`;
+                document.getElementById('system-heartbeat').textContent = heartbeatText;
+            }
+            
+            // 新增：事件详情 - Top3类型
+            document.getElementById('events-errors').textContent = errorsCount;
+            const eventStream = data.event_stream || [];
+            const eventTypes = {};
+            eventStream.forEach(e => {
+                const type = e.type || e.event || 'unknown';
+                eventTypes[type] = (eventTypes[type] || 0) + 1;
+            });
+            const top3 = Object.entries(eventTypes)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([type, count]) => `${type} ${count}`)
+                .join('<br>');
+            document.getElementById('events-top3').innerHTML = top3 || '暂无数据';
+            
+            // 新增：Agent详情 - 最忙Agent
+            const agentList = agents.agents || [];
+            const runningAgents = agentList.filter(a => a.status === 'active' && a.stats && a.stats.last_active);
+            const waitingAgents = agentList.filter(a => a.status === 'active' && (!a.stats || !a.stats.last_active));
+            document.getElementById('agent-status').textContent = `${runningAgents.length} / ${waitingAgents.length}`;
+            
+            if (runningAgents.length > 0) {
+                const busiest = runningAgents.sort((a, b) => 
+                    (b.stats.tasks_completed || 0) - (a.stats.tasks_completed || 0)
+                )[0];
+                const busiestText = `${busiest.name || busiest.id}<br>${busiest.stats.tasks_completed || 0} 任务`;
+                document.getElementById('agent-busiest').innerHTML = busiestText;
+            } else {
+                document.getElementById('agent-busiest').innerHTML = '暂无';
+            }
+            
+            // 新增：告警详情
+            const recentAlerts = alerts.recent || [];
+            const critAlerts = recentAlerts.filter(a => a.severity === 'CRIT').length;
+            const warnAlerts = recentAlerts.filter(a => a.severity === 'WARN').length;
+            document.getElementById('alert-levels').textContent = `${critAlerts} / ${warnAlerts}`;
+            
+            if (recentAlerts.length > 0) {
+                const latest = recentAlerts[recentAlerts.length - 1];
+                const latestText = `${latest.signature || latest.type}<br>${latest.first_seen || ''}`;
+                document.getElementById('alert-latest').innerHTML = latestText;
+            } else {
+                document.getElementById('alert-latest').innerHTML = '无';
+            }
 
-            // 每日事件量图表
+            // 每日事件量图表（使用 requestAnimationFrame 避免阻塞）
             if (data.daily_events && data.daily_events.length > 0) {
                 const labels = data.daily_events.map(d => d.date);
                 const counts = data.daily_events.map(d => d.count);
                 
-                console.log('Daily events:', labels, counts); // Debug
-                
                 eventsChart.data.labels = labels;
                 eventsChart.data.datasets[0].data = counts;
-                eventsChart.update('none'); // 无动画更新，更流畅
+                requestAnimationFrame(() => eventsChart.update('none'));
             }
 
             // 进化趋势图表
@@ -780,25 +1051,45 @@
                 const baseData = data.evolution_trend.map(d => d.base);
                 const reactorData = data.evolution_trend.map(d => d.reactor);
                 
-                console.log('Evolution trend:', labels, baseData, reactorData); // Debug
-                
                 evolutionChart.data.labels = labels;
                 evolutionChart.data.datasets[0].data = baseData;
                 evolutionChart.data.datasets[1].data = reactorData;
-                evolutionChart.update('none');
+                requestAnimationFrame(() => evolutionChart.update('none'));
             }
 
             // Reactor 统计
             const reactor = data.reactor_stats || {};
-            console.log('Reactor data:', reactor);
-            console.log('auto_exec_rate:', reactor.auto_exec_rate);
-            console.log('verify_rate:', reactor.verify_rate);
-            console.log('total_playbooks:', reactor.total_playbooks);
             
-            document.getElementById('reactor-exec').textContent = Math.round((reactor.auto_exec_rate || 0) * 100) + '%';
-            document.getElementById('reactor-verify').textContent = Math.round((reactor.verify_rate || 0) * 100) + '%';
-            document.getElementById('reactor-playbooks').textContent = reactor.total_playbooks || 0;
-            document.getElementById('reactor-breakers').textContent = reactor.breakers_active || 0;
+            console.log('Reactor stats:', reactor); // 调试日志
+            
+            const autoExecRate = Math.round((reactor.auto_exec_rate || 0) * 100);
+            const verifyRate = Math.round((reactor.verify_rate || 0) * 100);
+            const totalPlaybooks = reactor.total_playbooks || 0;
+            const breakersActive = reactor.breakers_active || 0;
+            
+            document.getElementById('reactor-exec').textContent = autoExecRate + '%';
+            document.getElementById('reactor-verify').textContent = verifyRate + '%';
+            document.getElementById('reactor-playbooks').textContent = totalPlaybooks;
+            document.getElementById('reactor-breakers').textContent = breakersActive;
+            
+            console.log('Updated Reactor UI:', {autoExecRate, verifyRate, totalPlaybooks, breakersActive}); // 调试日志
+
+            // Scheduler 统计
+            const scheduler = data.scheduler_stats || {};
+            
+            console.log('Scheduler stats:', scheduler); // 调试日志
+            
+            const totalDecisions = scheduler.total_decisions || 0;
+            const executedRate = Math.round((scheduler.executed_rate || 0) * 100);
+            const avgLatency = Math.round(scheduler.avg_latency_ms || 0);
+            const topAction = scheduler.top_action || '--';
+            
+            document.getElementById('scheduler-decisions').textContent = totalDecisions;
+            document.getElementById('scheduler-executed').textContent = executedRate + '%';
+            document.getElementById('scheduler-latency').textContent = avgLatency;
+            document.getElementById('scheduler-top-action').textContent = topAction;
+            
+            console.log('Updated Scheduler UI:', {totalDecisions, executedRate, avgLatency, topAction}); // 调试日志
 
             // Evolution 卡片
             const evolution = data.evolution || {};
@@ -835,19 +1126,28 @@
                 evolutionCard.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
             }
 
-            // Pipeline 运行历史
+            // Pipeline 运行历史（扩展到10条）
             const pipelineList = document.getElementById('pipeline-list');
             if (pipelineList && data.pipeline_runs && data.pipeline_runs.length > 0) {
-                console.log('Pipeline runs:', data.pipeline_runs); // Debug
-                pipelineList.innerHTML = data.pipeline_runs.slice(0, 4).map(run => `
-                    <div class="pipeline-item">
-                        <span class="pipeline-time">${run.time}</span>
-                        <span class="pipeline-duration">
-                            <span class="duration-dot"></span>
-                            ${run.duration_ms}ms
-                        </span>
-                    </div>
-                `).join('');
+                pipelineList.innerHTML = data.pipeline_runs.slice(0, 10).map(run => {
+                    const statusIcon = run.status === 'success' ? '✅' : run.status === 'failed' ? '❌' : '⏸️';
+                    const durationColor = run.duration_ms > 1000 ? '#ef4444' : run.duration_ms > 500 ? '#f59e0b' : '#10b981';
+                    return `
+                        <div class="pipeline-item">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>${statusIcon}</span>
+                                <span class="pipeline-time">${run.time}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 12px; color: #8b92a7;">${run.phase || 'unknown'}</span>
+                                <span class="pipeline-duration">
+                                    <span class="duration-dot" style="background: ${durationColor};"></span>
+                                    ${run.duration_ms}ms
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             } else if (pipelineList) {
                 pipelineList.innerHTML = '<div class="no-data">暂无数据</div>';
             }
@@ -872,18 +1172,10 @@
             }
 
             // 事件流
-            const eventStream = document.getElementById('event-stream');
+            const eventStreamEl = document.getElementById('event-stream');
             if (data.event_stream && data.event_stream.length > 0) {
-                eventStream.innerHTML = data.event_stream.slice(-20).reverse().map(event => {
-                    const timeStr = event.ts ? event.ts.split('T')[1].substring(0, 8) : '';
-                    return `
-                        <div class="event-line">
-                            <span class="event-time">${timeStr}</span>
-                            <span class="event-layer">[${event.layer || 'UNKNOWN'}]</span>
-                            <span class="event-type">${event.event || 'unknown'}</span>
-                        </div>
-                    `;
-                }).join('');
+                allEvents = data.event_stream; // 保存到全局变量
+                filterEvents(currentEventFilter); // 应用当前筛选
             }
 
             // 系统资源监控
@@ -1014,6 +1306,39 @@
                     `;
                 }
             }
+
+            // 心跳任务状态
+            if (data.heartbeat_status && data.heartbeat_status.tasks) {
+                const container = document.getElementById('heartbeat-tasks');
+                if (container) {
+                    container.innerHTML = data.heartbeat_status.tasks.map(task => {
+                        const statusClass = task.status === 'overdue' ? 'overdue' : 
+                                           task.status === 'never_run' ? 'never-run' : '';
+                        
+                        let statusText = '';
+                        if (task.status === 'never_run') {
+                            statusText = '从未运行';
+                        } else if (task.status === 'overdue') {
+                            statusText = `超时 ${task.elapsed_minutes}分钟`;
+                        } else if (task.elapsed_minutes !== null) {
+                            statusText = `${task.elapsed_minutes}分钟前`;
+                        } else {
+                            statusText = '未知';
+                        }
+                        
+                        return `
+                            <div class="heartbeat-task ${statusClass}">
+                                <div class="heartbeat-task-name">${task.name}</div>
+                                <div class="heartbeat-task-interval">${task.interval}</div>
+                                <div class="heartbeat-task-status">
+                                    <span class="heartbeat-status-dot ${statusClass}"></span>
+                                    <span>${statusText}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
         }
 
         // WebSocket 连接
@@ -1033,8 +1358,18 @@
             };
 
             ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                updateDashboard(data);
+                try {
+                    const message = JSON.parse(event.data);
+                    console.log('WebSocket message received:', message.type);
+                    
+                    if (message.type === 'snapshot' || message.type === 'update') {
+                        updateDashboard(message.data);
+                    } else {
+                        console.warn('Unknown message type:', message.type);
+                    }
+                } catch (error) {
+                    console.error('Failed to parse WebSocket message:', error);
+                }
             };
 
             ws.onerror = (error) => {
@@ -1049,33 +1384,125 @@
             };
         }
 
-        // HTTP 轮询降级
-        async function pollSnapshot() {
+        // 事件流筛选
+        let currentEventFilter = 'all';
+        let allEvents = [];
+        
+        function filterEvents(type) {
+            currentEventFilter = type;
+            
+            // 更新按钮样式
+            document.getElementById('filter-all').style.background = type === 'all' ? '#3b82f6' : '#374151';
+            document.getElementById('filter-error').style.background = type === 'error' ? '#ef4444' : '#374151';
+            
+            // 应用筛选
+            const eventStream = document.getElementById('event-stream');
+            let filtered = allEvents;
+            
+            if (type === 'error') {
+                filtered = allEvents.filter(e => 
+                    e.status === 'error' || 
+                    (e.type && e.type.includes('error')) ||
+                    (e.type && e.type.includes('failed'))
+                );
+            }
+            
+            if (filtered.length === 0) {
+                eventStream.innerHTML = '<div class="no-data">无匹配事件</div>';
+                return;
+            }
+            
+            eventStream.innerHTML = filtered.slice(-20).reverse().map(event => {
+                const timeStr = event.ts ? event.ts.split('T')[1].substring(0, 8) : 
+                               event.timestamp ? new Date(event.timestamp).toLocaleTimeString('zh-CN', {hour12: false}) : '';
+                
+                const status = event.status || (event.type && event.type.includes('success') ? 'ok' : 
+                               event.type && event.type.includes('error') ? 'err' : 'ok');
+                const statusColor = status === 'ok' ? '#10b981' : '#ef4444';
+                
+                const latency = event.payload?.duration_ms || event.latency_ms || '-';
+                const traceId = event.id || event.trace_id || '';
+                const shortTraceId = traceId ? traceId.substring(0, 8) : '';
+                
+                return `
+                    <div class="event-line" style="display: grid; grid-template-columns: 70px 80px 1fr 50px 50px 80px; gap: 8px; align-items: center;">
+                        <span class="event-time" style="font-size: 11px;">${timeStr}</span>
+                        <span class="event-layer" style="font-size: 10px; opacity: 0.7;">[${event.layer || 'UNKNOWN'}]</span>
+                        <span class="event-type" style="font-size: 11px;">${event.type || event.event || 'unknown'}</span>
+                        <span style="font-size: 10px; color: ${statusColor}; font-weight: 600;">${status}</span>
+                        <span style="font-size: 10px; opacity: 0.7;">${latency}ms</span>
+                        <span style="font-size: 9px; opacity: 0.5; font-family: monospace;" title="${traceId}">${shortTraceId}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 强制刷新
+        async function forceRefresh() {
+            console.log('Force refresh triggered');
+            const statusElement = document.getElementById('connection-status');
+            statusElement.textContent = '🟡 刷新中...';
+            
             try {
-                const response = await fetch('/api/snapshot');
+                await pollSnapshot();
+                statusElement.textContent = '🟢 在线';
+            } catch (error) {
+                console.error('Force refresh failed:', error);
+                statusElement.textContent = '🔴 刷新失败';
+                setTimeout(() => {
+                    statusElement.textContent = '🟢 在线';
+                }, 2000);
+            }
+        }
+
+        // HTTP 轮询降级
+        let _pollInFlight = false;
+        async function pollSnapshot() {
+            if (_pollInFlight) {
+                console.log('Poll already in flight, skipping...');
+                return;
+            }
+            _pollInFlight = true;
+            try {
+                console.log('Fetching snapshot...');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+                const response = await fetch('/api/snapshot', { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
+                console.log('Snapshot received:', Object.keys(data));
                 updateDashboard(data);
             } catch (error) {
-                console.error('Polling error:', error);
+                if (error.name !== 'AbortError') {
+                    console.error('Polling error:', error);
+                }
+            } finally {
+                _pollInFlight = false;
             }
         }
 
         // 初始化
-        window.addEventListener('load', () => {
-            console.log('Dashboard initializing...'); // Debug
+        let initialized = false;
+        window.addEventListener('load', async () => {
+            if (initialized) {
+                console.log('Already initialized, skipping...');
+                return;
+            }
+            initialized = true;
+            
+            console.log('Initializing dashboard...');
             initCharts();
-            connectWebSocket();
             
-            // 立即拉取一次数据
-            pollSnapshot();
+            // 立即拉取一次数据（确保页面加载时有数据）
+            await pollSnapshot();
             
-            // 如果 WebSocket 失败，降级到 HTTP 轮询
-            setTimeout(() => {
-                if (!ws || ws.readyState !== WebSocket.OPEN) {
-                    console.log('WebSocket failed, falling back to HTTP polling');
-                    setInterval(pollSnapshot, 10000); // 10秒轮询
-                }
-            }, 3000);
+            // 不再自动刷新，只保留手动刷新按钮
+            console.log('Auto-refresh disabled. Use manual refresh button.');
         });
     </script>
 </body>
