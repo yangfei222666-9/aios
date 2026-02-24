@@ -671,67 +671,19 @@
         <div class="grid-2">
             <div class="card">
                 <div class="card-header">
-                    <span class="card-icon">🧠</span>
-                    <span>SCHEDULER 调度总览</span>
-                </div>
-                <div class="reactor-grid">
-                    <div class="reactor-stat">
-                        <div class="reactor-icon">📊</div>
-                        <div class="reactor-value" id="scheduler-decisions">0</div>
-                        <div class="reactor-label">总决策数（1小时）</div>
-                    </div>
-                    <div class="reactor-stat">
-                        <div class="reactor-icon">✅</div>
-                        <div class="reactor-value" id="scheduler-executed">0%</div>
-                        <div class="reactor-label">执行率（决策后实际执行的比例）</div>
-                    </div>
-                    <div class="reactor-stat">
-                        <div class="reactor-icon">⏱️</div>
-                        <div class="reactor-value" id="scheduler-latency">0</div>
-                        <div class="reactor-label">平均延迟（ms）</div>
-                    </div>
-                    <div class="reactor-stat">
-                        <div class="reactor-icon">🎯</div>
-                        <div class="reactor-value" id="scheduler-top-action">--</div>
-                        <div class="reactor-label">最常见决策</div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-icon">⚡</span>
-                    <span>REACTOR 自动响应</span>
-                </div>
-                <div class="reactor-grid">
-                    <div class="reactor-stat">
-                        <div class="reactor-icon">🎯</div>
-                        <div class="reactor-value" id="reactor-exec">0%</div>
-                        <div class="reactor-label">自动执行率（匹配后自动执行的比例）</div>
-                    </div>
-                    <div class="reactor-stat">
-                        <div class="reactor-icon">✅</div>
-                        <div class="reactor-value" id="reactor-verify">0%</div>
-                        <div class="reactor-label">验证通过率（执行后验证成功的比例）</div>
-                    </div>
-                    <div class="reactor-stat">
-                        <div class="reactor-icon">📦</div>
-                        <div class="reactor-value" id="reactor-playbooks">0</div>
-                        <div class="reactor-label">总剧本数（可用的自动修复规则）</div>
-                    </div>
-                    <div class="reactor-stat">
-                        <div class="reactor-icon">🔒</div>
-                        <div class="reactor-value" id="reactor-breakers">0</div>
-                        <div class="reactor-label">熔断器（当前触发熔断的数量）</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
                     <span class="card-icon">🔄</span>
                     <span>PIPELINE 运行历史（最近10次）</span>
                 </div>
                 <div class="pipeline-list" id="pipeline-list">
+                    <div class="no-data">暂无数据</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-icon">🤖</span>
+                    <span>AGENT 活动（最近10次）</span>
+                </div>
+                <div class="pipeline-list" id="agent-activity-list">
                     <div class="no-data">暂无数据</div>
                 </div>
             </div>
