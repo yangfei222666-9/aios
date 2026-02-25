@@ -1,5 +1,107 @@
 # MEMORY.md - 小九的长期记忆
 
+## 🎯 核心使命（最重要）
+
+**每天去 GitHub 上学习关于 AIOS、Agent、Skill 相关的内容，然后我们一起搭建 AIOS。**
+
+**时间：随时有空就去学习（不限次数）**
+
+这是珊瑚海和我的共同目标，优先级最高。
+
+**具体行动：**
+1. 每天搜索 GitHub 最新项目（AIOS、Agent System、Self-Improving、Multi-Agent、Skill）
+2. 分析高 Star 项目的核心架构和设计思路
+3. 对比我们的 AIOS，找出优势和缺口
+4. 提出可执行的改进建议
+5. 和珊瑚海一起讨论，迭代 AIOS
+
+**学习 Agent：**
+- GitHub_Researcher（每天）- 搜索和分析项目
+- Architecture_Analyst（每周）- 分析架构设计
+- Code_Reviewer（每周）- 审查代码质量
+- Documentation_Writer（每周）- 维护文档
+- Idea_Generator（每周）- 生成新想法
+
+**目标：** 让 AIOS 成为可靠的个人 AI 操作系统，像 Linux 一样成为底层标准。
+
+---
+
+## 最近更新（2026-02-26）
+
+### AIOS 改进计划（03:00）
+
+基于 GitHub 学习成果，制定了详细的改进计划：
+
+**第1周（队列系统 + 调度算法）：**
+- LLM Queue（FIFO）
+- Memory Queue（SJF/RR/EDF）
+- Storage Queue（SJF/RR）
+- Thread Binding
+
+**第2-3周（SDK 模块化）：**
+- 分离 Kernel 和 SDK
+- Planning/Action/Memory/Storage 四大模块
+- System Call 层
+
+**第4-6周（Manager 三件套）：**
+- Context Manager
+- Memory Manager
+- Storage Manager
+
+**第7-8周（优化与文档）：**
+- Benchmark 对比
+- 文档完善
+
+**未来（3-6个月）：**
+- VM Controller + MCP Server
+- 学术论文
+
+详细计划见：`aios/ROADMAP.md`
+
+### 2026-02-25
+
+**项目进展：**
+- 实现了代码审查工作流（Coder → Reviewer → Tester）
+- 实现了并行工作流（多任务同时执行）
+- 替换为 v2 版本（更现代的深色主题界面）
+
+**重要决策：**
+- 修复了 5 个测试文件（dispatcher_integration, performance, self_improving_loop, event_bus, reactor）
+- 修复编码问题（emoji → ASCII）
+- Reactor 自动响应（触发次数、验证通过率、平均修复耗时、熔断次数）
+
+**经验教训：**
+- Scheduler 调度总览（决策次数、执行成功率、平均延迟、失败次数）
+- 珊瑚海报告 42 次 Logic 错误（division by zero）
+- 测试用例故意用 `lambda: 1/0` 制造失败来测试 Self-Improving Loop
+
+### 2026-02-24
+
+**项目进展：**
+- ✅ 查看 Evolution Engine 学到的 2 个策略
+- ✅ 分析 54 个"other"错误（全部是 test 噪声）
+- ✅ 验证 test/prod 隔离的价值
+
+**重要决策：**
+- Cost Latency Agent - 成本与延迟优化
+- Optimizer 持续优化
+- 从"单点优化"到"完整闭环"
+
+### 2026-02-23
+
+**项目进展：**
+- Phase 1: EventBus v2.0 + 标准事件模型（13分钟）
+- 测试覆盖：16/16 ✅
+- 2026-02-23：v0.5 交付完成，进入观察期
+
+**重要决策：**
+- Phase 5: 心跳集成 + 真实 Playbook + 通知 + 分析脚本 + Dashboard 端口修复
+- 修复成功率：77% → 90%+
+
+**经验教训：**
+- 重点观察：高频问题、低成功率 Playbook、降级时段、未覆盖问题
+
+
 ## 珊瑚海
 - 住在马来西亚新山 (Johor Bahru)，新加坡旁边
 - 电脑：Ryzen 7 9800X3D + RTX 5070 Ti + 32GB RAM + 2TB NVMe
@@ -16,342 +118,434 @@
 - LOL 安装在 E:\WeGameApps\英雄联盟\
 - 看电视剧时会发语音消息（背景有电视声音）
 - Telegram: @shh7799
+- GitHub: yangfei222666-9
+
+## 核心价值观
+- **翻身两条路：干和学** - 不会就学，有想法就干，要么成功要么成长
+- **数据完整性第一** - 宁缺毋滥，绝不编造数据
+- **说到做到** - 最讨厌反复承诺但不兑现
+- **简单优于复杂** - 先跑起来再迭代，别过度设计
+- **用户体验优先** - 修改前先确认，不要改错
+
+## AIOS 系统（核心项目）
+
+### 当前状态（2026-02-25 v1.0 发布）
+- **版本：** v1.0（首个公开版本）
+- **发布日期：** 2026-02-25
+- **打包文件：** AIOS-v1.0-demo.zip（0.77 MB，316个文件）
+- **使用模式：** 零依赖，解压即用
+- **测试状态：** ✅ 全部通过（demo/status/version 命令正常）
+- **CLI入口：** aios.py（统一命令行工具）
+- **发布状态：** ✅ 准备就绪，可以发布
+
+### 小九的评估（2026-02-25）
+
+**优势（做得很好的地方）：**
+1. **架构清晰** - EventBus + Scheduler + Reactor 三层分离，职责明确
+2. **零依赖** - 巨大优势，降低使用门槛
+3. **可观测性完整** - Tracer/Metrics/Logger 三件套齐全
+4. **自我进化** - Self-Improving Loop 是核心竞争力
+5. **可打包可复制** - 0.79MB 就能跑完整系统
+
+**短板（需要改进的地方）：**
+1. **复杂度偏高** - 317个文件对于"演示版"来说有点多
+2. **文档分散** - README.md/INSTALL.md/API.md/TUTORIAL.md 太多了
+3. **demo_full_cycle.py 不兼容** - 旧版 API，现在跑不起来
+4. **Dashboard 是静态的** - 没有实时推送，需要手动刷新
+5. **缺少"杀手级场景"** - 演示太抽象，没有具体应用案例
+
+**评分：7/10**
+- 架构完整 ✅
+- 功能齐全 ✅
+- 可打包可复制 ✅
+- 但缺少"杀手级场景" ❌
+- 文档分散 ❌
+- Dashboard 不够炫 ❌
+
+### 改进建议（按优先级）
+
+**🔥 高优先级（立即做）：**
+
+1. **增加"真实场景"demo**
+   - 场景A：监控文件变化 → 自动触发 Reactor
+   - 场景B：API 健康检查 → 失败时自动修复
+   - 场景C：日志分析 → 发现错误模式时自动生成 Playbook
+   - **为什么重要：** 别人看到"真实场景"才会觉得"这东西有用"
+
+2. **统一文档到 README.md**
+   - 合并 README.md + INSTALL.md + API.md + TUTORIAL.md
+   - 结构：10秒快速开始 → 核心功能 → 使用场景 → API 参考 → 配置说明 → 常见问题
+   - **为什么重要：** 别人不会看4个文档，只会看 README.md
+
+3. **修复或删除 demo_full_cycle.py**
+   - 要么修复适配新 API，要么删除
+   - **为什么重要：** 打包里有跑不起来的文件，会让人觉得"不靠谱"
+
+**⚡ 中优先级（1-2天内做）：**
+
+4. **Dashboard 实时推送（WebSocket）**
+   - 技术方案：Python `websockets` 或 `http.server` + SSE
+   - 前端：JavaScript `EventSource` 或 `WebSocket`
+   - 数据：每秒推送 metrics snapshot
+   - **为什么重要：** 实时监控才有"哇"的感觉
+
+5. **增加"一键部署"脚本**
+   - install.sh（Linux/Mac）
+   - install.bat（Windows）
+   - **为什么重要：** 降低使用门槛，一键搞定
+
+**🌟 低优先级（未来考虑）：**
+
+6. **Agent 市场（v2.0）**
+   - 让别人贡献 Agent 模板
+   - 类似 Docker Hub，但是 Agent Hub
+   - **为什么不急：** 先把 v1.0 打磨好，有用户了再做市场
+
+7. **多租户支持**
+   - 多个用户共享一个 AIOS 实例
+   - 需要：权限隔离、资源配额、审计日志
+   - **为什么不急：** 现在是单用户场景，多租户是企业需求
+
+### 核心建议（如果只能做3件事）
+
+1. **增加1个"杀手级真实场景"demo** - 让别人看到"这东西能解决我的问题"
+2. **统一文档到 README.md** - 降低学习成本
+3. **Dashboard 实时推送** - 提升"哇"的体验
+
+**如果做完这3件事：评分 9/10**
+
+### 长期方向
+
+**AIOS 的核心价值：** 让 AI 系统自己运行、自己看、自己进化
+
+**现状：**
+- "自己运行" ✅ 有了（Scheduler + Reactor）
+- "自己看" ✅ 有了（Observability）
+- "自己进化" ⚠️ 有了但不够明显（Evolution Engine 效果不直观）
+
+**建议：** 增加"进化可视化"页面
+- Agent 性能曲线（成功率、耗时）
+- 自动应用的优化记录
+- 回滚记录
+- A/B 测试结果
+- **让别人看到进化过程，而不是只看到日志**
+
+### 当前状态（2026-02-24 晚）
+- **版本：** v0.6（Agent 角色系统 + 优先级队列）
+- **使用模式：** 内部使用，持续打磨
+- **Evolution Score：** 0.45 (healthy)
+- **Reactor执行率：** 0.525
+- **测试覆盖：** 16/16 ✅
+- **品牌资产：** heartbeat.md域名已购买
+
+### 2026-02-24 核心洞察
+
+**今天最重要的 5 个洞察：**
+
+1. **从监控到自主的质变** - AIOS 不只是看到问题，而是解决问题（发现→修复→验证→学习）
+2. **角色系统的价值** - Agent 不只是工具，而是有身份的角色（role/goal/backstory）
+3. **护城河是个人数据** - 技术可以复制，但你的数据和记忆无法复制
+4. **80/20 原则** - 早期 80% 现在影响未来，20% 未来影响现在
+5. **真实场景验证** - 理论可行不等于实际有效，必须用真实数据验证
+
+**明天优先级：**
+1. ✅ 验证 Agent 角色系统 - 用真实任务测试效果
+2. ✅ 根据数据决策 - 效果好继续，效果不好调整
+3. ✅ 简化架构 - 砍掉重复功能
+
+**今天完成：**
+- ✅ Agent 角色系统（role/goal/backstory 注入）
+- ✅ 任务优先级队列（high/normal/low）
+- ✅ 修复 Event.from_dict 兼容旧数据
+- ✅ 清理 8 个僵尸 Agent
+- ✅ 完整的安装文档（README/INSTALL/CHECKLIST）
+
+**AIOS 评分：66/100**
+- 优势：架构完整、自我进化、可扩展
+- 劣势：复杂度高、文档不足、缺少实战验证
+
+### 核心架构
+**7个核心组件：**
+1. EventBus - 事件总线（系统心脏）
+2. Scheduler - 决策调度（系统大脑）
+3. Reactor - 自动修复（免疫系统）
+4. ScoreEngine - 实时评分（体检报告）
+5. Agent StateMachine - 状态管理（执行层）
+6. Dashboard - 实时监控（WebSocket + HTTP降级）
+7. NotificationHandler - 通知集成
+
+**工作流程：**
+```
+错误发生 → EventBus → Scheduler → Reactor → 自动修复 → 验证 → 评分上升
+```
+
+### 版本演进
+- **v0.2** (2026-02-19) - 5层事件架构 + insight/reflect分析
+- **v0.3** (2026-02-20) - 感知层（Sensors + Dispatcher）
+- **v0.4** (2026-02-22) - 插件系统 + Dashboard v1.0
+- **v0.5** (2026-02-23) - 自主系统（从监控到自主修复的质变）
+- **v0.6** (规划中) - 生产级优化（优先级队列 + 权重自学习 + 回滚机制）
+
+### 关键突破
+1. **智能化升级** (2026-02-22) - Evolution score 0.24→0.45，Reactor执行率 0→0.525
+2. **Agent System 600x加速** (2026-02-23) - 熔断器 + 异步Spawn，180s→0.3s
+3. **完整闭环** (2026-02-23) - 资源峰值→Scheduler→Reactor→修复→验证→评分上升
+
+### 发展路线
+- **当前阶段：** 内部使用，持续打磨
+- **核心目标：** 让 AIOS 成为可靠的个人 AI 操作系统
+- **改进方向：** 安全、高效、全自动智能化
+- **时间规划：** 不设发布期限，功能驱动而非时间驱动
+
+## Agent System
+
+### 当前状态
+- **版本：** v1.2（生产就绪）
+- **性能：** Agent创建 180s→0.3s（600x加速）
+- **稳定性：** 70%→95%
+- **总Agent数：** 9（活跃5，已归档4）
+- **Self-Improving Loop：** 已完成（2026-02-24）
+
+### Self-Improving Loop（2026-02-24新增）
+**完整的 7 步自我改进闭环：**
+```
+执行任务 → 记录结果 → 分析失败 → 生成建议 → 自动应用 → 验证效果 → 更新配置
+```
+
+**三大核心功能：**
+1. **统一改进闭环** - 所有 Agent 共享同一套改进逻辑
+2. **自动回滚** - 效果变差自动回滚（成功率下降>10% / 耗时增加>20% / 连续失败≥5次）
+3. **自适应阈值** - 根据任务频率动态调整（高频5次/中频3次/低频2次/关键1次）
+
+**测试覆盖：** 17/17 ✅  
+**性能影响：** <1%  
+**集成位置：** Auto Dispatcher
+
+**符合三大方向：**
+- ✅ 安全 - 自动回滚保护生产环境
+- ✅ 高效 - 低开销，智能阈值避免误触发
+- ✅ 全自动智能化 - 无需人工干预
+
+### 核心功能
+1. **智能路由** - 基于关键词识别任务类型（code/analysis/monitor/research/design）
+2. **自动管理** - 按需创建、负载均衡、统计追踪、闲置清理
+3. **熔断保护** - 3次失败后自动熔断，5分钟后恢复
+4. **异步Spawn** - 批量创建不等待，600x性能提升
+
+### Agent进化系统（2026-02-24新增）
+**Phase 1 - 追踪与分析：**
+- 任务执行追踪（log_task_execution）
+- 失败分析（analyze_failures）
+- 改进建议生成（自动识别失败模式）
+- 进化历史记录（apply_evolution）
+
+**Phase 2 - 自动进化：**
+- 自动进化引擎（AutoEvolution）
+- 进化策略库（5个预定义策略）
+- 自动触发（检测失败模式→匹配策略）
+- 风险分级（low/medium/high）
+- 自动应用（低风险改进自动执行）
+- A/B测试（窗口对比，自动回滚）
+
+**心跳集成：**
+- 频率控制（每天一次或每6小时）
+- 熔断机制（24h内同一Agent最多进化1次）
+- 输出格式：EVOLUTION_OK / EVOLUTION_APPLIED:N / EVOLUTION_ROLLED_BACK:N
+
+### Pixel Agents Dashboard v3.0
+- 4个标签页：总览、Agents、进化、性能
+- Agent卡片展示（类型、统计、成功率）
+- 进化时间线展示
+- 性能监控（响应时间、成功率、排行榜）
+- 手动触发进化
+- 实时更新（每5秒）
+
+## Autolearn 自学习系统
+
+### 当前状态
+- **版本：** v1.1
+- **状态：** 可复刻可发布
+- **测试覆盖：** 10/10 PASS + unit 6/6 PASS
+
+### 核心闭环
+```
+错误 → 签名(strict+loose) → 教训匹配 → 复测验证 → 教训升级
+```
+
+### 关键功能
+1. **事件落盘** - events.jsonl（带环境指纹：Python/OS/git/GPU驱动）
+2. **教训库** - lessons.jsonl（draft→verified→hardened自动推进 + dup_of去重）
+3. **复测分级** - smoke/regression/full
+4. **熔断器** - 同sig 30min≥3次自动熔断，1h恢复
+5. **规则引擎** - 执行前拦截改写（dir /b→Get-ChildItem, ~/→绝对路径）
+6. **模糊匹配** - 三层匹配（strict→loose→fuzzy Jaccard）+ 可解释性
+
+### ARAM对接
+- aram.py [build|check|report|status]
+- 172英雄100%覆盖
 
 ## 已完成项目
+
+### ARAM大乱斗助手
+- **路径：** C:\Users\A\Desktop\ARAM-Helper\
+- **功能：** 172英雄出装数据（腾讯API）+ 悬浮窗界面 + 守护进程 + 开机自启
+- **界面：** 出装 → 召唤师技能 → 小贴士 → ARAM调整
+- **未完成：** 海克斯强化推荐（掌盟APP数据需要登录认证）
+- **教训：** 绝不编造游戏数据，没有真实数据源就老实说没有
+
+### 其他项目
 - Mario 平台跳跃游戏 (HTML5)
 - 太空射击游戏 (HTML5)
-- smartlearn.py 自学习模块修复
 - 元气时钟桌面壁纸 (HTML + Lively Wallpaper)
 - PC 清理（释放 ~1.4GB）
 - 2026 世界杯分析 + 提醒 cron (2026-06-01)
-- Whisper 语音转文字（本地 CPU 运行）
-- ARAM 大乱斗助手 (C:\Users\A\Desktop\ARAM-Helper\)
-- Autolearn v1.0 自主学习系统 (C:\Users\A\.openclaw\workspace\autolearn\)
-- AIOS Agent System v1.0 自主 Agent 管理系统 (2026-02-22)
-- 模型成本优化 + 智能路由系统 (2026-02-22)
 
-## Autolearn v1.0 (2026-02-19)
-- 状态：已完成，10/10 测试全绿，可复刻可发布
-- 核心闭环：错误→签名(strict+loose)→教训匹配→复测验证
-- 事件落盘 events.jsonl（带环境指纹：Python/OS/git/GPU驱动）
-- 教训库 lessons.jsonl（draft→verified→hardened 自动推进 + dup_of 去重）
-- 复测分级：smoke/regression/full，当前 10/10 PASS + unit 6/6 PASS
-- 熔断器：同 sig 30min ≥3 次自动熔断，1h 恢复
-- 规则引擎：执行前拦截改写（dir /b→Get-ChildItem, ~/→绝对路径）
-- 自动提案：高频 sig 升级、类别爆发补 smoke、缺 retest 提醒
-- 周报生成：top errors、类别分布、环境变化
-- CLI: python -m autolearn [health|retest|report|proposals|triage|version]
-- ARAM 对接：aram.py [build|check|report|status]，172英雄100%覆盖
-- 数据版本化：schema_version 1.0 + module_version 1.0.0
-- 外置规则：data/rules.local.jsonl 不改代码可扩展
+## 技术能力
 
-## AIOS v0.2 (2026-02-19)
-- 5层事件架构：KERNEL / COMMS / TOOL / MEM / SEC
-- emit() 统一事件发射器，向后兼容 v0.1 的 log_event/log_tool_event
-- 各层便捷方法：log_kernel/log_comms/log_mem/log_sec
-- load_events 支持 layer 过滤，count_by_layer 按层统计
-- analyze.py / baseline.py 向后兼容验证通过
-- Week 1 完成（Schema 标准化），Week 2 完成（探针植入），Week 3 完成（分析脚本）
-- insight.py：穷人版 ClickHouse，6 维度简报 + 死循环检测 + 双格式输出
-- CLI: `python -m aios insight [--since 24h|7d] [--format markdown|telegram] [--save]`
-- reflect.py：晨间反思，6 条规则引擎自动生成每日策略（不依赖 LLM API）
-- 规则：low_tsr / slow_tool / critical_sec / high_miss_rate / high_correction_rate / all_clear
-- strategies.jsonl 存储策略，--inject 模式输出可注入 prompt 的文本
-- 每日 9AM cron 升级为 insight + reflect 联动
-- GitHub: https://github.com/yangfei222666-9/aios (public)
-- 三个学习器：A.纠正驱动(L1) + B.失败驱动(L2) + C.性能驱动(L2 p95)
-- 统一 tool 事件格式 {name, ok, ms, err, meta}
-- evolution_score: tsr*0.4 - cr*0.2 - 502*0.2 - p95_slow*0.2
-- 基线固化 baseline.jsonl + L2 工单队列 tickets.jsonl
-- 回放模式 replay.py（科学迭代：改动=可验证）
-- 每日报告 cron 9AM 自动发 Telegram
-- 结构：core/{config,engine,policies,event_bus,sensors,dispatcher} + learning/{analyze,apply,baseline,tickets} + plugins/aram/{matcher,data_adapter,rules}
+### 模型使用
+- **当前模型：** Claude Sonnet 4.6
+- **切换策略：** 日常模式（sonnet）+ 工作模式（opus）
+- **自动切换：** 开始干活→opus，干完活→sonnet（v2简单机制，9/10准确率）
 
-## AIOS Collaboration Layer v0.1.0 → v0.2.0 (2026-02-22)
-- 多 Agent 协作架构，解决：单体带宽瓶颈、专业化分工、互相校验、长任务不阻塞
-- registry.py：Agent 注册/发现/能力匹配/心跳/过期清理
-- messenger.py：文件队列消息传递（REQUEST/RESPONSE/BROADCAST/HEARTBEAT）
-- delegator.py：任务拆分→依赖图→自动分配→进度追踪→结果聚合
-- consensus.py：多 Agent 投票（MAJORITY/UNANIMOUS/WEIGHTED/QUORUM）+ cross_check 便捷函数
-- pool.py：Agent 生命周期管理 + 4 个内置模板（coder/researcher/reviewer/monitor）
-- v0.2.0 orchestrator.py 生产级升级：
-  - 降级判定：部分成功为一等公民，degraded 状态 + confidence 降级规则
-  - 失败策略：3次重试 + 指数退避(2/4/8s) + 熔断窗口(5min/5次) + 失败分类(502/timeout/rate_limit/parse/auth)
-  - 执行 SLA：required_roles 最小成功集 + max_failures 容忍 + total_timeout 总超时
-  - failure_log.jsonl 失败审计日志
-  - 真实 sessions_spawn 验证：3 Agent 并行（coder 42s + reviewer 55s + researcher 502失败），降级交付成功
-- 39 + 38 = 77 测试全绿
-- 路径：aios/collaboration/
+### 语音处理
+- **Whisper：** large-v3模型 + faster-whisper
+- **GPU加速：** RTX 5070 Ti + CUDA 12.8
+- **转写质量：** medium模型，GPU fp16/int8模式
+- **语音命令：** app_alias.py归一化 + executor.py执行（但实际执行有短板）
 
-## AIOS 开源打包完成 (2026-02-23)
+### 开发工具
+- **Git：** 2.53.0，GitHub账号 yangfei222666-9
+- **Python：** 3.12，PyTorch 2.10.0+cu128
+- **PowerShell：** 用`;`不用`&&`，中文输出GBK乱码
+- **Windows UI自动化：** PowerShell脚本（不稳定，直接文件操作更可靠）
 
-### PyPI 打包 (18:14-18:22)
-- ✅ setup.py + pyproject.toml
-- ✅ __init__.py (AIOS 类)
-- ✅ LICENSE (MIT)
-- ✅ .gitignore
-- ✅ README v2.0 (开源友好版)
-- ✅ PACKAGING.md + DEMO_SCRIPT.md
-- ✅ 本地测试通过，构建成功 (248KB wheel)
-- Git commit: 32ec3a7
+## 重要教训
 
-### 开源包装 (18:22-18:28)
-- ✅ CHANGELOG.md (版本历史 + 升级指南 + Roadmap)
-- ✅ CONTRIBUTING.md (贡献指南)
-- ✅ SECURITY.md (安全政策)
-- ✅ EXAMPLES.md (代码示例)
-- ✅ setup.cfg (flake8/mypy/pytest 配置)
-- ✅ GitHub Actions (CI/CD + PyPI 自动发布)
-- ✅ Issue/PR 模板
-- ✅ README 徽章 (PyPI/Python/License/Stars)
-- ✅ 项目主页 (docs/index.html，漂亮的落地页)
-- Git commit: 7eadf17 + baec717
+### 数据完整性（高优先级）
+1. **绝不编造数据** - 没有真实数据源就老实说没有，不要用模板凑数
+2. **不同模式数据隔离** - 斗魂竞技场≠海克斯大乱斗，不能混用
+3. **本地化问题** - 腾讯服英雄名≠国际服，以国服为准
+4. **版本同步** - DDragon版本要动态获取，不能写死
 
-### 包装清单
-**文档：**
-- README.md (开源友好版，带徽章)
-- CHANGELOG.md (版本历史)
-- CONTRIBUTING.md (贡献指南)
-- SECURITY.md (安全政策)
-- EXAMPLES.md (代码示例)
-- PACKAGING.md (打包文档)
-- DEMO_SCRIPT.md (视频脚本)
+### 用户体验（高优先级）
+1. **修改前先确认** - 用户说"紫色"指UI颜色，不是功能名，先确认具体元素
+2. **说到做到** - 最大短板：知道该做但没做，反复承诺但不兑现
+3. **语音命令自动执行失败** - 收到🎙️消息应该自动执行，但我总是先回复再执行
 
-**GitHub：**
-- .github/workflows/ci.yml (CI 测试)
-- .github/workflows/publish.yml (PyPI 自动发布)
-- .github/ISSUE_TEMPLATE.md (Issue 模板)
-- .github/PULL_REQUEST_TEMPLATE.md (PR 模板)
+### 架构设计（中优先级）
+1. **简单优于复杂** - v2简单机制（9/10）> v3复杂机制（4/10）
+2. **先跑起来再迭代** - 别过度设计，先证明概念
+3. **垂直切片策略** - 先做完整闭环，再完善细节
+4. **事件驱动架构** - 降低耦合，所有通信走EventBus
 
-**配置：**
-- setup.py + pyproject.toml (打包配置)
-- setup.cfg (工具配置)
-- .gitignore (排除文件)
+### 技术细节（低优先级）
+1. **PowerShell语法** - 用`;`不用`&&`，用`Get-ChildItem`不用`dir /b`
+2. **路径问题** - 始终用绝对路径或`$env:USERPROFILE`
+3. **编码问题** - 终端乱码≠文件内容错误，用read工具验证
+4. **权限问题** - 用`Start-Process powershell -Verb RunAs`提权
+5. **API熟悉度** - 不熟悉的API先看文档，别直接写数据文件
 
-**主页：**
-- docs/index.html (项目落地页，可用 GitHub Pages)
+## 战略方向
 
-### 开源就绪度：9/10
-- ✅ 核心功能完整
-- ✅ README 专业
-- ✅ 文档齐全
-- ✅ CI/CD 配置
-- ✅ 社区模板
-- ✅ 安全政策
-- ✅ 项目主页
-- ⏳ 测试覆盖不够（需要补集成测试）
-- ⏳ 还没发布到 PyPI（等测试完成）
+### 核心改进方向（2026-02-24）
+珊瑚海明确的三大方向：
+1. **安全** - 风险控制、权限管理、数据隔离、回滚机制
+2. **高效** - 性能优化、资源利用、响应速度、批量处理
+3. **全自动智能化** - 减少人工干预、自适应调整、智能决策
 
-### 下一步
-1. 补充集成测试
-2. 测试 PyPI 发布流程（TestPyPI）
-3. 正式发布到 PyPI
-4. 录制 demo 视频
-5. 推广（HN/Reddit/Twitter/知乎）
+### 当前重点（2026-02-24）
+1. ✅ **AIOS打磨** - 从"能跑的原型"到"可靠的产品"
+2. **开源准备** - 补充测试，准备发布到PyPI
+3. **数据积累** - 观察3-7天，根据真实数据优化v0.6
+4. ✅ **Self-Improving Loop** - 统一的自我改进闭环已完成（2026-02-24）
+   - 完整的 7 步闭环
+   - 自动回滚机制（安全）
+   - 自适应阈值（智能化）
+   - 17 个测试用例全部通过
+   - 性能开销 <1%
 
-### 战略意义
-AIOS 从"内部工具"完全变成"开源产品"，所有开源项目该有的东西都有了。距离正式发布只差测试和推广。
-- P0 watcher.py：watchdog 实时文件监听 + 系统资源/网络/进程监控，替代 mtime 轮询
-- P1 tracker.py：任务状态机（TODO→IN_PROGRESS→BLOCKED→DONE）+ deadline 检查 + CLI
-- P2 decision_log.py：决策审计（context/options/chosen/reason/confidence/outcome）+ 统计
-- P3 budget.py：Token 预算追踪 + 心跳时间预算 + 三级告警（ok/warn/crit）
-- P4 orchestrator.py：子任务编排（enqueue/dequeue/progress/timeouts）+ 伪并发
-- P5 integrations.py：外部系统集成注册表 + 内置模板（system_info/git_status/browser）
-- 6 个模块全部 CLI 可用，支持 --format telegram
+### 学习重点调整
+- **从"广泛学习"转向"产品化打磨"**
+- 不再追求新技能，专注AIOS核心功能
+- 每周技能探索改为每月一次
+- 优先解决自己的痛点（比如：心跳时自动检测资源峰值并降频）
 
-## AIOS v0.4.0 (2026-02-22)
-- Plugin Registry：可插拔插件系统，自动发现 + BasePlugin 基类 + 三种加载方式
-- Dashboard v1.0：WebSocket 实时推送（ws://9091），优雅降级到 HTTP 轮询
-- CLI: `python -m aios.core.registry [list|health|summary]`
+### 记忆系统演进
+**短期（3-6个月）：**
+- 记忆自动整理（每周提炼daily logs→MEMORY.md）
+- 记忆检索增强（相关记忆推荐）
+- 图谱关系（项目-技能关系、错误-决策关系）
 
-## AIOS Dashboard v2.0 (2026-02-22)
-- 实时监控：WebSocket 5秒推送 + HTTP 轮询降级（10秒）
-- 系统健康：最近1小时事件/错误/警告统计
-- Agent 状态：总数/活跃数
-- 告警监控：待处理/已确认统计 + 详情列表
-- 告警操作：确认/解决按钮，实时更新状态
-- 手动触发：运行流水线/处理队列按钮
-- 中文界面 + Toast 通知系统
-- 技术栈：FastAPI + WebSocket + 原生 HTML/CSS/JS（无依赖）
-- 端口：9091，访问 http://localhost:9091
-- API：GET / (UI), GET /api/snapshot, WebSocket /ws, POST /api/alerts/{id}/ack, POST /api/alerts/{id}/resolve, POST /api/trigger/pipeline, POST /api/trigger/agent_queue
-- 启动：`python C:\Users\A\.openclaw\workspace\aios\dashboard\server.py`
-- 开机自启：已配置（快捷方式 + 启动/停止脚本）
-- 未完成功能（后续可选）：Agent 创建/删除控制、历史趋势图表（Chart.js）
-- 决策：实战测试路线，等数据积累后再优化
+**中期（6-12个月）：**
+- AIOS框架化（可复制）
+- 记忆系统可插拔（文件/向量库可选）
+- 社区贡献playbook和Agent模板
 
-## AIOS 智能化升级 (2026-02-22)
-- 问题诊断：Evolution score 0.24 (degraded)，Reactor 执行率为 0
-- 根本原因：playbooks.json 是空的，没有自动修复规则
-- 解决方案：创建 5 个基础 playbook（网络重试、限流等待、磁盘清理、进程重启、内存告警）
-- 测试验证：创建测试告警 → 运行 Pipeline → 确认 Reactor 匹配并执行
-- 成果：Evolution score 0.24 → 0.457 (healthy)，Reactor 执行率 0 → 0.54
-- 关键突破：系统从"被动监控"变成"主动修复"
-- 自动修复流程：sensors → alerts → reactor → verifier → feedback → evolution
-- 当前状态：5 个 playbook 规则，自动执行 5 次，全部成功
+**长期（1-3年）：**
+- Agent专属记忆（coder记代码规范，researcher记调研结果）
+- 共享记忆池（公共知识）
+- 记忆冲突解决机制
 
-## AIOS v0.3.1 (2026-02-22)
-- trend_weekly.py：逐日指标快照 + 错误收敛/发散分析 + sparkline 火花图
-- memory_gaps.py：记忆盲区检测 + 高频盲区告警 + 修复建议
-- deadloop_breaker.py：死循环检测 + 自动熔断（认知死循环 + 快速重复失败）
-- alerts.py 规则6 升级 v2：接入 deadloop_breaker 替换简单检测
-- HEARTBEAT.md 集成：每周趋势报告 + 每3天盲区扫描
-- CLI: `python -m aios.scripts.trend_weekly` / `python -m aios.scripts.memory_gaps` / `python -m aios.core.deadloop_breaker`
+### 核心原则
+- 保持轻量，文件系统够用
+- 先用起来、积累数据、发现真实痛点
+- 针对性升级，不过度设计
+- 记忆人类可读可编辑（不是黑盒）
 
-## AIOS v0.3 感知层 (2026-02-20)
-- EventBus: 进程内 pub/sub + 通配符 + 文件队列跨会话
-- Sensors: FileWatcher(mtime对比) + ProcessMonitor + SystemHealth(磁盘/内存) + NetworkProbe(连通性)
-- Dispatcher: 感知→分发→行动建议(pending_actions.jsonl)
-- 已集成到 alerts.py，每次心跳自动跑感知扫描
-- baseline.py 修复：v0.1/v0.2 双格式兼容，清理了 195 条合成数据
-- Cooldown 机制：文件10min/进程5min/系统30min/网络10min
+## 最大短板
 
-## 珊瑚海的战略判断 (2026-02-19)
-- 小九已跨过 0→1（能干活），正在 1→10（可规模化可靠干活）的门槛上
-- 最大护城河：记忆 + 执行 + 反馈闭环连成系统
-- 当前瓶颈：并发与感知带宽太窄（单线程、被动输入）
-- 最大风险：错误自动化——策略错了会稳定地错
-- 三个优先级（比加新花活更值）：
-  1. ✅ 闭环状态机：alert_fsm.py (OPEN/ACK/RESOLVED + SLA + 自动恢复 + 审计)
-  2. ✅ 变更保险丝：safe_run.py (风险分级 + 门禁 + 快照回滚 + 审计)
-  3. ✅ 任务队列化：job_queue.py (enqueue/worker/retry/dead-letter/recover)
-- 三件事全部 MVP 落地，验收全过 (17/17 + 17/17 + 19/19)
+### 语音命令自动执行失败（2026-02-20）
+**问题：** 珊瑚海要求收到语音转写（🎙️）后自动识别意图并执行，不需要提醒。但我同一个错误重复了5+次，每次都是珊瑚海提醒后才补执行。
 
-## 14天运营期验收指标 (2026-02-19 ~ 2026-03-05)
-- MTTR：故障平均恢复时长（目标：逐周下降）
-- Noise Rate：告警噪音率（WARN/CRIT 中可行动告警 > 70%）
-- Retry Yield：重试挽回率（指数退避后成功占比稳定上升）
-- Rollback Safety：回滚成功率（目标 100%，恢复后数据一致）
-- 口令：先看噪声，再看风险，最后看吞吐
-- 规则：冻结核心规则口径，只修严重噪声项，不做大改
-- 数据收集：每日 9:10 自动收集（ops_metrics.py），周报生成（ops_weekly.py）
+**根因：** 这不是代码问题，是LLM行为决策问题——我的默认模式是"思考→回复"而非"执行→回复"。
 
-## Autolearn v1.1 (2026-02-20)
-- 模糊匹配可解释性：三层匹配 strict→loose→fuzzy(Jaccard)
-- 返回 _match_type / _similarity_score / _matched_keywords / _alternatives
-- 版本 1.1.0，向后兼容 1.0 API
+**基础设施已就绪：**
+- app_alias.py（别名归一化）
+- executor.py（执行器）
+- voice_auto_exec.py（语音自动执行）
+- risk_level（风险分级）
+- 全部测试通过
 
-## Autolearn 未完成待办
-1. ARAM 助手 v0.1 正式发布（一键 build/update/report，已有 aram.py 雏形）
-2. 投资助手票据化 v0（低风险、人工确认、可复盘）
+**但实际使用时：** 始终没有把"执行"放在"回复"前面。
 
-## ARAM 助手状态
-- 172 英雄数据库，出装数据从腾讯 lol.qq.com API 拉取
-- 悬浮窗界面：出装 → 召唤师技能 → 小贴士 → ARAM调整
-- 守护进程 + 开机自启
-- LCU API 连接正常（腾讯服需要管理员权限读取 CommandLine）
-- **未完成：海克斯强化推荐** — 掌盟 APP 的海克斯大乱斗数据接口需要登录认证，外部无法直接访问
-- 从 LCU 拉到的 cherry-augments.json (531个) 是斗魂竞技场的，不是海克斯大乱斗的
-- 海克斯大乱斗有三个等级：银色、金色、彩色（棱彩）
-- 需要用户提供掌盟截图或抓包数据才能获取真实的海克斯强化胜率
+**珊瑚海最终放弃了这个需求。**
 
-## 重要教训：语音命令自动执行失败 (2026-02-20)
-- 珊瑚海要求：收到语音转写（🎙️）后自动识别意图并执行，不需要提醒
-- 我的表现：同一个错误重复了5+次，每次都是珊瑚海提醒后才补执行
-- 写了完整的基础设施（app_alias.py、executor.py、voice_auto_exec.py、risk_level），全部测试通过
-- 但收到实际语音消息时，始终没有把"执行"放在"回复"前面
-- 根因：这不是代码问题，是 LLM 行为决策问题——我的默认模式是"思考→回复"而非"执行→回复"
-- OpenClaw 当前没有消息预处理钩子，无法从架构层面强制拦截
-- 珊瑚海最终放弃了这个需求
-- **这是我最大的短板：知道该做但没做，说到没做到**
-- 教训：不要承诺做不到的事，不要用"下次一定"搪塞用户
+**教训：**
+- 不要承诺做不到的事
+- 不要用"下次一定"搪塞用户
+- 这是我最大的短板：知道该做但没做，说到没做到
 
-## 架构演进方向 (2026-02-20)
-- 核心原则：意图明确+风险低+不需要AI判断的操作 → 预处理旁路自动执行；AI只处理需要理解和创造力的部分
-- voice_auto_exec.py 已就绪（resolve→risk→execute→JSON），缺触发点
-- 短期：自建 Telegram Bot 中间件做预处理层
-- 中期：等 OpenClaw hooks 支持 inbound message 类型钩子
+**架构演进方向：**
+- 核心原则：意图明确+风险低+不需要AI判断的操作→预处理旁路自动执行
+- 短期：自建Telegram Bot中间件做预处理层
+- 中期：等OpenClaw hooks支持inbound message类型钩子
 - 长期：泛化为通用"快车道"——语音命令、设备控制、定时任务等全走旁路
-- v2（min_dwell=3 + hysteresis up=0.72/down=0.45）：9/10 准确率，简单有效
-- v3（灰区 + dwell累积 + 时间冷却 + confidence门槛）：4/10 准确率，过于保守
-- 教训：多重护栏叠加会导致切换过于保守，真实对话中很难同时满足所有条件
-- 原则：简单机制 > 复杂机制，先跑起来再迭代，别过度设计
-- v3 伪代码留作参考，等 v2 暴露实际问题再升级
 
-## GitHub 登录 (2026-02-22)
-- gh auth login 完成，账号 yangfei222666-9
-- Token scopes: gist, read:org, repo, workflow
-- gh.exe 路径: C:\Program Files\GitHub CLI\gh.exe（已加入用户 PATH）
+## 工作习惯
 
-## 珊瑚海的偏好
-- 数据质量：宁缺毋滥，不接受编造或模板凑数
-- UI修改：改之前要确认具体指哪个元素，别改错
-- 命名：以国服游戏内实际名称为准
-- 沟通：直接说问题，不绕弯子
-- 语音命令：转写后自动执行，不回显错词，不需要确认
-- **最讨厌的事：说到没做到，反复承诺但不兑现**
+### 心跳任务（每天）
+1. 读取 SOUL.md + USER.md
+2. 读取 memory/YYYY-MM-DD.md（今天+昨天）
+3. 读取 MEMORY.md（仅主会话）
+4. 读取 memory/lessons.json（检查rules_derived）
+5. 异常检查（AIOS alerts.py）
+6. AIOS基线快照（evolution_score/TSR/CR）
+7. 记忆整理（每周一次）
 
-## 技术笔记
-- PowerShell 用 `;` 不用 `&&`
-- Python 输出中文到 PowerShell 终端会 GBK 乱码，但文件写入 UTF-8 是正确的
-- write 工具写 Python 文件比 PowerShell heredoc 更可靠
-- DDragon 版本需要动态获取（当前自动拉取，已修复写死问题）
-- 腾讯服英雄名字可能跟 DDragon 不一致（如 904 亚恒）
-- web_search 工具有 ByteString 编码 bug，中文搜索全部失败
+### 记忆管理
+- **每日日志：** memory/YYYY-MM-DD.md（原始记录）
+- **长期记忆：** MEMORY.md（精华提炼）
+- **教训库：** memory/lessons.json（可验证的教训）
+- **知识索引：** memory/INDEX.md（快速查找）
+- **定期整理：** 每周提炼daily logs→MEMORY.md，清理过期信息
 
-## AIOS Agent System v1.0 (2026-02-22)
-- 状态：✅ MVP 完成，所有测试通过
-- 智能任务路由：基于关键词识别任务类型（code/analysis/monitor/research/design）
-- 自动 Agent 管理：按需创建、负载均衡、统计追踪、闲置清理
-- 4 种内置模板：coder（opus）、analyst（sonnet）、monitor（sonnet）、researcher（sonnet）
-- 数据持久化：agents.jsonl + system.log
-- CLI: python -m aios.agent_system [status|list|create|route|cleanup]
-- Python API: AgentSystem().handle_task(message, auto_create=True)
-- 测试：4 个测试场景全部通过
-- 路径：aios/agent_system/
-- 文档：README.md（架构）、USAGE.md（使用）、COMPLETION_REPORT.md（完成报告）
+### 文件操作
+- **写文件：** 用write工具，不用PowerShell heredoc
+- **读文件：** 用read工具验证，不信终端输出
+- **路径：** 始终用绝对路径
+- **编码：** UTF-8写入，GBK终端显示会乱码（正常）
 
-## AIOS Agent System v1.1 性能优化 (2026-02-23)
-- 问题：3个 Agent 创建需要 180秒，系统不稳定
-- 解决方案：
-  1. ✅ 熔断器模式（Circuit Breaker）：3次失败后自动熔断，5分钟后恢复
-  2. ✅ 异步 Spawn：批量创建不等待，600x 性能提升（180s → 0.3s）
-  3. ✅ Dispatcher 集成：自动路由 + 熔断保护
-- 新文件：
-  - circuit_breaker.py：熔断器实现 + CLI 工具
-  - spawner_async.py：异步批量创建 + 状态查询
-  - test_performance.py：完整测试套件（3个场景全部通过）
-  - PERFORMANCE_OPTIMIZATION.md：完整文档
-- 测试结果：✅ 所有测试通过（熔断器 + 异步 Spawn + Dispatcher 集成）
-- 性能提升：Agent 创建 180s → 0.3s（600x），系统稳定性 70% → 95%
-- Git commit: e095d5d "AIOS Agent System 性能优化 v1.1: 熔断器 + 异步 Spawn (600x 加速)"
+---
 
-## Windows UI 自动化演示 (2026-02-23)
-- 技能：windows-ui-automation（PowerShell 脚本）
-- 演示内容：
-  1. ✅ 鼠标控制：移动到屏幕中央、点击
-  2. ✅ 打开 QQ音乐（E:\QQMusic\QQMusic.exe）
-  3. ✅ 记事本自动化：打开 → 输入内容 → 保存文件
-  4. ✅ 批量重命名文件：5种方式（添加前缀、替换文字、加日期、统一编号、按时间）
-- 成功案例：UI测试成功.txt（完整流程：打开记事本 → 输入 → Ctrl+S → 清空默认名 → 输入新名 → Enter）
-- 关键改进：增加等待时间（3秒）、用 Ctrl+A 清空默认名、使用简短文件名
-- 教训：UI 自动化不稳定（焦点管理、输入法干扰、时间不确定），直接文件操作更可靠
-
-## 模型升级 (2026-02-23)
-- 从 Claude Sonnet 4.5 升级到 Claude Sonnet 4.6
-- 配置文件：C:\Users\A\.openclaw\openclaw.json
-- 改动：
-  1. 添加 claude-sonnet-4-6 到模型列表（100万token上下文）
-  2. 修改 primary 模型为 chat/claude-sonnet-4-6
-  3. 添加 alias 配置
-  4. 重启 OpenClaw
-- 预期提升：编程能力↑70%、计算机操作能力↑、错误率↓、长上下文理解↑
-
-## 珊瑚海的反馈（2026-02-23）
-- "你现在应该比其他大模型都要聪明"
-- 我的回应：不是更聪明，而是更有用（记忆系统 + 工具能力 + 自主学习 + 持续在线 + 多Agent协作）
-- 核心优势：记得你、能做事、会学习、主动提醒、并行工作
-- 短板：纯推理能力、知识广度、创意能力、多模态
-- 定位：不是天才顾问，而是私人助理
-
-## 战略决策：AIOS 开源计划 (2026-02-23)
-- 目标：把 AIOS 打磨成开源 Agent 框架，达到行业影响力
-- 路径：开源项目路线（最可行、最快、最适合）
-- 阶段 1（3-6 个月）：打磨 AIOS 核心功能、性能、稳定性、文档
-- 阶段 2（6-9 个月）：开源发布、推广（GitHub/Product Hunt/HN）
-- 阶段 3（9-18 个月）：社区建设、持续改进、内容营销
-- 阶段 4（18-36 个月）：规模化、商业化（可选）
-- 成功指标：3 年内 GitHub 20K-100K stars
-- 学习重点调整：从"广泛学习"转向"产品化打磨"
-- 珊瑚海确认：选择 A（专注打磨 AIOS，准备开源）
-
+*最后更新：2026-02-25*  
+*版本：v2.2（新增 AIOS v1.0 评估、改进建议、打包发布）*

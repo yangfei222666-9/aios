@@ -8,10 +8,17 @@
 - 如果版本更新了：运行 C:\Users\A\Desktop\ARAM-Helper\fetch_real_data.py 刷新172英雄出装数据
 - 更新 ARAM-Helper 的 DDragon 版本号
 
-### 每3天：记忆整理
-- 读最近的 memory/YYYY-MM-DD.md 日志
-- 提取重要教训和新知识到 MEMORY.md
-- 清理过期信息
+### 每3天：记忆整理（自动化）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\scripts\memory_upgrade.py`
+- 自动从最近 7 天的 daily logs 中提取：
+  - 项目进展（v0.x、版本、发布、完成）
+  - 重要决策（决定、改为、优化、修复）
+  - 经验教训（教训、问题、错误、短板）
+- 自动更新 MEMORY.md 的"最近更新"章节
+- 输出：
+  - `✅ MEMORY.md 已更新` - 成功提取并更新
+  - `❌ 没有新内容需要更新` - 最近没有重要变化
+- 上次执行时间记录在 memory/selflearn-state.json 的 last_memory_upgrade
 
 ### 每次心跳：AIOS 插件系统
 - 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\plugin_heartbeat.py`
@@ -227,6 +234,21 @@
 - 运行 `& "C:\Program Files\Python312\python.exe" -m aios.scripts.memory_gaps --format telegram`
 - 如果输出包含"盲区超阈值"，主动提醒珊瑚海并给出修复建议
 - 上次执行时间记录在 selflearn-state.json 的 last_memory_gaps
+
+### 每天：GitHub 学习（AIOS/Agent/Skill 研究）（新增 2026-02-26）
+- **频率：随时有空就去学习（不限次数，不限时间）**
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\learning_scheduler.py`
+- 自动调度 5 个学习 Agent：
+  1. **GitHub_Researcher** - 每天搜索和分析 GitHub 项目
+  2. **Architecture_Analyst** - 每3天分析架构设计
+  3. **Code_Reviewer** - 每3天审查代码质量
+  4. **Documentation_Writer** - 每3天维护文档
+  5. **Idea_Generator** - 每3天生成新想法
+- Agent 自动执行任务并记录到 memory/YYYY-MM-DD.md
+- 输出：
+  - `LEARNING_AGENTS_OK` - 无需执行，静默
+  - `LEARNING_AGENTS_SPAWNED:N` - 创建了 N 个学习任务
+- 上次执行时间记录在 memory/selflearn-state.json
 
 ### 每天：技能探索与自动安装（主动学习）
 - 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\scripts\daily_skill_explorer.py`

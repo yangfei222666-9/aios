@@ -15,6 +15,13 @@ Things like:
 ## 应用路径
 - QQ音乐 → E:\QQMusic\QQMusic.exe
 
+## AIOS Dashboard
+- **版本：** v3.4（默认使用）
+- **路径：** C:\Users\A\.openclaw\workspace\aios\dashboard\AIOS-Dashboard-v3.4\
+- **启动命令：** `cd C:\Users\A\.openclaw\workspace\aios\dashboard\AIOS-Dashboard-v3.4; & "C:\Program Files\Python312\python.exe" server.py`
+- **访问地址：** http://127.0.0.1:8888
+- **端口：** 8888
+
 ## Examples
 
 ```markdown
