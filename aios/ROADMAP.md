@@ -100,8 +100,9 @@
 - **预计耗时：** 1周
 
 #### 任务10：Storage Manager（存储管理）
-- [x] 选择存储后端：**aiosqlite**（零依赖、异步、简单）✅ 已安装
+- [x] 选择存储后端：**aiosqlite + aiosql**（零依赖、异步、SQL分离）✅ 已安装
 - [ ] 设计存储抽象层
+- [ ] 创建 SQL 查询文件（queries.sql）
 - [ ] 实现 Agent 状态持久化
 - [ ] 实现上下文持久化
 - [ ] 实现事件存储（替代 events.jsonl）
@@ -110,12 +111,14 @@
 - **负责 Agent：** Architecture_Implementer
 - **预计耗时：** 1周
 
-**技术选型：aiosqlite**
-- 异步 SQLite 接口
+**技术选型：aiosqlite + aiosql**
+- **aiosqlite** - 异步 SQLite 接口
+- **aiosql** - SQL 和代码分离（SQL 写在文件里）
 - 零依赖（SQLite 内置）
 - 自动管理连接和游标
-- 支持 row_factory（返回字典）
-- 支持事务和批量操作
+- 支持参数化查询（:agent_id）
+- SQL 可复用（其他语言也能用）
+- 更好的 IDE 支持（SQL 语法高亮）
 
 ---
 
