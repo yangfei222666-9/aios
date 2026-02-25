@@ -296,6 +296,99 @@ LEARNING_AGENTS = [
         "schedule": "weekly",
         "interval_hours": 72
     },
+    
+    # ========== 开发加速 Agent ==========
+    {
+        "name": "Quick_Win_Hunter",
+        "role": "快速胜利猎人",
+        "goal": "寻找 1-2 天能完成的小任务，保持开发动力",
+        "backstory": "你是一个敏捷教练，擅长把大任务拆解成小胜利。",
+        "tasks": [
+            "从 ROADMAP 中识别简单任务（1-2天能完成）",
+            "从 GitHub Issue 中找低垂的果实（easy、good first issue）",
+            "优先级排序（价值/耗时比）",
+            "生成每日任务清单（3-5个小任务）"
+        ],
+        "tools": ["read", "write"],
+        "model": "claude-sonnet-4-6",
+        "thinking": "off",
+        "priority": "high",
+        "schedule": "daily",
+        "interval_hours": 24
+    },
+    {
+        "name": "Code_Generator",
+        "role": "代码生成器",
+        "goal": "根据设计直接生成可运行的代码，加速开发",
+        "backstory": "你是一个代码生成专家，擅长把设计图变成代码。",
+        "tasks": [
+            "读取 ROADMAP 中的任务描述",
+            "生成可运行的代码（LLM Queue、Memory Queue、Storage Manager 等）",
+            "包含单元测试（pytest）",
+            "包含文档注释（docstring）"
+        ],
+        "tools": ["read", "write", "exec"],
+        "model": "claude-opus-4-6",
+        "thinking": "on",
+        "priority": "high",
+        "schedule": "daily",
+        "interval_hours": 24
+    },
+    {
+        "name": "Test_Writer",
+        "role": "测试撰写员",
+        "goal": "为现有代码编写测试，提高测试覆盖率",
+        "backstory": "你是一个测试工程师，擅长编写全面的测试用例。",
+        "tasks": [
+            "分析现有代码（EventBus、Scheduler、Reactor、Agent System）",
+            "生成单元测试（pytest）",
+            "生成集成测试（端到端）",
+            "提高测试覆盖率（目标 >80%）"
+        ],
+        "tools": ["read", "write", "exec"],
+        "model": "claude-sonnet-4-6",
+        "thinking": "off",
+        "priority": "high",
+        "schedule": "daily",
+        "interval_hours": 24
+    },
+    {
+        "name": "Progress_Tracker",
+        "role": "进度追踪员",
+        "goal": "追踪 ROADMAP 进度，确保按计划推进",
+        "backstory": "你是一个项目经理，擅长追踪进度和调整计划。",
+        "tasks": [
+            "每天检查 ROADMAP 完成情况",
+            "生成进度报告（完成 X/Y 任务，进度 Z%）",
+            "识别延期任务（超过预计时间）",
+            "调整计划（重新评估优先级）"
+        ],
+        "tools": ["read", "write"],
+        "model": "claude-sonnet-4-6",
+        "thinking": "off",
+        "priority": "high",
+        "schedule": "daily",
+        "interval_hours": 24
+    },
+    {
+        "name": "Error_Analyzer",
+        "role": "错误分析师",
+        "goal": "分析错误日志，找出根因并生成修复建议",
+        "backstory": "你是一个调试专家，擅长从错误日志中找出根本原因。",
+        "tasks": [
+            "读取 events.jsonl 和错误日志",
+            "分析错误模式（哪些错误最频繁、何时发生）",
+            "识别根因（不是表象，而是根本原因）",
+            "生成修复建议（具体到文件和函数）"
+        ],
+        "tools": ["read", "exec"],
+        "model": "claude-sonnet-4-6",
+        "thinking": "off",
+        "priority": "high",
+        "schedule": "daily",
+        "interval_hours": 24
+    },
+    
     {
         "name": "Tutorial_Creator",
         "role": "教程创作者",
