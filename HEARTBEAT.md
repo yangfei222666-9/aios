@@ -23,6 +23,52 @@
   - `PLUGIN_ALERTS:N` - 发现 N 个告警
 - 上次执行时间记录在 memory/selflearn-state.json 的 last_plugin_heartbeat
 
+### 每天：AIOS 安全审计 Agent（新增 2026-02-24）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\security_auditor.py`
+- 5 项安全检查：
+  1. **权限检查** - 文件访问、工具使用权限
+  2. **敏感操作审查** - 删除、修改、外部调用
+  3. **数据访问日志** - 访问模式分析
+  4. **安全风险评分** - 0-10 分制
+  5. **合规性验证** - 符合安全规范
+- 输出：
+  - `SECURITY_AUDIT_OK` - 无安全问题
+  - `SECURITY_AUDIT_WARNINGS:N` - 发现 N 个警告
+  - `SECURITY_AUDIT_CRITICAL:N` - 发现 N 个严重问题
+- 报告保存到 `aios/agent_system/data/security/`
+- 执行时间：每天凌晨 4:00
+
+### 每5分钟：AIOS 异常检测 Agent（新增 2026-02-24）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\anomaly_detector.py`
+- 4 类异常检测：
+  1. **时间异常** - 非工作时间大量活动
+  2. **资源异常** - CPU/内存峰值
+  3. **模式异常** - 快速重复调用
+  4. **行为异常** - 偏离正常模式
+- 输出：
+  - `ANOMALY_OK` - 无异常
+  - `ANOMALY_DETECTED:N` - 检测到 N 个异常
+  - `ANOMALY_CRITICAL:N` - 检测到 N 个严重异常（自动熔断）
+- 自动熔断严重异常 Agent
+- 报告保存到 `aios/agent_system/data/anomaly/`
+- 执行时间：每 5 分钟
+
+### 每小时：AIOS 资源优化 Agent（新增 2026-02-24）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\resource_optimizer.py`
+- 5 项资源优化：
+  1. **内存泄漏检测** - >500MB 增长
+  2. **闲置进程清理** - >1h 闲置
+  3. **缓存策略优化** - 命中率 <50%
+  4. **资源分配调优** - CPU/内存/磁盘
+  5. **性能瓶颈识别** - 慢操作定位
+- 输出：
+  - `RESOURCE_OPTIMIZER_OK` - 无需优化
+  - `RESOURCE_OPTIMIZER_APPLIED:N` - 应用了 N 个优化
+  - `RESOURCE_OPTIMIZER_SUGGESTIONS:N` - 生成了 N 个建议（需确认）
+- 自动应用低风险优化
+- 报告保存到 `aios/agent_system/data/optimizer/`
+- 执行时间：每小时整点
+
 ### 每小时：AIOS Agent 闭环（自动化升级维护）
 - 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\orchestrator.py`
 - 完整 OODA 循环：Observe → Orient → Decide → Act → Verify → Learn
@@ -38,6 +84,72 @@
   - `ORCHESTRATOR_ACTIONS:N` - 执行了 N 个优化行动
 - 日志文件：`aios/orchestrator.log`
 - 上次执行时间记录在 memory/selflearn-state.json 的 last_orchestrator
+
+### 每小时：AIOS 安全守护 Agent（新增 2026-02-24）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\security_agent.py`
+- 5 项安全检查：
+  1. **频繁失败** - 同一操作短时间内多次失败
+  2. **异常调用** - 非工作时间大量操作
+  3. **权限异常** - 尝试访问敏感路径
+  4. **资源滥用** - 单个 Agent 占用过多资源
+  5. **数据异常** - 大量数据读写
+- 输出：
+  - `SECURITY_OK` - 系统安全
+  - `SECURITY_ALERT:N` - 发现 N 个安全风险
+- 高风险自动熔断
+- 报告保存到 `aios/agent_system/data/security/`
+- 执行时间：每小时整点
+
+### 每10分钟：AIOS 健康监控 Agent（新增 2026-02-24）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\health_monitor_agent.py`
+- 5 项健康监控：
+  1. **CPU 使用率** - >70% 警告，>90% 危险
+  2. **内存使用率** - >75% 警告，>90% 危险
+  3. **磁盘使用率** - >80% 警告，>90% 危险
+  4. **GPU 使用率** - 如果有 GPU
+  5. **进程数量** - 监控进程状态
+- 输出：
+  - `HEALTH_OK` - 系统健康
+  - `HEALTH_WARNING` - 资源紧张
+  - `HEALTH_CRITICAL` - 资源危险
+- 危险时自动清理
+- 报告保存到 `aios/agent_system/data/health/`
+- 执行时间：每 10 分钟
+
+### 每天：AIOS 学习 Agent（5 个专门学习维度）（新增 2026-02-24）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\learning_orchestrator_simple.py`
+- 5 个学习 Agent 按顺序执行：
+  1. **Provider Learner** - 学习 Provider 性能（成功率、响应时间、错误类型）
+  2. **Playbook Learner** - 学习 Playbook 效果（成功率、修复率）
+  3. **Agent Behavior Learner** - 学习 Agent 行为（成功率、工具使用、耗时）
+  4. **Error Pattern Learner** - 学习错误模式（重复错误、根因、传播链）
+  5. **Optimization Learner** - 学习优化效果（有效率、趋势）
+- 输出：
+  - `LEARNING_ORCHESTRATOR_OK` - 无重要发现，静默
+  - `LEARNING_ORCHESTRATOR_SUGGESTIONS:N` - 生成了 N 条改进建议
+- 报告保存到 `aios/agent_system/data/learning/`
+- 知识库自动更新：每个 Learner 独立维护学习报告
+- 执行时间：每天凌晨 4:00
+- 上次执行时间记录在 memory/selflearn-state.json 的 last_learning_orchestrator
+
+### 每天：AIOS 学习 Agent（旧版，已被 5 个专门 Learner 替代）
+- ~~运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\learner_agent.py`~~
+- ~~6 阶段学习流程~~
+- **已废弃：** 被 5 个专门学习 Agent 替代（Provider/Playbook/Agent Behavior/Error Pattern/Optimization）
+
+### 每天：AIOS 优化 Agent（新增 2026-02-24）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\optimizer_agent.py`
+- 5 阶段优化流程：
+  1. **分析性能瓶颈** - 慢操作、高失败率、频繁超时
+  2. **识别优化机会** - 缓存、可靠性、超时配置
+  3. **生成优化方案** - 低风险自动应用，中高风险需确认
+  4. **执行优化** - 自动应用低风险优化
+  5. **验证效果** - 检查优化是否成功
+- 输出：
+  - `OPTIMIZER_OK` - 无需优化，静默
+  - `OPTIMIZER_APPLIED:N` - 应用了 N 个优化
+- 报告保存到 `aios/agent_system/data/optimizer_reports/`
+- 执行时间：每天凌晨 2:00
 
 ### 每天：AIOS 维护 Agent
 - 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\maintenance_agent.py`
@@ -209,3 +321,40 @@
   - `IMPROVEMENT_FAILED:1` - 改进失败，需要人工审核
 - 改进报告保存到 `aios/agent_system/data/reports/cycle_*.json`
 - 上次执行时间记录在 memory/selflearn-state.json 的 last_self_improving
+
+### 每次心跳：Self-Improving Loop 统计（新增）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\self_improving_heartbeat.py`
+- 检查所有 Agent 的自动改进统计
+- 如果有新的改进应用，主动通知
+- 每天报告一次全局统计
+- 输出：
+  - `HEARTBEAT_OK` - 无新改进，静默
+  - `SELF_IMPROVING:+N` - N 个 Agent 应用了自动改进
+  - `SELF_IMPROVING_OK` - 定期统计报告
+- **核心闭环：** 执行任务 → 记录结果 → 分析失败 → 生成建议 → 自动应用 → 验证效果 → 更新配置
+- **自动触发：** 失败 ≥3 次自动触发改进循环
+- **风险控制：** 只自动应用低风险改进，中高风险需人工审核
+- **冷却期：** 每个 Agent 6 小时内最多改进 1 次
+
+### 每天：Meta-Agent 缺口检测（新增 2026-02-25）
+- 运行 `& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\meta_agent.py heartbeat`
+- 4 维缺口检测：
+  1. **模板覆盖** - 哪些模板类型没有活跃 Agent
+  2. **失败模式** - 哪些任务类型频繁失败（≥3次/7天）
+  3. **任务积压** - 哪些任务类型积压超过 1 小时
+  4. **事件覆盖** - 哪些事件类型未处理率 >50%
+- 发现缺口 → 匹配模板 → 沙盒测试 → 等待人工确认 → 创建 Agent
+- 安全机制：
+  - Agent 数量上限 15 个
+  - 沙盒测试（配置完整性、模型合法性、超时范围、权限安全）
+  - 所有创建操作需要人工确认
+  - 自动清理闲置 Agent（>24h）
+- 输出：
+  - `META_AGENT_OK` - 无缺口或仅低优先级缺口
+  - `META_AGENT_SUGGESTION:N` - 发现 N 个建议，等待确认
+  - `META_AGENT_PENDING:N` - 有 N 个待确认建议
+- 查看待审批：`meta_agent.py pending`
+- 批准：`meta_agent.py approve --id <suggestion_id>`
+- 拒绝：`meta_agent.py reject --id <suggestion_id> --reason "原因"`
+- 清理闲置：`meta_agent.py cleanup --idle-hours 24`
+- 上次执行时间记录在 meta_state.json 的 last_scan
