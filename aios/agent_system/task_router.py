@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-AIOS Task Router v1.0 - 智能任务路由系统
-接收任务 → 匹配 Agent → 分发执行
+AIOS Task Router v2.0 - 智能任务路由系统 + Planning 集成
+接收任务 → 自动拆解 → 匹配 Agent → 分发执行
 
 用法:
   python task_router.py route "写一个排序算法"
   python task_router.py route "检查系统健康度" --dry-run
   python task_router.py submit "分析最近的错误日志" --priority high
+  python task_router.py plan "搜索GitHub项目，然后分析架构，最后写报告"
   python task_router.py queue                    # 查看队列
   python task_router.py stats                    # 查看统计
 """
@@ -121,12 +122,61 @@ class Task:
 
 
 class TaskRouter:
-    """智能任务路由器"""
+    """智能任务路由器 + Planning 集成"""
 
     def __init__(self):
         self.registry = self._load_registry()
         self.agents = {a["id"]: a for a in self.registry.get("agents", [])}
         self.stats = self._load_stats()
+        self._planner = None
+
+    @property
+    def planner(self):
+        """懒加载 Planner"""
+        if self._planner is None:
+            try:
+                sys.path.insert(0, str(BASE_DIR.parent / "core"))
+                from planner import Planner
+                workspace = BASE_DIR.parent.parent
+                self._planner = Planner(workspace)
+            except ImportError:
+                self._planner = False  # 标记为不可用
+        return self._planner if self._planner is not False else None
+
+    def plan_and_submit(self, description: str, priority: str = "normal") -> List[Task]:
+        """
+        复杂任务：先拆解再逐个提交
+        返回所有子任务
+        """
+        if not self.planner:
+            # Planner 不可用，直接提交
+            return [self.submit(description, priority)]
+
+        plan = self.planner.plan(description)
+
+        if len(plan.subtasks) <= 1:
+            # 简单任务，不拆解
+            return [self.submit(description, priority)]
+
+        tasks = []
+        for st in plan.subtasks:
+            task = self.submit(
+                st.description,
+                priority=st.priority if st.priority != "normal" else priority
+            )
+            tasks.append(task)
+
+        # 记录计划
+        self._log_route(description, RouteResult(
+            agent_id="planner",
+            agent_name="Planner",
+            task_type="plan",
+            confidence=0.9,
+            reason=f"拆解为 {len(plan.subtasks)} 个子任务 (strategy={plan.strategy})",
+            alternatives=[]
+        ))
+
+        return tasks
 
     # ========== 核心路由 ==========
 
@@ -432,6 +482,16 @@ def main():
             for agent_id, count in sorted(by_agent.items(), key=lambda x: -x[1]):
                 print(f"    {agent_id:>12}: {count}")
 
+    elif cmd == "plan":
+        if len(sys.argv) < 3:
+            print("Usage: python task_router.py plan <complex task description>")
+            sys.exit(1)
+        desc = " ".join(sys.argv[2:]).strip()
+        tasks = router.plan_and_submit(desc)
+        print(f"\nPlan & Submit ({len(tasks)} tasks):")
+        for t in tasks:
+            print(f"  [{t.priority:>8}] {t.agent_id:>12} | {t.description[:60]}")
+
     elif cmd == "test":
         # 快速测试
         test_cases = [
@@ -452,9 +512,21 @@ def main():
             print(f"  {desc:30s} -> {r.agent_id:>12} ({r.task_type:>12}, {r.confidence:.0%})")
         print(f"\nAll {len(test_cases)} cases routed successfully.")
 
+        # Planning 测试
+        print(f"\n--- Planning Test ---\n")
+        plan_cases = [
+            "搜索 GitHub 上的 AIOS 项目，然后分析架构，最后写报告",
+            "实现一个新的调度算法",
+        ]
+        for desc in plan_cases:
+            tasks = router.plan_and_submit(desc)
+            print(f"  {desc[:50]:50s} -> {len(tasks)} subtasks")
+            for t in tasks:
+                print(f"    [{t.priority:>8}] {t.agent_id:>12} | {t.description[:50]}")
+
     else:
         print(f"Unknown command: {cmd}")
-        print("Commands: route, submit, queue, stats, test")
+        print("Commands: route, submit, plan, queue, stats, test")
         sys.exit(1)
 
 
