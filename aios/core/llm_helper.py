@@ -1,11 +1,12 @@
 """
-aios/core/llm_helper.py - LLM 辅助函数（带路由）
+aios/core/llm_helper.py - LLM 辅助函数（带队列路由）
 
-在 Pipeline 中需要 LLM 生成文本时使用
+在 Pipeline 中需要 LLM 生成文本时使用。
+所有调用通过 QueuedRouter 排队执行。
 """
 
 from typing import Optional, Dict, Any
-from core.model_router_v2 import route_model
+from core.queued_router import queued_route_model
 
 
 def generate_summary(
@@ -28,10 +29,11 @@ def generate_summary(
 
 要求：简洁、中文、一句话"""
 
-    result = route_model(
+    result = queued_route_model(
         task_type=task_type,
         prompt=prompt,
         context={"stage": "summary", "data_keys": list(data.keys())},
+        priority="normal",
     )
 
     if result["success"]:
@@ -59,10 +61,11 @@ def generate_alert_summary(alerts: list) -> str:
 
 要求：一句话，突出重点"""
 
-    result = route_model(
+    result = queued_route_model(
         task_type="summarize_short",
         prompt=prompt,
         context={"stage": "alerts", "count": len(alerts)},
+        priority="high",
     )
 
     if result["success"]:
@@ -90,8 +93,11 @@ def generate_recommendation(
 
 要求：具体、可执行、一句话"""
 
-    result = route_model(
-        task_type=task_type, prompt=prompt, context={"stage": "recommendation"}
+    result = queued_route_model(
+        task_type=task_type,
+        prompt=prompt,
+        context={"stage": "recommendation"},
+        priority="normal",
     )
 
     if result["success"]:
