@@ -6,12 +6,14 @@ through the System Call interface. Agents never access kernel internals
 directly; they go through aios.syscall.
 
 Components:
-- EventBus:   event routing and persistence
-- Scheduler:  priority queue task scheduling
-- Reactor:    automatic fault detection and repair
-- Queues:     resource queues (LLM, Memory, Storage)
-- ScoreEngine: system health scoring
+- EventBus:       event routing and persistence
+- Scheduler:      priority queue task scheduling
+- Reactor:        automatic fault detection and repair
+- Queues:         resource queues (LLM, Memory, Storage)
+- ScoreEngine:    system health scoring
 - CircuitBreaker: fault isolation
+- ContextManager: agent context save/restore/switch
+- MemoryManager:  per-agent memory allocation and limits
 """
 
 from core.event import Event, EventType, create_event
@@ -28,6 +30,9 @@ from core.queues import (
 )
 from core.queued_router import QueuedRouter, get_queued_router, queued_route_model
 
+from .context_manager import ContextManager, AgentContext
+from .memory_manager import MemoryManager, AgentMemoryBlock
+
 __all__ = [
     # Events
     "Event", "EventType", "create_event",
@@ -39,4 +44,8 @@ __all__ = [
     "QueueRequest", "RequestPriority", "SchedulingPolicy",
     # Router
     "QueuedRouter", "get_queued_router", "queued_route_model",
+    # Context
+    "ContextManager", "AgentContext",
+    # Memory
+    "MemoryManager", "AgentMemoryBlock",
 ]

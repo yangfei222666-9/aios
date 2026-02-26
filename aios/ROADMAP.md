@@ -84,41 +84,43 @@
 **目标：** Context Manager、Memory Manager、Storage Manager
 
 #### 任务8：Context Manager（上下文管理）
-- [ ] 设计上下文数据结构
-- [ ] 实现上下文切换机制
-- [ ] 支持上下文持久化
-- [ ] 编写单元测试
+- [x] 设计上下文数据结构（AgentContext dataclass）
+- [x] 实现上下文切换机制（save/restore/switch）
+- [x] 支持上下文持久化（snapshot/load to disk）
+- [x] 资源限制追踪和强制执行
+- [x] 编写单元测试（8/8 通过）
 - **负责 Agent：** Architecture_Implementer
-- **预计耗时：** 1周
+- **完成时间：** 2026-02-27
 
 #### 任务9：Memory Manager（内存管理）
-- [ ] 设计内存分配策略
-- [ ] 实现内存回收机制
-- [ ] 支持内存限制和监控
-- [ ] 编写性能测试
+- [x] 设计内存分配策略（per-agent quota + global limit）
+- [x] 实现内存回收机制（release/release_all/unregister）
+- [x] 支持内存限制和监控（quota enforcement + utilization）
+- [x] LRU 驱逐策略（evict_lru with target）
+- [x] 编写单元测试（8/8 通过）
 - **负责 Agent：** Performance_Optimizer
-- **预计耗时：** 1周
+- **完成时间：** 2026-02-27
 
 #### 任务10：Storage Manager（存储管理）
-- [x] 选择存储后端：**aiosqlite + aiosql**（零依赖、异步、SQL分离）✅ 已安装
-- [ ] 设计存储抽象层
-- [ ] 创建 SQL 查询文件（queries.sql）
-- [ ] 实现 Agent 状态持久化
-- [ ] 实现上下文持久化
-- [ ] 实现事件存储（替代 events.jsonl）
-- [ ] 支持查询和索引
-- [ ] 编写单元测试
+- [x] 选择存储后端：**aiosqlite**（零依赖、异步、原生 SQL）✅ 已安装
+- [x] 设计存储抽象层
+- [x] 创建 SQL Schema（schema.sql）
+- [x] 实现 Agent 状态持久化
+- [x] 实现上下文持久化
+- [x] 实现事件存储（替代 events.jsonl）
+- [x] 实现任务历史记录
+- [x] 支持查询和索引
+- [x] 编写单元测试
 - **负责 Agent：** Architecture_Implementer
-- **预计耗时：** 1周
+- **完成时间：** 2026-02-26
 
-**技术选型：aiosqlite + aiosql**
+**技术选型：aiosqlite（原生 SQL）**
 - **aiosqlite** - 异步 SQLite 接口
-- **aiosql** - SQL 和代码分离（SQL 写在文件里）
 - 零依赖（SQLite 内置）
 - 自动管理连接和游标
-- 支持参数化查询（:agent_id）
-- SQL 可复用（其他语言也能用）
-- 更好的 IDE 支持（SQL 语法高亮）
+- 支持参数化查询（?）
+- 原生 SQL，更灵活
+- 测试覆盖：9/9 ✅
 
 ---
 
@@ -148,13 +150,30 @@
 
 **目标：** Computer-use Agent 和学术影响力
 
-#### 任务13：VM Controller + MCP Server
-- [ ] 设计虚拟机控制器
-- [ ] 实现 MCP Server
-- [ ] 支持沙盒环境
-- [ ] 支持 Terminal、Code、Browser、Document
+#### 任务13：VM Controller + CloudRouter 集成
+- [ ] 设计虚拟机控制器（参考 LLM-X-Factors CloudRouter）
+- [ ] 实现 Local→Cloud 工作流反转
+- [ ] 支持云端 VM 启动（`cloudrouter start ./project`）
+- [ ] 支持 GPU 沙箱（`cloudrouter start --gpu B200`）
+- [ ] 内置 VNC 桌面、VS Code、Jupyter Lab
+- [ ] Agent 可在 VM 上操作浏览器验证
+- [ ] 支持并行执行（多个 Agent 同时在不同 VM 上工作）
+- [ ] 集成 DataCollector（统一收集所有 VM 的数据）
+- [ ] 集成 Evaluator（评估每个 VM 的执行结果）
+- [ ] 集成 Quality Gates（确保每个 VM 的改进是安全的）
+- [ ] 实现 MCP Server（可选）
 - **负责 Agent：** Architecture_Implementer
 - **预计耗时：** 1-2个月
+
+**核心价值：**
+- **工作流反转：** Agent 思考在本地，干活在云上（Local→Cloud）
+- **完全隔离：** 每个 Agent 有自己的 VM，互不干扰
+- **并行执行：** 可以同时跑十个 Agent 各干各的
+- **可观测性：** VNC 桌面 + DataCollector 事件记录，完整追踪链路
+
+**参考项目：**
+- LLM-X-Factors CloudRouter（https://github.com/llm-x-factors/cloudrouter）
+- 视频：https://www.bilibili.com/video/BV1xxx（从蓝工到考研 [Agent的] 自主克隆桌面视频）
 
 #### 任务14：学术论文
 - [ ] 整理核心创新点
@@ -182,6 +201,38 @@
 2. ✅ **Reactor** - 自动修复（他们没有）
 3. ✅ **Self-Improving Loop** - 自我进化（他们没有）
 4. ✅ **零依赖** - 可打包可复制（他们依赖很多）
+5. ✅ **DataCollector + Evaluator + Quality Gates** - 完整的数据采集、评估、质量门禁闭环（他们没有）
+
+## 🎯 未来方向（CloudRouter 启发）
+
+**工作流反转：Local→Cloud（而非 Cloud→Local）**
+- **传统工具：** Agent 思考在云上，干活在本地（Cloud→Local）
+- **AIOS + CloudRouter：** Agent 思考在本地，干活在云上（Local→Cloud）
+
+**优势：**
+- 干活在云上，你看得到它在想什么
+- 可以同时跑十个 Agent 各干各的
+- 完全隔离，互不干扰
+- 配合 DataCollector/Evaluator/Quality Gates，形成完整闭环
+
+**架构：**
+```
+AIOS（本地）
+  ↓
+DataCollector（记录所有任务）
+  ↓
+Scheduler（决策：哪个 Agent 做什么）
+  ↓
+CloudRouter（启动云端 VM）
+  ↓
+Agent 在 VM 上执行任务
+  ↓
+Evaluator（评估执行结果）
+  ↓
+Quality Gates（验证改进是否安全）
+  ↓
+自动回滚（如果失败）
+```
 
 ---
 
