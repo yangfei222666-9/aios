@@ -196,6 +196,147 @@ def cmd_version(args) -> int:
     return 0
 
 
+def cmd_plugin(args) -> int:
+    from plugins.manager import get_manager
+
+    manager = get_manager()
+
+    if args.plugin_cmd == "list":
+        plugins = manager.list()
+        if not plugins:
+            print("没有已加载的插件")
+            return 0
+
+        for meta in plugins:
+            # 查找插件实例（可能有 builtin/ 前缀）
+            plugin = None
+            for key in manager.plugins.keys():
+                if key == meta.name or key.endswith(f"/{meta.name}"):
+                    plugin = manager.plugins[key]
+                    break
+
+            if plugin:
+                status_icon = {
+                    "loaded": "✓",
+                    "running": "▶",
+                    "error": "✗",
+                    "disabled": "⏸",
+                }.get(plugin.status.value, "?")
+            else:
+                status_icon = "?"
+            print(
+                f"  {status_icon} {meta.name} v{meta.version} ({meta.plugin_type.value})"
+            )
+            print(f"     {meta.description}")
+        return 0
+
+    elif args.plugin_cmd == "discover":
+        plugins = manager.discover()
+        if not plugins:
+            print("没有发现可用插件")
+            return 0
+
+        print(f"发现 {len(plugins)} 个插件:")
+        for name in plugins:
+            loaded = "✓" if name in manager.plugins else " "
+            print(f"  [{loaded}] {name}")
+        return 0
+
+    elif args.plugin_cmd == "load":
+        if not args.name:
+            print("错误: 需要指定插件名称")
+            return 1
+
+        if manager.load(args.name):
+            print(f"✓ 插件 {args.name} 加载成功")
+            return 0
+        else:
+            print(f"✗ 插件 {args.name} 加载失败")
+            return 1
+
+    elif args.plugin_cmd == "unload":
+        if not args.name:
+            print("错误: 需要指定插件名称")
+            return 1
+
+        if manager.unload(args.name):
+            print(f"✓ 插件 {args.name} 卸载成功")
+            return 0
+        else:
+            print(f"✗ 插件 {args.name} 卸载失败")
+            return 1
+
+    elif args.plugin_cmd == "reload":
+        if not args.name:
+            print("错误: 需要指定插件名称")
+            return 1
+
+        if manager.reload(args.name):
+            print(f"✓ 插件 {args.name} 重载成功")
+            return 0
+        else:
+            print(f"✗ 插件 {args.name} 重载失败")
+            return 1
+
+    elif args.plugin_cmd == "enable":
+        if not args.name:
+            print("错误: 需要指定插件名称")
+            return 1
+
+        if manager.enable(args.name):
+            print(f"✓ 插件 {args.name} 已启用")
+            return 0
+        else:
+            print(f"✗ 插件 {args.name} 启用失败")
+            return 1
+
+    elif args.plugin_cmd == "disable":
+        if not args.name:
+            print("错误: 需要指定插件名称")
+            return 1
+
+        if manager.disable(args.name):
+            print(f"✓ 插件 {args.name} 已禁用")
+            return 0
+        else:
+            print(f"✗ 插件 {args.name} 禁用失败")
+            return 1
+
+    elif args.plugin_cmd == "health":
+        if args.name:
+            # 单个插件健康检查
+            plugin = manager.get(args.name)
+            if plugin is None:
+                print(f"✗ 插件 {args.name} 不存在")
+                return 1
+
+            health = plugin.health_check()
+            status = health.get("status", "unknown")
+            icon = {"ok": "✓", "warn": "⚠", "error": "✗"}.get(status, "?")
+            print(f"  {icon} {args.name}: {status}")
+            if "message" in health:
+                print(f"     {health['message']}")
+            return 0 if status == "ok" else 1
+        else:
+            # 所有插件健康检查
+            results = manager.health_check_all()
+            if not results:
+                print("没有已加载的插件")
+                return 0
+
+            for name, health in results.items():
+                status = health.get("status", "unknown")
+                icon = {"ok": "✓", "warn": "⚠", "error": "✗"}.get(status, "?")
+                print(f"  {icon} {name}: {status}")
+                if "message" in health:
+                    print(f"     {health['message']}")
+
+            has_error = any(h.get("status") == "error" for h in results.values())
+            return 1 if has_error else 0
+
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser(prog="aios", description="AIOS — 个人 AI 操作系统")
@@ -234,11 +375,42 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("test", help="跑回归测试 (15 cases)")
     sub.add_parser("version", help="版本信息")
 
+    # plugin 子命令
+    pp = sub.add_parser("plugin", help="插件管理")
+    pp_sub = pp.add_subparsers(dest="plugin_cmd")
+    pp_sub.add_parser("list", help="列出已加载插件")
+    pp_sub.add_parser("discover", help="发现可用插件")
+
+    pp_load = pp_sub.add_parser("load", help="加载插件")
+    pp_load.add_argument("name", nargs="?", help="插件名称")
+
+    pp_unload = pp_sub.add_parser("unload", help="卸载插件")
+    pp_unload.add_argument("name", nargs="?", help="插件名称")
+
+    pp_reload = pp_sub.add_parser("reload", help="重载插件")
+    pp_reload.add_argument("name", nargs="?", help="插件名称")
+
+    pp_enable = pp_sub.add_parser("enable", help="启用插件")
+    pp_enable.add_argument("name", nargs="?", help="插件名称")
+
+    pp_disable = pp_sub.add_parser("disable", help="禁用插件")
+    pp_disable.add_argument("name", nargs="?", help="插件名称")
+
+    pp_health = pp_sub.add_parser("health", help="健康检查")
+    pp_health.add_argument("name", nargs="?", help="插件名称（可选）")
+
     args = p.parse_args(argv)
 
     if not args.cmd:
         p.print_help()
         return 0
+
+    # plugin 子命令特殊处理
+    if args.cmd == "plugin":
+        if not hasattr(args, "plugin_cmd") or not args.plugin_cmd:
+            pp.print_help()
+            return 0
+        return cmd_plugin(args)
 
     dispatch = {
         "health": cmd_health,

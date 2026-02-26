@@ -1,0 +1,15 @@
+{
+  "name": "increase_timeout",
+  "description": "增加执行超时时间",
+  "actions": [
+    {
+      "type": "increase_timeout",
+      "from": 30,
+      "to": 60
+    },
+    {
+      "type": "retry",
+      "max_retries": 1
+    }
+  ]
+}

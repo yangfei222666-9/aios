@@ -16,7 +16,7 @@ setup(
     version="0.5.0",
     author="Shanhuhai",
     author_email="",
-    description="Memory-driven, self-healing, production-ready AI agent framework",
+    description="Self-healing, self-learning AI operating system with event-driven architecture",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yangfei222666-9/aios",
@@ -68,9 +68,11 @@ setup(
             "dashboard/static/*.js",
         ],
     },
-    keywords="ai agent framework self-learning autonomous multi-agent",
+    keywords="ai agent framework self-learning autonomous self-healing event-driven aios",
     project_urls={
+        "Documentation": "https://github.com/yangfei222666-9/aios#readme",
         "Bug Reports": "https://github.com/yangfei222666-9/aios/issues",
         "Source": "https://github.com/yangfei222666-9/aios",
+        "Changelog": "https://github.com/yangfei222666-9/aios/blob/main/CHANGELOG.md",
     },
 )

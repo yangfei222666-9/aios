@@ -471,7 +471,7 @@ class MetaAgent:
         保存到 pending 列表，等待 approve() 或 reject()
         """
         suggestion = {
-            "id": f"suggestion-{int(time.time())}",
+            "id": f"suggestion-{int(time.time() * 1000)}",
             "design": design,
             "test_result": test_result,
             "submitted_at": datetime.now().isoformat(),

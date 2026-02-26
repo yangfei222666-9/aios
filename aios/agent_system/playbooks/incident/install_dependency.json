@@ -1,0 +1,14 @@
+{
+  "name": "install_dependency",
+  "description": "自动安装缺失的 Python 依赖",
+  "actions": [
+    {
+      "type": "install_dependency",
+      "auto_detect": true
+    },
+    {
+      "type": "retry",
+      "max_retries": 1
+    }
+  ]
+}

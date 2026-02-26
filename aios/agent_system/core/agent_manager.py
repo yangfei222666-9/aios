@@ -238,7 +238,7 @@ class AgentManager:
                 by_template[template] = by_template.get(template, 0) + 1
 
         total_tasks = sum(
-            a["stats"]["tasks_completed"] + a["stats"]["tasks_failed"]
+            a["stats"].get("tasks_completed", 0) + a["stats"].get("tasks_failed", 0)
             for a in self.agents.values()
         )
 

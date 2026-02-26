@@ -1,0 +1,15 @@
+{
+  "name": "fallback_model",
+  "description": "切换到备用模型",
+  "actions": [
+    {
+      "type": "fallback_model",
+      "from": "claude-opus-4-6",
+      "to": "claude-sonnet-4-6"
+    },
+    {
+      "type": "retry",
+      "max_retries": 1
+    }
+  ]
+}

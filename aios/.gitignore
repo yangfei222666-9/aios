@@ -141,6 +141,23 @@ core/alert_history.jsonl
 core/safe_run_audit.jsonl
 core/job_queue.jsonl
 core/job_dead_letter.jsonl
+memory/*.json
+memory/*.jsonl
+dashboard/data/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
 
 # Keep example data
 !data/playbooks.json

@@ -1,0 +1,22 @@
+{
+  "layer_counts": {
+    "KERNEL": 64,
+    "COMMS": 0,
+    "TOOL": 13,
+    "MEM": 0,
+    "SEC": 23
+  },
+  "top_errors": [
+    [
+      "agent.error",
+      3
+    ],
+    [
+      "reactor.failed",
+      3
+    ]
+  ],
+  "avg_duration": 681.6756756756756,
+  "duration_samples": 37,
+  "total_events": 100
+}

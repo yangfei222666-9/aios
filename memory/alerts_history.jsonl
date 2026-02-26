@@ -17,3 +17,4 @@
 {"ts": "2026-02-22T20:11:19.837801", "alert_id": "8aacc843", "fingerprint": "rate_limit:test:2026-02-22", "rule_id": "rate_limit", "severity": "WARN", "from": "OPEN", "to": "RESOLVED", "reason": "测试完成，清理"}
 {"ts": "2026-02-22T20:11:19.841806", "alert_id": "3c285f79", "fingerprint": "memory_high:test:2026-02-22", "rule_id": "memory_high", "severity": "WARN", "from": "OPEN", "to": "RESOLVED", "reason": "测试完成，清理"}
 {"ts": "2026-02-23T13:57:26.194434", "alert_id": "4e833507", "fingerprint": "gpu_overheat:test:2026-02-23", "rule_id": "gpu_overheat", "severity": "WARN", "from": null, "to": "OPEN", "reason": "新告警: GPU temperature high: 85C detected"}
+{"ts": "2026-02-23T19:23:28.343154", "alert_id": "4e833507", "fingerprint": "gpu_overheat:test:2026-02-23", "rule_id": "gpu_overheat", "severity": "WARN", "from": "OPEN", "to": "ACK", "reason": "手动确认"}

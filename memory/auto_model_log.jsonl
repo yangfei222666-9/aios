@@ -96,3 +96,11 @@
 {"ts": 1771553981, "trace_id": "693d61b2", "current_model": "opus", "target_model": "sonnet", "will_switch": true, "switch_reason": "score<=0.45", "score": 0.35, "confidence": 0.3}
 {"ts": 1771553981, "trace_id": "6bde719b", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.05, "confidence": 0.9}
 {"ts": 1771553981, "trace_id": "be728b33", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.2, "confidence": 0.6}
+{"ts": 1771873432, "trace_id": "efc90371", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.05, "confidence": 0.9}
+{"ts": 1771873432, "trace_id": "b25a0965", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.53, "confidence": 0.06}
+{"ts": 1771873432, "trace_id": "fefabc34", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.43, "confidence": 0.14}
+{"ts": 1771873432, "trace_id": "ab2a2887", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.68, "confidence": 0.36}
+{"ts": 1771873432, "trace_id": "a76fb05f", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.2, "confidence": 0.6}
+{"ts": 1771873432, "trace_id": "89de7b79", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.35, "confidence": 0.3}
+{"ts": 1771873432, "trace_id": "e5982786", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.68, "confidence": 0.36}
+{"ts": 1771873432, "trace_id": "c59d47f2", "current_model": "sonnet", "target_model": "sonnet", "will_switch": false, "switch_reason": "stay_sonnet_by_threshold", "score": 0.35, "confidence": 0.3}

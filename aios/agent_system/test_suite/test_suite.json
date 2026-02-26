@@ -1,0 +1,64 @@
+[
+  {
+    "id": "test_001",
+    "name": "简单函数",
+    "description": "写一个函数计算1到n的和",
+    "type": "code",
+    "priority": "normal",
+    "expected": {
+      "success": true,
+      "has_function": true,
+      "has_error_handling": true,
+      "max_duration_ms": 10000
+    }
+  },
+  {
+    "id": "test_002",
+    "name": "斐波那契数列",
+    "description": "写一个函数，输入n，返回斐波那契数列前n项",
+    "type": "code",
+    "priority": "normal",
+    "expected": {
+      "success": true,
+      "has_function": true,
+      "max_duration_ms": 10000
+    }
+  },
+  {
+    "id": "test_003",
+    "name": "质数判断",
+    "description": "写一个函数判断一个数是否为质数",
+    "type": "code",
+    "priority": "normal",
+    "expected": {
+      "success": true,
+      "has_function": true,
+      "has_optimization": false,
+      "max_duration_ms": 10000
+    }
+  },
+  {
+    "id": "test_004",
+    "name": "简单爬虫",
+    "description": "写一个爬虫抓取网页标题",
+    "type": "code",
+    "priority": "high",
+    "expected": {
+      "success": true,
+      "has_error_handling": true,
+      "max_duration_ms": 15000
+    }
+  },
+  {
+    "id": "test_005",
+    "name": "Flask API",
+    "description": "写一个简单的 Flask API，返回当前时间",
+    "type": "code",
+    "priority": "high",
+    "expected": {
+      "success": true,
+      "has_error_handling": true,
+      "max_duration_ms": 15000
+    }
+  }
+]

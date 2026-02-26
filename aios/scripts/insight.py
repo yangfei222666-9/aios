@@ -188,16 +188,25 @@ def generate_insight(days: int = 1, compact: bool = False) -> str:
             consecutive_kernel_events = []
 
         if consecutive_kernel >= 5:
-            # 检查是否是部署窗口：所有事件都是 deploy/restart/rollout
-            is_deploy_window = all(
+            # 检查是否是正常窗口：
+            # 1. 部署/重启/发布
+            # 2. 资源快照/反思
+            # 3. Scheduler 决策
+            # 4. 任务创建
+            # 5. 测试事件（noop/sleep/fail）
+            is_normal_window = all(
                 any(
                     k in _event_name(ev).lower()
-                    for k in ("deploy", "restart", "rollout")
+                    for k in (
+                        "deploy", "restart", "rollout",
+                        "resource_snapshot", "reflection",
+                        "scheduler.decision", "task.", "noop", "sleep", "fail"
+                    )
                 )
                 for ev in consecutive_kernel_events
             )
 
-            if is_deploy_window:
+            if is_normal_window:
                 excluded_deploy_restart += 1
             else:
                 deadlock_warnings += 1

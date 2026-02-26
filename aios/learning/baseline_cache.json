@@ -26,26 +26,32 @@
     }
   },
   "snapshot": {
-    "cached_at": 1771809605.4191144,
+    "cached_at": 1772016930.3004074,
     "data": {
-      "ts": "2026-02-23T09:20:05",
+      "ts": "2026-02-25T18:55:30",
       "period_days": 1,
       "correction_rate": 0,
       "tool_success_rate": 1.0,
       "tool_p95_ms": {
-        "?": 16
+        "?": 900
       },
-      "http_error_count": 7,
+      "http_error_count": 0,
       "http_502_rate": 0.0,
       "http_404_rate": 0.0,
-      "total_events": 47,
+      "total_events": 44,
       "severity_counts": {
-        "CRIT": 1,
+        "CRIT": 0,
         "WARN": 0,
-        "INFO": 40,
-        "ERR": 6
+        "INFO": 44,
+        "ERR": 0
       },
-      "evolution_score": 0.4,
+      "resource": {
+        "avg_cpu_percent": 7.89,
+        "avg_memory_percent": 50.97,
+        "peak_cpu_percent": 100.0,
+        "peak_memory_percent": 81.4
+      },
+      "evolution_score": 0.37,
       "grade": "healthy"
     }
   }

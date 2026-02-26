@@ -1,0 +1,30 @@
+{
+  "budget_daily": 1.0,
+  "budget_monthly": 30.0,
+  "alert_threshold": 0.8,
+  "model_costs": {
+    "claude-opus-4-6": {
+      "input": 15.0,
+      "output": 75.0
+    },
+    "claude-sonnet-4-6": {
+      "input": 3.0,
+      "output": 15.0
+    },
+    "claude-haiku-4-5": {
+      "input": 0.8,
+      "output": 4.0
+    }
+  },
+  "task_priority_models": {
+    "critical": "claude-opus-4-6",
+    "high": "claude-sonnet-4-6",
+    "normal": "claude-sonnet-4-6",
+    "low": "claude-haiku-4-5"
+  },
+  "fallback_chain": [
+    "claude-opus-4-6",
+    "claude-sonnet-4-6",
+    "claude-haiku-4-5"
+  ]
+}

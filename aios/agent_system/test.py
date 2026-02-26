@@ -90,7 +90,7 @@ def test_task_routing():
     print("测试 3: 任务路由准确性")
     print("=" * 60)
 
-    from aios.agent_system.core.task_router import TaskRouter
+    from aios.agent_system._deprecated.core_task_router import TaskRouter
 
     router = TaskRouter()
 

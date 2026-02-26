@@ -167,11 +167,12 @@ class EvolutionEngine:
         return report
 
     def _phase_observe(self) -> Dict:
-        """Phase 1: 收集追踪数据"""
+        """Phase 1: 收集追踪数据（只看 prod）"""
         analyzer = TraceAnalyzer()
         traces = analyzer.traces
 
-        failure_patterns = analyzer.get_failure_patterns(min_occurrences=3)
+        # 只分析 prod 环境的失败模式
+        failure_patterns = analyzer.get_failure_patterns(min_occurrences=3, env="prod")
         agents = self.agent_manager.list_agents(status="active")
 
         # 按 agent 分组统计
@@ -258,21 +259,40 @@ class EvolutionEngine:
         }
 
     def _phase_evolve(self, analyze_data: Dict, learn_data: Dict) -> Dict:
-        """Phase 4: 应用进化"""
+        """Phase 4: 应用进化（带影子验证）"""
+        from shadow_validator import ShadowValidator
+        
+        validator = ShadowValidator(str(self.data_dir))
         prompts_patched = 0
         configs_adjusted = 0
         strategies_merged = 0
+        validation_blocked = 0  # 被验证拦截的改进数
 
-        # 4.1 应用 Prompt 补丁
+        # 4.1 应用 Prompt 补丁（带验证）
         for agent_id, gaps in analyze_data.get("agent_gaps", {}).items():
             agent = self.agent_manager.get_agent(agent_id)
             if not agent:
                 continue
 
+            system_prompt = agent.get("system_prompt") or agent.get("role", "")
             patch = self.prompt_evolver.generate_prompt_patch(
-                agent_id, agent["system_prompt"], gaps
+                agent_id, system_prompt, gaps
             )
             if patch:
+                # 影子验证
+                improvement = {
+                    "type": "prompt_patch",
+                    "patch": str(patch),
+                    "reason": "修复 Prompt 缺陷"
+                }
+                ok, msg = validator.validate_before_apply(agent_id, improvement)
+                
+                if not ok:
+                    print(f"  ⚠️  {agent_id} Prompt 补丁被拦截: {msg}")
+                    validation_blocked += 1
+                    self.emitter.emit_blocked(agent_id, improvement, msg)
+                    continue
+                
                 success = self.prompt_evolver.apply_patch(agent_id, self.agent_manager, patch)
                 if success:
                     prompts_patched += 1
@@ -287,17 +307,33 @@ class EvolutionEngine:
         if new_strategies:
             strategies_merged = self.strategy_learner.merge_to_strategy_library(new_strategies)
 
-        # 4.3 通过 auto_evolution 应用配置调整
+        # 4.3 通过 auto_evolution 应用配置调整（带验证）
         agents = self.agent_manager.list_agents(status="active")
         for agent in agents:
             result = self.auto_evolution.auto_evolve(agent["id"], self.agent_manager)
             if result.get("status") == "applied":
-                configs_adjusted += len(result.get("plans", []))
+                # 对每个改进计划验证
+                for plan in result.get("plans", []):
+                    improvement = {
+                        "type": "config_change",
+                        "key": plan.get("key"),
+                        "value": plan.get("value"),
+                        "reason": plan.get("reason")
+                    }
+                    ok, msg = validator.validate_before_apply(agent["id"], improvement)
+                    
+                    if not ok:
+                        print(f"  ⚠️  {agent['id']} 配置调整被拦截: {msg}")
+                        validation_blocked += 1
+                        self.emitter.emit_blocked(agent["id"], improvement, msg)
+                    else:
+                        configs_adjusted += 1
 
         return {
             "prompts_patched": prompts_patched,
             "configs_adjusted": configs_adjusted,
-            "strategies_merged": strategies_merged
+            "strategies_merged": strategies_merged,
+            "validation_blocked": validation_blocked  # 新增：被拦截数
         }
 
     def _phase_share(self) -> Dict:

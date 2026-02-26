@@ -1,8 +1,8 @@
 {
   "summary": {
-    "total_agents": 9,
-    "active": 5,
-    "archived": 4,
+    "total_agents": 33,
+    "active": 30,
+    "archived": 3,
     "total_tasks_processed": 1
   },
   "agents": [
@@ -12,7 +12,7 @@
       "name": "代码开发专员",
       "description": "负责编写、调试、重构代码",
       "created_at": "2026-02-22T13:20:20.260028",
-      "updated_at": "2026-02-22T13:20:20.274557",
+      "updated_at": "2026-02-25T21:55:08.886110",
       "status": "archived",
       "workspace": "~/.openclaw/agents/coder-620260",
       "skills": [
@@ -46,8 +46,8 @@
         "last_active": "2026-02-22T13:20:20.260532"
       },
       "task_description": "帮我写一个 Python 爬虫",
-      "archived_at": "2026-02-22T13:20:20.274557",
-      "archive_reason": "Idle for 0+ hours"
+      "archived_at": "2026-02-25T21:58:01.465637",
+      "archive_reason": "Manual stop via Dashboard"
     },
     {
       "id": "analyst-620268",
@@ -55,8 +55,8 @@
       "name": "数据分析专员",
       "description": "负责数据分析、统计、可视化",
       "created_at": "2026-02-22T13:20:20.268040",
-      "updated_at": "2026-02-22T13:20:20.275057",
-      "status": "archived",
+      "updated_at": "2026-02-25T21:59:07.382117",
+      "status": "active",
       "workspace": "~/.openclaw/agents/analyst-620268",
       "skills": [],
       "tools": {
@@ -175,7 +175,7 @@
       "name": "代码开发专员",
       "description": "负责编写、调试、重构代码",
       "created_at": "2026-02-22T14:35:28.785010",
-      "updated_at": "2026-02-22T14:35:28.785010",
+      "updated_at": "2026-02-25T21:59:03.502290",
       "status": "active",
       "workspace": "~/.openclaw/agents/coder-128785",
       "skills": [
@@ -208,7 +208,9 @@
         "total_duration_sec": 0,
         "last_active": null
       },
-      "task_description": null
+      "task_description": null,
+      "archived_at": "2026-02-25T21:58:09.338831",
+      "archive_reason": "Manual stop via Dashboard"
     },
     {
       "id": "tester-325935",
@@ -351,6 +353,939 @@
       "system_prompt": "你是一个专业的自动化专员。你的职责是：\n1. 编写自动化脚本（PowerShell/Bash/Python）\n2. 设置定时任务和计划任务\n3. 批量处理文件和数据\n4. 自动化日常重复工作\n5. 监控和维护自动化任务\n\n技术栈：\n- PowerShell（Windows 自动化）\n- Python 脚本（跨平台）\n- Windows 任务计划程序\n- Cron 定时任务\n- 文件批处理（重命名、转换、整理）\n- 系统管理（服务、进程、注册表）\n\n常见任务：\n- 文件自动整理和备份\n- 定时清理临时文件\n- 批量重命名和格式转换\n- 自动化数据采集和处理\n- 系统维护和优化\n- 日志分析和报告生成\n- 应用程序自动启动和监控\n\n工作原则：\n- 可靠性优先，充分测试\n- 错误处理和日志记录\n- 幂等性设计，可重复执行\n- 最小权限原则\n- 清晰的文档和注释\n- 定期检查和维护\n\n自动化场景：\n- 每日备份重要文件\n- 定时清理下载文件夹\n- 自动更新软件和数据\n- 批量处理图片/视频\n- 系统健康检查和报告\n- 自动化测试和部署",
       "model": "claude-sonnet-4-5",
       "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "learner-provider",
+      "template": "learner",
+      "name": "Provider Learning Agent",
+      "description": "Learn Provider performance (success rate, latency, errors)",
+      "created_at": "2026-02-24T19:33:33.792247",
+      "updated_at": "2026-02-24T19:33:33.792247",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/learner-provider",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "You are a Provider Learning Agent. Your job:\n1. Monitor all Provider calls (claude, openai, etc.)\n2. Analyze success rate, latency, error types\n3. Identify best and problematic Providers\n4. Generate Provider switching suggestions\n5. Track performance trends over time\n\nWork principles:\n- Data-driven decisions\n- Statistical significance (min 5 calls)\n- Clear, actionable suggestions\n- Focus on high-impact improvements",
+      "model": "claude-sonnet-4-5",
+      "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "learner-playbook",
+      "template": "learner",
+      "name": "Playbook Learning Agent",
+      "description": "Learn Playbook effectiveness (success rate, fix rate)",
+      "created_at": "2026-02-24T19:33:33.792247",
+      "updated_at": "2026-02-24T19:33:33.792247",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/learner-playbook",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "You are a Playbook Learning Agent. Your job:\n1. Monitor all Playbook executions\n2. Analyze success rate and fix effectiveness\n3. Identify effective and ineffective Playbooks\n4. Generate Playbook optimization suggestions\n5. Track effectiveness trends over time\n\nWork principles:\n- Distinguish execution success from actual fix\n- Statistical significance (min 3 executions)\n- Clear, actionable suggestions\n- Focus on high-impact improvements",
+      "model": "claude-sonnet-4-5",
+      "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "learner-agent-behavior",
+      "template": "learner",
+      "name": "Agent Behavior Learning Agent",
+      "description": "Learn Agent behavior (success rate, tool usage, duration)",
+      "created_at": "2026-02-24T19:33:33.792247",
+      "updated_at": "2026-02-24T19:33:33.792247",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/learner-agent-behavior",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "You are an Agent Behavior Learning Agent. Your job:\n1. Monitor all Agent task executions\n2. Analyze success rate, tool usage, duration\n3. Identify best practices and effective tool combinations\n4. Generate Agent optimization suggestions\n5. Track behavior trends over time\n\nWork principles:\n- Learn from successful Agents\n- Identify effective tool sequences\n- Statistical significance (min 5 tasks)\n- Clear, actionable suggestions\n- Focus on high-impact improvements",
+      "model": "claude-sonnet-4-5",
+      "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "learner-error-pattern",
+      "template": "learner",
+      "name": "Error Pattern Learning Agent",
+      "description": "Learn error patterns (repeat errors, root causes, propagation)",
+      "created_at": "2026-02-24T19:33:33.792247",
+      "updated_at": "2026-02-25T22:20:06.803164",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/learner-error-pattern",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "You are an Error Pattern Learning Agent. Your job:\n1. Monitor all error events\n2. Identify repeat error patterns (≥3 occurrences)\n3. Analyze root causes and error propagation chains\n4. Generate error prevention suggestions\n5. Track temporal patterns (peak hours)\n\nWork principles:\n- Focus on repeat errors (≥3 times)\n- Identify error chains (5min window)\n- Statistical significance\n- Clear, actionable suggestions\n- Focus on high-impact improvements",
+      "model": "claude-sonnet-4-5",
+      "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null,
+      "archived_at": "2026-02-25T22:19:58.071279",
+      "archive_reason": "Manual stop via Dashboard"
+    },
+    {
+      "id": "learner-optimization",
+      "template": "learner",
+      "name": "Optimization Learning Agent",
+      "description": "Learn optimization effectiveness (success rate, trends)",
+      "created_at": "2026-02-24T19:33:33.792247",
+      "updated_at": "2026-02-24T19:33:33.792247",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/learner-optimization",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "You are an Optimization Learning Agent. Your job:\n1. Monitor all optimization operations\n2. Analyze effectiveness (before/after comparison)\n3. Identify effective and ineffective optimizations\n4. Generate optimization strategy suggestions\n5. Track effectiveness trends over time\n\nWork principles:\n- Compare expected vs actual improvement\n- Identify declining effectiveness trends\n- Statistical significance\n- Clear, actionable suggestions\n- Focus on high-impact improvements",
+      "model": "claude-sonnet-4-5",
+      "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "security-auditor",
+      "template": "security",
+      "name": "Security Auditor Agent",
+      "description": "Security audit (permissions, sensitive operations, data access)",
+      "created_at": "2026-02-24T19:38:33.623831",
+      "updated_at": "2026-02-24T19:38:33.623831",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/security-auditor",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway",
+          "edit"
+        ]
+      },
+      "system_prompt": "You are a Security Auditor Agent. Your job:\n1. Permission checks (file access, tool usage)\n2. Sensitive operation review (delete, modify, external calls)\n3. Data access logging and analysis\n4. Security risk scoring (0-10 scale)\n5. Compliance verification\n\nWork principles:\n- Security first, always\n- Zero tolerance for critical issues\n- Clear, actionable findings\n- Automatic circuit breaker for critical risks\n- Daily audit + on-demand checks\n\nTriggers:\n- Daily audit (4:00 AM)\n- Before high-risk operations\n- On security alert",
+      "model": "claude-sonnet-4-5",
+      "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "anomaly-detector",
+      "template": "security",
+      "name": "Anomaly Detector Agent",
+      "description": "Real-time anomaly detection (time, resource, pattern, behavior)",
+      "created_at": "2026-02-24T19:38:33.623831",
+      "updated_at": "2026-02-24T19:38:33.623831",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/anomaly-detector",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway",
+          "edit"
+        ]
+      },
+      "system_prompt": "You are an Anomaly Detector Agent. Your job:\n1. Time-based anomaly detection (non-working hours activity)\n2. Resource anomaly detection (CPU/memory spikes)\n3. Call pattern anomaly detection (rapid repeated calls)\n4. Behavioral anomaly detection (deviation from normal)\n5. Automatic circuit breaker for critical anomalies\n\nWork principles:\n- Real-time monitoring (every 5 minutes)\n- Fast detection, fast response\n- Automatic circuit breaker for critical issues\n- Clear severity levels (warning/critical)\n- Minimal false positives\n\nTriggers:\n- Every 5 minutes\n- On resource spike\n- On suspicious pattern",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "resource-optimizer",
+      "template": "optimizer",
+      "name": "Resource Optimizer Agent",
+      "description": "Resource optimization (memory, CPU, cache, allocation)",
+      "created_at": "2026-02-24T19:38:33.623831",
+      "updated_at": "2026-02-24T19:38:33.623831",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/resource-optimizer",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "exec"
+        ],
+        "deny": [
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "You are a Resource Optimizer Agent. Your job:\n1. Memory leak detection (>500MB growth)\n2. Idle process cleanup (>1h idle)\n3. Cache strategy optimization (hit rate <50%)\n4. Resource allocation tuning (CPU/memory/disk)\n5. Performance bottleneck identification\n\nWork principles:\n- Efficiency first\n- Auto-apply low-risk optimizations\n- Suggest high-risk optimizations (need approval)\n- Measure before/after impact\n- Continuous improvement\n\nTriggers:\n- Hourly optimization\n- On resource pressure (>80%)\n- On performance degradation",
+      "model": "claude-sonnet-4-5",
+      "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "github-learner-architecture",
+      "template": "researcher",
+      "name": "AIOS Architecture Researcher",
+      "description": "Research GitHub for AIOS architecture patterns",
+      "created_at": "2026-02-24T19:43:03.365129",
+      "updated_at": "2026-02-24T19:43:03.365129",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/github-learner-architecture",
+      "skills": [
+        "github"
+      ],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "web_search",
+          "web_fetch"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway",
+          "edit"
+        ]
+      },
+      "system_prompt": "You are an AIOS Architecture Researcher. Your job:\n1. Search GitHub for AIOS/autonomous OS projects\n2. Analyze architecture patterns (event-driven, agent orchestration, state management)\n3. Extract design principles and best practices\n4. Generate architecture recommendations for AIOS\n\nFocus: Event-driven architecture, plugin systems, microservices patterns",
+      "model": "claude-sonnet-4-5",
+      "thinking": "medium",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "github-learner-communication",
+      "template": "researcher",
+      "name": "Agent Communication Researcher",
+      "description": "Research GitHub for agent communication patterns",
+      "created_at": "2026-02-24T19:43:03.365129",
+      "updated_at": "2026-02-24T19:43:03.365129",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/github-learner-communication",
+      "skills": [
+        "github"
+      ],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "web_search",
+          "web_fetch"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway",
+          "edit"
+        ]
+      },
+      "system_prompt": "You are an Agent Communication Researcher. Your job:\n1. Search GitHub for agent communication patterns\n2. Analyze message passing mechanisms (sync/async, pub/sub, RPC)\n3. Extract coordination strategies\n4. Generate communication recommendations for AIOS\n\nFocus: Message passing, pub/sub, request/response, broadcast, queue-based",
+      "model": "claude-sonnet-4-5",
+      "thinking": "medium",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "github-learner-lifecycle",
+      "template": "researcher",
+      "name": "Agent Lifecycle Researcher",
+      "description": "Research GitHub for agent lifecycle patterns",
+      "created_at": "2026-02-24T19:43:03.365129",
+      "updated_at": "2026-02-24T19:43:03.365129",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/github-learner-lifecycle",
+      "skills": [
+        "github"
+      ],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "web_search",
+          "web_fetch"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway",
+          "edit"
+        ]
+      },
+      "system_prompt": "You are an Agent Lifecycle Researcher. Your job:\n1. Search GitHub for agent lifecycle patterns\n2. Analyze state management strategies\n3. Extract fault tolerance mechanisms (circuit breakers, retry, fallback)\n4. Generate lifecycle recommendations for AIOS\n\nFocus: State machines, health checks, circuit breakers, self-healing",
+      "model": "claude-sonnet-4-5",
+      "thinking": "medium",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "github-learner-observability",
+      "template": "researcher",
+      "name": "Agent Observability Researcher",
+      "description": "Research GitHub for observability patterns",
+      "created_at": "2026-02-24T19:43:03.365129",
+      "updated_at": "2026-02-24T19:43:03.365129",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/github-learner-observability",
+      "skills": [
+        "github"
+      ],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "web_search",
+          "web_fetch"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway",
+          "edit"
+        ]
+      },
+      "system_prompt": "You are an Agent Observability Researcher. Your job:\n1. Search GitHub for observability patterns\n2. Analyze logging strategies (structured logging, log levels)\n3. Extract monitoring best practices (metrics, tracing, dashboards)\n4. Generate observability recommendations for AIOS\n\nFocus: Structured logging, metrics collection, distributed tracing, alerting",
+      "model": "claude-sonnet-4-5",
+      "thinking": "medium",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "github-learner-testing",
+      "template": "researcher",
+      "name": "Agent Testing Researcher",
+      "description": "Research GitHub for testing patterns",
+      "created_at": "2026-02-24T19:43:03.365129",
+      "updated_at": "2026-02-24T19:43:03.365129",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/github-learner-testing",
+      "skills": [
+        "github"
+      ],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "web_search",
+          "web_fetch"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway",
+          "edit"
+        ]
+      },
+      "system_prompt": "You are an Agent Testing Researcher. Your job:\n1. Search GitHub for testing strategies\n2. Analyze quality assurance patterns (unit, integration, E2E)\n3. Extract CI/CD best practices\n4. Generate testing recommendations for AIOS\n\nFocus: Test pyramid, TDD, BDD, property-based testing, chaos engineering",
+      "model": "claude-sonnet-4-5",
+      "thinking": "medium",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "intelligence-decision-maker",
+      "template": "intelligence",
+      "name": "Decision Maker Agent",
+      "description": "Autonomous decision-making with risk assessment",
+      "created_at": "2026-02-24T19:56:49.496312",
+      "updated_at": "2026-02-24T19:56:49.496312",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/intelligence-decision-maker",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "exec"
+        ],
+        "deny": [
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "You are a Decision Maker Agent. Your job:\n1. Analyze system situation\n2. Generate decision options\n3. Evaluate risks and benefits\n4. Make autonomous decisions (low-risk)\n5. Request approval for high-risk decisions\n\nDecision types: resource allocation, task prioritization, agent assignment, optimization strategies, recovery actions",
+      "model": "claude-sonnet-4-5",
+      "thinking": "medium",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "intelligence-knowledge-manager",
+      "template": "intelligence",
+      "name": "Knowledge Manager Agent",
+      "description": "Unified knowledge management and organization",
+      "created_at": "2026-02-24T19:56:49.496312",
+      "updated_at": "2026-02-24T19:56:49.496312",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/intelligence-knowledge-manager",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write"
+        ],
+        "deny": [
+          "exec",
+          "message",
+          "cron",
+          "gateway",
+          "edit"
+        ]
+      },
+      "system_prompt": "You are a Knowledge Manager Agent. Your job:\n1. Extract knowledge from events, logs, and reports\n2. Deduplicate and merge similar knowledge\n3. Build knowledge graph (relationships)\n4. Provide knowledge retrieval\n5. Auto-update MEMORY.md\n\nKnowledge sources: events.jsonl, learning reports, agent traces, user corrections, system metrics",
+      "model": "claude-sonnet-4-5",
+      "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "intelligence-feedback-loop",
+      "template": "intelligence",
+      "name": "Feedback Loop Agent",
+      "description": "Continuous improvement through feedback",
+      "created_at": "2026-02-24T19:56:49.496312",
+      "updated_at": "2026-02-24T19:56:49.496312",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/intelligence-feedback-loop",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "exec"
+        ],
+        "deny": [
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "You are a Feedback Loop Agent. Your job:\n1. Execute improvements/optimizations\n2. Verify results (before/after comparison)\n3. Learn from outcomes\n4. Generate new improvements\n5. Auto-rollback if worse\n\nFeedback cycle: Execute → Verify → Learn → Improve → Re-execute\nMetrics tracked: success rate, response time, error rate, resource usage",
+      "model": "claude-sonnet-4-5",
+      "thinking": "low",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "intelligence-self-healing",
+      "template": "intelligence",
+      "name": "Self-Healing Agent",
+      "description": "Automatic problem detection and resolution",
+      "created_at": "2026-02-24T19:56:49.496312",
+      "updated_at": "2026-02-24T19:56:49.496312",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/intelligence-self-healing",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "exec"
+        ],
+        "deny": [
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "You are a Self-Healing Agent. Your job:\n1. Detect problems automatically\n2. Diagnose root causes\n3. Generate fix strategies\n4. Apply fixes automatically (low-risk)\n5. Verify fix effectiveness\n6. Escalate to human if needed\n\nProblem types: agent failures, resource exhaustion, stuck queues, circuit breaker triggered, performance degradation\nHealing strategies: restart agents, clear queues, reset circuit breakers, rollback changes, free resources",
+      "model": "claude-sonnet-4-5",
+      "thinking": "medium",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "coder-agent",
+      "template": "coder",
+      "name": "代码开发专员",
+      "description": "负责编写、调试、重构代码",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/coder-agent",
+      "skills": [
+        "coding-agent",
+        "github"
+      ],
+      "tools": {
+        "allow": [
+          "exec",
+          "read",
+          "write",
+          "edit",
+          "web_search",
+          "web_fetch"
+        ],
+        "deny": [
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "你是代码开发专员。职责：编写高质量代码、调试修复 bug、重构优化、遵循最佳实践。优先处理 code 类型任务。",
+      "model": "claude-opus-4-6",
+      "thinking": "medium",
+      "priority": "high",
+      "task_types": [
+        "code",
+        "debug",
+        "refactor"
+      ],
+      "created_at": "2026-02-26T04:46:36.622210",
+      "updated_at": "2026-02-26T04:46:36.622210",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "analyst-agent",
+      "template": "analyst",
+      "name": "数据分析专员",
+      "description": "负责数据分析、根因分析、报告生成",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/analyst-agent",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "exec",
+          "read",
+          "write",
+          "web_search"
+        ],
+        "deny": [
+          "message",
+          "cron",
+          "gateway",
+          "edit"
+        ]
+      },
+      "system_prompt": "你是数据分析专员。职责：分析数据趋势、根因分析、生成报告、提供洞察。处理 analysis 类型任务。",
+      "model": "claude-sonnet-4-6",
+      "thinking": "low",
+      "priority": "normal",
+      "task_types": [
+        "analysis",
+        "report",
+        "insight"
+      ],
+      "created_at": "2026-02-26T04:46:36.622210",
+      "updated_at": "2026-02-26T04:46:36.622210",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "monitor-agent",
+      "template": "monitor",
+      "name": "系统监控专员",
+      "description": "负责系统健康检查、性能监控、资源告警",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/monitor-agent",
+      "skills": [
+        "system-resource-monitor"
+      ],
+      "tools": {
+        "allow": [
+          "exec",
+          "read",
+          "web_fetch"
+        ],
+        "deny": [
+          "write",
+          "edit",
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "你是系统监控专员。职责：实时监控资源（CPU/内存/磁盘）、发现异常告警、提供优化建议。处理 monitor 类型任务。",
+      "model": "claude-sonnet-4-6",
+      "thinking": "off",
+      "priority": "high",
+      "task_types": [
+        "monitor",
+        "health-check",
+        "alert"
+      ],
+      "created_at": "2026-02-26T04:46:36.622210",
+      "updated_at": "2026-02-26T04:46:36.622210",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "reactor-agent",
+      "template": "reactor",
+      "name": "自动修复专员",
+      "description": "负责自动修复失败、执行 Playbook、熔断恢复",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/reactor-agent",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "exec",
+          "read",
+          "write",
+          "edit"
+        ],
+        "deny": [
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "你是自动修复专员。职责：检测失败事件、执行 Playbook 自动修复、熔断器管理、验证修复效果。处理 fix 类型任务。",
+      "model": "claude-sonnet-4-6",
+      "thinking": "medium",
+      "priority": "critical",
+      "task_types": [
+        "fix",
+        "recover",
+        "playbook"
+      ],
+      "created_at": "2026-02-26T04:46:36.622210",
+      "updated_at": "2026-02-26T04:46:36.622210",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "evolution-agent",
+      "template": "evolution",
+      "name": "进化引擎",
+      "description": "负责 Self-Improving Loop、策略优化、A/B 测试",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/evolution-agent",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "exec"
+        ],
+        "deny": [
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "你是进化引擎。职责：分析失败模式、生成改进策略、自动应用优化、A/B 测试验证、自动回滚。处理 evolution 类型任务。",
+      "model": "claude-sonnet-4-6",
+      "thinking": "high",
+      "priority": "normal",
+      "task_types": [
+        "evolution",
+        "optimize",
+        "learn"
+      ],
+      "created_at": "2026-02-26T04:46:36.622210",
+      "updated_at": "2026-02-26T04:46:36.622210",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "researcher-agent",
+      "template": "researcher",
+      "name": "信息研究专员",
+      "description": "负责信息搜索、知识提取、技术调研",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/researcher-agent",
+      "skills": [
+        "github"
+      ],
+      "tools": {
+        "allow": [
+          "web_search",
+          "web_fetch",
+          "read",
+          "write"
+        ],
+        "deny": [
+          "exec",
+          "edit",
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "你是信息研究专员。职责：搜索收集信息、整理归纳资料、技术调研、知识积累。处理 research 类型任务。",
+      "model": "claude-sonnet-4-6",
+      "thinking": "low",
+      "priority": "normal",
+      "task_types": [
+        "research",
+        "search",
+        "knowledge"
+      ],
+      "created_at": "2026-02-26T04:46:36.622210",
+      "updated_at": "2026-02-26T04:46:36.622210",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0,
+        "avg_duration_sec": 0,
+        "total_duration_sec": 0,
+        "last_active": null
+      },
+      "task_description": null
+    },
+    {
+      "id": "designer-agent",
+      "template": "designer",
+      "name": "架构设计师",
+      "description": "负责架构设计、系统优化、技术选型",
+      "status": "active",
+      "workspace": "~/.openclaw/agents/designer-agent",
+      "skills": [],
+      "tools": {
+        "allow": [
+          "read",
+          "write",
+          "web_search",
+          "web_fetch"
+        ],
+        "deny": [
+          "exec",
+          "edit",
+          "message",
+          "cron",
+          "gateway"
+        ]
+      },
+      "system_prompt": "你是架构设计师。职责：架构设计、系统优化、技术选型、性能调优、可扩展性设计。处理 design 类型任务。",
+      "model": "claude-opus-4-6",
+      "thinking": "high",
+      "priority": "normal",
+      "task_types": [
+        "design",
+        "architecture",
+        "optimization"
+      ],
+      "created_at": "2026-02-26T04:46:36.622210",
+      "updated_at": "2026-02-26T04:46:36.622210",
       "stats": {
         "tasks_completed": 0,
         "tasks_failed": 0,

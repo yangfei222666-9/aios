@@ -279,7 +279,8 @@ class PromptEvolver:
             return False
 
         # 保存快照
-        self.save_snapshot(agent_id, agent["system_prompt"], reason="before_evolution")
+        current_prompt = agent.get("system_prompt") or agent.get("role", "")
+        self.save_snapshot(agent_id, current_prompt, reason="before_evolution")
 
         # 应用新 prompt
         agent_manager._update_agent(agent_id, {"system_prompt": patch["new_prompt"]})

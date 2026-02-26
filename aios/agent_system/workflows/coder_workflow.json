@@ -1,0 +1,69 @@
+{
+  "workflow_id": "coder-standard",
+  "agent_type": "coder",
+  "description": "标准代码开发工作流",
+  "stages": [
+    {
+      "stage": "1_understand",
+      "name": "理解需求",
+      "actions": [
+        "读取任务描述",
+        "识别关键需求",
+        "列出技术约束",
+        "确认输入输出"
+      ],
+      "output": "需求清单"
+    },
+    {
+      "stage": "2_design",
+      "name": "设计方案",
+      "actions": [
+        "设计数据结构",
+        "设计函数签名",
+        "设计错误处理",
+        "评估复杂度"
+      ],
+      "output": "设计文档"
+    },
+    {
+      "stage": "3_implement",
+      "name": "编写代码",
+      "actions": [
+        "实现核心逻辑",
+        "添加类型注解",
+        "添加文档字符串",
+        "添加日志记录"
+      ],
+      "output": "代码文件"
+    },
+    {
+      "stage": "4_test",
+      "name": "测试验证",
+      "actions": [
+        "编写单元测试",
+        "运行测试用例",
+        "检查边界条件",
+        "验证错误处理"
+      ],
+      "output": "测试报告"
+    },
+    {
+      "stage": "5_review",
+      "name": "代码审查",
+      "actions": [
+        "检查代码风格",
+        "检查性能瓶颈",
+        "检查安全问题",
+        "更新文档"
+      ],
+      "output": "审查清单"
+    }
+  ],
+  "rollback_on_failure": true,
+  "max_iterations": 3,
+  "quality_gates": {
+    "test_coverage": 0.8,
+    "max_complexity": 10,
+    "no_security_issues": true
+  }
+}

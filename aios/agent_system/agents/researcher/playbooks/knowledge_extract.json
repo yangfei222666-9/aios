@@ -1,0 +1,1 @@
+﻿{"name": "knowledge_extract", "trigger": "new_info", "action": "save_to_lessons.json"}

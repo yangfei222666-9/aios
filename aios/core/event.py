@@ -34,8 +34,40 @@ class Event:
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Event":
-        """从字典创建事件"""
-        return cls(**data)
+        """从字典创建事件（兼容旧格式：额外字段自动归入 payload）"""
+        from datetime import datetime as _dt
+        known_fields = {"id", "type", "source", "timestamp", "payload"}
+        known = {}
+        extra = {}
+        for k, v in data.items():
+            if k in known_fields:
+                known[k] = v
+            else:
+                extra[k] = v
+        # 合并额外字段到 payload
+        if extra:
+            payload = known.get("payload", {})
+            if not isinstance(payload, dict):
+                payload = {}
+            payload.update(extra)
+            known["payload"] = payload
+        # 确保必要字段存在
+        if "id" not in known:
+            known["id"] = str(uuid.uuid4())
+        if "source" not in known:
+            known["source"] = known.get("payload", {}).get("source", "unknown")
+        if "payload" not in known:
+            known["payload"] = {}
+        # 兼容 ISO 字符串 timestamp → 毫秒整数
+        ts = known.get("timestamp")
+        if isinstance(ts, str):
+            try:
+                known["timestamp"] = int(_dt.fromisoformat(ts).timestamp() * 1000)
+            except Exception:
+                known["timestamp"] = int(time.time() * 1000)
+        elif ts is None:
+            known["timestamp"] = int(time.time() * 1000)
+        return cls(**known)
 
 
 # 标准事件类型常量

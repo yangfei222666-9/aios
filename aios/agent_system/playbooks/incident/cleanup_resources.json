@@ -1,0 +1,17 @@
+{
+  "name": "cleanup_resources",
+  "description": "清理资源",
+  "actions": [
+    {
+      "type": "cleanup",
+      "targets": [
+        "temp_files",
+        "old_logs"
+      ]
+    },
+    {
+      "type": "retry",
+      "max_retries": 1
+    }
+  ]
+}

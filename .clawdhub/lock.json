@@ -32,6 +32,54 @@
     "news-summary": {
       "version": "1.0.1",
       "installedAt": 1771828739594
+    },
+    "pls-agent-tools": {
+      "version": "1.0.0",
+      "installedAt": 1771864244091
+    },
+    "screenshot": {
+      "version": "1.0.0",
+      "installedAt": 1771874469306
+    },
+    "file-organizer-skill": {
+      "version": "1.0.0",
+      "installedAt": 1771874505020
+    },
+    "todoist": {
+      "version": "0.2.1",
+      "installedAt": 1771874519129
+    },
+    "web-monitor": {
+      "version": "1.0.0",
+      "installedAt": 1771874576579
+    },
+    "tavily-search": {
+      "version": "1.0.0",
+      "installedAt": 1771874749932
+    },
+    "find-skills": {
+      "version": "0.1.0",
+      "installedAt": 1771874753652
+    },
+    "monitoring": {
+      "version": "1.0.0",
+      "installedAt": 1771874931325
+    },
+    "hz-error-guard": {
+      "version": "1.0.0",
+      "installedAt": 1771874945579
+    },
+    "automation-workflows": {
+      "version": "0.1.0",
+      "installedAt": 1771875001718
+    },
+    "server-health": {
+      "version": "1.0.0",
+      "installedAt": 1771875055475
+    },
+    "agent-team-orchestration": {
+      "version": "1.0.0",
+      "installedAt": 1771876202425
     }
   }
 }

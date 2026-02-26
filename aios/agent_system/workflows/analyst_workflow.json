@@ -1,0 +1,69 @@
+{
+  "workflow_id": "analyst-standard",
+  "agent_type": "analyst",
+  "description": "标准数据分析工作流",
+  "stages": [
+    {
+      "stage": "1_collect",
+      "name": "数据收集",
+      "actions": [
+        "读取数据源（events.jsonl/metrics/logs）",
+        "验证数据完整性",
+        "识别数据范围",
+        "记录数据统计"
+      ],
+      "output": "数据清单"
+    },
+    {
+      "stage": "2_clean",
+      "name": "数据清洗",
+      "actions": [
+        "去除重复数据",
+        "处理缺失值",
+        "标准化格式",
+        "过滤异常值"
+      ],
+      "output": "清洗后数据"
+    },
+    {
+      "stage": "3_analyze",
+      "name": "数据分析",
+      "actions": [
+        "计算统计指标",
+        "识别趋势模式",
+        "发现异常点",
+        "关联分析"
+      ],
+      "output": "分析结果"
+    },
+    {
+      "stage": "4_insight",
+      "name": "洞察提取",
+      "actions": [
+        "总结关键发现",
+        "识别根因",
+        "评估影响",
+        "生成建议"
+      ],
+      "output": "洞察报告"
+    },
+    {
+      "stage": "5_visualize",
+      "name": "可视化",
+      "actions": [
+        "生成图表",
+        "创建仪表盘",
+        "导出报告",
+        "更新文档"
+      ],
+      "output": "可视化报告"
+    }
+  ],
+  "rollback_on_failure": false,
+  "max_iterations": 2,
+  "quality_gates": {
+    "min_data_points": 10,
+    "confidence_level": 0.95,
+    "no_data_leakage": true
+  }
+}

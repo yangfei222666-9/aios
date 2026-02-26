@@ -1,0 +1,69 @@
+{
+  "workflow_id": "monitor-standard",
+  "agent_type": "monitor",
+  "description": "标准系统监控工作流",
+  "stages": [
+    {
+      "stage": "1_observe",
+      "name": "观察系统",
+      "actions": [
+        "读取系统指标（CPU/内存/磁盘）",
+        "读取事件日志",
+        "读取错误日志",
+        "记录基线数据"
+      ],
+      "output": "观察数据"
+    },
+    {
+      "stage": "2_detect",
+      "name": "异常检测",
+      "actions": [
+        "对比基线阈值",
+        "识别异常模式",
+        "计算异常评分",
+        "分类异常类型"
+      ],
+      "output": "异常清单"
+    },
+    {
+      "stage": "3_diagnose",
+      "name": "诊断根因",
+      "actions": [
+        "分析错误堆栈",
+        "追踪事件链",
+        "识别触发条件",
+        "评估影响范围"
+      ],
+      "output": "诊断报告"
+    },
+    {
+      "stage": "4_alert",
+      "name": "告警通知",
+      "actions": [
+        "评估告警级别（info/warning/critical）",
+        "生成告警消息",
+        "发送通知（Telegram）",
+        "记录告警历史"
+      ],
+      "output": "告警记录"
+    },
+    {
+      "stage": "5_recommend",
+      "name": "修复建议",
+      "actions": [
+        "匹配 Playbook",
+        "生成修复方案",
+        "评估风险等级",
+        "提交修复请求"
+      ],
+      "output": "修复建议"
+    }
+  ],
+  "rollback_on_failure": false,
+  "max_iterations": 1,
+  "quality_gates": {
+    "false_positive_rate": 0.1,
+    "alert_latency_sec": 60,
+    "no_missed_critical": true
+  }
+}

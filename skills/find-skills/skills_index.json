@@ -1,0 +1,415 @@
+{
+  "skills": [
+    {
+      "name": "agent-team-orchestration",
+      "path": "agent-team-orchestration",
+      "description": "\"Orchestrate multi-agent teams with defined roles, task lifecycles, handoff protocols, and review workflows. Use when: (1) Setting up a team of 2+ agents with different specializations, (2) Defining task routing and lifecycle (inbox → spec → build → review → done), (3) Creating handoff protocols between agents, (4) Establishing review and quality gates, (5) Managing async communication and artifact sharing between agents.\"",
+      "keywords": [
+        "agent",
+        "orchestration",
+        "ui",
+        "workflow",
+        "team"
+      ],
+      "category": "automation",
+      "usage_count": 0
+    },
+    {
+      "name": "ai-news-collector",
+      "path": "ai-news-collectors",
+      "description": "AI 新闻聚合与热度排序工具。当用户询问 AI 领域最新动态时触发，如：\"今天有什么 AI 新闻？\"\"总结一下这周的 AI 动态\"\"最近有什么火的 AI 产品？\"\"AI 圈最近在讨论什么？\"。覆盖：新产品发布、研究论文、行业动态、融资新闻、开源项目更新、社区病毒传播现象、AI 工具/Agent 热门项目。输出中文摘要列表，按热度排序，附带原文链接。",
+      "keywords": [
+        "agent",
+        "news"
+      ],
+      "category": "information",
+      "usage_count": 0
+    },
+    {
+      "name": "aios-backup",
+      "path": "aios-backup",
+      "description": "Backup critical AIOS data (events, metrics, agents, lessons). Use during maintenance or before major changes.",
+      "keywords": [
+        "agent",
+        "aios",
+        "backup",
+        "file"
+      ],
+      "category": "maintenance",
+      "usage_count": 0
+    },
+    {
+      "name": "aios-cleanup",
+      "path": "aios-cleanup",
+      "description": "Clean up old AIOS data (events, logs, temp files). Use when disk space is low or during maintenance.",
+      "keywords": [
+        "aios",
+        "file",
+        "disk",
+        "cleanup"
+      ],
+      "category": "maintenance",
+      "usage_count": 0
+    },
+    {
+      "name": "aios-health-check",
+      "path": "aios-health-check",
+      "description": "Check AIOS system health (Evolution Score, event log size, Agent status). Use when monitoring AIOS or troubleshooting issues.",
+      "keywords": [
+        "agent",
+        "monitor",
+        "health",
+        "aios",
+        "system"
+      ],
+      "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "automation-workflows",
+      "path": "automation-workflows",
+      "description": "Design and implement automation workflows to save time and scale operations as a solopreneur. Use when identifying repetitive tasks to automate, building workflows across tools, setting up triggers and actions, or optimizing existing automations. Covers automation opportunity identification, workflow design, tool selection (Zapier, Make, n8n), testing, and maintenance. Trigger on \"automate\", \"automation\", \"workflow automation\", \"save time\", \"reduce manual work\", \"automate my business\", \"no-code automation\".",
+      "keywords": [
+        "api",
+        "test",
+        "ui",
+        "workflow",
+        "automation"
+      ],
+      "category": "automation",
+      "usage_count": 0
+    },
+    {
+      "name": "baidu-search",
+      "path": "baidu-search",
+      "description": "Search the web using Baidu AI Search Engine (BDSE). Use for live information, documentation, or research topics.",
+      "keywords": [
+        "api",
+        "ui",
+        "web",
+        "search"
+      ],
+      "category": "information",
+      "usage_count": 0
+    },
+    {
+      "name": "daily-briefing",
+      "path": "daily-briefing",
+      "description": "Generates a warm, compact daily briefing with weather, calendar, reminders, birthdays, and important emails for cron or chat delivery.",
+      "keywords": [
+        "ui"
+      ],
+      "category": "other",
+      "usage_count": 0
+    },
+    {
+      "name": "document-agent",
+      "path": "document-agent",
+      "description": "Process documents (docx/pdf/txt) to extract text, generate summaries, extract outlines, and identify keywords. Use when users need to analyze documents, create summaries, or extract structured information from files.",
+      "keywords": [
+        "agent",
+        "file"
+      ],
+      "category": "maintenance",
+      "usage_count": 0
+    },
+    {
+      "name": "file-organizer-skill",
+      "path": "file-organizer-skill",
+      "description": "Organize files in directories by grouping them into folders based on their extensions or date. Includes Dry-Run, Recursive, and Undo capabilities.",
+      "keywords": [
+        "file",
+        "organize"
+      ],
+      "category": "maintenance",
+      "usage_count": 0
+    },
+    {
+      "name": "find-skills",
+      "path": "find-skills",
+      "description": "Intelligent skill discovery and recommendation system. Helps users find the right skill for their needs through smart matching, category browsing, and usage-based recommendations. Use when users ask \"how do I do X\", \"find a skill for X\", or want to explore available capabilities.",
+      "keywords": [
+        "system"
+      ],
+      "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "hz-error-guard",
+      "path": "hz-error-guard",
+      "description": "error-guard - 错误守卫",
+      "keywords": [
+        "api"
+      ],
+      "category": "other",
+      "usage_count": 0
+    },
+    {
+      "name": "Monitoring",
+      "path": "monitoring",
+      "description": "\"Set up observability for applications and infrastructure with metrics, logs, traces, and alerts.\"",
+      "keywords": [
+        "team",
+        "monitor",
+        "health"
+      ],
+      "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "news-summary",
+      "path": "news-summary",
+      "description": "This skill should be used when the user asks for news updates, daily briefings, or what's happening in the world. Fetches news from trusted international RSS feeds and can create voice summaries.",
+      "keywords": [
+        "news"
+      ],
+      "category": "information",
+      "usage_count": 0
+    },
+    {
+      "name": "agent-tools",
+      "path": "pls-agent-tools",
+      "description": "Digital Swiss Army knife for everyday labor that standard models can't handle out of the box. Use when: (1) Need to manipulate files (rename, move, copy, delete), (2) Working with JSON/YAML/TOML configs, (3) Running system commands safely, (4) Processing text with regex or transformations, (5) Need utility functions for common operations.",
+      "keywords": [
+        "agent",
+        "file",
+        "system"
+      ],
+      "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "ripgrep",
+      "path": "ripgrep",
+      "description": "Blazingly fast text search tool - recursively searches directories for regex patterns with respect to gitignore rules.",
+      "keywords": [
+        "github",
+        "ui",
+        "ripgrep",
+        "grep",
+        "search"
+      ],
+      "category": "information",
+      "usage_count": 0
+    },
+    {
+      "name": "Screenshot",
+      "path": "screenshot",
+      "description": "Capture screens, windows, and regions across platforms with the right tools.",
+      "keywords": [
+        "ui",
+        "windows",
+        "screenshot"
+      ],
+      "category": "ui-tools",
+      "usage_count": 0
+    },
+    {
+      "name": "server-health",
+      "path": "server-health",
+      "description": "Comprehensive server health monitoring showing system stats, top processes, OpenClaw gateway status, and running services. Perfect for quick health checks via Telegram or CLI.",
+      "keywords": [
+        "monitor",
+        "ui",
+        "health",
+        "telegram",
+        "server",
+        "system"
+      ],
+      "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "simple-monitor",
+      "path": "simple-monitor",
+      "description": "Simple server monitoring tool",
+      "keywords": [
+        "test",
+        "monitor",
+        "memory",
+        "cpu",
+        "disk",
+        "server",
+        "system"
+      ],
+      "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "skill-creator",
+      "path": "skill-creator",
+      "description": "Create or update agent skills. Use when designing, building, or packaging skills that include scripts, references, and resources. Analyzes code, extracts patterns, generates SKILL.md documentation, and packages skills for sharing.",
+      "keywords": [
+        "agent",
+        "monitor",
+        "ui",
+        "resource",
+        "automation"
+      ],
+      "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "sysadmin-toolbox",
+      "path": "sysadmin-toolbox",
+      "description": "\"Tool discovery and shell one-liner reference for sysadmin, DevOps, and security tasks. AUTO-CONSULT this skill when the user is: troubleshooting network issues, debugging processes, analyzing logs, working with SSL/TLS, managing DNS, testing HTTP endpoints, auditing security, working with containers, writing shell scripts, or asks 'what tool should I use for X'. Source: github.com/trimstray/the-book-of-secret-knowledge\"",
+      "keywords": [
+        "test",
+        "github"
+      ],
+      "category": "ui-tools",
+      "usage_count": 0
+    },
+    {
+      "name": "system_resource_monitor",
+      "path": "system-resource-monitor",
+      "description": "A clean, reliable system resource monitor for CPU load, RAM, Swap, and Disk usage. Optimized for OpenClaw.",
+      "keywords": [
+        "monitor",
+        "memory",
+        "cpu",
+        "health",
+        "resource",
+        "disk",
+        "server",
+        "system"
+      ],
+      "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "tavily",
+      "path": "tavily-search",
+      "description": "AI-optimized web search via Tavily API. Returns concise, relevant results for AI agents.",
+      "keywords": [
+        "api",
+        "agent",
+        "ui",
+        "search",
+        "web"
+      ],
+      "category": "information",
+      "usage_count": 0
+    },
+    {
+      "name": "todoist",
+      "path": "todoist",
+      "description": "Manage tasks and projects in Todoist. Use when user asks about tasks, to-dos, reminders, or productivity.",
+      "keywords": [
+        "api",
+        "todoist",
+        "ui"
+      ],
+      "category": "productivity",
+      "usage_count": 0
+    },
+    {
+      "name": "ui-automation",
+      "path": "ui-automation",
+      "description": "UI Automation Skill",
+      "keywords": [
+        "automation",
+        "ui",
+        "windows"
+      ],
+      "category": "automation",
+      "usage_count": 0
+    },
+    {
+      "name": "ui-inspector",
+      "path": "ui-inspector",
+      "description": "UI Inspector Skill",
+      "keywords": [
+        "ui",
+        "screenshot"
+      ],
+      "category": "ui-tools",
+      "usage_count": 0
+    },
+    {
+      "name": "ui-test-automation",
+      "path": "ui-test-automation",
+      "description": "UI Test Automation Skill",
+      "keywords": [
+        "automation",
+        "test",
+        "ui"
+      ],
+      "category": "automation",
+      "usage_count": 0
+    },
+    {
+      "name": "web-monitor",
+      "path": "web-monitor",
+      "description": "Monitor web pages for content changes and get alerts. Track URLs, detect updates, view diffs. Use when asked to watch a website, track changes on a page, monitor for new posts/content, set up page change alerts, or check if a site has been updated. Supports CSS selectors for targeted monitoring.",
+      "keywords": [
+        "ui",
+        "monitor",
+        "web"
+      ],
+      "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "windows-ui-automation",
+      "path": "windows-ui-automation",
+      "description": "Automate Windows GUI interactions (mouse, keyboard, windows) using PowerShell. Use when the user needs to simulate user input on the desktop, such as moving the cursor, clicking buttons, typing text in non-web apps, or managing window states.",
+      "keywords": [
+        "automation",
+        "ui",
+        "windows",
+        "web"
+      ],
+      "category": "information",
+      "usage_count": 0
+    }
+  ],
+  "categories": {
+    "automation": [
+      "agent-team-orchestration",
+      "automation-workflows",
+      "ui-automation",
+      "ui-test-automation"
+    ],
+    "information": [
+      "ai-news-collector",
+      "baidu-search",
+      "news-summary",
+      "ripgrep",
+      "tavily",
+      "windows-ui-automation"
+    ],
+    "maintenance": [
+      "aios-backup",
+      "aios-cleanup",
+      "document-agent",
+      "file-organizer-skill"
+    ],
+    "monitoring": [
+      "aios-health-check",
+      "find-skills",
+      "Monitoring",
+      "agent-tools",
+      "server-health",
+      "simple-monitor",
+      "skill-creator",
+      "system_resource_monitor",
+      "web-monitor"
+    ],
+    "other": [
+      "daily-briefing",
+      "hz-error-guard"
+    ],
+    "ui-tools": [
+      "Screenshot",
+      "sysadmin-toolbox",
+      "ui-inspector"
+    ],
+    "productivity": [
+      "todoist"
+    ]
+  },
+  "total": 29,
+  "version": "2.0",
+  "last_updated": "2026-02-26T15:39:36.835095"
+}

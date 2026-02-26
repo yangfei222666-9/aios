@@ -13,6 +13,25 @@ import json, sys, io, time, subprocess, uuid
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional
+from contextlib import contextmanager
+
+# 跨平台文件锁
+try:
+    import msvcrt
+    def _lock_file(f):
+        msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+    def _unlock_file(f):
+        try:
+            f.seek(0)
+            msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+        except Exception:
+            pass
+except ImportError:
+    import fcntl
+    def _lock_file(f):
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    def _unlock_file(f):
+        fcntl.flock(f, fcntl.LOCK_UN)
 
 if __name__ == "__main__":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -150,7 +169,8 @@ def execute_action(action, dry_run=False):
     """执行单个 action，返回 (success, result)"""
     atype = action.get("type", "shell")
     target = action.get("target", "")
-    timeout = action.get("timeout", 60)
+    # 优化：降低默认超时从 60s 到 30s，硬上限从 300s 到 120s
+    timeout = min(action.get("timeout", 30), 120)
 
     if dry_run:
         return True, f"[DRY_RUN] would execute: {atype} → {target}"
@@ -293,8 +313,20 @@ def react(alert, mode="auto"):
         is_dry = effective_mode == "dry_run"
         action_results = []
         all_ok = True
+        fast_fail = False  # 快速失败标志
 
         for action in pb.get("actions", []):
+            # 快速失败：如果前一个 action 失败且是高风险，跳过后续
+            if fast_fail:
+                action_results.append({
+                    "type": action.get("type"),
+                    "target": action.get("target", "")[:80],
+                    "risk": action.get("risk", "low"),
+                    "success": False,
+                    "output": "SKIPPED: 前置操作失败",
+                })
+                continue
+            
             ok, output = execute_action(action, dry_run=is_dry)
             action_results.append(
                 {
@@ -307,6 +339,9 @@ def react(alert, mode="auto"):
             )
             if not ok:
                 all_ok = False
+                # 如果是高风险操作失败，启用快速失败
+                if action.get("risk", "low") in ("medium", "high"):
+                    fast_fail = True
 
         # 记录冷却 + 统计
         if not is_dry:

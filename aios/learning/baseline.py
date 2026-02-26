@@ -97,8 +97,27 @@ def _inline_evolution_score(record: dict) -> dict:
         p95_slow_ratio = slow / len(p95)
     else:
         p95_slow_ratio = 0
+    
+    # 资源效率：峰值 CPU/内存超标扣分
+    resource = record.get("resource", {})
+    peak_cpu = resource.get("peak_cpu_percent", 0)
+    peak_mem = resource.get("peak_memory_percent", 0)
+    
+    # CPU > 80% 或 内存 > 85% 算超标
+    resource_penalty = 0
+    if peak_cpu > 80:
+        resource_penalty += (peak_cpu - 80) / 100  # 最多扣 0.2
+    if peak_mem > 85:
+        resource_penalty += (peak_mem - 85) / 100  # 最多扣 0.15
+    resource_penalty = min(resource_penalty, 0.2)  # 封顶 0.2
 
-    score = round(tsr * 0.4 - cr * 0.2 - h502 * 0.2 - p95_slow_ratio * 0.2, 4)
+    score = round(
+        tsr * 0.4           # 系统稳定性（少出错）
+        - cr * 0.15         # 学习能力（纠正率下降）
+        - h502 * 0.15       # 网络稳定性
+        - p95_slow_ratio * 0.15  # 响应速度
+        - resource_penalty * 0.15  # 资源效率
+    , 4)
 
     if score >= 0.35:
         grade = "healthy"
@@ -158,6 +177,22 @@ def snapshot(days: int = 1) -> dict:
         if _classify(e) == "http_error"
         or (e.get("layer") == "SEC" and "http" in e.get("event", ""))
     ]
+    
+    # 资源监控数据（从 KERNEL 层 resource_snapshot 事件提取）
+    resource_events = [
+        e for e in events 
+        if e.get("layer") == "KERNEL" and e.get("event") == "resource_snapshot"
+    ]
+    
+    if resource_events:
+        cpu_values = [e.get("payload", {}).get("cpu_percent", 0) for e in resource_events]
+        mem_values = [e.get("payload", {}).get("memory_percent", 0) for e in resource_events]
+        avg_cpu = sum(cpu_values) / len(cpu_values)
+        avg_mem = sum(mem_values) / len(mem_values)
+        peak_cpu = max(cpu_values)
+        peak_mem = max(mem_values)
+    else:
+        avg_cpu = avg_mem = peak_cpu = peak_mem = 0
 
     total_match = len(matches) + len(corrections)
     correction_rate = len(corrections) / total_match if total_match > 0 else 0
@@ -197,6 +232,13 @@ def snapshot(days: int = 1) -> dict:
         "total_events": len(events),
         # 事件严重度统计（fatal/error/warn 分级）
         "severity_counts": _count_severity(events),
+        # 资源效率指标
+        "resource": {
+            "avg_cpu_percent": round(avg_cpu, 2),
+            "avg_memory_percent": round(avg_mem, 2),
+            "peak_cpu_percent": round(peak_cpu, 2),
+            "peak_memory_percent": round(peak_mem, 2),
+        }
     }
 
     # 强制内联 evolution_score + grade（不缺 key）
@@ -271,12 +313,13 @@ def evolution_score(limit: int = 7) -> dict:
     """
     进化评分：基于最新 baseline 快照直接计算。
 
-    score = tool_success_rate * 0.4
-          - correction_rate * 0.2
-          - http_502_rate * 0.2
-          - p95_slow_ratio * 0.2
+    score = tool_success_rate * 0.4        # 系统稳定性
+          - correction_rate * 0.15         # 学习能力
+          - http_502_rate * 0.15           # 网络稳定性
+          - p95_slow_ratio * 0.15          # 响应速度
+          - resource_penalty * 0.15        # 资源效率
 
-    p95_slow_ratio = 超过 5000ms 的 tool 占比
+    resource_penalty: CPU > 80% 或 内存 > 85% 扣分
     score: 0.0 (最差) ~ 1.0 (完美)
     """
     history = load_history(limit)
@@ -296,8 +339,26 @@ def evolution_score(limit: int = 7) -> dict:
         p95_slow_ratio = slow / len(p95)
     else:
         p95_slow_ratio = 0
+    
+    # 资源效率
+    resource = last.get("resource", {})
+    peak_cpu = resource.get("peak_cpu_percent", 0)
+    peak_mem = resource.get("peak_memory_percent", 0)
+    
+    resource_penalty = 0
+    if peak_cpu > 80:
+        resource_penalty += (peak_cpu - 80) / 100
+    if peak_mem > 85:
+        resource_penalty += (peak_mem - 85) / 100
+    resource_penalty = min(resource_penalty, 0.2)
 
-    score = round(tsr * 0.4 - cr * 0.2 - h502 * 0.2 - p95_slow_ratio * 0.2, 4)
+    score = round(
+        tsr * 0.4 
+        - cr * 0.15 
+        - h502 * 0.15 
+        - p95_slow_ratio * 0.15 
+        - resource_penalty * 0.15
+    , 4)
 
     if score >= 0.35:
         grade = "healthy"
@@ -313,9 +374,10 @@ def evolution_score(limit: int = 7) -> dict:
         "grade": grade,
         "breakdown": {
             "tool_success_rate": {"value": tsr, "weight": 0.4},
-            "correction_rate": {"value": cr, "weight": -0.2},
-            "http_502_rate": {"value": h502, "weight": -0.2},
-            "p95_slow_ratio": {"value": round(p95_slow_ratio, 3), "weight": -0.2},
+            "correction_rate": {"value": cr, "weight": -0.15},
+            "http_502_rate": {"value": h502, "weight": -0.15},
+            "p95_slow_ratio": {"value": round(p95_slow_ratio, 3), "weight": -0.15},
+            "resource_penalty": {"value": round(resource_penalty, 3), "weight": -0.15},
         },
         "snapshot_ts": last.get("ts", "?"),
     }

@@ -1,0 +1,87 @@
+{
+  "workflow_name": "reactor_workflow",
+  "agent": "reactor-agent",
+  "description": "自动修复工作流：检测 → 诊断 → 修复 → 验证 → 学习",
+  "stages": [
+    {
+      "stage": "detection",
+      "description": "检测异常事件",
+      "actions": [
+        "监听 EventBus 错误事件",
+        "读取最近 10 分钟 events.jsonl",
+        "识别错误类型（timeout/crash/high_latency）",
+        "计算错误频率"
+      ],
+      "output": "detected_issues.json",
+      "next_stage": "diagnosis"
+    },
+    {
+      "stage": "diagnosis",
+      "description": "诊断根因",
+      "actions": [
+        "匹配 playbooks（按优先级）",
+        "检查历史修复记录",
+        "评估修复成功率",
+        "选择最佳 playbook"
+      ],
+      "output": "diagnosis_result.json",
+      "next_stage": "fix"
+    },
+    {
+      "stage": "fix",
+      "description": "执行修复",
+      "actions": [
+        "应用 playbook 修复步骤",
+        "记录修复操作到 events.jsonl",
+        "设置超时保护（30s）",
+        "捕获修复过程中的错误"
+      ],
+      "output": "fix_result.json",
+      "next_stage": "verification"
+    },
+    {
+      "stage": "verification",
+      "description": "验证修复效果",
+      "actions": [
+        "等待 5 分钟观察",
+        "检查错误是否再次出现",
+        "对比修复前后指标",
+        "判断修复是否成功"
+      ],
+      "output": "verification_result.json",
+      "next_stage": "learning"
+    },
+    {
+      "stage": "learning",
+      "description": "学习和优化",
+      "actions": [
+        "更新 playbook 成功率",
+        "如果失败，标记 playbook 为 degraded",
+        "如果成功 ≥5 次，升级 playbook 等级",
+        "记录到 memory/lessons.json"
+      ],
+      "output": "learning_complete",
+      "next_stage": null
+    }
+  ],
+  "rollback_policy": {
+    "trigger": "修复后错误频率增加 >20%",
+    "action": "回滚修复操作，标记 playbook 为 failed"
+  },
+  "quality_gates": [
+    {
+      "stage": "diagnosis",
+      "check": "找到匹配的 playbook",
+      "fail_action": "创建新 playbook 或人工介入"
+    },
+    {
+      "stage": "verification",
+      "check": "错误频率下降 ≥50%",
+      "fail_action": "标记修复失败，尝试备选方案"
+    }
+  ],
+  "circuit_breaker": {
+    "trigger": "同一问题 3 次修复失败",
+    "action": "熔断 5 分钟，通知人工介入"
+  }
+}

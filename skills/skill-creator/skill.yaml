@@ -1,0 +1,51 @@
+name: skill_creator
+version: 1.0.0
+category: development
+
+description: |
+  从 Python 脚本自动生成 Skill 配置。
+  分析代码结构、提取函数、推断用途、生成文档。
+  适用场景：快速将脚本转换为标准 Skill。
+
+parameters:
+  - name: script_path
+    type: string
+    required: true
+    description: Python 脚本路径
+  
+  - name: output_dir
+    type: string
+    required: false
+    default: ./skills
+    description: 输出目录
+  
+  - name: skill_name
+    type: string
+    required: false
+    description: Skill 名称（默认从脚本名推断）
+
+execution:
+  type: python
+  entry: skill_creator.py
+  command: "python skill_creator.py --script {script_path} --output {output_dir} --name {skill_name}"
+  
+  sandbox:
+    network: false
+    filesystem: read-write
+    timeout: 30
+
+output:
+  type: text
+  success_pattern: "^SUCCESS:"
+  error_pattern: "^ERROR:"
+
+examples:
+  - input:
+      script_path: "test_monitor.py"
+      output_dir: "./skills"
+    output: "SUCCESS: Skill 'simple-monitor' created at ./skills/simple-monitor"
+
+metadata:
+  author: 小九
+  created: 2026-02-26
+  tags: [development, automation, skill-creation]

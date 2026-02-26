@@ -1,0 +1,61 @@
+name: document_agent
+version: 1.0.0
+category: analysis
+
+description: |
+  处理文档（docx/pdf/txt），提取文本、生成摘要、提取大纲、识别关键词。
+  适用场景：文档分析、内容提取、自动摘要、关键词识别。
+
+parameters:
+  - name: file_path
+    type: string
+    required: true
+    description: 文档文件路径（支持 txt/docx/pdf）
+  
+  - name: action
+    type: string
+    required: true
+    enum: [extract, summary, outline, keywords]
+    description: 操作类型（extract=提取文本, summary=生成摘要, outline=提取大纲, keywords=识别关键词）
+  
+  - name: output_format
+    type: string
+    required: false
+    default: json
+    enum: [json, markdown]
+    description: 输出格式
+
+execution:
+  type: python
+  entry: document_agent.py
+  command: "python document_agent.py --file {file_path} --action {action} --format {output_format}"
+  
+  sandbox:
+    network: false
+    filesystem: read-only
+    timeout: 30
+
+output:
+  type: json
+  success_pattern: "^\\{.*\\}$"
+  error_pattern: "^ERROR:"
+
+examples:
+  - input:
+      file_path: "test.txt"
+      action: "summary"
+      output_format: "json"
+    output: '{"summary": "这是一个测试文档...", "length": 638}'
+  
+  - input:
+      file_path: "test.docx"
+      action: "keywords"
+    output: '{"keywords": ["测试", "文档", "关键词"], "count": 3}'
+
+metadata:
+  author: 小九
+  created: 2026-02-26
+  tags: [document, analysis, nlp]
+  dependencies:
+    - python-docx
+    - PyPDF2

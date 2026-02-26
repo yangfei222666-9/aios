@@ -1,0 +1,45 @@
+name: aios_health_check
+version: 1.0.0
+category: monitoring
+
+description: |
+  检查 AIOS 系统健康状态。
+  监控 Evolution Score、事件日志大小、Agent 状态。
+  适用场景：系统监控、故障排查、健康检查。
+
+parameters:
+  - name: check_type
+    type: string
+    required: false
+    default: all
+    enum: [all, score, events, agents]
+    description: 检查类型（all=全部, score=评分, events=事件, agents=Agent状态）
+
+execution:
+  type: python
+  entry: health_check.py
+  command: "python health_check.py --type {check_type}"
+  
+  sandbox:
+    network: false
+    filesystem: read-only
+    timeout: 10
+
+output:
+  type: json
+  success_pattern: "^\\{.*\\}$"
+  error_pattern: "^ERROR:"
+
+examples:
+  - input:
+      check_type: "all"
+    output: '{"evolution_score": 0.45, "events_count": 1234, "agents_active": 5}'
+  
+  - input:
+      check_type: "score"
+    output: '{"evolution_score": 0.45, "status": "healthy"}'
+
+metadata:
+  author: 小九
+  created: 2026-02-26
+  tags: [monitoring, health-check, aios]

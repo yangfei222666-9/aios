@@ -1,0 +1,178 @@
+{
+  "agents": [
+    {
+      "id": "document-agent_agent",
+      "name": "Document_Agent Agent",
+      "type": "learning",
+      "role": "Specialist in document-agent",
+      "goal": "Process documents (docx/pdf/txt) to extract text, generate summaries, extract outlines, and identify",
+      "backstory": "An expert agent that uses the document-agent skill to accomplish tasks.",
+      "skill_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\document-agent",
+      "script_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\document-agent\\document_agent.py",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "created_at": "2026-02-26T15:44:41.490653"
+    },
+    {
+      "id": "skill-creator_agent",
+      "name": "Skill_Creator Agent",
+      "type": "learning",
+      "role": "Specialist in skill-creator",
+      "goal": "Create or update agent skills. Use when designing, building, or packaging skills that include script",
+      "backstory": "An expert agent that uses the skill-creator skill to accomplish tasks.",
+      "skill_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\skill-creator",
+      "script_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\skill-creator\\skill_creator.py",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "created_at": "2026-02-26T15:45:53.083223"
+    },
+    {
+      "id": "aios-health-check_agent",
+      "name": "Aios_Health_Check Agent",
+      "type": "learning",
+      "role": "Specialist in aios-health-check",
+      "goal": "Check AIOS system health (Evolution Score, event log size, Agent status). Use when monitoring AIOS o",
+      "backstory": "An expert agent that uses the aios-health-check skill to accomplish tasks.",
+      "skill_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\aios-health-check",
+      "script_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\aios-health-check\\check.py",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "created_at": "2026-02-26T15:45:58.476753"
+    },
+    {
+      "name": "aios_health_check",
+      "type": "monitoring",
+      "role": "aios_health_check Specialist",
+      "goal": "检查 AIOS 系统健康状态。",
+      "backstory": "专门负责 aios_health_check 相关任务的 Agent，基于 Skill 自动生成。",
+      "system_prompt": "你是 aios_health_check Agent，专门负责以下任务：\n\n检查 AIOS 系统健康状态。\n监控 Evolution Score、事件日志大小、Agent 状态。\n适用场景：系统监控、故障排查、健康检查。\n\n## 参数说明\n  - check_type (string, 可选，默认值: all): 检查类型（all=全部, score=评分, events=事件, agents=Agent状态）\n\n## 使用示例\n示例 1:\n输入: {\n  \"check_type\": \"all\"\n}\n输出: {\"evolution_score\": 0.45, \"events_count\": 1234, \"agents_active\": 5}\n\n示例 2:\n输入: {\n  \"check_type\": \"score\"\n}\n输出: {\"evolution_score\": 0.45, \"status\": \"healthy\"}\n\n## 执行规则\n1. 接收用户请求后，提取所需参数\n2. 验证参数完整性和合法性\n3. 调用底层脚本执行任务\n4. 解析输出结果，返回给用户\n5. 如果执行失败，分析错误原因并给出建议\n\n## 输出格式\n- 成功时：简洁描述结果 + 关键数据\n- 失败时：错误原因 + 解决建议\n\n始终保持专业、高效、友好的沟通风格。\n",
+      "execution": {
+        "type": "python",
+        "entry": "C:\\Users\\A\\.openclaw\\workspace\\skills\\aios-health-check\\health_check.py",
+        "command": "python health_check.py --type {check_type}",
+        "sandbox": {
+          "network": false,
+          "filesystem": "read-only",
+          "timeout": 10
+        }
+      },
+      "output": {
+        "type": "json",
+        "success_pattern": "^\\{.*\\}$",
+        "error_pattern": "^ERROR:"
+      },
+      "metadata": {
+        "source": "skill",
+        "skill_dir": "C:\\Users\\A\\.openclaw\\workspace\\skills\\aios-health-check",
+        "created": "2026-02-26T16:11:19.735717",
+        "version": "1.0.0",
+        "author": "小九",
+        "tags": [
+          "monitoring",
+          "health-check",
+          "aios"
+        ],
+        "skill_version": "1.0.0",
+        "last_synced": "2026-02-26T16:12:05.075209"
+      },
+      "state": {
+        "status": "active",
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "last_active": null
+      }
+    },
+    {
+      "name": "document_agent",
+      "type": "analysis",
+      "role": "document_agent Specialist",
+      "goal": "处理文档（docx/pdf/txt），提取文本、生成摘要、提取大纲、识别关键词。",
+      "backstory": "专门负责 document_agent 相关任务的 Agent，基于 Skill 自动生成。",
+      "system_prompt": "你是 document_agent Agent，专门负责以下任务：\n\n处理文档（docx/pdf/txt），提取文本、生成摘要、提取大纲、识别关键词。\n适用场景：文档分析、内容提取、自动摘要、关键词识别。\n\n## 参数说明\n  - file_path (string, 必填): 文档文件路径（支持 txt/docx/pdf）\n  - action (string, 必填): 操作类型（extract=提取文本, summary=生成摘要, outline=提取大纲, keywords=识别关键词）\n  - output_format (string, 可选，默认值: json): 输出格式\n\n## 使用示例\n示例 1:\n输入: {\n  \"file_path\": \"test.txt\",\n  \"action\": \"summary\",\n  \"output_format\": \"json\"\n}\n输出: {\"summary\": \"这是一个测试文档...\", \"length\": 638}\n\n示例 2:\n输入: {\n  \"file_path\": \"test.docx\",\n  \"action\": \"keywords\"\n}\n输出: {\"keywords\": [\"测试\", \"文档\", \"关键词\"], \"count\": 3}\n\n## 执行规则\n1. 接收用户请求后，提取所需参数\n2. 验证参数完整性和合法性\n3. 调用底层脚本执行任务\n4. 解析输出结果，返回给用户\n5. 如果执行失败，分析错误原因并给出建议\n\n## 输出格式\n- 成功时：简洁描述结果 + 关键数据\n- 失败时：错误原因 + 解决建议\n\n始终保持专业、高效、友好的沟通风格。\n",
+      "execution": {
+        "type": "python",
+        "entry": "C:\\Users\\A\\.openclaw\\workspace\\skills\\document-agent\\document_agent.py",
+        "command": "python document_agent.py --file {file_path} --action {action} --format {output_format}",
+        "sandbox": {
+          "network": false,
+          "filesystem": "read-only",
+          "timeout": 30
+        }
+      },
+      "output": {
+        "type": "json",
+        "success_pattern": "^\\{.*\\}$",
+        "error_pattern": "^ERROR:"
+      },
+      "metadata": {
+        "source": "skill",
+        "skill_dir": "C:\\Users\\A\\.openclaw\\workspace\\skills\\document-agent",
+        "created": "2026-02-26T16:11:19.739217",
+        "version": "1.0.0",
+        "author": "小九",
+        "tags": [
+          "document",
+          "analysis",
+          "nlp"
+        ],
+        "skill_version": "1.0.0",
+        "last_synced": "2026-02-26T16:12:05.083225"
+      },
+      "state": {
+        "status": "active",
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "last_active": null
+      }
+    },
+    {
+      "name": "skill_creator",
+      "type": "development",
+      "role": "skill_creator Specialist",
+      "goal": "从 Python 脚本自动生成 Skill 配置。",
+      "backstory": "专门负责 skill_creator 相关任务的 Agent，基于 Skill 自动生成。",
+      "system_prompt": "你是 skill_creator Agent，专门负责以下任务：\n\n从 Python 脚本自动生成 Skill 配置。\n分析代码结构、提取函数、推断用途、生成文档。\n适用场景：快速将脚本转换为标准 Skill。\n\n## 参数说明\n  - script_path (string, 必填): Python 脚本路径\n  - output_dir (string, 可选，默认值: ./skills): 输出目录\n  - skill_name (string, 可选): Skill 名称（默认从脚本名推断）\n\n## 使用示例\n示例 1:\n输入: {\n  \"script_path\": \"test_monitor.py\",\n  \"output_dir\": \"./skills\"\n}\n输出: SUCCESS: Skill 'simple-monitor' created at ./skills/simple-monitor\n\n## 执行规则\n1. 接收用户请求后，提取所需参数\n2. 验证参数完整性和合法性\n3. 调用底层脚本执行任务\n4. 解析输出结果，返回给用户\n5. 如果执行失败，分析错误原因并给出建议\n\n## 输出格式\n- 成功时：简洁描述结果 + 关键数据\n- 失败时：错误原因 + 解决建议\n\n始终保持专业、高效、友好的沟通风格。\n",
+      "execution": {
+        "type": "python",
+        "entry": "C:\\Users\\A\\.openclaw\\workspace\\skills\\skill-creator\\skill_creator.py",
+        "command": "python skill_creator.py --script {script_path} --output {output_dir} --name {skill_name}",
+        "sandbox": {
+          "network": false,
+          "filesystem": "read-write",
+          "timeout": 30
+        }
+      },
+      "output": {
+        "type": "text",
+        "success_pattern": "^SUCCESS:",
+        "error_pattern": "^ERROR:"
+      },
+      "metadata": {
+        "source": "skill",
+        "skill_dir": "C:\\Users\\A\\.openclaw\\workspace\\skills\\skill-creator",
+        "created": "2026-02-26T16:11:19.747737",
+        "version": "1.0.0",
+        "author": "小九",
+        "tags": [
+          "development",
+          "automation",
+          "skill-creation"
+        ],
+        "skill_version": "1.0.0",
+        "last_synced": "2026-02-26T16:12:05.089250"
+      },
+      "state": {
+        "status": "active",
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "last_active": null
+      }
+    }
+  ],
+  "metadata": {
+    "last_updated": "2026-02-26T16:12:05.089250"
+  }
+}

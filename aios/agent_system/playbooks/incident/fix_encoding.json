@@ -1,0 +1,10 @@
+{
+  "name": "fix_encoding",
+  "description": "修复编码问题",
+  "actions": [
+    {
+      "type": "log",
+      "message": "编码错误通常不影响功能，已记录"
+    }
+  ]
+}

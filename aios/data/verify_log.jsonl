@@ -97,3 +97,56 @@
 {"ts": "2026-02-23T18:32:26.460910", "reaction_id": "f69d02f3", "alert_id": "4e833507", "playbook_id": "pb-015-model-fallback", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
 {"ts": "2026-02-23T18:32:26.460910", "reaction_id": "0fef3126", "alert_id": "4e833507", "playbook_id": "pb-017-network-speed-test", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
 {"ts": "2026-02-23T18:32:26.460910", "reaction_id": "625c6ffb", "alert_id": "4e833507", "playbook_id": "pb-018-aios-health-check", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:00:13.673941", "reaction_id": "54a28263", "alert_id": "4e833507", "playbook_id": "pb-003-process-restart", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:00:13.674442", "reaction_id": "453c2bac", "alert_id": "4e833507", "playbook_id": "pb-004-api-rate-limit", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:00:13.674442", "reaction_id": "b030b295", "alert_id": "4e833507", "playbook_id": "pb-012-gpu-critical-alert", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:00:13.674442", "reaction_id": "73c01f4c", "alert_id": "4e833507", "playbook_id": "pb-015-model-fallback", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:00:13.674442", "reaction_id": "a65729a2", "alert_id": "4e833507", "playbook_id": "pb-017-network-speed-test", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:01:35.969104", "reaction_id": "a65729a2", "alert_id": "4e833507", "playbook_id": "pb-017-network-speed-test", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:01:35.969104", "reaction_id": "d0115627", "alert_id": "4e833507", "playbook_id": "pb-005-memory-leak", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:01:35.969604", "reaction_id": "bb55b62b", "alert_id": "4e833507", "playbook_id": "pb-007-gpu-overheat", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:01:35.969604", "reaction_id": "33ed04c5", "alert_id": "4e833507", "playbook_id": "pb-013-app-crash-monitor", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:01:35.969604", "reaction_id": "5883ae10", "alert_id": "4e833507", "playbook_id": "pb-018-aios-health-check", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:08:38.915655", "reaction_id": "d10d6e48", "alert_id": "4e833507", "playbook_id": "pb-001-network-retry", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:08:38.915655", "reaction_id": "54a3205f", "alert_id": "4e833507", "playbook_id": "pb-015-model-fallback", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:12:08.034682", "reaction_id": "85eefc46", "alert_id": "4e833507", "playbook_id": "pb-003-process-restart", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:12:08.034682", "reaction_id": "07fc081d", "alert_id": "4e833507", "playbook_id": "pb-012-gpu-critical-alert", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:18:28.373518", "reaction_id": "d27ba450", "alert_id": "4e833507", "playbook_id": "pb-001-network-retry", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:18:28.374018", "reaction_id": "bdf65d63", "alert_id": "4e833507", "playbook_id": "pb-004-api-rate-limit", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:18:28.374018", "reaction_id": "7fd318dc", "alert_id": "4e833507", "playbook_id": "pb-015-model-fallback", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:18:28.374018", "reaction_id": "86c94413", "alert_id": "4e833507", "playbook_id": "pb-017-network-speed-test", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:22:34.598967", "reaction_id": "7aa85dcd", "alert_id": "4e833507", "playbook_id": "pb-003-process-restart", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:22:34.598967", "reaction_id": "8815bf51", "alert_id": "4e833507", "playbook_id": "pb-012-gpu-critical-alert", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:23:32.966684", "reaction_id": "7aa85dcd", "alert_id": "4e833507", "playbook_id": "pb-003-process-restart", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:23:32.966684", "reaction_id": "8815bf51", "alert_id": "4e833507", "playbook_id": "pb-012-gpu-critical-alert", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:23:32.967189", "reaction_id": "2d0086a2", "alert_id": "4e833507", "playbook_id": "pb-001-network-retry", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:23:32.967189", "reaction_id": "9a3c4205", "alert_id": "4e833507", "playbook_id": "pb-015-model-fallback", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:35:53.186270", "reaction_id": "e054b89a", "alert_id": "4e833507", "playbook_id": "pb-012-gpu-critical-alert", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:35:53.186270", "reaction_id": "eae350da", "alert_id": "4e833507", "playbook_id": "pb-013-app-crash-monitor", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:35:53.187277", "reaction_id": "ba091eeb", "alert_id": "4e833507", "playbook_id": "pb-015-model-fallback", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:35:53.187277", "reaction_id": "f6e2afcf", "alert_id": "4e833507", "playbook_id": "pb-017-network-speed-test", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:35:53.187277", "reaction_id": "110180c9", "alert_id": "4e833507", "playbook_id": "pb-018-aios-health-check", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:44:55.920525", "reaction_id": "8ff175c7", "alert_id": "4e833507", "playbook_id": "pb-001-network-retry", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-23T19:44:55.920525", "reaction_id": "ba6d40e8", "alert_id": "4e833507", "playbook_id": "pb-015-model-fallback", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T02:59:24.579541", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T02:59:24.580549", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-24T03:03:40.062335", "reaction_id": "?", "alert_id": "?", "playbook_id": "?", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:03:40.063340", "reaction_id": "r1", "alert_id": "a1", "playbook_id": "nonexistent_xyz", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:03:47.055103", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:03:47.055604", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-24T03:04:53.048407", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:04:53.048905", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-24T03:04:53.401531", "reaction_id": "?", "alert_id": "?", "playbook_id": "?", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:04:53.402032", "reaction_id": "r1", "alert_id": "a1", "playbook_id": "nonexistent_xyz", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:05:05.265511", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:05:05.266517", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-24T03:05:45.525954", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:05:45.526453", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-24T03:05:54.612236", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:05:54.613239", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-24T03:05:54.996449", "reaction_id": "?", "alert_id": "?", "playbook_id": "?", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-24T03:05:54.996449", "reaction_id": "r1", "alert_id": "a1", "playbook_id": "nonexistent_xyz", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-25T12:20:49.628204", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-25T12:20:49.628705", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-25T12:24:42.161570", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-25T12:24:42.161570", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}

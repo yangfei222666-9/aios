@@ -1,12 +1,19 @@
 """
-AIOS Agent Spawner (Async) - 异步批量创建 Agent
+AIOS Agent Spawner (Async) - 异步批量创建 Agent（集成 Failover）
 不等待完成，通过 subagents 工具异步查询结果
 """
 
 import json
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
+
+# 添加路径以导入 Failover
+AIOS_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(AIOS_ROOT))
+
+from agent_system.spawner_with_failover import create_spawner_with_failover
 
 WORKSPACE = Path(__file__).parent.parent.parent
 SPAWN_FILE = WORKSPACE / "aios" / "agent_system" / "spawn_requests.jsonl"
@@ -53,7 +60,7 @@ def record_spawn_result(
 
 def spawn_batch_async(requests: List[Dict], spawn_fn) -> Dict:
     """
-    批量异步创建 Agent
+    批量异步创建 Agent（集成 Failover）
 
     Args:
         requests: spawn 请求列表
@@ -62,6 +69,9 @@ def spawn_batch_async(requests: List[Dict], spawn_fn) -> Dict:
     Returns:
         {"spawned": int, "failed": int, "details": [...]}
     """
+    # 创建带 Failover 的 Spawner
+    spawner = create_spawner_with_failover(spawn_fn)
+    
     spawned = 0
     failed = 0
     details = []
@@ -73,18 +83,21 @@ def spawn_batch_async(requests: List[Dict], spawn_fn) -> Dict:
         model = req["model"]
 
         try:
-            # 异步创建（不等待完成）
-            result = spawn_fn(
+            # 使用 Failover 创建（自动重试 + 熔断 + DLQ）
+            result = spawner.spawn_with_failover(
                 task=message,
                 label=label,
                 model=model,
                 cleanup="keep",  # 保持会话，不自动删除
-                runTimeoutSeconds=300,
+                runTimeoutSeconds=300
             )
 
             # 检查结果
             if result.get("status") == "spawned":
                 session_key = result.get("sessionKey")
+                provider = result.get("provider", model)
+                attempt = result.get("attempt", 1)
+                
                 record_spawn_result(task_id, label, model, session_key=session_key)
                 spawned += 1
                 details.append(
@@ -93,10 +106,19 @@ def spawn_batch_async(requests: List[Dict], spawn_fn) -> Dict:
                         "label": label,
                         "status": "spawned",
                         "session_key": session_key,
+                        "provider": provider,
+                        "attempt": attempt
                     }
                 )
+                
+                # 如果使用了 Failover，记录日志
+                if provider != model:
+                    print(f"[Spawner] ⚡ Failover: {model} → {provider}")
             else:
                 error = result.get("error", "unknown")
+                dlq = result.get("dlq", False)
+                task_id_dlq = result.get("task_id")
+                
                 record_spawn_result(task_id, label, model, error=error)
                 failed += 1
                 details.append(
@@ -105,8 +127,14 @@ def spawn_batch_async(requests: List[Dict], spawn_fn) -> Dict:
                         "label": label,
                         "status": "error",
                         "error": error,
+                        "dlq": dlq,
+                        "dlq_task_id": task_id_dlq
                     }
                 )
+                
+                # 如果进入 DLQ，记录日志
+                if dlq:
+                    print(f"[Spawner] 🔴 Task entered DLQ: {task_id_dlq}")
 
         except Exception as e:
             error = str(e)

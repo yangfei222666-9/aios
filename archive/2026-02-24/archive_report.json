@@ -1,0 +1,223 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.32,
+    "archive_date":  "2026-02-24",
+    "files_count":  37,
+    "total_size_bytes":  179342,
+    "timestamp":  "2026-02-24 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\analyst.log",
+                      "Type":  "temp",
+                      "Size":  16494
+                  },
+                  {
+                      "Path":  "aios\\dashboard.log",
+                      "Type":  "temp",
+                      "Size":  0
+                  },
+                  {
+                      "Path":  "aios\\dashboard_err.log",
+                      "Type":  "temp",
+                      "Size":  0
+                  },
+                  {
+                      "Path":  "aios\\maintenance.log",
+                      "Type":  "temp",
+                      "Size":  5325
+                  },
+                  {
+                      "Path":  "aios\\monitor.log",
+                      "Type":  "temp",
+                      "Size":  6714
+                  },
+                  {
+                      "Path":  "aios\\orchestrator.log",
+                      "Type":  "temp",
+                      "Size":  5979
+                  },
+                  {
+                      "Path":  "aios\\orchestrator_enhanced.log",
+                      "Type":  "temp",
+                      "Size":  762
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  2345
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\self_evolution.log",
+                      "Type":  "temp",
+                      "Size":  1467
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\data\\loop.log",
+                      "Type":  "temp",
+                      "Size":  10396
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\data\\system.log",
+                      "Type":  "temp",
+                      "Size":  3825
+                  },
+                  {
+                      "Path":  "aios\\data\\events.jsonl.bak",
+                      "Type":  "temp",
+                      "Size":  5007
+                  },
+                  {
+                      "Path":  "test_audio_result.py",
+                      "Type":  "old_test",
+                      "Size":  2409,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_complete_system.py",
+                      "Type":  "old_test",
+                      "Size":  8233,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_final_audio_system.py",
+                      "Type":  "old_test",
+                      "Size":  6743,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_improved_system.py",
+                      "Type":  "old_test",
+                      "Size":  5285,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_integration.py",
+                      "Type":  "old_test",
+                      "Size":  7088,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_libcst_fix.py",
+                      "Type":  "old_test",
+                      "Size":  9988,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_new_audio_command.py",
+                      "Type":  "old_test",
+                      "Size":  6221,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_normalize_direct.py",
+                      "Type":  "old_test",
+                      "Size":  1143,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_simple.py",
+                      "Type":  "old_test",
+                      "Size":  5468,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_state_machine_fix.py",
+                      "Type":  "old_test",
+                      "Size":  9100,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_tts_integration.py",
+                      "Type":  "old_test",
+                      "Size":  7431,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_unicode_cleanup.py",
+                      "Type":  "old_test",
+                      "Size":  6982,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_unicode_integration.py",
+                      "Type":  "old_test",
+                      "Size":  7815,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_wake_comprehensive.py",
+                      "Type":  "old_test",
+                      "Size":  4602,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "test_wake_detection.py",
+                      "Type":  "old_test",
+                      "Size":  1228,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "tools\\asr_test_final.py",
+                      "Type":  "old_test",
+                      "Size":  1734,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "tools\\asr_test_fixed.py",
+                      "Type":  "old_test",
+                      "Size":  1564,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "tools\\asr_test_vosk.py",
+                      "Type":  "old_test",
+                      "Size":  987,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "tools\\wake_listener_test.py",
+                      "Type":  "old_test",
+                      "Size":  9549,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "debug_actual_text.py",
+                      "Type":  "old_test",
+                      "Size":  2353,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "debug_command_parser.py",
+                      "Type":  "old_test",
+                      "Size":  2076,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "debug_pattern_match.py",
+                      "Type":  "old_test",
+                      "Size":  1268,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "tools\\daily_check_debug.py",
+                      "Type":  "old_test",
+                      "Size":  2758,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "notes\\debug_duckduckgo_20260217_141420.txt",
+                      "Type":  "old_test",
+                      "Size":  383,
+                      "LastModified":  "2026-02-17"
+                  },
+                  {
+                      "Path":  "notes\\websearch_debug_20260217_140046.txt",
+                      "Type":  "old_test",
+                      "Size":  411,
+                      "LastModified":  "2026-02-17"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-02-24",
+    "total_size_mb":  0.17
+}

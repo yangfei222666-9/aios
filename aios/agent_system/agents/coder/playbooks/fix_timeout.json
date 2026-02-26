@@ -1,0 +1,44 @@
+{
+  "name": "fix_timeout",
+  "description": "检测到超时错误时，自动增加超时时间并重试",
+  "trigger": {
+    "event": "error",
+    "conditions": {
+      "error_type": "TimeoutError",
+      "retry_count": {"<": 3}
+    }
+  },
+  "actions": [
+    {
+      "type": "log",
+      "level": "warning",
+      "message": "检测到 TimeoutError，增加超时时间 +30s"
+    },
+    {
+      "type": "modify_config",
+      "target": "timeout",
+      "operation": "add",
+      "value": 30
+    },
+    {
+      "type": "restart_task",
+      "preserve_context": true
+    }
+  ],
+  "max_retries": 3,
+  "success_criteria": {
+    "task_completed": true,
+    "no_timeout": true
+  },
+  "failure_action": {
+    "type": "escalate",
+    "target": "human",
+    "message": "超时问题持续存在，已增加 90s 超时仍失败"
+  },
+  "metadata": {
+    "version": "1.0",
+    "author": "AIOS",
+    "created_at": "2026-02-26",
+    "tags": ["timeout", "auto-fix", "performance"]
+  }
+}

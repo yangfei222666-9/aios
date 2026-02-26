@@ -1,4 +1,4 @@
-"""学习 Agent 配置 - 辅助小九学习 AIOS/Agent/Skill 知识"""
+﻿"""学习 Agent 配置 - 辅助小九学习 AIOS/Agent/Skill 知识"""
 
 LEARNING_AGENTS = [
     # ========== 核心学习 Agent ==========

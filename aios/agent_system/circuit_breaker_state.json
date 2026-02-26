@@ -1,1 +1,14 @@
-{}
+{
+  "analysis": {
+    "count": 11,
+    "last_fail": 1772050199.7324605
+  },
+  "code": {
+    "count": 2,
+    "last_fail": 1772006025.1270661
+  },
+  "monitor": {
+    "count": 7,
+    "last_fail": 1772050199.7319574
+  }
+}

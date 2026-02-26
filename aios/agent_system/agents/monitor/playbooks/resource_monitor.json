@@ -1,0 +1,29 @@
+{
+  "name": "resource_monitor",
+  "description": "监控系统资源（CPU/内存/磁盘），超阈值告警",
+  "trigger": {
+    "event_type": "heartbeat",
+    "interval": "30s"
+  },
+  "actions": [
+    {
+      "type": "check_resources",
+      "metrics": ["cpu", "memory", "disk", "gpu"]
+    },
+    {
+      "type": "evaluate_thresholds",
+      "thresholds": {
+        "cpu": {"warn": 70, "critical": 90},
+        "memory": {"warn": 75, "critical": 90},
+        "disk": {"warn": 80, "critical": 95}
+      }
+    },
+    {
+      "type": "alert_if_exceeded",
+      "channel": "telegram",
+      "message": "⚠️ {metric} 使用率 {value}% 超过阈值"
+    }
+  ],
+  "priority": "high",
+  "enabled": true
+}
