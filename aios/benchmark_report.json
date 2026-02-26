@@ -1,0 +1,196 @@
+{
+  "kernel.context_manager": [
+    {
+      "name": "context.create (100 agents)",
+      "ops": 1000,
+      "elapsed_sec": 0.089056,
+      "rate": 11228.86,
+      "unit": "ops/sec",
+      "avg_us": 89.06
+    },
+    {
+      "name": "context.switch",
+      "ops": 100000,
+      "elapsed_sec": 0.131037,
+      "rate": 763145.56,
+      "unit": "ops/sec",
+      "avg_us": 1.31
+    },
+    {
+      "name": "context.switch (latency)",
+      "n": 50000,
+      "p50_us": 1.2,
+      "p95_us": 1.9,
+      "p99_us": 2.4,
+      "min_us": 1.1,
+      "max_us": 230.1,
+      "avg_us": 1.32
+    },
+    {
+      "name": "context.add_message",
+      "ops": 100000,
+      "elapsed_sec": 0.031471,
+      "rate": 3177538.62,
+      "unit": "ops/sec",
+      "avg_us": 0.31
+    },
+    {
+      "name": "context.snapshot (50 msgs)",
+      "ops": 5000,
+      "elapsed_sec": 1.285475,
+      "rate": 3889.61,
+      "unit": "ops/sec",
+      "avg_us": 257.09
+    },
+    {
+      "name": "context.load_snapshot",
+      "ops": 5000,
+      "elapsed_sec": 0.350084,
+      "rate": 14282.27,
+      "unit": "ops/sec",
+      "avg_us": 70.02
+    },
+    {
+      "name": "context.check_limits",
+      "ops": 100000,
+      "elapsed_sec": 0.029193,
+      "rate": 3425455.24,
+      "unit": "ops/sec",
+      "avg_us": 0.29
+    },
+    {
+      "name": "context.save_restore_cycle",
+      "ops": 100000,
+      "elapsed_sec": 0.108941,
+      "rate": 917924.68,
+      "unit": "ops/sec",
+      "avg_us": 1.09
+    }
+  ],
+  "kernel.memory_manager": [
+    {
+      "name": "memory.alloc_100_agents",
+      "ops": 1000,
+      "elapsed_sec": 0.088517,
+      "rate": 11297.32,
+      "unit": "ops/sec",
+      "avg_us": 88.52
+    },
+    {
+      "name": "memory.allocate_single",
+      "ops": 100000,
+      "elapsed_sec": 0.02717,
+      "rate": 3680597.73,
+      "unit": "ops/sec",
+      "avg_us": 0.27
+    },
+    {
+      "name": "memory.release",
+      "ops": 100000,
+      "elapsed_sec": 0.021196,
+      "rate": 4717804.52,
+      "unit": "ops/sec",
+      "avg_us": 0.21
+    },
+    {
+      "name": "memory.evict_lru (80 agents)",
+      "ops": 500,
+      "elapsed_sec": 0.03293,
+      "rate": 15183.63,
+      "unit": "ops/sec",
+      "avg_us": 65.86
+    },
+    {
+      "name": "memory.usage_all (50 agents)",
+      "ops": 10000,
+      "elapsed_sec": 0.338921,
+      "rate": 29505.42,
+      "unit": "ops/sec",
+      "avg_us": 33.89
+    },
+    {
+      "name": "memory.top(10)",
+      "ops": 10000,
+      "elapsed_sec": 0.085462,
+      "rate": 117011.07,
+      "unit": "ops/sec",
+      "avg_us": 8.55
+    },
+    {
+      "name": "memory.stats",
+      "ops": 100000,
+      "elapsed_sec": 0.358138,
+      "rate": 279222.21,
+      "unit": "ops/sec",
+      "avg_us": 3.58
+    }
+  ],
+  "sdk.planning": [
+    {
+      "name": "sdk.planning (skipped)",
+      "error": "No module named 'aios.storage'; 'aios' is not a package"
+    }
+  ],
+  "sdk.action": [
+    {
+      "name": "sdk.action (skipped)",
+      "error": "No module named 'aios.storage'; 'aios' is not a package"
+    }
+  ],
+  "sdk.memory": [
+    {
+      "name": "sdk.memory (skipped)",
+      "error": "No module named 'aios.storage'; 'aios' is not a package"
+    }
+  ],
+  "storage": [
+    {
+      "name": "storage.save_state (1000)",
+      "ops": 1000,
+      "elapsed_sec": 0.094971,
+      "rate": 10529.52,
+      "unit": "ops/sec",
+      "avg_us": 94.97
+    },
+    {
+      "name": "storage.get_state (1000)",
+      "ops": 1000,
+      "elapsed_sec": 0.118622,
+      "rate": 8430.15,
+      "unit": "ops/sec",
+      "avg_us": 118.62
+    },
+    {
+      "name": "storage.log_event (1000)",
+      "ops": 1000,
+      "elapsed_sec": 0.089815,
+      "rate": 11133.94,
+      "unit": "ops/sec",
+      "avg_us": 89.82
+    },
+    {
+      "name": "storage.list_events (100q)",
+      "ops": 100,
+      "elapsed_sec": 0.02997,
+      "rate": 3336.65,
+      "unit": "ops/sec",
+      "avg_us": 299.7
+    },
+    {
+      "name": "storage.log_task (500)",
+      "ops": 500,
+      "elapsed_sec": 0.037914,
+      "rate": 13187.64,
+      "unit": "ops/sec",
+      "avg_us": 75.83
+    },
+    {
+      "name": "storage.get_task (500)",
+      "ops": 500,
+      "elapsed_sec": 0.051279,
+      "rate": 9750.49,
+      "unit": "ops/sec",
+      "avg_us": 102.56
+    }
+  ]
+}

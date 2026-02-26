@@ -2,338 +2,372 @@
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-0.6-orange.svg)](https://github.com/yangfei222666-9/aios)
+[![Version](https://img.shields.io/badge/Version-1.1-orange.svg)](https://github.com/yangfei222666-9/aios)
+[![Tests](https://img.shields.io/badge/Tests-27%2F27-brightgreen.svg)]()
 
-**从监控 → 自动修复 → 自我进化**
+**自监控 · 自修复 · 自进化 — 零依赖 AI 操作系统框架**
 
-AIOS 是一个轻量级的 AI 操作系统框架，提供完整的事件驱动、自动修复和自我进化能力。
+AIOS 是一个轻量级 AI 操作系统，提供完整的 Kernel（上下文/内存/存储管理）、SDK（Planning/Action/Memory/Storage）、事件驱动架构和安全自我进化闭环。
 
 ---
 
-## 🚀 10秒快速开始
+## 10 秒快速开始
 
 ```bash
-# 1. 克隆仓库
 git clone https://github.com/yangfei222666-9/aios.git
 cd aios
-
-# 2. 运行演示
-python aios.py demo
-
-# 3. 查看系统状态
-python aios.py status
+python aios.py demo      # 运行演示
+python aios.py status    # 查看系统状态
+python aios.py version   # 查看版本
 ```
 
-**零依赖，只需要 Python 3.8+**
+零依赖，只需 Python 3.8+。
 
 ---
 
-## ✨ 核心功能
+## 架构总览
 
-### EventBus（事件总线）
-系统心脏，所有事件通过这里流转。支持发布/订阅模式，自动持久化到 EventStore。
-
-```python
-from core.event_bus import get_event_bus
-from core.event import create_event, EventType
-
-bus = get_event_bus()
-event = create_event(EventType.RESOURCE_HIGH, {"resource": "cpu", "value": 85})
-bus.emit(event)
 ```
-
-### Scheduler（任务调度）
-优先级队列调度系统，支持 P0/P1/P2 三级优先级，最多 5 个并行任务，自动超时重试。
-
-```python
-from core.scheduler_v2 import SchedulerV2, Task, Priority
-
-scheduler = SchedulerV2()
-scheduler.start()
-scheduler.submit(Task(name="fix_cpu", priority=Priority.P0, handler=my_handler))
-```
-
-### Reactor（自动修复）
-基于 Playbook 的自动修复引擎，匹配事件模式并执行修复动作。
-
-```python
-from core.production_reactor import ProductionReactor
-
-reactor = ProductionReactor()
-reactor.load_playbooks("playbooks/")
-reactor.handle_event(event)  # 自动匹配并执行 playbook
-```
-
-### ScoreEngine（评分引擎）
-实时计算系统健康度，追踪任务成功率、修复率、运行时间等指标。
-
-```python
-from core.score_engine import ScoreEngine
-
-engine = ScoreEngine()
-score = engine.get_score()  # 0.0 - 1.0
-print(f"Evolution Score: {score:.2f}")
-```
-
-### Agent System（Agent 管理）
-自动调度和管理 AI Agent，支持健康检查、自动恢复、性能追踪。
-
-```python
-from agent_system.auto_dispatcher import AutoDispatcher
-
-dispatcher = AutoDispatcher()
-dispatcher.start()
-dispatcher.dispatch_task({"type": "worker", "params": {...}})
-```
-
-### Dashboard（实时监控）
-Web 界面展示系统状态、任务时间线、进化曲线。
-
-```bash
-python aios.py dashboard
-# 访问 http://localhost:9091
+┌─────────────────────────────────────────────────────┐
+│                    AIOS Kernel                       │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │
+│  │   Context     │ │   Memory     │ │   Storage    │ │
+│  │   Manager     │ │   Manager    │ │   Manager    │ │
+│  │  (上下文切换) │ │ (内存配额)   │ │  (SQLite)    │ │
+│  └──────────────┘ └──────────────┘ └──────────────┘ │
+├─────────────────────────────────────────────────────┤
+│                     SDK Layer                        │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────┐ │
+│  │ Planning │ │  Action  │ │  Memory  │ │Storage │ │
+│  │  (CoT)   │ │ (执行器) │ │ (向量)   │ │ (持久) │ │
+│  └──────────┘ └──────────┘ └──────────┘ └────────┘ │
+├─────────────────────────────────────────────────────┤
+│                  Runtime Layer                        │
+│  EventBus → Scheduler → Reactor → Self-Improving     │
+│  Tracer   → Metrics   → Logger → Dashboard          │
+├─────────────────────────────────────────────────────┤
+│                  Safety Layer                         │
+│  DataCollector → Evaluator → Quality Gates           │
+│  (数据采集)     (量化评估)   (三层门禁)              │
+└─────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎯 使用场景
+## 核心模块
 
-### 场景 1: 文件监控 + 自动备份（推荐）
+### Kernel（内核层）
 
-自动监控重要文件，检测到变化立即备份。
-
-```bash
-python demo_file_monitor.py
-```
-
-**效果：**
-- 🔍 每 2 秒检查文件变化（哈希对比）
-- 🚨 检测到修改立即触发备份
-- 💾 自动备份到 backups/ 目录（带时间戳）
-- ✅ 验证备份完整性（哈希匹配）
-- 📊 记录所有事件和指标
-
-**输出示例：**
-```
-[19:35:38] ✅ 检查 #1: 文件未变化
-[19:35:42] 🚨 检测到文件变化！
-💾 触发 AIOS 自动备份...
-   ✅ 备份成功: important_config_20260225_193542.json
-   ✅ 备份验证通过（哈希匹配）
-[19:35:44] ✅ 检查 #4: 文件未变化
-```
-
-**真实用途：**
-- 配置文件自动备份（nginx.conf、config.json）
-- 代码文件版本追踪（自动保存历史版本）
-- 重要文档保护（防止误删除或误修改）
-
-### 场景 2: API 健康检查
-
-自动监控 API 服务，连续失败时自动修复。
-
-```bash
-python demo_api_health.py
-```
-
-**效果：**
-- 🔍 每 2 秒检查 API 健康状态
-- 🚨 连续失败 2 次触发告警
-- 🔧 自动重启服务
-- ✅ 验证修复效果
-- 📊 记录所有事件和指标
-
-**输出示例：**
-```
-[16:54:23] ✅ 检查 #1: 健康
-[16:54:27] ❌ 检查 #4: 故障
-[16:54:29] ❌ 检查 #5: 故障
-🚨 检测到连续故障，触发 AIOS 自动修复...
-✅ 自动修复成功！
-[16:54:34] ✅ 检查 #6: 健康（已恢复）
-```
-
-### 场景 3: 资源监控与自动修复
-
-监控 CPU/内存使用率，超过阈值时自动清理。
+#### Context Manager — 上下文管理
+管理 Agent 执行上下文：创建/销毁、保存/恢复（抢占支持）、上下文切换、磁盘快照、资源限制。
 
 ```python
-from core.event_bus import get_event_bus
-from core.event import create_event, EventType
+from kernel.context_manager import ContextManager
 
-bus = get_event_bus()
+cm = ContextManager()
+ctx = cm.create("coder-001", metadata={"role": "coder"})
+ctx.add_message("user", "Fix the bug in scheduler.py")
+ctx.record_llm_call(tokens=1500)
 
-# 模拟高 CPU 事件
-event = create_event(EventType.RESOURCE_HIGH, {
-    "resource": "cpu",
-    "value": 85,
-    "threshold": 80
-})
-bus.emit(event)
+# 抢占：保存当前 → 切换到另一个 Agent
+cm.switch("coder-001", "analyst-002", save_state={"line": 42})
 
-# Reactor 自动匹配 playbook 并执行修复
+# 磁盘快照（崩溃恢复）
+cm.snapshot("coder-001")
 ```
 
-### 场景 4: Agent 任务调度
-
-自动分配任务给健康的 Agent，失败时自动重试。
+#### Memory Manager — 内存管理
+Per-agent 内存配额、全局限制、LRU 驱逐策略。
 
 ```python
-from agent_system.auto_dispatcher import AutoDispatcher
+from kernel.memory_manager import MemoryManager
 
-dispatcher = AutoDispatcher()
-dispatcher.start()
+mm = MemoryManager(global_limit_mb=512)
+mm.register("coder-001", quota_mb=64)
+mm.allocate("coder-001", size_bytes=1024*1024)
 
-# 提交任务
-task = {
-    "type": "worker",
-    "params": {"file": "data.csv"}
-}
-result = dispatcher.dispatch_task(task)
+# 内存压力时自动驱逐
+evicted = mm.evict_lru(target_free_bytes=100*1024*1024)
 ```
 
----
+#### Storage Manager — 存储管理
+基于 aiosqlite 的持久化层，支持 Agent 状态、上下文、事件、任务历史。
 
-## 📖 API 参考
+```python
+from storage.storage_manager import StorageManager
+import asyncio
 
-### 核心类
+async def main():
+    sm = StorageManager("aios.db")
+    await sm.initialize()
+    await sm.save_agent_state("coder-001", "coder", "active")
+    await sm.log_event("task.completed", {"agent": "coder-001"})
+    await sm.close()
 
-| 类名 | 功能 | 主要方法 |
+asyncio.run(main())
+```
+
+### SDK（开发套件）
+
+| 模块 | 功能 | 关键特性 |
 |------|------|----------|
-| `EventBus` | 事件总线 | `emit(event)`, `subscribe(pattern, callback)` |
-| `SchedulerV2` | 任务调度 | `submit(task)`, `start()`, `stop()` |
-| `ProductionReactor` | 自动修复 | `load_playbooks(dir)`, `handle_event(event)` |
-| `ScoreEngine` | 评分引擎 | `get_score()`, `get_breakdown()` |
-| `AutoDispatcher` | Agent 调度 | `dispatch_task(task)`, `check_agent_health()` |
+| Planning | 任务规划 | CoT 拆解、依赖分析、执行策略 |
+| Action | 执行引擎 | 工具注册、风险分级、护栏机制 |
+| Memory | 记忆系统 | 三层记忆（working/episodic/long_term）、向量检索 |
+| Storage | 持久化 | 统一存储接口 |
 
-### 事件类型
+### Runtime（运行时）
 
-| 事件类型 | 说明 | 数据字段 |
-|----------|------|----------|
-| `RESOURCE_HIGH` | 资源使用率高 | `resource`, `value`, `threshold` |
-| `TASK_FAILED` | 任务失败 | `task_id`, `error_message` |
-| `AGENT_ERROR` | Agent 错误 | `agent_id`, `error_type` |
-| `PIPELINE_COMPLETE` | Pipeline 完成 | `pipeline_id`, `duration` |
+| 组件 | 功能 |
+|------|------|
+| EventBus | 事件驱动通信，发布/订阅模式 |
+| Scheduler | 任务调度，优先级队列 + Planning 集成 |
+| Reactor | 自动故障检测和修复（Playbook 驱动） |
+| Self-Improving Loop | 安全自我进化闭环 |
 
-### 优先级
+### Safety（安全层）
 
-| 优先级 | 说明 | 使用场景 |
-|--------|------|----------|
-| `P0` | 紧急 | 系统崩溃、资源临界 |
-| `P1` | 高 | Agent 错误、任务失败 |
-| `P2` | 普通 | 日志记录、Pipeline 完成 |
+| 组件 | 功能 |
+|------|------|
+| DataCollector | 统一数据采集（5 种 Schema） |
+| Evaluator | 量化评估（0-100 分，S/A/B/C/D/F 等级） |
+| Quality Gates | 三层门禁（L0 自动/L1 回归/L2 人工） |
 
 ---
 
-## ⚙️ 配置说明
+## 性能基准
 
-### 环境变量
+在 Ryzen 7 9800X3D / Python 3.12 / Windows 11 上的测试结果：
 
+### Kernel
+
+| 操作 | 吞吐量 | 平均延迟 | 状态 |
+|------|--------|----------|------|
+| Context 创建（100 agents） | 11.2K ops/s | 89μs | ✅ |
+| Context 切换 | 763K ops/s | 1.3μs | ✅ PASS |
+| Context 切换 p99 | — | 2.4μs | ✅ |
+| 消息添加 | 3.18M ops/s | 0.3μs | ✅ PASS |
+| 磁盘快照（50 msgs） | 3.9K ops/s | 257μs | ✅ |
+| 快照加载 | 14.3K ops/s | 70μs | ✅ |
+| 资源限制检查 | 3.43M ops/s | 0.3μs | ✅ PASS |
+| Save/Restore 循环 | 918K ops/s | 1.1μs | ✅ |
+| 内存分配（单次） | 3.68M ops/s | 0.3μs | ✅ PASS |
+| 内存释放 | 4.72M ops/s | 0.2μs | ✅ PASS |
+| LRU 驱逐（80 agents） | 15.2K ops/s | 66μs | ✅ |
+
+### Storage（SQLite in-memory）
+
+| 操作 | 吞吐量 | 平均延迟 |
+|------|--------|----------|
+| Agent 状态写入 | 10.5K ops/s | 95μs |
+| Agent 状态读取 | 8.4K ops/s | 119μs |
+| 事件写入 | 11.1K ops/s | 90μs |
+| 事件查询 | 3.3K ops/s | 300μs |
+| 任务写入 | 13.2K ops/s | 76μs |
+| 任务读取 | 9.8K ops/s | 103μs |
+
+运行 benchmark：
 ```bash
-# Windows
-set AIOS_LOG_PATH=aios/logs/aios.jsonl
-set AIOS_EVENTS_PATH=events.jsonl
-set AIOS_DASHBOARD_PORT=9091
-
-# Linux/Mac
-export AIOS_LOG_PATH="aios/logs/aios.jsonl"
-export AIOS_EVENTS_PATH="events.jsonl"
-export AIOS_DASHBOARD_PORT=9091
-```
-
-### Playbook 配置
-
-创建 `playbooks/my_playbook.json`：
-
-```json
-{
-  "id": "cpu_high_kill_idle",
-  "description": "CPU 高时杀掉空闲 Agent",
-  "trigger": {
-    "event_type": "resource.high",
-    "conditions": {
-      "resource": "cpu",
-      "value": {"$gt": 80}
-    }
-  },
-  "actions": [
-    {
-      "type": "kill_idle_agents",
-      "params": {"max_count": 3}
-    }
-  ],
-  "validation": {
-    "check": "cpu_below_threshold",
-    "timeout_seconds": 30
-  },
-  "risk_level": "low"
-}
+python benchmark.py          # 完整报告
+python benchmark.py --json   # JSON 输出
+python benchmark.py --module kernel  # 仅 kernel
 ```
 
 ---
 
-## 🧪 测试
+## 自我进化闭环
 
-```bash
-# 运行所有测试
-python aios.py test
-
-# 运行性能基准测试
-python aios.py benchmark
-
-# 运行心跳检查
-python aios.py heartbeat
 ```
+DataCollector → Evaluator → Quality Gates → Self-Improving Loop → Heartbeat
+  (眼睛)        (大脑)       (刹车)          (进化)              (监控)
+```
+
+1. **DataCollector** 采集所有运行数据（5 种标准 Schema）
+2. **Evaluator** 量化评估（任务成功率、Agent 评分、系统健康度）
+3. **Quality Gates** 三层门禁确保改进安全（L0 自动 → L1 回归 → L2 人工）
+4. **Self-Improving Loop** 自动应用安全改进
+5. **Heartbeat** 定期监控，健康度 < 60 自动告警
 
 ---
 
-## ❓ FAQ
+## Agent 系统
 
-### Q: 需要安装依赖吗？
-A: **不需要！** AIOS 核心是零依赖的，只需要 Python 3.8+。Dashboard 需要安装 `flask`（可选）。
+AIOS 内置 64 个 Agent（27 Learning + 37 Skill），通过 Task Router 智能路由：
 
-### Q: 支持哪些 Python 版本？
-A: Python 3.8, 3.9, 3.10, 3.11, 3.12 都支持。
-
-### Q: 可以在生产环境使用吗？
-A: 可以！AIOS v0.6 已经过充分测试，性能优异。建议先在测试环境验证。
-
-### Q: 如何集成到我的项目？
-A: 只需要导入核心模块：
 ```python
-from core.event_bus import get_event_bus
-from core.event import create_event, EventType
+# 提交任务
+python -c "from agent_system.task_router import TaskRouter; tr = TaskRouter(); print(tr.route('分析系统性能'))"
+
+# 心跳自动分发
+python agent_system/heartbeat_v5.py
 ```
 
-### Q: EventStore 存储在哪里？
-A: 默认存储在 `data/events/` 目录，按日期分片（`events_YYYY-MM-DD.jsonl`）。
-
-### Q: 如何自定义 Playbook？
-A: 在 `playbooks/` 目录创建 JSON 文件，参考"配置说明"部分的示例。
-
-### Q: Dashboard 无法访问？
-A: 检查端口是否被占用，或使用 `python aios.py dashboard --port 8080` 指定其他端口。
+Task Router 支持 80+ 中英文关键词，三层匹配策略（精确 → 关键词 → 模糊 Jaccard）。
 
 ---
 
-## 📄 License
+## Dashboard
 
-MIT License - 详见 [LICENSE](LICENSE)
-
----
-
-## 🤝 贡献
-
-欢迎贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md)
+```bash
+cd dashboard/AIOS-Dashboard-v3.4
+python server.py
+# 访问 http://127.0.0.1:8888
+```
 
 ---
 
-## 📚 更多资源
+## 项目结构
 
-- **GitHub**: https://github.com/yangfei222666-9/aios
-- **文档**: 查看 `docs/` 目录
-- **示例**: 查看 `demo/` 目录
+```
+aios/
+├── kernel/              # 内核层
+│   ├── context_manager.py   # 上下文管理
+│   └── memory_manager.py    # 内存管理
+├── sdk/                 # SDK 层
+│   ├── planning.py          # 规划模块（CoT）
+│   ├── action.py            # 执行引擎
+│   ├── memory.py            # 记忆系统
+│   └── storage.py           # 存储接口
+├── storage/             # 持久化层
+│   ├── storage_manager.py   # SQLite 存储管理
+│   └── sql/schema.sql       # 数据库 Schema
+├── core/                # 核心运行时
+│   ├── event_bus.py         # 事件总线
+│   └── engine.py            # 引擎
+├── agent_system/        # Agent 系统
+│   ├── task_router.py       # 智能路由
+│   ├── heartbeat_v5.py      # 心跳分发
+│   └── agents.json          # Agent 注册表
+├── data_collector/      # 数据采集
+├── observability/       # 可观测性（Tracer/Metrics/Logger）
+├── dashboard/           # Web Dashboard
+├── benchmark.py         # 性能基准测试
+├── aios.py              # CLI 入口
+└── README.md
+```
 
 ---
 
-**AIOS v0.6** - 让 AI 系统自己运行、自己看、自己进化！🚀
+## 配置
+
+```yaml
+# config.yaml
+system:
+  name: "AIOS"
+  version: "1.1"
+  log_level: "INFO"
+
+scheduler:
+  max_concurrent: 5
+  default_timeout: 60
+
+memory:
+  global_limit_mb: 512
+  default_quota_mb: 64
+
+storage:
+  backend: "sqlite"
+  db_path: "aios.db"
+```
+
+---
+
+## API 参考
+
+### Kernel API
+
+```python
+# Context Manager
+cm = ContextManager(snapshot_dir=Path("./snapshots"))
+ctx = cm.create(agent_id, metadata={}, limits={})
+cm.save(agent_id, extra_state={})
+state = cm.restore(agent_id)
+cm.switch(from_agent, to_agent, save_state={})
+cm.snapshot(agent_id)
+cm.load_snapshot(agent_id)
+cm.check_limits(agent_id) -> dict
+cm.enforce_limits(agent_id) -> str | None
+cm.stats() -> dict
+
+# Memory Manager
+mm = MemoryManager(global_limit_mb=512)
+mm.register(agent_id, quota_mb=64)
+mm.allocate(agent_id, size_bytes) -> (bool, str)
+mm.release(agent_id, size_bytes) -> bool
+mm.release_all(agent_id) -> int
+mm.evict_lru(target_free_bytes) -> list[str]
+mm.usage(agent_id) -> dict
+mm.top(n=5) -> list[dict]
+mm.stats() -> dict
+```
+
+### Storage API
+
+```python
+# StorageManager (async)
+sm = StorageManager("aios.db")
+await sm.initialize()
+await sm.save_agent_state(agent_id, role, state, goal=None, stats=None)
+await sm.get_agent_state(agent_id) -> dict | None
+await sm.log_event(event_type, data, agent_id=None)
+await sm.list_events(event_type=None, agent_id=None, limit=100)
+await sm.log_task(task_id, agent_id, task_type, priority="normal")
+await sm.update_task_status(task_id, status, result=None)
+await sm.get_task(task_id) -> dict | None
+await sm.close()
+```
+
+### SDK API
+
+```python
+# Planning
+planner = PlanningModule(agent_id="coder-001")
+plan = planner.plan("Refactor scheduler")
+deps = planner.analyze_dependencies(tasks)
+
+# Action
+engine = ActionEngine(agent_id="coder-001")
+engine.register_tool("read_file", fn, risk="low")
+result = engine.execute("read_file", "/path/to/file")
+
+# Memory
+mem = MemoryModule(agent_id="coder-001")
+mem.store("key", data, layer="working")
+result = mem.retrieve("key")
+results = mem.search("query", top_k=10)
+```
+
+---
+
+## 开发
+
+```bash
+# 运行测试
+python -m pytest tests/ -v
+
+# 运行 benchmark
+python benchmark.py
+
+# 检查系统健康度
+python agent_system/heartbeat_v4.py
+```
+
+---
+
+## Roadmap
+
+- [x] Week 1-3: 队列系统 + 调度算法
+- [x] Week 4-6: Context/Memory/Storage Manager
+- [x] Week 7-8: Benchmark + 文档
+- [ ] Month 4-6: VM Controller + CloudRouter 集成
+- [ ] Month 6+: 学术论文
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE)
+
+---
+
+*Built by 珊瑚海 + 小九 🐾*
