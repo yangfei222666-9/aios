@@ -46,36 +46,36 @@
 **目标：** SDK 模块化和 API 接口
 
 #### 任务5：分离 Kernel 和 SDK
-- [ ] 设计 Kernel 和 SDK 的接口边界
-- [ ] 重构现有代码（分离关注点）
-- [ ] 实现 Exposed Ports（统一 API）
-- [ ] 编写迁移指南
+- [x] 设计 Kernel 和 SDK 的接口边界
+- [x] 重构现有代码（分离关注点）
+- [x] 实现 Exposed Ports（统一 API）
+- [x] 编写迁移指南
 - **负责 Agent：** Refactor_Planner + Architecture_Implementer
-- **预计耗时：** 1周
+- **完成时间：** 2026-02-26
 
 #### 任务6：SDK 四大模块
-- [ ] Planning Module（规划模块）
+- [x] Planning Module（规划模块）
   - LLMQuery 接口
   - ToolQuery 接口
-- [ ] Action Module（行动模块）
+- [x] Action Module（行动模块）
   - ToolQuery 接口
   - 执行器
-- [ ] Memory Module（记忆模块）
+- [x] Memory Module（记忆模块）
   - MemoryQuery 接口
   - 上下文管理
-- [ ] Storage Module（存储模块）
+- [x] Storage Module（存储模块）
   - StorageQuery 接口
   - 持久化管理
 - **负责 Agent：** Architecture_Implementer
-- **预计耗时：** 1周
+- **完成时间：** 2026-02-26
 
 #### 任务7：System Call 层
-- [ ] 设计 AIOS System Call 接口
-- [ ] 实现系统调用路由
-- [ ] 支持权限控制
-- [ ] 编写 API 文档
+- [x] 设计 AIOS System Call 接口
+- [x] 实现系统调用路由
+- [x] 支持权限控制
+- [x] 编写 API 文档
 - **负责 Agent：** Documentation_Writer
-- **预计耗时：** 3-4天
+- **完成时间：** 2026-02-26
 
 ---
 
