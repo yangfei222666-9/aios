@@ -239,6 +239,7 @@ class SuperpowersModeV6:
 - shell: {"action": "shell", "params": {"command": "..."}, "reasoning": "..."}
 - read: {"action": "read", "params": {"path": "..."}, "reasoning": "..."}
 - write: {"action": "write", "params": {"path": "...", "content": "..."}, "reasoning": "..."}
+- http: {"action": "http", "params": {"method": "GET/POST", "url": "...", "headers": {...}, "data": {...}}, "reasoning": "..."}
 - done: {"action": "done", "result": {...}, "reasoning": "..."}
 
 **Return JSON only.**
@@ -284,6 +285,32 @@ class SuperpowersModeV6:
                     "success": True,
                     "output": f"Wrote {len(params['content'])} chars"
                 }
+            except Exception as e:
+                return {"success": False, "error": str(e)}
+        
+        elif action == "http":
+            # HTTP 请求
+            try:
+                import sys
+                sys.path.insert(0, "C:/Users/A/.openclaw/workspace")
+                from aios.sdk.tools.http_tool import http_request
+                
+                method = params.get("method", "GET")
+                url = params["url"]
+                headers = params.get("headers")
+                data = params.get("data")
+                
+                result = http_request(method, url, headers=headers, data=data)
+                
+                if result["success"]:
+                    output = f"HTTP {method} {url} -> {result['status_code']}"
+                    return {
+                        "success": True,
+                        "output": output,
+                        "data": result.get("body_json") or result.get("body")
+                    }
+                else:
+                    return {"success": False, "error": result.get("error")}
             except Exception as e:
                 return {"success": False, "error": str(e)}
         
