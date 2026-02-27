@@ -21,6 +21,14 @@ from typing import Any, Callable, Dict, List
 
 AIOS_ROOT = Path(__file__).resolve().parent
 
+# Ensure AIOS_ROOT is in sys.path for absolute imports
+if str(AIOS_ROOT) not in sys.path:
+    sys.path.insert(0, str(AIOS_ROOT))
+# Also add parent so 'aios' package can be found
+_PARENT = str(AIOS_ROOT.parent)
+if _PARENT not in sys.path:
+    sys.path.insert(0, _PARENT)
+
 
 def _import_module(dotted: str):
     """Import a module by file path to avoid package conflicts."""

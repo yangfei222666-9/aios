@@ -232,9 +232,9 @@ See [SKILL.md](SKILL.md) for details.
 """
     (skill_dir / "README.md").write_text(readme, encoding="utf-8")
     
-    print(f"✅ Skill 创建成功: {skill_dir}")
-    print(f"📄 SKILL.md: {skill_dir / 'SKILL.md'}")
-    print(f"🐍 脚本: {target_script}")
+    print(f"[OK] Skill created: {skill_dir}")
+    print(f"[FILE] SKILL.md: {skill_dir / 'SKILL.md'}")
+    print(f"[SCRIPT] {target_script}")
     
     return skill_dir
 

@@ -1,0 +1,233 @@
+{
+  "version": "1.0",
+  "updated_at": "2026-02-27T00:40:00",
+  "description": "AIOS 统一注册中心 - Agent 和 Skill 的唯一真相来源",
+
+  "agents": [
+    {
+      "id": "coder",
+      "name": "代码开发专员",
+      "role": "编写、调试、重构代码",
+      "model": "claude-opus-4-6",
+      "thinking": "medium",
+      "priority": "high",
+      "task_types": ["code", "debug", "refactor"],
+      "skills": ["git-skill", "skill-creator", "api-testing-skill"],
+      "status": "active",
+      "stats": {"tasks_completed": 1, "tasks_failed": 0, "success_rate": 1.0}
+    },
+    {
+      "id": "analyst",
+      "name": "数据分析专员",
+      "role": "数据分析、根因分析、报告生成",
+      "model": "claude-sonnet-4-6",
+      "thinking": "low",
+      "priority": "normal",
+      "task_types": ["analysis", "report", "insight"],
+      "skills": ["data-collector-skill", "evaluator-skill", "log-analysis-skill"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "monitor",
+      "name": "系统监控专员",
+      "role": "系统健康检查、性能监控、资源告警",
+      "model": "claude-sonnet-4-6",
+      "thinking": "off",
+      "priority": "high",
+      "task_types": ["monitor", "health-check", "alert"],
+      "skills": ["aios-health-check", "server-health", "system-resource-monitor", "simple-monitor"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "reactor",
+      "name": "自动修复专员",
+      "role": "自动修复失败、执行 Playbook、熔断恢复",
+      "model": "claude-sonnet-4-6",
+      "thinking": "medium",
+      "priority": "critical",
+      "task_types": ["fix", "recover", "playbook"],
+      "skills": ["self-improving-skill", "quality-gates-skill"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "researcher",
+      "name": "信息研究专员",
+      "role": "GitHub 学习、技术调研、知识积累",
+      "model": "claude-sonnet-4-6",
+      "thinking": "medium",
+      "priority": "normal",
+      "task_types": ["research", "search", "knowledge"],
+      "skills": ["ai-news-collectors", "news-summary", "tavily-search", "find-skills"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "designer",
+      "name": "架构设计师",
+      "role": "架构设计、系统优化、技术选型",
+      "model": "claude-opus-4-6",
+      "thinking": "high",
+      "priority": "normal",
+      "task_types": ["design", "architecture", "optimization"],
+      "skills": ["agent-team-orchestration", "cloudrouter-skill"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "evolution",
+      "name": "进化引擎",
+      "role": "Self-Improving Loop、策略优化、A/B 测试",
+      "model": "claude-sonnet-4-6",
+      "thinking": "high",
+      "priority": "normal",
+      "task_types": ["evolution", "optimize", "learn"],
+      "skills": ["self-improving-skill", "evaluator-skill", "quality-gates-skill", "data-collector-skill"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "security",
+      "name": "安全审计员",
+      "role": "权限检查、敏感操作审核、异常检测",
+      "model": "claude-sonnet-4-6",
+      "thinking": "low",
+      "priority": "high",
+      "task_types": ["audit", "security", "anomaly"],
+      "skills": ["log-analysis-skill"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "automation",
+      "name": "自动化专员",
+      "role": "自动化脚本、定时任务、批量处理",
+      "model": "claude-sonnet-4-6",
+      "thinking": "low",
+      "priority": "normal",
+      "task_types": ["automation", "script", "batch"],
+      "skills": ["automation-workflows", "file-organizer-skill", "aios-backup", "aios-cleanup"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "document",
+      "name": "文档处理专员",
+      "role": "文档提取、摘要生成、关键词识别",
+      "model": "claude-sonnet-4-6",
+      "thinking": "low",
+      "priority": "normal",
+      "task_types": ["document", "summary", "extract"],
+      "skills": ["document-agent", "skill-creator"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "tester",
+      "name": "测试工程师",
+      "role": "自动化测试、质量保证、bug 验证",
+      "model": "claude-sonnet-4-6",
+      "thinking": "medium",
+      "priority": "normal",
+      "task_types": ["test", "qa", "regression"],
+      "skills": ["api-testing-skill"],
+      "status": "active",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    },
+    {
+      "id": "game-dev",
+      "name": "游戏开发工程师",
+      "role": "游戏开发、游戏机制设计、关卡设计",
+      "model": "claude-opus-4-6",
+      "thinking": "medium",
+      "priority": "low",
+      "task_types": ["game", "gamedev"],
+      "skills": [],
+      "status": "standby",
+      "stats": {"tasks_completed": 0, "tasks_failed": 0, "success_rate": 0.0}
+    }
+  ],
+
+  "skills": {
+    "aios-core": [
+      {"name": "data-collector-skill", "has_script": true, "desc": "数据采集（Event/Task/Agent/Trace/Metric）"},
+      {"name": "evaluator-skill", "has_script": true, "desc": "量化评估（任务/Agent/系统/改进）"},
+      {"name": "quality-gates-skill", "has_script": true, "desc": "质量门禁（L0/L1/L2 三层）"},
+      {"name": "self-improving-skill", "has_script": true, "desc": "安全自我进化闭环"},
+      {"name": "aios-health-check", "has_script": true, "desc": "系统健康检查"},
+      {"name": "aios-backup", "has_script": true, "desc": "数据备份"},
+      {"name": "aios-cleanup", "has_script": true, "desc": "数据清理"},
+      {"name": "agent-deployer", "has_script": true, "desc": "Skill → Agent 部署"},
+      {"name": "agent-team-orchestration", "has_script": false, "desc": "多 Agent 团队编排"},
+      {"name": "pls-agent-tools", "has_script": false, "desc": "Agent 工具集"}
+    ],
+    "monitoring": [
+      {"name": "server-health", "has_script": false, "desc": "服务器健康监控"},
+      {"name": "system-resource-monitor", "has_script": false, "desc": "系统资源监控"},
+      {"name": "simple-monitor", "has_script": true, "desc": "简单监控"},
+      {"name": "monitoring", "has_script": false, "desc": "通用监控"},
+      {"name": "web-monitor", "has_script": false, "desc": "网页变化监控"}
+    ],
+    "development": [
+      {"name": "git-skill", "has_script": true, "desc": "Git 操作"},
+      {"name": "skill-creator", "has_script": true, "desc": "Skill 创建工具"},
+      {"name": "api-testing-skill", "has_script": false, "desc": "API 测试"},
+      {"name": "database-skill", "has_script": false, "desc": "数据库操作"},
+      {"name": "docker-skill", "has_script": false, "desc": "Docker 操作"},
+      {"name": "ripgrep", "has_script": false, "desc": "文本搜索"},
+      {"name": "sysadmin-toolbox", "has_script": false, "desc": "运维工具箱"}
+    ],
+    "automation": [
+      {"name": "automation-workflows", "has_script": false, "desc": "自动化工作流"},
+      {"name": "file-organizer-skill", "has_script": false, "desc": "文件整理"},
+      {"name": "cloudrouter-skill", "has_script": false, "desc": "云端 VM 控制"},
+      {"name": "vm-controller-skill", "has_script": false, "desc": "VM 控制器"},
+      {"name": "windows-ui-automation", "has_script": false, "desc": "Windows UI 自动化"},
+      {"name": "ui-automation", "has_script": true, "desc": "UI 自动化"},
+      {"name": "ui-test-automation", "has_script": true, "desc": "UI 测试自动化"}
+    ],
+    "information": [
+      {"name": "find-skills", "has_script": true, "desc": "Skill 智能搜索"},
+      {"name": "ai-news-collectors", "has_script": false, "desc": "AI 新闻聚合"},
+      {"name": "news-summary", "has_script": false, "desc": "新闻摘要"},
+      {"name": "tavily-search", "has_script": false, "desc": "AI 搜索"},
+      {"name": "baidu-search", "has_script": false, "desc": "百度搜索"}
+    ],
+    "productivity": [
+      {"name": "document-agent", "has_script": true, "desc": "文档处理"},
+      {"name": "todoist", "has_script": false, "desc": "任务管理"},
+      {"name": "screenshot", "has_script": false, "desc": "截图"},
+      {"name": "log-analysis-skill", "has_script": false, "desc": "日志分析"},
+      {"name": "daily-briefing", "has_script": false, "desc": "每日简报"},
+      {"name": "ui-inspector", "has_script": false, "desc": "UI 检查"},
+      {"name": "hz-error-guard", "has_script": false, "desc": "错误防护"}
+    ]
+  },
+
+  "stats": {
+    "agents_active": 11,
+    "agents_standby": 1,
+    "agents_total": 12,
+    "skills_total": 41,
+    "skills_with_scripts": 15,
+    "skills_doc_only": 26,
+    "categories": 6,
+    "agents_with_tasks": 1,
+    "agents_zero_tasks": 11
+  },
+
+  "archived_agents": [
+    "coder-620260", "coder-128785", "coder-dispatcher",
+    "analyst-620268", "analyst-dispatcher",
+    "monitor-620268", "monitor-dispatcher",
+    "researcher-620268",
+    "github-learner-architecture", "github-learner-communication", "github-learner-lifecycle", "github-learner-observability", "github-learner-testing",
+    "learner-provider", "learner-playbook", "learner-agent-behavior", "learner-error-pattern", "learner-optimization",
+    "intelligence-decision-maker", "intelligence-knowledge-manager", "intelligence-feedback-loop", "intelligence-self-healing",
+    "security-auditor", "anomaly-detector", "resource-optimizer",
+    "document-agent_agent", "skill-creator_agent", "aios-health-check_agent",
+    "ai-trainer-039507"
+  ]
+}

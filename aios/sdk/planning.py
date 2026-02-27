@@ -26,9 +26,14 @@ import sys
 from pathlib import Path
 
 AIOS_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(AIOS_ROOT))
+if str(AIOS_ROOT) not in sys.path:
+    sys.path.insert(0, str(AIOS_ROOT))
 
-from core.queued_router import queued_route_model
+try:
+    from aios.core.queued_router import queued_route_model
+except ImportError:
+    # Fallback for direct execution
+    from core.queued_router import queued_route_model
 
 
 class PlanningModule:

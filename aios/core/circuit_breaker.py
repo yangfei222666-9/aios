@@ -17,19 +17,12 @@ Circuit Breaker - 熔断机制
 import time
 import json
 from pathlib import Path
-import sys
-import time
-import json
 from datetime import datetime
 from typing import Dict, Optional
 from collections import defaultdict
 
-# 添加路径
-AIOS_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(AIOS_ROOT))
-
-from core.event import create_event, EventType
-from core.event_bus import emit
+from .event import create_event, EventType
+from .event_bus import emit
 
 
 class CircuitBreaker:

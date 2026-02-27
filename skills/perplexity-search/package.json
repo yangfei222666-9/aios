@@ -1,0 +1,14 @@
+{
+  "name": "perplexity-search",
+  "version": "1.0.0",
+  "description": "Perplexity AI search integration for AIOS",
+  "type": "module",
+  "scripts": {
+    "search": "node scripts/search.mjs",
+    "ask": "node scripts/ask.mjs",
+    "research": "node scripts/research.mjs"
+  },
+  "keywords": ["perplexity", "search", "ai", "research"],
+  "author": "AIOS",
+  "license": "MIT"
+}

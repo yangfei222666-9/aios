@@ -1,0 +1,14 @@
+{
+  "timestamp": "2025-01-23T15:30:00+08:00",
+  "target_directory": "C:\\Users\\A\\.openclaw\\workspace\\aios\\agent_system",
+  "statistics": {
+    "pycache_directories_found": 15,
+    "pyc_files_found": 176,
+    "total_files_cleaned": 191,
+    "total_size_bytes": 3336582,
+    "total_size_kb": 3258.38,
+    "total_size_mb": 3.18
+  },
+  "status": "completed",
+  "summary": "Successfully cleaned 15 __pycache__ directories and 176 .pyc files, freeing 3.18 MB of disk space"
+}

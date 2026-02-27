@@ -28,10 +28,16 @@ import sys
 from pathlib import Path
 
 AIOS_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(AIOS_ROOT))
+if str(AIOS_ROOT) not in sys.path:
+    sys.path.insert(0, str(AIOS_ROOT))
 
-from core.event import create_event
-from core.event_bus import get_event_bus
+try:
+    from aios.core.event import create_event
+    from aios.core.event_bus import get_event_bus
+except ImportError:
+    # Fallback for direct execution
+    from core.event import create_event
+    from core.event_bus import get_event_bus
 
 
 # Risk levels

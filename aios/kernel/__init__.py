@@ -25,13 +25,14 @@ from core.queues import (
     StorageQueue,
     ThreadPoolManager,
     QueueRequest,
-    RequestPriority,
+    RequestState,
     SchedulingPolicy,
 )
 from core.queued_router import QueuedRouter, get_queued_router, queued_route_model
 
 from .context_manager import ContextManager, AgentContext
 from .memory_manager import MemoryManager, AgentMemoryBlock
+from .thread_binding import ThreadBinding, ThreadState, TaskFuture
 
 __all__ = [
     # Events
@@ -41,11 +42,13 @@ __all__ = [
     "SchedulerV2", "Task", "Priority", "start_scheduler",
     # Queues
     "LLMQueue", "MemoryQueue", "StorageQueue", "ThreadPoolManager",
-    "QueueRequest", "RequestPriority", "SchedulingPolicy",
+    "QueueRequest", "RequestState", "SchedulingPolicy",
     # Router
     "QueuedRouter", "get_queued_router", "queued_route_model",
     # Context
     "ContextManager", "AgentContext",
     # Memory
     "MemoryManager", "AgentMemoryBlock",
+    # Thread Binding
+    "ThreadBinding", "ThreadState", "TaskFuture",
 ]

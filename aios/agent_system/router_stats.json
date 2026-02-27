@@ -1,0 +1,11 @@
+{
+  "total_routed": 9,
+  "by_agent": {
+    "monitor": 1,
+    "analyst": 3,
+    "reactor": 1,
+    "researcher": 1,
+    "coder": 3
+  },
+  "by_type": {}
+}

@@ -17,7 +17,18 @@ from collections import defaultdict
 import fnmatch
 
 from .event import Event
-from .event_store import EventStore, get_event_store
+
+# 使用新的 Storage Manager（通过适配器）
+try:
+    from aios.storage.event_store_adapter import EventStoreAdapter, get_event_store_adapter
+except ImportError:
+    # Fallback for direct execution
+    import sys
+    from pathlib import Path
+    AIOS_ROOT = Path(__file__).resolve().parent.parent
+    if str(AIOS_ROOT) not in sys.path:
+        sys.path.insert(0, str(AIOS_ROOT))
+    from storage.event_store_adapter import EventStoreAdapter, get_event_store_adapter
 
 
 class EventBus:
@@ -32,8 +43,8 @@ class EventBus:
         """
         self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
         
-        # 使用新的 EventStore
-        self.store = get_event_store()
+        # 使用新的 EventStoreAdapter（基于 Storage Manager）
+        self.store = get_event_store_adapter()
         
         # 兼容旧版：如果指定了 storage_path，尝试迁移
         if storage_path:
@@ -76,24 +87,24 @@ class EventBus:
         Raises:
             ValueError: 验证失败
         """
-        # 检查 event_type
-        if not event.event_type or not isinstance(event.event_type, str):
-            raise ValueError("event_type must be a non-empty string")
+        # 检查 type（Event 使用 type 不是 event_type）
+        if not event.type or not isinstance(event.type, str):
+            raise ValueError("type must be a non-empty string")
         
-        if len(event.event_type) > 200:
-            raise ValueError("event_type too long (max 200 chars)")
+        if len(event.type) > 200:
+            raise ValueError("type too long (max 200 chars)")
         
-        # 检查 event_type 格式（只允许字母、数字、点、下划线、连字符）
+        # 检查 type 格式（只允许字母、数字、点、下划线、连字符）
         import re
-        if not re.match(r'^[a-zA-Z0-9._-]+$', event.event_type):
-            raise ValueError("event_type contains invalid characters")
+        if not re.match(r'^[a-zA-Z0-9._-]+$', event.type):
+            raise ValueError("type contains invalid characters")
         
-        # 检查 data 大小（防止过大的 payload）
-        if event.data:
+        # 检查 payload 大小（防止过大的 payload）
+        if event.payload:
             import sys
-            data_size = sys.getsizeof(str(event.data))
+            data_size = sys.getsizeof(str(event.payload))
             if data_size > 1024 * 1024:  # 1MB
-                raise ValueError(f"event data too large ({data_size} bytes, max 1MB)")
+                raise ValueError(f"event payload too large ({data_size} bytes, max 1MB)")
     
     def subscribe(self, event_type: str, handler: Callable[[Event], None]) -> None:
         """

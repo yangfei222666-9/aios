@@ -1,8 +1,131 @@
-# AIOS 心跳机制 - 自动任务处理 v3.6
+# AIOS 心跳机制 - 自动任务处理 v5.0
 
 **触发：** 每 30 秒执行一次（OpenClaw 主会话心跳）
 
-## 心跳模式
+**最新版本：** v5.0 - 集成 Task Queue 自动执行
+
+## 版本对比
+
+| 版本 | 用途 | 特点 |
+|------|------|------|
+| v3.6 Demo | 开发测试 | 直接模拟执行，秒级反馈 |
+| v3.6 Full | 生产环境 | 创建 spawn 请求，真实执行 |
+| v4.0 | 生产环境 | 集成 Self-Improving Loop v2.0，自动监控和改进 |
+| **v5.0** | **生产环境（推荐）** | **集成 Task Queue，自动执行待处理任务** |
+
+---
+
+## 🚀 Heartbeat v5.0（推荐）
+
+### 新增功能
+
+1. **自动处理任务队列**
+   - 每次心跳检查待处理任务
+   - 自动执行最多 5 个任务
+   - 根据任务类型路由到对应 Agent
+   - 更新任务状态（completed/failed）
+
+2. **系统健康度评估**
+   - 基于任务成功率计算健康分数（0-100）
+   - 健康度 >= 80：GOOD
+   - 健康度 60-79：WARNING
+   - 健康度 < 60：CRITICAL
+
+3. **完整工作流**
+   - 用户提交任务 → 进入队列
+   - Heartbeat 自动检测 → 执行任务
+   - 更新状态 → 记录结果
+
+### 使用方式
+
+```bash
+cd C:\Users\A\.openclaw\workspace\aios\agent_system
+python heartbeat_v5.py
+```
+
+### 输出示例
+
+**有任务处理：**
+```
+AIOS Heartbeat v5.0 Started
+
+[QUEUE] Processing 3 pending tasks...
+[1/3] Executing task: task-xxx
+  Type: code
+  Description: 重构 scheduler.py
+  ✓ Completed in 21.2s
+[2/3] Executing task: task-yyy
+  Type: analysis
+  Description: 分析错误日志
+  ✓ Completed in 22.0s
+[3/3] Executing task: task-zzz
+  Type: monitor
+  Description: 监控资源使用率
+  ✓ Completed in 24.9s
+
+[QUEUE] Processed 3 tasks
+  Success: 3
+  Failed: 0
+
+[HEALTH] Checking system health...
+   Health Score: 85.71/100
+   Total Tasks: 7
+   Completed: 6
+   Failed: 1
+   Pending: 0
+   Status: GOOD
+
+HEARTBEAT_OK (processed=3, health=86)
+
+Heartbeat Completed
+```
+
+**无任务时：**
+```
+AIOS Heartbeat v5.0 Started
+
+[QUEUE] No pending tasks
+
+[HEALTH] Checking system health...
+   Health Score: 74.29/100
+   Total Tasks: 7
+   Completed: 5
+   Failed: 2
+   Pending: 0
+   Status: WARNING
+
+HEARTBEAT_OK (no_tasks, health=74)
+
+Heartbeat Completed
+```
+
+---
+
+## 完整工作流
+
+```
+1. 用户提交任务
+   python aios.py submit --desc "重构 scheduler.py" --type code --priority high
+
+2. 任务进入队列
+   task_queue.jsonl
+
+3. Heartbeat 自动检测（每 30 秒）
+   heartbeat_v5.py
+
+4. 执行任务
+   TaskExecutor → sessions_spawn（未来集成）
+
+5. 更新状态
+   task_queue.jsonl (status: completed/failed)
+
+6. 记录结果
+   task_executions.jsonl
+```
+
+---
+
+## 心跳模式（v3.6）
 
 AIOS 提供两种心跳模式，适用于不同场景：
 

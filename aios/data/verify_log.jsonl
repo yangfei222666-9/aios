@@ -150,3 +150,5 @@
 {"ts": "2026-02-25T12:20:49.628705", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
 {"ts": "2026-02-25T12:24:42.161570", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
 {"ts": "2026-02-25T12:24:42.161570", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}
+{"ts": "2026-02-27T17:17:46.891428", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "no_verify_rule", "passed": true, "detail": "无验证规则，默认通过"}
+{"ts": "2026-02-27T17:17:46.892432", "reaction_id": "fake1", "alert_id": "a1", "playbook_id": "nonexistent", "verify_method": "test", "passed": true, "detail": "test detail"}

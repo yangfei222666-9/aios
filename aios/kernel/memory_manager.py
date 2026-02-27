@@ -71,6 +71,13 @@ class MemoryManager:
         self._global_limit = int(global_limit_mb * 1024 * 1024)
         self._total_allocated: int = 0
         self._eviction_log: List[Dict[str, Any]] = []
+        
+        # Cached stats (updated on alloc/release)
+        self._total_allocs: int = 0
+        self._total_releases: int = 0
+        self._stats_cache: Optional[Dict[str, Any]] = None
+        self._stats_cache_ts: float = 0.0
+        self._stats_cache_ttl: float = 5.0  # 5 seconds
 
     # ------------------------------------------------------------------
     # Allocation
@@ -119,6 +126,11 @@ class MemoryManager:
         if block.allocated_bytes > block.peak_bytes:
             block.peak_bytes = block.allocated_bytes
         self._total_allocated += size_bytes
+        
+        # Update cached stats
+        self._total_allocs += 1
+        self._stats_cache = None  # Invalidate cache
+        
         return True, "ok"
 
     def release(self, agent_id: str, size_bytes: int) -> bool:
@@ -132,6 +144,11 @@ class MemoryManager:
         block.release_count += 1
         block.last_access = time.time()
         self._total_allocated -= actual
+        
+        # Update cached stats
+        self._total_releases += 1
+        self._stats_cache = None  # Invalidate cache
+        
         return True
 
     def release_all(self, agent_id: str) -> int:
@@ -277,13 +294,24 @@ class MemoryManager:
     # ------------------------------------------------------------------
 
     def stats(self) -> Dict[str, Any]:
-        return {
+        """Get memory manager statistics (cached for 5 seconds)."""
+        now = time.time()
+        
+        # Return cached stats if still valid
+        if self._stats_cache and (now - self._stats_cache_ts) < self._stats_cache_ttl:
+            return self._stats_cache
+        
+        # Rebuild cache
+        self._stats_cache = {
             "agents": len(self._blocks),
             "total_allocated_mb": self.total_allocated_mb,
             "global_limit_mb": self.global_limit_mb,
             "free_mb": self.free_mb,
             "utilization_pct": self.utilization,
             "evictions": len(self._eviction_log),
-            "total_allocs": sum(b.alloc_count for b in self._blocks.values()),
-            "total_releases": sum(b.release_count for b in self._blocks.values()),
+            "total_allocs": self._total_allocs,
+            "total_releases": self._total_releases,
         }
+        self._stats_cache_ts = now
+        
+        return self._stats_cache

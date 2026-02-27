@@ -75,12 +75,12 @@ def process_task_queue():
     to_process = tasks[:5]
     remaining = tasks[5:]
     
-    # 路由映射
+    # 路由映射（直接映射到 agents.json 里的 Agent）
     route_map = {
-        "code": "coder-dispatcher",
-        "analysis": "analyst-dispatcher",
-        "monitor": "monitor-dispatcher",
-        "research": "researcher-dispatcher"
+        "code": "skill_creator",  # 代码相关 → skill_creator
+        "analysis": "document_agent",  # 分析相关 → document_agent
+        "monitor": "aios_health_check",  # 监控相关 → aios_health_check
+        "research": "document_agent"  # 研究相关 → document_agent
     }
     
     processed = 0
@@ -89,8 +89,8 @@ def process_task_queue():
     
     for task in to_process:
         task_id = task.get("id", "unknown")
-        task_type = task.get("type", "unknown")
-        agent_id = route_map.get(task_type, "coder-dispatcher")
+        task_type = task.get("task_type", task.get("type", "unknown"))  # 兼容两种格式
+        agent_id = route_map.get(task_type, "document_agent")  # 默认用 document_agent
         
         log(f"  处理任务 {task_id} ({task_type}) -> {agent_id}")
         

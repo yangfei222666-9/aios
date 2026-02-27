@@ -1,0 +1,11 @@
+{
+  "processes": [
+    {
+      "name": "AIOS Dashboard",
+      "cmd": "cd C:\\Users\\A\\.openclaw\\workspace\\aios\\dashboard\\AIOS-Dashboard-v3.4 && \"C:\\Program Files\\Python312\\python.exe\" server.py",
+      "port": 8888,
+      "check_interval": 30,
+      "max_retries": 3
+    }
+  ]
+}

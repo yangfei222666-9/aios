@@ -201,12 +201,19 @@ class AIOSCLI:
         else:
             print("\n❌ 预热失败")
     
-    def heartbeat(self):
+    def heartbeat(self, version="v5"):
         """运行心跳"""
-        print("💓 运行心跳...")
+        print(f"Running Heartbeat {version}...")
+        
+        if version == "v5":
+            script = self.aios_root / "agent_system" / "heartbeat_v5.py"
+        elif version == "v4":
+            script = self.aios_root / "agent_system" / "heartbeat_v4.py"
+        else:
+            script = self.aios_root / "heartbeat_runner_optimized.py"
         
         result = subprocess.run(
-            [self.python, "-X", "utf8", str(self.aios_root / "heartbeat_runner_optimized.py")],
+            [self.python, "-X", "utf8", str(script)],
             cwd=str(self.aios_root)
         )
     
@@ -229,22 +236,42 @@ class AIOSCLI:
             cwd=str(self.aios_root)
         )
     
-    def demo(self):
+    def demo(self, scenario=None):
         """运行演示"""
         print("🎬 AIOS 演示")
         print("=" * 60)
-        print("\n选择演示场景：")
-        print("  1. 文件监控 + 自动备份（推荐，真实场景，20秒）")
-        print("  2. API 健康检查（真实场景，20秒）")
-        print("  3. 简单演示（10秒快速体验）")
-        print("\n默认运行场景 1（文件监控 + 自动备份）")
-        print("=" * 60)
         
-        # 默认运行文件监控演示
-        result = subprocess.run(
-            [self.python, "-X", "utf8", str(self.aios_root / "demo_file_monitor.py")],
-            cwd=str(self.aios_root)
-        )
+        if scenario is None:
+            print("\n选择演示场景：")
+            print("  1. 文件监控 + 自动分类（推荐，真实场景，20秒）")
+            print("  2. API 健康检查 + 自动恢复（真实场景，20秒）")
+            print("  3. 日志分析 + 自动生成 Playbook（真实场景，10秒）")
+            print("\n默认运行场景 1（文件监控 + 自动分类）")
+            print("=" * 60)
+            scenario = "1"
+        
+        # 运行对应的 demo
+        if scenario == "1":
+            print("\n[Demo 1] 文件监控 + 自动分类")
+            result = subprocess.run(
+                [self.python, "-X", "utf8", str(self.aios_root / "demo_file_monitor.py")],
+                cwd=str(self.aios_root)
+            )
+        elif scenario == "2":
+            print("\n[Demo 2] API 健康检查 + 自动恢复")
+            result = subprocess.run(
+                [self.python, "-X", "utf8", str(self.aios_root / "demo_api_health.py")],
+                cwd=str(self.aios_root)
+            )
+        elif scenario == "3":
+            print("\n[Demo 3] 日志分析 + 自动生成 Playbook")
+            result = subprocess.run(
+                [self.python, "-X", "utf8", str(self.aios_root / "demo_log_analysis.py")],
+                cwd=str(self.aios_root)
+            )
+        else:
+            print(f"\n❌ 未知场景: {scenario}")
+            return
         
         if result.returncode == 0:
             print("\n✅ 演示完成")
@@ -284,7 +311,7 @@ def main():
     parser.add_argument(
         "command",
         choices=["status", "start", "stop", "dashboard", "demo", "analyze", "test",
-                 "warmup", "heartbeat", "monitor", "benchmark", "version"],
+                 "warmup", "heartbeat", "monitor", "benchmark", "version", "submit", "tasks"],
         help="要执行的命令"
     )
     
@@ -295,6 +322,44 @@ def main():
         help="监控时长（分钟），默认 5"
     )
     
+    # Task submission arguments
+    parser.add_argument(
+        "--desc",
+        help="任务描述（用于 submit 命令）"
+    )
+    
+    parser.add_argument(
+        "--type",
+        choices=["code", "analysis", "monitor", "refactor", "test", "deploy", "research"],
+        default="code",
+        help="任务类型（用于 submit 命令）"
+    )
+    
+    parser.add_argument(
+        "--priority",
+        choices=["low", "normal", "high", "urgent"],
+        default="normal",
+        help="优先级（用于 submit 命令）"
+    )
+    
+    parser.add_argument(
+        "--status",
+        help="任务状态过滤（用于 tasks 命令）"
+    )
+    
+    parser.add_argument(
+        "--scenario",
+        choices=["1", "2", "3"],
+        help="演示场景（1=文件监控，2=API健康检查，3=日志分析）"
+    )
+    
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=50,
+        help="最大结果数（用于 tasks 命令）"
+    )
+    
     args = parser.parse_args()
     
     cli = AIOSCLI()
@@ -303,7 +368,7 @@ def main():
     if args.command == "status":
         cli.status()
     elif args.command == "demo":
-        cli.demo()
+        cli.demo(scenario=args.scenario)
     elif args.command == "start":
         cli.start()
     elif args.command == "stop":
@@ -318,12 +383,60 @@ def main():
         cli.warmup()
     elif args.command == "heartbeat":
         cli.heartbeat()
-    elif args.command == "monitor":
         cli.monitor(args.duration)
     elif args.command == "benchmark":
         cli.benchmark()
     elif args.command == "version":
         cli.version()
+    elif args.command == "submit":
+        # Submit a task
+        if not args.desc:
+            print("[ERROR] --desc is required for submit command")
+            sys.exit(1)
+        
+        from core.task_submitter import submit_task
+        task_id = submit_task(
+            description=args.desc,
+            task_type=args.type,
+            priority=args.priority,
+        )
+        print(f"[OK] Task submitted: {task_id}")
+    
+    elif args.command == "tasks":
+        # List tasks
+        from core.task_submitter import list_tasks, queue_stats
+        
+        # Only filter by type if explicitly provided
+        filter_type = args.type if args.type != "code" or "--type" in sys.argv else None
+        
+        if args.status or filter_type:
+            tasks = list_tasks(
+                status=args.status,
+                task_type=filter_type,
+                limit=args.limit,
+            )
+            if not tasks:
+                print("No tasks found.")
+            else:
+                print(f"Found {len(tasks)} tasks:\n")
+                for task in tasks:
+                    print(f"[{task['priority']}] {task['id']}")
+                    print(f"  Type: {task['type']}")
+                    print(f"  Status: {task['status']}")
+                    print(f"  Description: {task['description']}")
+                    print()
+        else:
+            stats = queue_stats()
+            print(f"Total tasks: {stats['total']}\n")
+            print("By status:")
+            for status, count in stats['by_status'].items():
+                print(f"  {status}: {count}")
+            print("\nBy type:")
+            for task_type, count in stats['by_type'].items():
+                print(f"  {task_type}: {count}")
+            print("\nBy priority:")
+            for priority, count in stats['by_priority'].items():
+                print(f"  {priority}: {count}")
 
 
 if __name__ == "__main__":

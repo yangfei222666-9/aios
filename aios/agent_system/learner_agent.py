@@ -1,21 +1,28 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
-AIOS Learner Agent - 涓撻棬璐熻矗瀛︿範鍜屾敼杩?AIOS 绯荤粺
+AIOS Learner Agent - Responsible for learning and improving the AIOS system
 
-鑱岃矗锛?1. 浠庡巻鍙叉暟鎹腑瀛︿範妯″紡
-2. 鎻愬彇鏈€浣冲疄璺?3. 璇嗗埆鍙嶆ā寮忥紙搴旇閬垮厤鐨勫仛娉曪級
-4. 鐢熸垚鐭ヨ瘑搴?5. 鏇存柊绯荤粺绛栫暐
-6. 鎸佺画鏀硅繘
+Responsibilities:
+1. Learn patterns from historical data
+2. Extract best practices
+3. Identify anti-patterns (practices to avoid)
+4. Generate knowledge base
+5. Update system strategies
+6. Continuous improvement
 
-瀛︿範鍐呭锛?- Provider 鎬ц兘锛堝摢涓ā鍨嬫垚鍔熺巼楂橈級
-- Playbook 鏁堟灉锛堝摢浜涜鍒欐湁鏁堬級
-- Agent 琛屼负锛堝摢浜涚瓥鐣ユ垚鍔燂級
-- 閿欒妯″紡锛堝摢浜涢敊璇噸澶嶅嚭鐜帮級
-- 浼樺寲鏁堟灉锛堝摢浜涗紭鍖栨湁鏁堬級
+Learning content:
+- Provider performance (which model has higher success rate)
+- Playbook effectiveness (which rules are effective)
+- Agent behavior (which strategies succeed)
+- Error patterns (which errors repeat)
+- Optimization results (which optimizations are effective)
 
-宸ヤ綔妯″紡锛?- 姣忓ぉ鑷姩杩愯涓€娆?- 鍒嗘瀽鏈€杩?7 澶╃殑鏁版嵁
-- 鐢熸垚瀛︿範鎶ュ憡
-- 鏇存柊鐭ヨ瘑搴?- 鎻愬嚭鏀硅繘寤鸿
+Working mode:
+- Run automatically once per day
+- Analyze data from the last 7 days
+- Generate learning report
+- Update knowledge base
+- Propose improvement suggestions
 """
 
 import json
@@ -25,7 +32,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 from collections import Counter, defaultdict
 
-# 娣诲姞 AIOS 璺緞
+# Add AIOS path
 AIOS_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(AIOS_ROOT))
 sys.path.insert(0, str(AIOS_ROOT / "agent_system"))
@@ -34,7 +41,7 @@ from agent_tracer import TraceAnalyzer
 
 
 class AIOSLearnerAgent:
-    """AIOS 瀛︿範 Agent"""
+    """AIOS Learner Agent"""
 
     def __init__(self):
         self.data_dir = AIOS_ROOT / "agent_system" / "data"
@@ -45,7 +52,7 @@ class AIOSLearnerAgent:
         self.events_file = AIOS_ROOT / "data" / "events.jsonl"
 
     def run(self) -> Dict:
-        """杩愯瀹屾暣瀛︿範娴佺▼"""
+        """Run the complete learning workflow"""
         print("=" * 60)
         print("  AIOS Learner Agent")
         print(f"  Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -57,56 +64,56 @@ class AIOSLearnerAgent:
             "learning": {}
         }
 
-        # 1. 瀛︿範 Provider 鎬ц兘
-        print("[1/6] 瀛︿範 Provider 鎬ц兘...")
+        # 1. Learn Provider performance
+        print("[1/6] Learning Provider performance...")
         provider_learning = self._learn_provider_performance()
         report["learning"]["providers"] = provider_learning
-        print(f"  鍒嗘瀽浜?{provider_learning['total_calls']} 娆¤皟鐢?)
+        print(f"  Analyzed {provider_learning['total_calls']} calls")
 
-        # 2. 瀛︿範 Playbook 鏁堟灉
-        print("[2/6] 瀛︿範 Playbook 鏁堟灉...")
+        # 2. Learn Playbook effectiveness
+        print("[2/6] Learning Playbook effectiveness...")
         playbook_learning = self._learn_playbook_effectiveness()
         report["learning"]["playbooks"] = playbook_learning
-        print(f"  鍒嗘瀽浜?{playbook_learning['total_executions']} 娆℃墽琛?)
+        print(f"  Analyzed {playbook_learning['total_executions']} executions")
 
-        # 3. 瀛︿範 Agent 琛屼负
-        print("[3/6] 瀛︿範 Agent 琛屼负...")
+        # 3. Learn Agent behavior
+        print("[3/6] Learning Agent behavior...")
         agent_learning = self._learn_agent_behavior()
         report["learning"]["agents"] = agent_learning
-        print(f"  鍒嗘瀽浜?{agent_learning['total_agents']} 涓?Agent")
+        print(f"  Analyzed {agent_learning['total_agents']} Agents")
 
-        # 4. 璇嗗埆閿欒妯″紡
-        print("[4/6] 璇嗗埆閿欒妯″紡...")
+        # 4. Identify error patterns
+        print("[4/6] Identifying error patterns...")
         error_patterns = self._identify_error_patterns()
         report["learning"]["error_patterns"] = error_patterns
-        print(f"  璇嗗埆浜?{len(error_patterns['patterns'])} 涓敊璇ā寮?)
+        print(f"  Identified {len(error_patterns['patterns'])} error patterns")
 
-        # 5. 璇勪及浼樺寲鏁堟灉
-        print("[5/6] 璇勪及浼樺寲鏁堟灉...")
+        # 5. Evaluate optimization results
+        print("[5/6] Evaluating optimization results...")
         optimization_learning = self._evaluate_optimizations()
         report["learning"]["optimizations"] = optimization_learning
-        print(f"  璇勪及浜?{optimization_learning['total_optimizations']} 涓紭鍖?)
+        print(f"  Evaluated {optimization_learning['total_optimizations']} optimizations")
 
-        # 6. 鐢熸垚鏀硅繘寤鸿
-        print("[6/6] 鐢熸垚鏀硅繘寤鸿...")
+        # 6. Generate improvement suggestions
+        print("[6/6] Generating improvement suggestions...")
         suggestions = self._generate_suggestions(report["learning"])
         report["suggestions"] = suggestions
-        print(f"  鐢熸垚浜?{len(suggestions)} 鏉″缓璁?)
+        print(f"  Generated {len(suggestions)} suggestions")
 
-        # 淇濆瓨鎶ュ憡鍜岀煡璇嗗簱
+        # Save report and knowledge base
         self._save_report(report)
         self._update_knowledge_base(report)
 
         print()
         print("=" * 60)
-        print(f"  瀹屾垚锛佺敓鎴?{len(suggestions)} 鏉℃敼杩涘缓璁?)
+        print(f"  Done! Generated {len(suggestions)} improvement suggestions")
         print("=" * 60)
 
         return report
 
     def _learn_provider_performance(self) -> Dict:
-        """瀛︿範 Provider 鎬ц兘"""
-        # 绠€鍖栫増锛氫粠 events.jsonl 璇诲彇 router 璋冪敤璁板綍
+        """Learn Provider performance"""
+        # Simplified: read router call records from events.jsonl
         provider_stats = defaultdict(lambda: {"calls": 0, "successes": 0, "failures": 0, "total_duration": 0})
         
         if self.events_file.exists():
@@ -128,7 +135,7 @@ class AIOSLearnerAgent:
                     except:
                         continue
 
-        # 璁＄畻鎴愬姛鐜囧拰骞冲潎鑰楁椂
+        # Calculate success rate and average duration
         results = {}
         for provider, stats in provider_stats.items():
             if stats["calls"] > 0:
@@ -144,7 +151,7 @@ class AIOSLearnerAgent:
         }
 
     def _learn_playbook_effectiveness(self) -> Dict:
-        """瀛︿範 Playbook 鏁堟灉"""
+        """Learn Playbook effectiveness"""
         playbook_stats = defaultdict(lambda: {"executions": 0, "successes": 0, "failures": 0})
         
         if self.events_file.exists():
@@ -164,7 +171,8 @@ class AIOSLearnerAgent:
                     except:
                         continue
 
-        # 璁＄畻鎴愬姛鐜?        results = {}
+        # Calculate success rate
+        results = {}
         for playbook, stats in playbook_stats.items():
             if stats["executions"] > 0:
                 results[playbook] = {
@@ -178,8 +186,8 @@ class AIOSLearnerAgent:
         }
 
     def _learn_agent_behavior(self) -> Dict:
-        """瀛︿範 Agent 琛屼负"""
-        # 浠?trace 鏁版嵁瀛︿範
+        """Learn Agent behavior"""
+        # Learn from trace data
         agent_stats = {}
         
         for trace in self.analyzer.traces:
@@ -204,12 +212,12 @@ class AIOSLearnerAgent:
             
             agent_stats[agent_id]["total_duration"] += trace.get("duration_sec", 0)
             
-            # 缁熻宸ュ叿浣跨敤
+            # Count tool usage
             for tool_call in trace.get("tools_used", []):
                 tool = tool_call.get("tool", "unknown")
                 agent_stats[agent_id]["tools_used"][tool] += 1
 
-        # 璁＄畻鎸囨爣
+        # Calculate metrics
         results = {}
         for agent_id, stats in agent_stats.items():
             if stats["total_tasks"] > 0:
@@ -226,8 +234,9 @@ class AIOSLearnerAgent:
         }
 
     def _identify_error_patterns(self) -> Dict:
-        """璇嗗埆閿欒妯″紡"""
-        # 浣跨敤 TraceAnalyzer 鐨勫け璐ユā寮忓垎鏋?        patterns = self.analyzer.get_failure_patterns(min_occurrences=3, env="prod")
+        """Identify error patterns"""
+        # Use TraceAnalyzer failure pattern analysis
+        patterns = self.analyzer.get_failure_patterns(min_occurrences=3, env="prod")
         
         return {
             "patterns": patterns,
@@ -235,8 +244,8 @@ class AIOSLearnerAgent:
         }
 
     def _evaluate_optimizations(self) -> Dict:
-        """璇勪及浼樺寲鏁堟灉"""
-        # 璇诲彇浼樺寲鎶ュ憡
+        """Evaluate optimization results"""
+        # Read optimization reports
         optimizer_reports_dir = self.data_dir / "optimizer_reports"
         
         if not optimizer_reports_dir.exists():
@@ -259,71 +268,74 @@ class AIOSLearnerAgent:
 
         return {
             "total_optimizations": sum(e["applied"] for e in evaluations),
-            "evaluations": evaluations[-5:]  # 鏈€杩?5 娆?        }
+            "evaluations": evaluations[-5:]  # Last 5
+        }
 
     def _generate_suggestions(self, learning: Dict) -> List[Dict]:
-        """鐢熸垚鏀硅繘寤鸿"""
+        """Generate improvement suggestions"""
         suggestions = []
 
-        # 1. Provider 寤鸿
+        # 1. Provider suggestions
         providers = learning.get("providers", {}).get("providers", {})
         for provider, stats in providers.items():
             if stats["success_rate"] < 0.8 and stats["calls"] >= 10:
                 suggestions.append({
                     "type": "provider_reliability",
                     "priority": "high",
-                    "description": f"{provider} 鎴愬姛鐜囪緝浣庯紙{stats['success_rate']:.1%}锛夛紝寤鸿妫€鏌ラ厤缃垨鍒囨崲 Provider",
+                    "description": f"{provider} success rate is low ({stats['success_rate']:.1%}), suggest checking config or switching Provider",
                     "data": stats
                 })
 
-        # 2. Playbook 寤鸿
+        # 2. Playbook suggestions
         playbooks = learning.get("playbooks", {}).get("playbooks", {})
         for playbook, stats in playbooks.items():
             if stats["success_rate"] < 0.7 and stats["executions"] >= 5:
                 suggestions.append({
                     "type": "playbook_effectiveness",
                     "priority": "medium",
-                    "description": f"Playbook {playbook} 鎴愬姛鐜囪緝浣庯紙{stats['success_rate']:.1%}锛夛紝寤鸿浼樺寲瑙勫垯",
+                    "description": f"Playbook {playbook} success rate is low ({stats['success_rate']:.1%}), suggest optimizing rules",
                     "data": stats
                 })
 
-        # 3. Agent 寤鸿
+        # 3. Agent suggestions
         agents = learning.get("agents", {}).get("agents", {})
         for agent_id, stats in agents.items():
             if stats["success_rate"] < 0.7 and stats["total_tasks"] >= 10:
                 suggestions.append({
                     "type": "agent_reliability",
                     "priority": "high",
-                    "description": f"Agent {agent_id} 鎴愬姛鐜囪緝浣庯紙{stats['success_rate']:.1%}锛夛紝寤鸿鎻愬崌鍙潬鎬?,
+                    "description": f"Agent {agent_id} success rate is low ({stats['success_rate']:.1%}), suggest improving reliability",
                     "data": stats
                 })
 
-        # 4. 閿欒妯″紡寤鸿
+        # 4. Error pattern suggestions
         error_patterns = learning.get("error_patterns", {}).get("patterns", [])
-        for pattern in error_patterns[:3]:  # 鍓?3 涓珮棰戦敊璇?            suggestions.append({
+        for pattern in error_patterns[:3]:  # Top 3 frequent errors
+            suggestions.append({
                 "type": "error_pattern",
                 "priority": "high",
-                "description": f"閿欒妯″紡 '{pattern['error_signature']}' 鍑虹幇 {pattern['occurrences']} 娆★紝寤鸿鍒跺畾淇绛栫暐",
+                "description": f"Error pattern '{pattern['error_signature']}' occurred {pattern['occurrences']} times, suggest creating fix strategy",
                 "data": pattern
             })
 
         return suggestions
 
     def _save_report(self, report: Dict):
-        """淇濆瓨瀛︿範鎶ュ憡"""
+        """Save learning report"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_file = self.knowledge_dir / f"learning_{timestamp}.json"
         
         with open(report_file, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2)
         
-        print(f"\n馃搫 鎶ュ憡宸蹭繚瀛? {report_file}")
+        print(f"\nReport saved: {report_file}")
 
     def _update_knowledge_base(self, report: Dict):
-        """鏇存柊鐭ヨ瘑搴?""
+        """Update knowledge base"""
         kb_file = self.knowledge_dir / "knowledge_base.json"
         
-        # 璇诲彇鐜版湁鐭ヨ瘑搴?        if kb_file.exists():
+        # Read existing knowledge base
+        if kb_file.exists():
             with open(kb_file, 'r', encoding='utf-8') as f:
                 kb = json.load(f)
         else:
@@ -336,9 +348,10 @@ class AIOSLearnerAgent:
                 "best_practices": []
             }
 
-        # 鏇存柊鐭ヨ瘑搴?        kb["last_updated"] = report["timestamp"]
+        # Update knowledge base
+        kb["last_updated"] = report["timestamp"]
         
-        # 鏇存柊 Provider 鐭ヨ瘑
+        # Update Provider knowledge
         providers = report["learning"].get("providers", {}).get("providers", {})
         for provider, stats in providers.items():
             if provider not in kb["providers"]:
@@ -348,9 +361,10 @@ class AIOSLearnerAgent:
                 "timestamp": report["timestamp"],
                 "stats": stats
             })
-            # 鍙繚鐣欐渶杩?30 鏉?            kb["providers"][provider]["history"] = kb["providers"][provider]["history"][-30:]
+            # Keep only last 30 entries
+            kb["providers"][provider]["history"] = kb["providers"][provider]["history"][-30:]
 
-        # 鏇存柊 Agent 鐭ヨ瘑
+        # Update Agent knowledge
         agents = report["learning"].get("agents", {}).get("agents", {})
         for agent_id, stats in agents.items():
             if agent_id not in kb["agents"]:
@@ -362,18 +376,19 @@ class AIOSLearnerAgent:
             })
             kb["agents"][agent_id]["history"] = kb["agents"][agent_id]["history"][-30:]
 
-        # 淇濆瓨鐭ヨ瘑搴?        with open(kb_file, "w", encoding="utf-8") as f:
+        # Save knowledge base
+        with open(kb_file, "w", encoding="utf-8") as f:
             json.dump(kb, f, ensure_ascii=False, indent=2)
         
-        print(f"馃摎 鐭ヨ瘑搴撳凡鏇存柊: {kb_file}")
+        print(f"Knowledge base updated: {kb_file}")
 
 
 def main():
-    """涓诲嚱鏁?""
+    """Main function"""
     agent = AIOSLearnerAgent()
     report = agent.run()
     
-    # 杈撳嚭鎽樿
+    # Output summary
     suggestions = report.get("suggestions", [])
     if suggestions:
         print(f"\nLEARNER_SUGGESTIONS:{len(suggestions)}")
@@ -383,4 +398,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -82,6 +82,8 @@ class AutoDispatcher:
             "test": {"model": "claude-sonnet-4-5", "label": "tester"},
             "document": {"model": "claude-sonnet-4-5", "label": "documenter"},
             "debug": {"model": "claude-opus-4-5", "label": "debugger"},
+            "search": {"model": "perplexity-sonar-pro", "label": "perplexity_search"},
+            "deep_research": {"model": "perplexity-sonar-pro", "label": "perplexity_researcher"},
         }
 
         self.agent_configs = self._load_agent_configs()

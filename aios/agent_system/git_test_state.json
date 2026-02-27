@@ -1,0 +1,21 @@
+{
+  "last_commit": "d62e4599c64fc6ec8dc8272a6b5bd6bbeb7aeea8",
+  "last_result": {
+    "commit": {
+      "hash": "d62e4599c64fc6ec8dc8272a6b5bd6bbeb7aeea8",
+      "author": "xiaojiu",
+      "message": "Week 7-8: Benchmark suite v1.0 + unified README"
+    },
+    "test_result": {
+      "returncode": -1,
+      "stdout": "",
+      "stderr": "Command timeout",
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "total": 0,
+      "duration": 0.0,
+      "failures": []
+    }
+  }
+}

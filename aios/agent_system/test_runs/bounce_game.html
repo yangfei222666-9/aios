@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弹球游戏</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        #gameCanvas {
+            border: 3px solid #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            background: #1a1a2e;
+        }
+        
+        #info {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        #bounceCount {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="info">弹跳次数: <span id="bounceCount">0</span></div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const bounceCountElement = document.getElementById('bounceCount');
+
+        // 球的属性
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 20,
+            dx: 4,
+            dy: 3,
+            color: '#ff6b6b'
+        };
+
+        // 弹跳计数
+        let bounceCount = 0;
+
+        // 颜色数组
+        const colors = [
+            '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', 
+            '#6c5ce7', '#a29bfe', '#fd79a8', '#fdcb6e',
+            '#00b894', '#e17055', '#74b9ff', '#a29bfe'
+        ];
+
+        // 绘制球
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball.color;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // 更新球的位置
+        function updateBall() {
+            // 检测左右边界碰撞
+            if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+                ball.dx = -ball.dx;
+                bounceCount++;
+                updateBounceCount();
+            }
+
+            // 检测上下边界碰撞
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.dy = -ball.dy;
+                bounceCount++;
+                updateBounceCount();
+            }
+
+            // 更新位置
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+        }
+
+        // 更新弹跳次数显示
+        function updateBounceCount() {
+            bounceCountElement.textContent = bounceCount;
+        }
+
+        // 清空画布
+        function clearCanvas() {
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // 游戏循环
+        function gameLoop() {
+            clearCanvas();
+            drawBall();
+            updateBall();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 鼠标点击改变颜色
+        canvas.addEventListener('click', () => {
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            ball.color = randomColor;
+        });
+
+        // 启动游戏
+        gameLoop();
+    </script>
+</body>
+</html>
