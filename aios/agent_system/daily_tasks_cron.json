@@ -1,0 +1,198 @@
+[
+  {
+    "name": "系统健康检查",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 * * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 检查AIOS系统健康度，生成报告"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "卦象监控",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 * * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 检查当前系统卦象，记录变化"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "GitHub每日搜索",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 搜索GitHub最新的AIOS、Agent System、Self-Improving相关项目"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "代码质量审查",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 审查最近修改的代码，提出改进建议"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "磁盘空间检查",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 检查磁盘空间使用率，清理临时文件"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "数据备份",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 备份重要数据（events.jsonl, agents.json等）"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "错误日志分析",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 分析错误日志，识别高频问题"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "成本统计",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 统计每日API成本，生成报告"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "Agent状态检查",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 检查所有Agent的运行状态，识别异常"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "性能分析",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * 1",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 分析系统性能，识别瓶颈"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "学习新技术",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * 1",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 搜索和学习AI领域的最新技术"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "架构审查",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * 1",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 审查AIOS架构，提出优化建议"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "文档更新",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * 1",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 更新项目文档，保持同步"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  },
+  {
+    "name": "安全审计",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 9 * * 1",
+      "tz": "Asia/Shanghai"
+    },
+    "payload": {
+      "kind": "systemEvent",
+      "text": "执行任务: 检查系统安全性，识别潜在风险"
+    },
+    "sessionTarget": "main",
+    "enabled": true
+  }
+]
