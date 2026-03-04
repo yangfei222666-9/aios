@@ -1,0 +1,23 @@
+{
+  "id": "monitor_master",
+  "name": "Monitor Master（比卦监控大师）",
+  "version": "1.0.0",
+  "description": "比卦专属监控大师：实时追踪 Health、Dashboard、Heartbeat、Self-Healing Loop、三诸侯协作状态。自动生成告警 + 性能报告。比卦生态守护者。",
+  "author": "AIOS Team",
+  "hexagram_affinity": "比卦 (No.8)",
+  "capabilities": [
+    "全系统 Health 实时监控",
+    "Dashboard 三诸侯状态同步",
+    "Heartbeat 异常告警",
+    "Self-Healing 执行追踪",
+    "三诸侯协同调度",
+    "每日简报性能优化"
+  ],
+  "tools": ["health_check", "dashboard_sync", "alert_telegram", "loop_monitor"],
+  "required_python": ">=3.10",
+  "install_command": "python aios.py market install monitor_master",
+  "example_usage": "python aios.py run monitor_master --task '生成三诸侯健康报告'",
+  "tags": ["monitor", "bigua", "health", "three-lords"],
+  "download_count": 0,
+  "last_updated": "2026-03-05"
+}
