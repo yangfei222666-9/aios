@@ -88,6 +88,7 @@ def generate_spawn_commands(tasks):
         commands.append({
             "task_id": task["id"],
             "agent_id": agent_id,
+            "model_used": config.get("model", "claude-sonnet-4-6"),
             "spawn": cmd,
         })
     return commands
