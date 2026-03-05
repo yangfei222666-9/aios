@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release preparation
 - Open source documentation
 
+### Metrics Specification
+- **Success rate denominator = finished tasks only (completed + failed)**; pending tasks are excluded from all success rate calculations. This is the canonical definition to prevent regression.
+
 ## [0.1.0] - 2026-02-24
 
 ### Added
