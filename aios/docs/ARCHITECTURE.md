@@ -1,12 +1,59 @@
-# AIOS Runtime Control Architecture
+# AIOS — AI Agent Operating System
 
-> An autonomous AI operating system with closed-loop control, adversarial validation, and symbolic policy engine.
+> **AIOS is a runtime control system for autonomous AI agents.**
 >
-> AIOS follows an **autonomic control loop** similar to [MAPE-K](https://en.wikipedia.org/wiki/Autonomic_computing) — Monitor, Analyze, Plan, Execute, Knowledge.
+> It turns AI agents into **observable**, **self-healing**, **evolving** systems.
+>
+> AIOS follows an autonomic control loop similar to [MAPE-K](https://en.wikipedia.org/wiki/Autonomic_computing) — Monitor, Analyze, Plan, Execute, Knowledge.
 
 ---
 
-## 图1: AIOS Runtime Control Architecture（四层 + 遥测层）
+## Overview: What AIOS Does (5 seconds)
+
+```mermaid
+flowchart TD
+    A["🧑 User Tasks"]
+    B["🔀 Route"]
+    C["🤖 AI Agents"]
+    D["⚔️ Debate"]
+    E["⚡ Execute"]
+    F["📊 Observe"]
+    G["📈 Evaluate"]
+    H["🔄 Adapt"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+    H -->|"tune"| B
+
+    subgraph LOOP["Runtime Control Loop"]
+        B
+        C
+        D
+        E
+        F
+        G
+        H
+    end
+
+    style LOOP fill:#1a1a2e,stroke:#90caf9,stroke-width:2px,color:#eee
+    style A fill:#e8f5e9,stroke:#2e7d32
+    style D fill:#ffcdd2,stroke:#c62828
+    style F fill:#fce4ec,stroke:#ad1457
+    style H fill:#e1bee7,stroke:#6a1b9a
+```
+
+> **Route → Debate → Execute → Observe → Evaluate → Adapt → repeat.**
+>
+> That's it. AIOS is a closed control loop that makes AI agents reliable.
+
+---
+
+## 图1: Runtime Control Architecture（四层 + 遥测层）
 
 ```mermaid
 graph TB
