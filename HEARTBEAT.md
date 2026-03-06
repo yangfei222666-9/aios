@@ -4,6 +4,24 @@
 
 **最新版本：** v5.0 - 集成 Task Queue 自动执行
 
+## 🔧 编码配置（重要）
+
+为避免 Windows/PowerShell 编码问题，所有 Python 命令统一使用：
+
+**环境变量（推荐）：**
+- `PYTHONUTF8=1` - Python 3.7+ 全局 UTF-8 模式
+- `PYTHONIOENCODING=utf-8` - 标准输入输出编码
+
+**命令行参数：**
+- `-X utf8` - 强制 UTF-8 模式
+
+**完整命令模板：**
+```powershell
+$env:PYTHONUTF8=1; $env:PYTHONIOENCODING='utf-8'; & "C:\Program Files\Python312\python.exe" -X utf8 <script.py>
+```
+
+---
+
 ## 版本对比
 
 | 版本 | 用途 | 特点 |
@@ -38,6 +56,13 @@
 
 ### 使用方式
 
+**推荐方式（环境变量 + 参数双保险）：**
+```bash
+cd C:\Users\A\.openclaw\workspace\aios\agent_system
+$env:PYTHONUTF8=1; $env:PYTHONIOENCODING='utf-8'; & "C:\Program Files\Python312\python.exe" -X utf8 heartbeat_v5.py
+```
+
+**简化方式（仅参数）：**
 ```bash
 cd C:\Users\A\.openclaw\workspace\aios\agent_system
 & "C:\Program Files\Python312\python.exe" -X utf8 heartbeat_v5.py
@@ -225,7 +250,7 @@ def heartbeat():
 ### Demo 模式（快速测试）
 ```bash
 cd C:\Users\A\.openclaw\workspace\aios\agent_system
-& "C:\Program Files\Python312\python.exe" -X utf8 heartbeat_demo.py
+$env:PYTHONUTF8=1; $env:PYTHONIOENCODING='utf-8'; & "C:\Program Files\Python312\python.exe" -X utf8 heartbeat_demo.py
 ```
 
 **输出示例：**
@@ -245,12 +270,12 @@ cd C:\Users\A\.openclaw\workspace\aios\agent_system
 ### Full 模式（生产环境）
 ```bash
 cd C:\Users\A\.openclaw\workspace\aios\agent_system
-& "C:\Program Files\Python312\python.exe" -X utf8 heartbeat_full.py
+$env:PYTHONUTF8=1; $env:PYTHONIOENCODING='utf-8'; & "C:\Program Files\Python312\python.exe" -X utf8 heartbeat_full.py
 ```
 
 **或在 OpenClaw 主会话心跳中调用：**
 ```bash
-& "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\heartbeat_full.py
+$env:PYTHONUTF8=1; $env:PYTHONIOENCODING='utf-8'; & "C:\Program Files\Python312\python.exe" -X utf8 C:\Users\A\.openclaw\workspace\aios\agent_system\heartbeat_full.py
 ```
 
 ## 5. 输出格式
