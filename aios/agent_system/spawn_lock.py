@@ -245,6 +245,49 @@ def try_acquire_spawn_lock(task: dict) -> Optional[str]:
     return store.acquire(key)
 
 
+def acquire_or_reuse(task: dict, existing_token: Optional[str] = None) -> tuple[Optional[str], bool]:
+    """
+    重试场景专用：如果已持有锁（existing_token 有效），直接复用，不重新 acquire。
+    
+    这保证"重试不重跑"：同一任务的重试不会产生新的锁文件，
+    也不会触发幂等命中计数（因为锁本来就是自己的）。
+    
+    Args:
+        task: 任务对象
+        existing_token: 上次 acquire 返回的 token（如果有）
+    
+    Returns:
+        (token, is_reused)
+        - token: 有效的 lock_token（None 表示被其他 worker 锁定）
+        - is_reused: True 表示复用了已有锁，False 表示新 acquire
+    
+    Usage:
+        # 首次执行
+        token, _ = acquire_or_reuse(task)
+        
+        # 重试时复用
+        token, reused = acquire_or_reuse(task, existing_token=token)
+        if reused:
+            # 锁已持有，直接重试，不产生新锁文件
+            pass
+    """
+    store = get_lock_store()
+    key = idem_key(task)
+    
+    # 如果有 existing_token，验证锁是否仍然有效
+    if existing_token:
+        with _file_mutex(store.lock_file):
+            locks = store._read_locks()
+            existing = locks.get(key)
+            if existing and existing.get("lock_token") == existing_token:
+                # 锁仍然有效且属于自己，直接复用
+                return (existing_token, True)
+    
+    # 否则正常 acquire
+    token = store.acquire(key)
+    return (token, False)
+
+
 def release_spawn_lock(task: dict, lock_token: str) -> bool:
     """任务终态（成功/永久失败）时释放锁"""
     store = get_lock_store()
