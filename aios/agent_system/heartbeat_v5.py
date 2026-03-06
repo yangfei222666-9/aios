@@ -90,6 +90,94 @@ def activate_bigua_resource_sharing():
         print("   ⚠️  agents/ 目录不存在，跳过 Agent 加载")
 
 
+from spawn_lock import (
+    startup_cleanup, 
+    try_acquire_spawn_lock, 
+    release_spawn_lock, 
+    get_idempotency_metrics,
+    recover_stale_locks,
+    transition_status
+)
+
+
+def reclaim_zombie_tasks(timeout_seconds: int = 300, max_retries: int = 2) -> dict:
+    """
+    回收超时的 running 任务：running > timeout_seconds => retry(带上限) or failed
+    使用 transition_status 原子更新，清空 worker_id/started_at/last_heartbeat_at。
+
+    Returns:
+        {"reclaimed": int, "retried": int, "permanently_failed": int}
+    """
+    queue_file = Path(__file__).parent / "task_queue.jsonl"
+    if not queue_file.exists():
+        return {"reclaimed": 0, "retried": 0, "permanently_failed": 0}
+
+    now = time.time()
+    reclaimed = retried = permanently_failed = 0
+
+    with open(queue_file, "r", encoding="utf-8") as f:
+        tasks = [json.loads(l) for l in f if l.strip()]
+
+    modified = False
+    for task in tasks:
+        if task.get("status") != "running":
+            continue
+
+        updated_at = task.get("updated_at", task.get("created_at", 0))
+        age = now - updated_at
+        if age <= timeout_seconds:
+            continue
+
+        task_id = task.get("id", "?")
+        age_hr = age / 3600
+        retry_count = task.get("zombie_retries", 0)
+
+        if retry_count < max_retries:
+            # 原子转换 running → queued，清空 worker 字段
+            ok = transition_status(
+                task,
+                from_status="running",
+                to_status="queued",
+                extra={
+                    "zombie_retries": retry_count + 1,
+                    "zombie_note": f"reclaimed after {age_hr:.1f}h, retry #{retry_count + 1}",
+                    "worker_id": None,
+                    "started_at": None,
+                    "last_heartbeat_at": None,
+                },
+            )
+            if ok:
+                retried += 1
+                print(f"  [ZOMBIE] {task_id}: running {age_hr:.1f}h → queued (retry #{retry_count + 1})")
+        else:
+            # 超过重试上限：原子转换 running → failed
+            ok = transition_status(
+                task,
+                from_status="running",
+                to_status="failed",
+                extra={
+                    "zombie_note": f"permanently failed after {max_retries} retries, last age {age_hr:.1f}h",
+                    "worker_id": None,
+                    "started_at": None,
+                    "last_heartbeat_at": None,
+                },
+            )
+            if ok:
+                permanently_failed += 1
+                print(f"  [ZOMBIE] {task_id}: running {age_hr:.1f}h → permanently failed (max retries)")
+
+        if ok:
+            reclaimed += 1
+            modified = True
+
+    if modified:
+        with open(queue_file, "w", encoding="utf-8") as f:
+            for task in tasks:
+                f.write(json.dumps(task, ensure_ascii=False) + "\n")
+
+    return {"reclaimed": reclaimed, "retried": retried, "permanently_failed": permanently_failed}
+
+
 def process_task_queue(max_tasks: int = 5) -> dict:
     """
     Process pending tasks from the queue.
@@ -109,8 +197,28 @@ def process_task_queue(max_tasks: int = 5) -> dict:
     
     print(f"[QUEUE] Processing {len(tasks)} pending tasks...")
     
-    # Execute tasks
-    results = execute_batch(tasks, max_tasks=max_tasks)
+    # Execute tasks with idempotency gate
+    results = []
+    skipped = 0
+    for task in tasks[:max_tasks]:
+        token = try_acquire_spawn_lock(task)
+        if token is None:
+            skipped += 1
+            continue
+        try:
+            batch_results = execute_batch([task], max_tasks=1)
+            results.extend(batch_results)
+            # Release lock on terminal state
+            if batch_results and not batch_results[0].get("success"):
+                pass  # Keep lock until zombie reclaim handles it
+            else:
+                release_spawn_lock(task, token)
+        except Exception:
+            release_spawn_lock(task, token)
+            raise
+    
+    if skipped:
+        print(f"   [IDEM] {skipped} tasks skipped (idempotent hit)")
     
     # Count results
     success_count = sum(1 for r in results if r["success"])
@@ -301,6 +409,9 @@ def main():
     print(f"║  AIOS Heartbeat v5.0 - {timestamp}  ║")
     print(f"╚══════════════════════════════════════════════════════════════╝\n")
     
+    # 0. Startup: cleanup expired spawn locks
+    startup_cleanup()
+    
     # 0. 启动 Self-Healing Loop v2（首次心跳时启动）
     start_self_healing_loop()
     print()
@@ -328,6 +439,7 @@ def main():
     # 0. LowSuccess Regeneration (每小时整点) + Phase 3观察
     from datetime import datetime
     current_minute = datetime.now().minute
+    current_hour = datetime.now().hour
     if current_minute == 0:  # 每小时整点
         # Phase 2.5: 先执行spawn请求
         print("[BRIDGE] Spawn Request Execution:")
@@ -397,7 +509,15 @@ def main():
         except Exception as e:
             print(f"   [OK] Hexagram Timeline: {e}\n")
     
-    # 1. Process task queue
+    # 1. Reclaim zombie running tasks (before processing queue)
+    print("[ZOMBIE] Checking for stale running tasks...")
+    zombie_result = reclaim_zombie_tasks(timeout_seconds=300, max_retries=2)
+    if zombie_result["reclaimed"] > 0:
+        print(f"   Reclaimed: {zombie_result['reclaimed']} (retried: {zombie_result['retried']}, failed: {zombie_result['permanently_failed']})")
+    else:
+        print("   No zombie tasks found")
+    
+    # 2. Process task queue
     queue_result = process_task_queue(max_tasks=5)
     
     if queue_result["processed"] > 0:
@@ -408,7 +528,7 @@ def main():
     else:
         print("[QUEUE] Task Queue: No pending tasks")
     
-    # 2. Evolution Guard Pre-Check (before health calculation)
+    # 3. Evolution Guard Pre-Check (before health calculation)
     print(f"\n[EVOLUTION_GUARD] Pre-Check:")
     guard_result = run_evolution_guard_precheck()
     print(f"   Status: {guard_result['guard_status']}")
@@ -416,7 +536,7 @@ def main():
     print(f"   Age: {guard_result['age_hours']:.1f}h")
     print(f"   Freshness: {guard_result['freshness']}")
     
-    # 3. Check system health (with freshness context)
+    # 4. Check system health (with freshness context)
     print(f"\n[HEALTH] System Health Check:")
     health = check_system_health(evolution_freshness=guard_result['freshness'])
     
@@ -444,7 +564,27 @@ def main():
             sync_agent_stats()
         except Exception as e:
             print(f"[WARN] Agent stats sync failed: {e}")
+        
+        # Spawn lock health check
+        try:
+            from spawn_lock_monitor import check_spawn_lock_health
+            print(f"\n[LOCK] Spawn lock health check:")
+            check_spawn_lock_health()
+        except Exception as e:
+            print(f"[WARN] Spawn lock monitor failed: {e}")
     
+    # 2.8. Learnings Extractor (每天0点和12点提炼黄金法则)
+    if current_minute == 0 and current_hour in (0, 12):
+        try:
+            from learnings_extractor import run as run_learnings_extractor
+            print(f"\n[LEARNINGS] Extracting Golden Rules:")
+            result = run_learnings_extractor()
+            if result["rules_new"] > 0:
+                print(f"   🆕 {result['rules_new']} new rules extracted!")
+            print(f"   Total: {result['rules_total']} rules | Success rate: {result['success_rate']:.1%}")
+        except Exception as e:
+            print(f"[WARN] Learnings extractor failed: {e}")
+
     # 3. Token Report (每天0点生成)
     if current_minute == 0 and datetime.now().hour == 0:
         print(f"\n[REPORT] Daily Token Report:")
@@ -452,7 +592,6 @@ def main():
         print(report)
     
     # 3.5. Daily Metrics (00:00 full, 12:00 quick)
-    current_hour = datetime.now().hour
     if current_minute == 0 and current_hour == 0:
         try:
             from daily_metrics import run as run_daily_metrics
@@ -472,12 +611,106 @@ def main():
             print(f"[WARN] Quick metrics failed: {e}")
     
     # 4. Output summary
+    idem_metrics = get_idempotency_metrics()
     print(f"\n{'=' * 62}")
     if queue_result["processed"] > 0:
         print(f"[OK] HEARTBEAT_OK | Processed: {queue_result['processed']} | Health: {health['score']:.0f}/100")
     else:
         print(f"[OK] HEARTBEAT_OK | No tasks | Health: {health['score']:.0f}/100")
+    print(f"     Idempotent hit rate: {idem_metrics['idempotent_hit_rate']:.1%} | Stale locks recovered: {idem_metrics['stale_lock_recovered_total']}")
     print(f"{'=' * 62}\n")
+
+
+class HeartbeatSchedulerV5:
+    """
+    Heartbeat scheduler with boot recovery + periodic recovery.
+
+    Recovery rules (per user spec):
+    - transition_status must be WHERE task_id AND status (atomic).
+    - running → queued clears worker_id / started_at / last_heartbeat_at.
+    - Periodic recovery is debounced by _last_recovery_ts (updated on both
+      success and failure to prevent tight retry storms).
+    """
+
+    def __init__(
+        self,
+        recovery_timeout_seconds: int = 300,
+        recovery_interval_seconds: int = 600,
+        recovery_scan_limit: int = 1000,
+    ) -> None:
+        import logging
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.recovery_timeout_seconds = recovery_timeout_seconds
+        self.recovery_interval_seconds = recovery_interval_seconds
+        self.recovery_scan_limit = recovery_scan_limit
+        self._last_recovery_ts: float = 0.0
+
+    # ── public API ────────────────────────────────────────────────────────────
+
+    def start(self) -> None:
+        """启动时执行一次 boot recovery，然后进入主循环。"""
+        try:
+            self._recover_on_boot()
+        except Exception:
+            self.logger.exception("boot recovery failed")
+        self._run_loop()
+
+    def tick(self, now_ts: float) -> None:
+        """每次心跳调用一次；内部决定是否触发周期 recovery。"""
+        try:
+            self._maybe_run_periodic_recovery(now_ts)
+        except Exception:
+            self.logger.exception("periodic recovery failed")
+
+    # ── internal ──────────────────────────────────────────────────────────────
+
+    def _recover_on_boot(self) -> None:
+        """启动时回收所有超时 running 任务（扫描上限 recovery_scan_limit）。"""
+        self.logger.info("[RECOVERY] boot scan started (timeout=%ds)", self.recovery_timeout_seconds)
+        result = reclaim_zombie_tasks(
+            timeout_seconds=self.recovery_timeout_seconds,
+            max_retries=2,
+        )
+        self.logger.info(
+            "[RECOVERY] boot done: reclaimed=%d retried=%d permanently_failed=%d",
+            result["reclaimed"], result["retried"], result["permanently_failed"],
+        )
+
+    def _maybe_run_periodic_recovery(self, now_ts: float) -> None:
+        """
+        周期 recovery 门控：距上次执行超过 recovery_interval_seconds 才触发。
+        无论成功失败都更新 _last_recovery_ts（防抖）。
+        """
+        elapsed = now_ts - self._last_recovery_ts
+        if elapsed < self.recovery_interval_seconds:
+            return
+
+        # 先更新时间戳（防抖：即使下面抛异常也不会立刻重试）
+        self._last_recovery_ts = now_ts
+
+        self.logger.info(
+            "[RECOVERY] periodic scan (elapsed=%.0fs, timeout=%ds)",
+            elapsed, self.recovery_timeout_seconds,
+        )
+        result = reclaim_zombie_tasks(
+            timeout_seconds=self.recovery_timeout_seconds,
+            max_retries=2,
+        )
+        self.logger.info(
+            "[RECOVERY] periodic done: reclaimed=%d retried=%d permanently_failed=%d",
+            result["reclaimed"], result["retried"], result["permanently_failed"],
+        )
+
+    def _run_loop(self) -> None:
+        """主循环：每次调用 main() 并 tick()。"""
+        while True:
+            now_ts = time.time()
+            try:
+                main()
+            except Exception:
+                self.logger.exception("heartbeat main() failed")
+            self.tick(now_ts)
+            time.sleep(30)
 
 
 if __name__ == "__main__":
