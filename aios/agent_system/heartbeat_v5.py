@@ -29,7 +29,7 @@ if str(AIOS_ROOT) not in sys.path:
 from core.task_submitter import list_tasks, queue_stats
 from core.task_executor import execute_batch
 # from low_success_regeneration import run_low_success_regeneration  # Temporarily disabled for service
-from experience_learner import learner
+from experience_learner_v4 import learner_v4
 from token_monitor import check_and_alert, auto_optimize, generate_report
 
 # ── Memory model warm-up (background, non-blocking) ──────────────────────────
@@ -463,28 +463,21 @@ def main():
         except ImportError as e:
             print(f"   ⚠️ LowSuccess Regeneration disabled (missing dependency: {e})\n")
     
-    # 0.5. Experience Learning (每小时整点，在regeneration之后)
+    # 0.5. Experience Learning v4.0 (每小时整点，在regeneration之后)
     if current_minute == 0:
-        print("[LEARN] Experience Library Learning:")
-        # 获取待处理任务
-        pending_tasks = list_tasks(status="pending", limit=10)
-        if pending_tasks:
-            applied_count = 0
-            for task in pending_tasks:
-                # 学习并增强任务
-                enhanced_task = learner.learn_and_recommend(task)
-                if 'enhanced_prompt' in enhanced_task:
-                    applied_count += 1
-            
-            if applied_count > 0:
-                print(f"   [OK] 已应用历史成功模式到 {applied_count} 个任务")
-                # 显示学习统计
-                stats = learner.get_stats()
-                print(f"   经验库: {stats['total_patterns']} 个成功模式, {stats['unique_error_types']} 种错误类型")
-            else:
-                print(f"   [OK] 待处理任务暂无匹配的历史模式")
+        print("[LEARN] Experience Learner v4.0:")
+        metrics = learner_v4.get_metrics()
+        store = metrics.get("store_stats", {})
+        cfg = metrics.get("config", {})
+        print(f"   Grayscale: {cfg.get('grayscale_ratio', 0):.0%} | Version: {cfg.get('strategy_version', '?')}")
+        print(f"   Store: {store.get('total_entries', 0)} entries, {store.get('unique_error_types', 0)} error types")
+        print(f"   Hit rate: {metrics.get('recommend_hit_rate', 0):.1%} | Regen success: {metrics.get('regen_success_rate', 0):.1%}")
+        post_fail = metrics.get('post_recommend_failure_rate', 0)
+        if post_fail > 0.3:
+            print(f"   ⚠️  Post-recommend failure rate HIGH: {post_fail:.1%}")
         else:
-            print(f"   [OK] 无待处理任务\n")
+            print(f"   Post-recommend failure: {post_fail:.1%}")
+        print()
     
     # 0.6. Adversarial Validation Dashboard (每小时整点)
     if current_minute == 0:
