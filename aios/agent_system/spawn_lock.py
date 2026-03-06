@@ -38,7 +38,16 @@ def _file_mutex(path: Path):
     try:
         if platform.system() == "Windows":
             import msvcrt
-            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+            # Windows: 非阻塞尝试，失败则等待重试
+            for _ in range(50):  # 最多等 500ms
+                try:
+                    msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError:
+                    time.sleep(0.01)
+            else:
+                # 最后尝试阻塞锁
+                msvcrt.locking(fh.fileno(), msvcrt.LK_LOCK, 1)
         else:
             import fcntl
             fcntl.flock(fh, fcntl.LOCK_EX)
