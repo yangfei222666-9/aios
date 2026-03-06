@@ -40,7 +40,7 @@
 
 ```bash
 cd C:\Users\A\.openclaw\workspace\aios\agent_system
-python heartbeat_v5.py
+& "C:\Program Files\Python312\python.exe" -X utf8 heartbeat_v5.py
 ```
 
 ### 输出示例
@@ -225,7 +225,7 @@ def heartbeat():
 ### Demo 模式（快速测试）
 ```bash
 cd C:\Users\A\.openclaw\workspace\aios\agent_system
-python heartbeat_demo.py
+& "C:\Program Files\Python312\python.exe" -X utf8 heartbeat_demo.py
 ```
 
 **输出示例：**
@@ -245,7 +245,7 @@ python heartbeat_demo.py
 ### Full 模式（生产环境）
 ```bash
 cd C:\Users\A\.openclaw\workspace\aios\agent_system
-python heartbeat_full.py
+& "C:\Program Files\Python312\python.exe" -X utf8 heartbeat_full.py
 ```
 
 **或在 OpenClaw 主会话心跳中调用：**
