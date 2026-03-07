@@ -1,0 +1,57 @@
+{
+  "agents": [
+    {
+      "id": "coder-dispatcher",
+      "name": "coder-dispatcher",
+      "version": "1.0.0",
+      "author": "小九",
+      "description": "Write clean, maintainable, and well-tested Python code",
+      "type": "core",
+      "priority": "high",
+      "tags": [],
+      "downloads": 0,
+      "rating": 0.0,
+      "package_path": "packages/coder-dispatcher-v1.0.0"
+    },
+    {
+      "id": "monitor-dispatcher",
+      "name": "monitor-dispatcher",
+      "version": "1.0.0",
+      "author": "小九",
+      "description": "Detect anomalies and maintain system health",
+      "type": "core",
+      "priority": "normal",
+      "tags": [],
+      "downloads": 0,
+      "rating": 0.0,
+      "package_path": "packages/monitor-dispatcher-v1.0.0"
+    },
+    {
+      "id": "analyst-dispatcher",
+      "name": "analyst-dispatcher",
+      "version": "1.0.0",
+      "author": "小九",
+      "description": "Analyze data and generate insights",
+      "type": "core",
+      "priority": "normal",
+      "tags": [],
+      "downloads": 0,
+      "rating": 0.0,
+      "package_path": "packages/analyst-dispatcher-v1.0.0"
+    },
+    {
+      "id": "health-monitor",
+      "name": "Health_Monitor",
+      "version": "1.0.0",
+      "author": "小九",
+      "description": "Monitor AIOS health and send alerts when issues are detected",
+      "type": "monitor",
+      "priority": "high",
+      "tags": [],
+      "downloads": 1,
+      "rating": 0.0,
+      "package_path": "packages/health-monitor-v1.0.0"
+    }
+  ],
+  "last_updated": "2026-03-04T13:04:36.040084"
+}

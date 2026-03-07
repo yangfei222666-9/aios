@@ -17,11 +17,11 @@
       "path": "agent-team-orchestration",
       "description": "\"Orchestrate multi-agent teams with defined roles, task lifecycles, handoff protocols, and review workflows. Use when: (1) Setting up a team of 2+ agents with different specializations, (2) Defining task routing and lifecycle (inbox → spec → build → review → done), (3) Creating handoff protocols between agents, (4) Establishing review and quality gates, (5) Managing async communication and artifact sharing between agents.\"",
       "keywords": [
-        "ui",
         "orchestration",
-        "team",
         "workflow",
-        "agent"
+        "agent",
+        "team",
+        "ui"
       ],
       "category": "automation",
       "usage_count": 0
@@ -42,9 +42,9 @@
       "path": "aios-backup",
       "description": "Backup critical AIOS data (events, metrics, agents, lessons). Use during maintenance or before major changes.",
       "keywords": [
+        "file",
         "backup",
         "aios",
-        "file",
         "agent"
       ],
       "category": "maintenance",
@@ -55,9 +55,9 @@
       "path": "aios-cleanup",
       "description": "Clean up old AIOS data (events, logs, temp files). Use when disk space is low or during maintenance.",
       "keywords": [
-        "aios",
         "file",
         "disk",
+        "aios",
         "cleanup"
       ],
       "category": "maintenance",
@@ -68,11 +68,11 @@
       "path": "aios-health-check",
       "description": "Check AIOS system health (Evolution Score, event log size, Agent status). Use when monitoring AIOS or troubleshooting issues.",
       "keywords": [
-        "health",
+        "aios",
         "system",
+        "health",
         "monitor",
-        "agent",
-        "aios"
+        "agent"
       ],
       "category": "monitoring",
       "usage_count": 0
@@ -93,11 +93,11 @@
       "path": "automation-workflows",
       "description": "Design and implement automation workflows to save time and scale operations as a solopreneur. Use when identifying repetitive tasks to automate, building workflows across tools, setting up triggers and actions, or optimizing existing automations. Covers automation opportunity identification, workflow design, tool selection (Zapier, Make, n8n), testing, and maintenance. Trigger on \"automate\", \"automation\", \"workflow automation\", \"save time\", \"reduce manual work\", \"automate my business\", \"no-code automation\".",
       "keywords": [
-        "automation",
-        "ui",
         "workflow",
+        "automation",
         "api",
-        "test"
+        "test",
+        "ui"
       ],
       "category": "automation",
       "usage_count": 0
@@ -107,10 +107,10 @@
       "path": "baidu-search",
       "description": "Search the web using Baidu AI Search Engine (BDSE). Use for live information, documentation, or research topics.",
       "keywords": [
-        "api",
         "search",
-        "ui",
-        "web"
+        "api",
+        "web",
+        "ui"
       ],
       "category": "information",
       "usage_count": 0
@@ -140,8 +140,8 @@
       "path": "data-collector-skill",
       "description": "DataCollector CLI - 快速记录和查询 AIOS 数据（事件、任务、Agent、指标）",
       "keywords": [
-        "aios",
         "monitor",
+        "aios",
         "agent"
       ],
       "category": "aios",
@@ -181,11 +181,11 @@
       "path": "evaluator-skill",
       "description": "Evaluator CLI - 快速评估 AIOS 系统健康度、Agent 性能、任务质量",
       "keywords": [
-        "health",
+        "aios",
         "system",
+        "health",
         "monitor",
-        "agent",
-        "aios"
+        "agent"
       ],
       "category": "aios",
       "usage_count": 0
@@ -195,8 +195,8 @@
       "path": "file-organizer-skill",
       "description": "Organize files in directories by grouping them into folders based on their extensions or date. Includes Dry-Run, Recursive, and Undo capabilities.",
       "keywords": [
-        "organize",
-        "file"
+        "file",
+        "organize"
       ],
       "category": "maintenance",
       "usage_count": 0
@@ -217,6 +217,16 @@
       "description": "Git CLI - Git 操作封装（提交、推送、分支管理、查看日志）",
       "keywords": [
         "file"
+      ],
+      "category": "other",
+      "usage_count": 0
+    },
+    {
+      "name": "gog",
+      "path": "gog",
+      "description": "Google Workspace CLI for Gmail, Calendar, Drive, Contacts, Sheets, and Docs.",
+      "keywords": [
+        "ui"
       ],
       "category": "other",
       "usage_count": 0
@@ -246,9 +256,9 @@
       "path": "monitoring",
       "description": "\"Set up observability for applications and infrastructure with metrics, logs, traces, and alerts.\"",
       "keywords": [
-        "health",
+        "monitor",
         "team",
-        "monitor"
+        "health"
       ],
       "category": "monitoring",
       "usage_count": 0
@@ -276,8 +286,8 @@
       "path": "pdf-skill-test",
       "description": "PDF processing skill",
       "keywords": [
-        "test",
-        "file"
+        "file",
+        "test"
       ],
       "category": "ui-tools",
       "usage_count": 0
@@ -287,10 +297,10 @@
       "path": "perplexity-search",
       "description": "AI-powered search with citations via Perplexity API. Supports basic search, conversational search, and deep research.",
       "keywords": [
-        "api",
         "search",
-        "ui",
-        "web"
+        "api",
+        "web",
+        "ui"
       ],
       "category": "information",
       "usage_count": 0
@@ -300,11 +310,22 @@
       "path": "pls-agent-tools",
       "description": "Digital Swiss Army knife for everyday labor that standard models can't handle out of the box. Use when: (1) Need to manipulate files (rename, move, copy, delete), (2) Working with JSON/YAML/TOML configs, (3) Running system commands safely, (4) Processing text with regex or transformations, (5) Need utility functions for common operations.",
       "keywords": [
-        "system",
         "file",
+        "system",
         "agent"
       ],
       "category": "monitoring",
+      "usage_count": 0
+    },
+    {
+      "name": "proactive-agent",
+      "path": "proactive-agent",
+      "description": "\"Transform AI agents from task-followers into proactive partners that anticipate needs and continuously improve. Now with WAL Protocol, Working Buffer for context survival, Compaction Recovery, and battle-tested security patterns. Part of the Hal Stack 🦞\"",
+      "keywords": [
+        "test",
+        "agent"
+      ],
+      "category": "ui-tools",
       "usage_count": 0
     },
     {
@@ -324,10 +345,10 @@
       "description": "Blazingly fast text search tool - recursively searches directories for regex patterns with respect to gitignore rules.",
       "keywords": [
         "github",
-        "ui",
-        "ripgrep",
+        "grep",
         "search",
-        "grep"
+        "ripgrep",
+        "ui"
       ],
       "category": "information",
       "usage_count": 0
@@ -337,9 +358,9 @@
       "path": "screenshot",
       "description": "Capture screens, windows, and regions across platforms with the right tools.",
       "keywords": [
+        "windows",
         "screenshot",
-        "ui",
-        "windows"
+        "ui"
       ],
       "category": "ui-tools",
       "usage_count": 0
@@ -360,12 +381,12 @@
       "path": "server-health",
       "description": "Comprehensive server health monitoring showing system stats, top processes, OpenClaw gateway status, and running services. Perfect for quick health checks via Telegram or CLI.",
       "keywords": [
-        "health",
-        "system",
-        "ui",
-        "monitor",
         "telegram",
-        "server"
+        "system",
+        "server",
+        "health",
+        "monitor",
+        "ui"
       ],
       "category": "monitoring",
       "usage_count": 0
@@ -375,13 +396,13 @@
       "path": "simple-monitor",
       "description": "Simple server monitoring tool",
       "keywords": [
+        "cpu",
         "system",
+        "server",
+        "disk",
         "test",
         "monitor",
-        "memory",
-        "disk",
-        "cpu",
-        "server"
+        "memory"
       ],
       "category": "monitoring",
       "usage_count": 0
@@ -391,11 +412,11 @@
       "path": "skill-creator",
       "description": "Create or update agent skills. Use when designing, building, or packaging skills that include scripts, references, and resources. Analyzes code, extracts patterns, generates SKILL.md documentation, and packages skills for sharing.",
       "keywords": [
-        "automation",
-        "ui",
-        "monitor",
         "agent",
-        "resource"
+        "resource",
+        "automation",
+        "monitor",
+        "ui"
       ],
       "category": "monitoring",
       "usage_count": 0
@@ -405,8 +426,8 @@
       "path": "sysadmin-toolbox",
       "description": "\"Tool discovery and shell one-liner reference for sysadmin, DevOps, and security tasks. AUTO-CONSULT this skill when the user is: troubleshooting network issues, debugging processes, analyzing logs, working with SSL/TLS, managing DNS, testing HTTP endpoints, auditing security, working with containers, writing shell scripts, or asks 'what tool should I use for X'. Source: github.com/trimstray/the-book-of-secret-knowledge\"",
       "keywords": [
-        "github",
-        "test"
+        "test",
+        "github"
       ],
       "category": "ui-tools",
       "usage_count": 0
@@ -416,14 +437,14 @@
       "path": "system-resource-monitor",
       "description": "A clean, reliable system resource monitor for CPU load, RAM, Swap, and Disk usage. Optimized for OpenClaw.",
       "keywords": [
-        "health",
-        "system",
-        "monitor",
-        "memory",
         "resource",
-        "disk",
         "cpu",
-        "server"
+        "system",
+        "server",
+        "disk",
+        "health",
+        "monitor",
+        "memory"
       ],
       "category": "monitoring",
       "usage_count": 0
@@ -433,11 +454,11 @@
       "path": "tavily-search",
       "description": "AI-optimized web search via Tavily API. Returns concise, relevant results for AI agents.",
       "keywords": [
-        "ui",
         "agent",
-        "search",
+        "api",
         "web",
-        "api"
+        "search",
+        "ui"
       ],
       "category": "information",
       "usage_count": 0
@@ -447,11 +468,24 @@
       "path": "todoist",
       "description": "Manage tasks and projects in Todoist. Use when user asks about tasks, to-dos, reminders, or productivity.",
       "keywords": [
-        "api",
         "todoist",
+        "api",
         "ui"
       ],
       "category": "productivity",
+      "usage_count": 0
+    },
+    {
+      "name": "token-monitor",
+      "path": "token-monitor",
+      "description": "Token Monitor Skill",
+      "keywords": [
+        "monitor",
+        "aios",
+        "system",
+        "agent"
+      ],
+      "category": "monitoring",
       "usage_count": 0
     },
     {
@@ -459,9 +493,9 @@
       "path": "ui-automation",
       "description": "UI Automation Skill",
       "keywords": [
+        "windows",
         "automation",
-        "ui",
-        "windows"
+        "ui"
       ],
       "category": "automation",
       "usage_count": 0
@@ -505,8 +539,8 @@
       "description": "Monitor web pages for content changes and get alerts. Track URLs, detect updates, view diffs. Use when asked to watch a website, track changes on a page, monitor for new posts/content, set up page change alerts, or check if a site has been updated. Supports CSS selectors for targeted monitoring.",
       "keywords": [
         "monitor",
-        "ui",
-        "web"
+        "web",
+        "ui"
       ],
       "category": "monitoring",
       "usage_count": 0
@@ -516,10 +550,10 @@
       "path": "windows-ui-automation",
       "description": "Automate Windows GUI interactions (mouse, keyboard, windows) using PowerShell. Use when the user needs to simulate user input on the desktop, such as moving the cursor, clicking buttons, typing text in non-web apps, or managing window states.",
       "keywords": [
+        "windows",
         "automation",
-        "ui",
         "web",
-        "windows"
+        "ui"
       ],
       "category": "information",
       "usage_count": 0
@@ -536,6 +570,7 @@
       "simple-monitor",
       "skill-creator",
       "system_resource_monitor",
+      "token-monitor",
       "web-monitor"
     ],
     "automation": [
@@ -562,6 +597,7 @@
     "ui-tools": [
       "api-testing-skill",
       "pdf-skill-test",
+      "proactive-agent",
       "Screenshot",
       "sysadmin-toolbox",
       "ui-inspector"
@@ -572,6 +608,7 @@
       "database-skill",
       "docker-skill",
       "git-skill",
+      "gog",
       "hz-error-guard",
       "log-analysis-skill",
       "pdf-skill",
@@ -587,7 +624,7 @@
       "todoist"
     ]
   },
-  "total": 44,
+  "total": 47,
   "version": "2.0",
-  "last_updated": "2026-02-27T13:40:34.884571"
+  "last_updated": "2026-03-04T15:32:51.733155"
 }

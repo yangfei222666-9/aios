@@ -1,0 +1,1019 @@
+{
+  "agents": [
+    {
+      "id": "document-agent_agent",
+      "name": "Document_Agent Agent",
+      "type": "learning",
+      "role": "Specialist in document-agent",
+      "goal": "Process documents (docx/pdf/txt) to extract text, generate summaries, extract outlines, and identify",
+      "backstory": "An expert agent that uses the document-agent skill to accomplish tasks.",
+      "skill_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\document-agent",
+      "script_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\document-agent\\document_agent.py",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "created_at": "2026-02-26T15:44:41.490653",
+      "model": "claude-sonnet-4-5"
+    },
+    {
+      "id": "skill-creator_agent",
+      "name": "Skill_Creator Agent",
+      "type": "learning",
+      "role": "Specialist in skill-creator",
+      "goal": "Create or update agent skills. Use when designing, building, or packaging skills that include script",
+      "backstory": "An expert agent that uses the skill-creator skill to accomplish tasks.",
+      "skill_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\skill-creator",
+      "script_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\skill-creator\\skill_creator.py",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "created_at": "2026-02-26T15:45:53.083223",
+      "model": "claude-sonnet-4-5"
+    },
+    {
+      "id": "aios-health-check_agent",
+      "name": "Aios_Health_Check Agent",
+      "type": "learning",
+      "role": "Specialist in aios-health-check",
+      "goal": "Check AIOS system health (Evolution Score, event log size, Agent status). Use when monitoring AIOS o",
+      "backstory": "An expert agent that uses the aios-health-check skill to accomplish tasks.",
+      "skill_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\aios-health-check",
+      "script_path": "C:\\Users\\A\\.openclaw\\workspace\\skills\\aios-health-check\\check.py",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "created_at": "2026-02-26T15:45:58.476753",
+      "model": "claude-sonnet-4-5"
+    },
+    {
+      "name": "aios_health_check",
+      "type": "monitoring",
+      "role": "aios_health_check Specialist",
+      "goal": "检查 AIOS 系统健康状态。",
+      "backstory": "专门负责 aios_health_check 相关任务的 Agent，基于 Skill 自动生成。",
+      "system_prompt": "你是 aios_health_check Agent，专门负责以下任务：\n\n检查 AIOS 系统健康状态。\n监控 Evolution Score、事件日志大小、Agent 状态。\n适用场景：系统监控、故障排查、健康检查。\n\n## 参数说明\n  - check_type (string, 可选，默认值: all): 检查类型（all=全部, score=评分, events=事件, agents=Agent状态）\n\n## 使用示例\n示例 1:\n输入: {\n  \"check_type\": \"all\"\n}\n输出: {\"evolution_score\": 0.45, \"events_count\": 1234, \"agents_active\": 5}\n\n示例 2:\n输入: {\n  \"check_type\": \"score\"\n}\n输出: {\"evolution_score\": 0.45, \"status\": \"healthy\"}\n\n## 执行规则\n1. 接收用户请求后，提取所需参数\n2. 验证参数完整性和合法性\n3. 调用底层脚本执行任务\n4. 解析输出结果，返回给用户\n5. 如果执行失败，分析错误原因并给出建议\n\n## 输出格式\n- 成功时：简洁描述结果 + 关键数据\n- 失败时：错误原因 + 解决建议\n\n始终保持专业、高效、友好的沟通风格。\n",
+      "execution": {
+        "type": "python",
+        "entry": "C:\\Users\\A\\.openclaw\\workspace\\skills\\aios-health-check\\health_check.py",
+        "command": "python health_check.py --type {check_type}",
+        "sandbox": {
+          "network": false,
+          "filesystem": "read-only",
+          "timeout": 10
+        }
+      },
+      "output": {
+        "type": "json",
+        "success_pattern": "^\\{.*\\}$",
+        "error_pattern": "^ERROR:"
+      },
+      "metadata": {
+        "source": "skill",
+        "skill_dir": "C:\\Users\\A\\.openclaw\\workspace\\skills\\aios-health-check",
+        "created": "2026-02-26T16:11:19.735717",
+        "version": "1.0.0",
+        "author": "小九",
+        "tags": [
+          "monitoring",
+          "health-check",
+          "aios"
+        ],
+        "skill_version": "1.0.0",
+        "last_synced": "2026-02-26T16:12:05.075209"
+      },
+      "state": {
+        "status": "active",
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "last_active": "2026-02-27T02:28:15.830615",
+        "total_duration_seconds": 34.0,
+        "avg_duration_seconds": 34.0
+      }
+    },
+    {
+      "name": "document_agent",
+      "type": "analysis",
+      "role": "document_agent Specialist",
+      "goal": "处理文档（docx/pdf/txt），提取文本、生成摘要、提取大纲、识别关键词。",
+      "backstory": "专门负责 document_agent 相关任务的 Agent，基于 Skill 自动生成。",
+      "system_prompt": "你是 document_agent Agent，专门负责以下任务：\n\n处理文档（docx/pdf/txt），提取文本、生成摘要、提取大纲、识别关键词。\n适用场景：文档分析、内容提取、自动摘要、关键词识别。\n\n## 参数说明\n  - file_path (string, 必填): 文档文件路径（支持 txt/docx/pdf）\n  - action (string, 必填): 操作类型（extract=提取文本, summary=生成摘要, outline=提取大纲, keywords=识别关键词）\n  - output_format (string, 可选，默认值: json): 输出格式\n\n## 使用示例\n示例 1:\n输入: {\n  \"file_path\": \"test.txt\",\n  \"action\": \"summary\",\n  \"output_format\": \"json\"\n}\n输出: {\"summary\": \"这是一个测试文档...\", \"length\": 638}\n\n示例 2:\n输入: {\n  \"file_path\": \"test.docx\",\n  \"action\": \"keywords\"\n}\n输出: {\"keywords\": [\"测试\", \"文档\", \"关键词\"], \"count\": 3}\n\n## 执行规则\n1. 接收用户请求后，提取所需参数\n2. 验证参数完整性和合法性\n3. 调用底层脚本执行任务\n4. 解析输出结果，返回给用户\n5. 如果执行失败，分析错误原因并给出建议\n\n## 输出格式\n- 成功时：简洁描述结果 + 关键数据\n- 失败时：错误原因 + 解决建议\n\n始终保持专业、高效、友好的沟通风格。\n",
+      "execution": {
+        "type": "python",
+        "entry": "C:\\Users\\A\\.openclaw\\workspace\\skills\\document-agent\\document_agent.py",
+        "command": "python document_agent.py --file {file_path} --action {action} --format {output_format}",
+        "sandbox": {
+          "network": false,
+          "filesystem": "read-only",
+          "timeout": 30
+        }
+      },
+      "output": {
+        "type": "json",
+        "success_pattern": "^\\{.*\\}$",
+        "error_pattern": "^ERROR:"
+      },
+      "metadata": {
+        "source": "skill",
+        "skill_dir": "C:\\Users\\A\\.openclaw\\workspace\\skills\\document-agent",
+        "created": "2026-02-26T16:11:19.739217",
+        "version": "1.0.0",
+        "author": "小九",
+        "tags": [
+          "document",
+          "analysis",
+          "nlp"
+        ],
+        "skill_version": "1.0.0",
+        "last_synced": "2026-02-26T16:12:05.083225"
+      },
+      "state": {
+        "status": "active",
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "last_active": "2026-02-27T02:30:03.961030",
+        "total_duration_seconds": 40.0,
+        "avg_duration_seconds": 40.0
+      },
+      "model": "claude-sonnet-4-6"
+    },
+    {
+      "name": "skill_creator",
+      "type": "development",
+      "role": "skill_creator Specialist",
+      "goal": "从 Python 脚本自动生成 Skill 配置。",
+      "backstory": "专门负责 skill_creator 相关任务的 Agent，基于 Skill 自动生成。",
+      "system_prompt": "你是 skill_creator Agent，专门负责以下任务：\n\n从 Python 脚本自动生成 Skill 配置。\n分析代码结构、提取函数、推断用途、生成文档。\n适用场景：快速将脚本转换为标准 Skill。\n\n## 参数说明\n  - script_path (string, 必填): Python 脚本路径\n  - output_dir (string, 可选，默认值: ./skills): 输出目录\n  - skill_name (string, 可选): Skill 名称（默认从脚本名推断）\n\n## 使用示例\n示例 1:\n输入: {\n  \"script_path\": \"test_monitor.py\",\n  \"output_dir\": \"./skills\"\n}\n输出: SUCCESS: Skill 'simple-monitor' created at ./skills/simple-monitor\n\n## 执行规则\n1. 接收用户请求后，提取所需参数\n2. 验证参数完整性和合法性\n3. 调用底层脚本执行任务\n4. 解析输出结果，返回给用户\n5. 如果执行失败，分析错误原因并给出建议\n\n## 输出格式\n- 成功时：简洁描述结果 + 关键数据\n- 失败时：错误原因 + 解决建议\n\n始终保持专业、高效、友好的沟通风格。\n",
+      "execution": {
+        "type": "python",
+        "entry": "C:\\Users\\A\\.openclaw\\workspace\\skills\\skill-creator\\skill_creator.py",
+        "command": "python skill_creator.py --script {script_path} --output {output_dir} --name {skill_name}",
+        "sandbox": {
+          "network": false,
+          "filesystem": "read-write",
+          "timeout": 30
+        }
+      },
+      "output": {
+        "type": "text",
+        "success_pattern": "^SUCCESS:",
+        "error_pattern": "^ERROR:"
+      },
+      "metadata": {
+        "source": "skill",
+        "skill_dir": "C:\\Users\\A\\.openclaw\\workspace\\skills\\skill-creator",
+        "created": "2026-02-26T16:11:19.747737",
+        "version": "1.0.0",
+        "author": "小九",
+        "tags": [
+          "development",
+          "automation",
+          "skill-creation"
+        ],
+        "skill_version": "1.0.0",
+        "last_synced": "2026-02-26T16:12:05.089250"
+      },
+      "state": {
+        "status": "active",
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "last_active": "2026-02-27T02:30:18.744298",
+        "total_duration_seconds": 40.0,
+        "avg_duration_seconds": 40.0
+      }
+    },
+    {
+      "id": "coder-dispatcher",
+      "name": "coder-dispatcher",
+      "type": "core",
+      "role": "Senior Python Developer",
+      "goal": "Write clean, maintainable, and well-tested Python code",
+      "backstory": "You are an experienced Python developer with expertise in writing production-ready code.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "high",
+      "model": "claude-opus-4-5",
+      "thinking": "on",
+      "timeout": 120,
+      "max_retries": 5,
+      "stats": {
+        "tasks_completed": 11,
+        "tasks_failed": 3,
+        "tasks_total": 14,
+        "success_rate": 78.6,
+        "avg_duration": 11.9
+      },
+      "created_at": "2026-02-25T15:57:00"
+    },
+    {
+      "id": "analyst-dispatcher",
+      "name": "analyst-dispatcher",
+      "type": "core",
+      "role": "Data Analyst",
+      "goal": "Analyze data and generate insights",
+      "backstory": "You are a data analyst skilled at finding patterns and generating actionable insights.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "model": "claude-sonnet-4-6",
+      "thinking": "off",
+      "timeout": 60,
+      "max_retries": 3,
+      "stats": {
+        "tasks_completed": 27,
+        "tasks_failed": 2,
+        "tasks_total": 29,
+        "success_rate": 93.1,
+        "avg_duration": 9.8
+      },
+      "created_at": "2026-02-25T15:57:00"
+    },
+    {
+      "id": "monitor-dispatcher",
+      "name": "monitor-dispatcher",
+      "type": "core",
+      "role": "System Monitor",
+      "goal": "Detect anomalies and maintain system health",
+      "backstory": "You are a system monitoring expert focused on reliability and performance.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "max_retries": 3,
+      "stats": {
+        "tasks_completed": 51,
+        "tasks_failed": 0,
+        "tasks_total": 51,
+        "success_rate": 100.0,
+        "avg_duration": 10.8
+      },
+      "created_at": "2026-02-25T15:57:00"
+    },
+    {
+      "id": "task-queue-processor",
+      "name": "Task_Queue_Processor",
+      "type": "core",
+      "role": "Task Queue Manager",
+      "goal": "Automatically process pending tasks from the queue",
+      "backstory": "You are a task orchestrator that ensures tasks are executed efficiently.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "high",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "max_retries": 3,
+      "script_path": "agents/task_queue_processor.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T01:54:00"
+    },
+    {
+      "id": "coder-failure-analyzer",
+      "name": "Coder_Failure_Analyzer",
+      "type": "analysis",
+      "role": "Failure Analyst",
+      "goal": "Analyze why Coder Agent fails and provide diagnostic reports",
+      "backstory": "You are a debugging expert who identifies root causes of failures.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "high",
+      "model": "claude-sonnet-4-6",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/coder_failure_analyzer.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T01:54:00"
+    },
+    {
+      "id": "cost-guardian",
+      "name": "Cost_Guardian",
+      "type": "monitor",
+      "role": "Cost Monitor",
+      "goal": "Monitor API costs and prevent budget overruns",
+      "backstory": "You are a financial guardian that keeps costs under control.",
+      "enabled": true,
+      "schedule": "daily",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/cost_guardian.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 1.2
+      },
+      "created_at": "2026-02-28T01:58:00"
+    },
+    {
+      "id": "performance-optimizer",
+      "name": "Performance_Optimizer",
+      "type": "analysis",
+      "role": "Performance Analyst",
+      "goal": "Analyze performance bottlenecks and generate optimization recommendations",
+      "backstory": "You are a performance expert who makes systems faster and more efficient.",
+      "enabled": true,
+      "schedule": "weekly",
+      "priority": "normal",
+      "model": "claude-sonnet-4-6",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/performance_optimizer.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 1.8
+      },
+      "created_at": "2026-02-28T01:58:00"
+    },
+    {
+      "id": "dependency-manager",
+      "name": "Dependency_Manager",
+      "type": "core",
+      "role": "Task Dependency Orchestrator",
+      "goal": "Manage task dependencies and generate parallel execution plans",
+      "backstory": "You are an orchestration expert who ensures tasks execute in the right order.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/dependency_manager.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 1.5
+      },
+      "created_at": "2026-02-28T02:00:00"
+    },
+    {
+      "id": "user-intent-classifier",
+      "name": "User_Intent_Classifier",
+      "type": "core",
+      "role": "Intent Recognition Specialist",
+      "goal": "Classify user intent and route tasks to the right agent",
+      "backstory": "You are an NLP expert who understands what users want.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "high",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 30,
+      "script_path": "agents/user_intent_classifier.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 0.8
+      },
+      "created_at": "2026-02-28T02:00:00"
+    },
+    {
+      "id": "knowledge-base-manager",
+      "name": "Knowledge_Base_Manager",
+      "type": "learning",
+      "role": "Knowledge Curator",
+      "goal": "Collect, organize, and index knowledge from learning agents",
+      "backstory": "You are a librarian who organizes knowledge for easy retrieval.",
+      "enabled": true,
+      "schedule": "daily",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 120,
+      "script_path": "agents/knowledge_base_manager.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 3.2
+      },
+      "created_at": "2026-02-28T02:03:00"
+    },
+    {
+      "id": "ab-test-runner",
+      "name": "AB_Test_Runner",
+      "type": "analysis",
+      "role": "A/B Testing Specialist",
+      "goal": "Run A/B tests to compare different strategies and make data-driven recommendations",
+      "backstory": "You are a data scientist who uses experiments to find the best solutions.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "model": "claude-sonnet-4-6",
+      "thinking": "off",
+      "timeout": 180,
+      "script_path": "agents/ab_test_runner.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 5.4
+      },
+      "created_at": "2026-02-28T02:03:00"
+    },
+    {
+      "id": "auto-fixer",
+      "name": "Auto_Fixer",
+      "type": "core",
+      "role": "Automatic Task Fixer",
+      "goal": "Automatically fix failed tasks by analyzing errors and applying repair strategies",
+      "backstory": "You are a debugging expert who can identify and fix common failure patterns.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "high",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/auto_fixer.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T02:09:00"
+    },
+    {
+      "id": "task-scheduler",
+      "name": "Task_Scheduler",
+      "type": "core",
+      "role": "Intelligent Task Scheduler",
+      "goal": "Schedule tasks based on priority, dependencies, and resource availability",
+      "backstory": "You are a scheduling expert who optimizes task execution order.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "high",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/task_scheduler.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 2.1
+      },
+      "created_at": "2026-02-28T02:09:00"
+    },
+    {
+      "id": "model-router",
+      "name": "Model_Router",
+      "type": "core",
+      "role": "Model Selection Optimizer",
+      "goal": "Automatically select the optimal model for each task to balance cost and quality",
+      "backstory": "You are an optimization expert who knows which model works best for each task type.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 30,
+      "script_path": "agents/model_router.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 1.8
+      },
+      "created_at": "2026-02-28T02:09:00"
+    },
+    {
+      "id": "code-reviewer",
+      "name": "Code_Reviewer",
+      "type": "analysis",
+      "role": "Code Quality Reviewer",
+      "goal": "Review code for syntax, security, performance, and best practices",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "high",
+      "model": "claude-sonnet-4-6",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/code_reviewer.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 1.2
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "notification-manager",
+      "name": "Notification_Manager",
+      "type": "core",
+      "role": "Notification Aggregator",
+      "goal": "Collect, deduplicate, and send notifications across channels",
+      "enabled": true,
+      "schedule": "hourly",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 30,
+      "script_path": "agents/notification_manager.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 0.8
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "resource-monitor",
+      "name": "Resource_Monitor",
+      "type": "monitor",
+      "role": "System Resource Monitor",
+      "goal": "Monitor CPU, memory, and disk usage and alert on high utilization",
+      "enabled": true,
+      "schedule": "hourly",
+      "priority": "high",
+      "model": "claude-haiku-4-5",
+      "thinking": "off",
+      "timeout": 30,
+      "script_path": "agents/resource_monitor.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "prompt-optimizer",
+      "name": "Prompt_Optimizer",
+      "type": "analysis",
+      "role": "Prompt Quality Optimizer",
+      "goal": "Analyze and optimize agent prompts for better performance",
+      "enabled": true,
+      "schedule": "weekly",
+      "priority": "normal",
+      "model": "claude-sonnet-4-6",
+      "thinking": "on",
+      "timeout": 120,
+      "script_path": "agents/prompt_optimizer.py",
+      "stats": {
+        "tasks_completed": 1,
+        "tasks_failed": 0,
+        "tasks_total": 1,
+        "success_rate": 100.0,
+        "avg_duration": 2.5
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "data-pipeline",
+      "name": "Data_Pipeline",
+      "type": "core",
+      "role": "Data Flow Manager",
+      "goal": "Manage data collection, cleaning, archiving, and reporting",
+      "enabled": true,
+      "schedule": "daily",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 180,
+      "script_path": "agents/data_pipeline.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "workflow-designer",
+      "name": "Workflow_Designer",
+      "type": "core",
+      "role": "Workflow Orchestrator",
+      "goal": "Design and execute multi-agent workflows",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/workflow_designer.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "security-auditor",
+      "name": "Security_Auditor",
+      "type": "analysis",
+      "role": "Security Auditor",
+      "goal": "Audit code and configurations for security vulnerabilities",
+      "enabled": true,
+      "schedule": "weekly",
+      "priority": "high",
+      "model": "claude-sonnet-4-6",
+      "thinking": "on",
+      "timeout": 180,
+      "script_path": "agents/security_auditor.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "feedback-collector",
+      "name": "Feedback_Collector",
+      "type": "learning",
+      "role": "User Feedback Analyst",
+      "goal": "Collect and analyze user feedback for continuous improvement",
+      "enabled": true,
+      "schedule": "daily",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/feedback_collector.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "documentation-generator",
+      "name": "Documentation_Generator",
+      "type": "learning",
+      "role": "Documentation Writer",
+      "goal": "Automatically generate documentation from code and reports",
+      "enabled": true,
+      "schedule": "weekly",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 120,
+      "script_path": "agents/documentation_generator.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "experiment-runner",
+      "name": "Experiment_Runner",
+      "type": "analysis",
+      "role": "Experiment Designer",
+      "goal": "Design and run experiments to test new strategies",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "model": "claude-sonnet-4-6",
+      "thinking": "on",
+      "timeout": 180,
+      "script_path": "agents/experiment_runner.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-02-28T02:13:00"
+    },
+    {
+      "id": "error-pattern-learner",
+      "name": "Error_Pattern_Learner",
+      "type": "learning",
+      "role": "Error Pattern Analyst",
+      "goal": "从失败任务中学习错误模式，自动生成修复策略",
+      "backstory": "You are an expert at analyzing failure patterns and generating fix strategies.",
+      "enabled": true,
+      "schedule": "daily",
+      "priority": "high",
+      "model": "claude-sonnet-4-6",
+      "thinking": "off",
+      "timeout": 60,
+      "script_path": "agents/error_pattern_learner.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-03-03T18:50:50.374026"
+    },
+    {
+      "id": "task-decomposer",
+      "name": "Task_Decomposer",
+      "type": "core",
+      "role": "Task Decomposition Specialist",
+      "goal": "将复杂任务自动拆解为子任务",
+      "backstory": "You are an expert at breaking down complex tasks into manageable subtasks.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "high",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 30,
+      "script_path": "agents/task_decomposer.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-03-03T18:50:50.374026"
+    },
+    {
+      "id": "context-manager",
+      "name": "Context_Manager",
+      "type": "core",
+      "role": "Context Orchestrator",
+      "goal": "管理 Agent 间的上下文传递和共享",
+      "backstory": "You are an expert at managing shared context between agents.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 30,
+      "script_path": "agents/context_manager.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-03-03T18:50:50.374026"
+    },
+    {
+      "id": "visualization-generator",
+      "name": "Visualization_Generator",
+      "type": "analysis",
+      "role": "Data Visualization Specialist",
+      "goal": "自动生成数据可视化图表",
+      "backstory": "You are an expert at creating clear and insightful data visualizations.",
+      "enabled": true,
+      "schedule": "on_demand",
+      "priority": "normal",
+      "model": "claude-haiku-4-5",
+      "thinking": "off",
+      "timeout": 30,
+      "script_path": "agents/visualization_generator.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-03-03T18:50:50.374026"
+    },
+    {
+      "id": "health-monitor",
+      "name": "Health_Monitor",
+      "type": "monitor",
+      "role": "System Health Monitor",
+      "goal": "Monitor AIOS health and send alerts when issues are detected",
+      "backstory": "You are a vigilant monitor that keeps the system running smoothly.",
+      "enabled": true,
+      "schedule": "hourly",
+      "priority": "high",
+      "model": "claude-sonnet-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "max_retries": 3,
+      "script_path": "agents/health_monitor.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-03-04T13:04:36.038580",
+      "version": "1.0.0",
+      "author": "小九"
+    },
+    {
+      "name": "aios-backup",
+      "role": "Backup critical AIOS data (events, metrics, agents, lessons). Use during maintenance or before major changes.",
+      "goal": "Execute aios-backup skill tasks",
+      "system_prompt": "You are aios-backup Agent. Backup critical AIOS data (events, metrics, agents, lessons). Use during maintenance or before major changes.",
+      "type": "skill-based",
+      "state": {
+        "status": "active",
+        "last_active": "2026-03-04T13:35:38.846298"
+      },
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "name": "aios-cleanup",
+      "role": "Clean up old AIOS data (events, logs, temp files). Use when disk space is low or during maintenance.",
+      "goal": "Execute aios-cleanup skill tasks",
+      "system_prompt": "You are aios-cleanup Agent. Clean up old AIOS data (events, logs, temp files). Use when disk space is low or during maintenance.",
+      "type": "skill-based",
+      "state": {
+        "status": "active",
+        "last_active": "2026-03-04T13:35:55.465170"
+      },
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "name": "ai-news-collectors",
+      "role": "AI 新闻聚合与热度排序工具。当用户询问 AI 领域最新动态时触发，如：\"今天有什么 AI 新闻？\"\"总结一下这周的 AI 动态\"\"最近有什么火的 AI 产品？\"\"AI 圈最近在讨论什么？\"。覆盖：新产品发布、研究论文、行业动态、融资新闻、开源项目更新、社区病毒传播现象、AI 工具/Agent 热门项目。输出中文摘要列表，按热度排序，附带原文链接。",
+      "goal": "Execute ai-news-collectors skill tasks",
+      "system_prompt": "You are ai-news-collectors Agent. AI 新闻聚合与热度排序工具。当用户询问 AI 领域最新动态时触发，如：\"今天有什么 AI 新闻？\"\"总结一下这周的 AI 动态\"\"最近有什么火的 AI 产品？\"\"AI 圈最近在讨论什么？\"。覆盖：新产品发布、研究论文、行业动态、融资新闻、开源项目更新、社区病毒传播现象、AI 工具/Agent 热门项目。输出中文摘要列表，按热度排序，附带原文链接。",
+      "type": "skill-based",
+      "state": {
+        "status": "active",
+        "last_active": "2026-03-04T15:02:57.396524"
+      },
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "name": "agent-deployer",
+      "role": "Deploy Skills as AIOS Agents. Automatically generates Agent configurations from SKILL.md and integrates them into the AIOS Agent System. Use when you want to turn a Skill into an executable Agent that can be scheduled and managed by AIOS.",
+      "goal": "Execute agent-deployer skill tasks",
+      "system_prompt": "You are agent-deployer Agent. Deploy Skills as AIOS Agents. Automatically generates Agent configurations from SKILL.md and integrates them into the AIOS Agent System. Use when you want to turn a Skill into an executable Agent that can be scheduled and managed by AIOS.",
+      "type": "skill-based",
+      "state": {
+        "status": "active",
+        "last_active": "2026-03-04T15:02:57.460133"
+      },
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "name": "agent-team-orchestration",
+      "role": "\"Orchestrate multi-agent teams with defined roles, task lifecycles, handoff protocols, and review workflows. Use when: (1) Setting up a team of 2+ agents with different specializations, (2) Defining task routing and lifecycle (inbox → spec → build → review → done), (3) Creating handoff protocols between agents, (4) Establishing review and quality gates, (5) Managing async communication and artifact sharing between agents.\"",
+      "goal": "Execute agent-team-orchestration skill tasks",
+      "system_prompt": "You are agent-team-orchestration Agent. \"Orchestrate multi-agent teams with defined roles, task lifecycles, handoff protocols, and review workflows. Use when: (1) Setting up a team of 2+ agents with different specializations, (2) Defining task routing and lifecycle (inbox → spec → build → review → done), (3) Creating handoff protocols between agents, (4) Establishing review and quality gates, (5) Managing async communication and artifact sharing between agents.\"",
+      "type": "skill-based",
+      "state": {
+        "status": "active",
+        "last_active": "2026-03-04T15:02:57.521417"
+      },
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "name": "file-organizer-skill",
+      "role": "Organize files in directories by grouping them into folders based on their extensions or date. Includes Dry-Run, Recursive, and Undo capabilities.",
+      "goal": "Execute file-organizer-skill skill tasks",
+      "system_prompt": "You are file-organizer-skill Agent. Organize files in directories by grouping them into folders based on their extensions or date. Includes Dry-Run, Recursive, and Undo capabilities.",
+      "type": "skill-based",
+      "state": {
+        "status": "active",
+        "last_active": "2026-03-04T15:02:57.578016"
+      },
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "name": "pdf-skill",
+      "role": "PDF 提取、生成、合并、拆分工具。打工人刚需，支持文本提取、PDF 信息查询、多文件合并、按页拆分、指定页面提取。",
+      "goal": "Execute pdf-skill skill tasks",
+      "system_prompt": "You are pdf-skill Agent. PDF 提取、生成、合并、拆分工具。打工人刚需，支持文本提取、PDF 信息查询、多文件合并、按页拆分、指定页面提取。",
+      "type": "skill-based",
+      "state": {
+        "status": "active",
+        "last_active": "2026-03-04T15:02:57.637715"
+      },
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "name": "server-health",
+      "role": "Comprehensive server health monitoring showing system stats, top processes, OpenClaw gateway status, and running services. Perfect for quick health checks via Telegram or CLI.",
+      "goal": "Execute server-health skill tasks",
+      "system_prompt": "You are server-health Agent. Comprehensive server health monitoring showing system stats, top processes, OpenClaw gateway status, and running services. Perfect for quick health checks via Telegram or CLI.",
+      "type": "skill-based",
+      "state": {
+        "status": "active",
+        "last_active": "2026-03-04T15:02:57.697223"
+      },
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "name": "web-monitor",
+      "role": "Monitor web pages for content changes and get alerts. Track URLs, detect updates, view diffs. Use when asked to watch a website, track changes on a page, monitor for new posts/content, set up page change alerts, or check if a site has been updated. Supports CSS selectors for targeted monitoring.",
+      "goal": "Execute web-monitor skill tasks",
+      "system_prompt": "You are web-monitor Agent. Monitor web pages for content changes and get alerts. Track URLs, detect updates, view diffs. Use when asked to watch a website, track changes on a page, monitor for new posts/content, set up page change alerts, or check if a site has been updated. Supports CSS selectors for targeted monitoring.",
+      "type": "skill-based",
+      "state": {
+        "status": "active",
+        "last_active": "2026-03-04T15:02:57.759436"
+      },
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 100.0
+      }
+    },
+    {
+      "id": "camera-monitor",
+      "name": "Camera_Monitor",
+      "type": "monitor",
+      "role": "Camera Monitoring Specialist",
+      "goal": "Monitor Insta360 Link 2 Pro camera status and capture snapshots",
+      "backstory": "You are a camera monitoring expert that ensures the camera is working properly.",
+      "enabled": true,
+      "schedule": "hourly",
+      "priority": "normal",
+      "model": "claude-haiku-4-5",
+      "thinking": "off",
+      "timeout": 60,
+      "max_retries": 3,
+      "script_path": "camera_monitor_agent.py",
+      "stats": {
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "tasks_total": 0,
+        "success_rate": 0.0,
+        "avg_duration": 0.0
+      },
+      "created_at": "2026-03-04T16:02:00",
+      "version": "1.0.0",
+      "author": "小九"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2026-03-04T13:04:36.038580"
+  }
+}

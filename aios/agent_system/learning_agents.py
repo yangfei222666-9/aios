@@ -520,7 +520,7 @@ def list_agents_by_priority():
 
 if __name__ == '__main__':
     print("学习 Agent 列表：")
-    print("\n🔥 高优先级：")
+    print("\n[FIRE] 高优先级：")
     for agent in LEARNING_AGENTS:
         if agent.get('priority') == 'high':
             schedule = agent.get('interval_hours', 24)
@@ -534,7 +534,7 @@ if __name__ == '__main__':
                 freq = f"每{schedule}小时"
             print(f"  - {agent['name']} ({freq}): {agent['goal']}")
     
-    print("\n⚡ 中优先级：")
+    print("\n[ZAP] 中优先级：")
     for agent in LEARNING_AGENTS:
         if agent.get('priority') == 'normal':
             schedule = agent.get('interval_hours', 24)
@@ -548,7 +548,7 @@ if __name__ == '__main__':
                 freq = f"每{schedule}小时"
             print(f"  - {agent['name']} ({freq}): {agent['goal']}")
     
-    print("\n🌟 低优先级：")
+    print("\n[GLOWING] 低优先级：")
     for agent in LEARNING_AGENTS:
         if agent.get('priority') == 'low':
             schedule = agent.get('interval_hours', 24)

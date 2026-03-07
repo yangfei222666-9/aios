@@ -266,7 +266,7 @@ class ValidationReport:
 
         # 今日统计
         today = report["today_stats"]
-        print(f"📊 今日统计")
+        print(f"[REPORT] 今日统计")
         print(f"  总任务数: {today['total_tasks']}")
         print(f"  失败数: {today['failures']}")
         print(f"  成功率: {today['success_rate']:.1%}")
@@ -277,7 +277,7 @@ class ValidationReport:
         # 对比
         if "note" not in report["comparison"]:
             comp = report["comparison"]
-            print(f"📈 对比昨天")
+            print(f"[COMPARE] 对比昨天")
             print(f"  成功率变化: {comp['success_rate_change']:+.1%}")
             print(f"  超时变化: {comp['timeout_change']:+d}")
             print(f"  耗时变化: {comp['avg_duration_change']:+.2f}s")
@@ -285,7 +285,7 @@ class ValidationReport:
 
         # 失败模式
         if report["failure_patterns"]:
-            print(f"🔍 识别到的模式 Top3")
+            print(f"[SEARCH] 识别到的模式 Top3")
             for p in report["failure_patterns"]:
                 print(f"  - {p['signature']} (出现 {p['count']} 次)")
             print()
@@ -293,7 +293,7 @@ class ValidationReport:
         # 改进情况
         if "note" not in report["improvements"]:
             imp = report["improvements"]
-            print(f"🔧 改进情况")
+            print(f"[FIX] 改进情况")
             print(f"  建议数: {imp['total_suggested']}")
             print(f"  应用数: {imp['applied']}")
             print(f"  成功: {imp['success']}")
@@ -301,14 +301,14 @@ class ValidationReport:
 
         # 安全状态
         safety = report["safety_status"]
-        print(f"🛡️ 安全状态")
+        print(f"[SHIELD] 安全状态")
         print(f"  熔断器: {'触发' if safety['circuit_breaker_broken'] else '正常'}")
         print(f"  连续失败: {safety['consecutive_failures']}")
         print(f"  冷却中: {safety['cooldown_count']} 个改进\n")
 
         # 结论
         verdict = report["verdict"]
-        print(f"✅ 验证结论")
+        print(f"[OK] 验证结论")
         print(f"  阶段: {verdict['phase']}")
         print(f"  通过: {'✓' if verdict['pass'] else '✗'}")
         print(f"  标准: {verdict['criteria']}\n")

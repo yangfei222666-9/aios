@@ -1,11 +1,12 @@
-﻿import json
+import json
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta
 from collections import Counter
+from paths import DATA_DIR
 
 # 读取错误分类配置
-config_file = Path(r"C:\Users\A\.openclaw\workspace\aios\agent_system\data\error_classification.json")
+config_file = DATA_DIR / "error_classification.json"
 if config_file.exists():
     with open(config_file, 'r', encoding='utf-8') as f:
         config = json.load(f)
@@ -14,7 +15,7 @@ else:
     sys.exit(1)
 
 # 读取最近的进化报告
-reports_dir = Path(r"C:\Users\A\.openclaw\workspace\aios\agent_system\data\evolution\reports")
+reports_dir = DATA_DIR / "evolution" / "reports"
 if reports_dir.exists():
     reports = sorted(reports_dir.glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True)
     if reports:
@@ -52,7 +53,7 @@ if reports_dir.exists():
         for category, count in error_categories.most_common():
             severity = config['error_categories'].get(category, {}).get('severity', 'unknown')
             threshold = config['monitoring']['alert_thresholds'].get(category, 999)
-            status = "⚠️ 超阈值" if count >= threshold else "✅"
+            status = "[WARN] 超阈值" if count >= threshold else "[OK]"
             print(f"  {status} {category}: {count}次 (阈值: {threshold}, 严重度: {severity})")
     else:
         print("没有找到进化报告")

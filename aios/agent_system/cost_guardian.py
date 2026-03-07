@@ -7,7 +7,6 @@ import json
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-from data_collector import collect_cost
 
 # 配置文件
 CONFIG_FILE = Path(__file__).parent / "cost_config.json"
@@ -58,10 +57,19 @@ class CostGuardian:
     
     def calculate_cost(self, model: str, input_tokens: int, output_tokens: int) -> float:
         """计算成本"""
-        costs = self.config["model_costs"].get(model, {"input": 3.0, "output": 15.0})
+        costs = self.config.get("model_costs", {}).get(model, {"input": 3.0, "output": 15.0})
         
-        input_cost = (input_tokens / 1_000_000) * costs["input"]
-        output_cost = (output_tokens / 1_000_000) * costs["output"]
+        # 输入验证：token 数不能为负
+        if not isinstance(input_tokens, (int, float)) or input_tokens < 0:
+            input_tokens = 0
+        if not isinstance(output_tokens, (int, float)) or output_tokens < 0:
+            output_tokens = 0
+        
+        input_rate = costs.get("input", 3.0)
+        output_rate = costs.get("output", 15.0)
+        
+        input_cost = (input_tokens / 1_000_000) * input_rate
+        output_cost = (output_tokens / 1_000_000) * output_rate
         
         return input_cost + output_cost
     
@@ -109,8 +117,14 @@ class CostGuardian:
     def check_budget(self) -> Dict:
         """检查预算状态"""
         usage = self.get_today_usage()
-        budget_daily = self.config["budget_daily"]
-        alert_threshold = self.config["alert_threshold"]
+        budget_daily = self.config.get("budget_daily", 1.0)
+        alert_threshold = self.config.get("alert_threshold", 0.8)
+        
+        # 除零保护：预算不能为零或负数
+        if not isinstance(budget_daily, (int, float)) or budget_daily <= 0:
+            budget_daily = 1.0
+        if not isinstance(alert_threshold, (int, float)) or not (0 < alert_threshold <= 1):
+            alert_threshold = 0.8
         
         remaining = budget_daily - usage["total_cost"]
         usage_percent = (usage["total_cost"] / budget_daily) * 100
@@ -215,14 +229,14 @@ class CostGuardian:
         budget_status = self.check_budget()
         
         report = f"""
-📊 成本报告 - {datetime.now().strftime('%Y-%m-%d')}
+[REPORT] 成本报告 - {datetime.now().strftime('%Y-%m-%d')}
 
-💰 预算状态: {budget_status['status'].upper()}
+[COST] 预算状态: {budget_status['status'].upper()}
    每日预算: ${budget_status['budget_daily']:.2f}
    已使用: ${budget_status['used']:.3f} ({budget_status['usage_percent']:.1f}%)
    剩余: ${budget_status['remaining']:.3f}
 
-📈 使用统计:
+[COMPARE] 使用统计:
    任务数: {budget_status['task_count']}
    API调用: {budget_status['api_calls']}
 
@@ -251,7 +265,7 @@ def calculate_cost(model: str, input_tokens: int, output_tokens: int):
 
 if __name__ == "__main__":
     # 测试
-    print("💰 CostGuardian Agent 测试\n")
+    print("[COST] CostGuardian Agent 测试\n")
     
     guardian = CostGuardian()
     

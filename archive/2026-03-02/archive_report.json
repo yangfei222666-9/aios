@@ -1,0 +1,73 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.53,
+    "archive_date":  "2026-03-02",
+    "files_count":  10,
+    "total_size_bytes":  49040,
+    "timestamp":  "2026-03-02 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\generate_reactor_test.py",
+                      "Type":  "old_test",
+                      "Size":  913,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\generate_test_events.py",
+                      "Type":  "old_test",
+                      "Size":  1624,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\run_tests.py",
+                      "Type":  "old_test",
+                      "Size":  2021,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\stress_test.py",
+                      "Type":  "old_test",
+                      "Size":  2947,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\tests\\cleanup_test_alerts.py",
+                      "Type":  "old_test",
+                      "Size":  934,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_e2e_dashboard.py",
+                      "Type":  "old_test",
+                      "Size":  10534,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_e2e_heartbeat.py",
+                      "Type":  "old_test",
+                      "Size":  7640,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_full_loop.py",
+                      "Type":  "old_test",
+                      "Size":  6040,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_full_system.py",
+                      "Type":  "old_test",
+                      "Size":  6875,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_smart_agent.py",
+                      "Type":  "old_test",
+                      "Size":  1303,
+                      "LastModified":  "2026-02-23"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-02",
+    "total_size_mb":  0.05
+}

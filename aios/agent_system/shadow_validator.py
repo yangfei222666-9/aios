@@ -99,7 +99,7 @@ class ShadowValidator:
             # 未知类型：保守拒绝
             return False, f"未知改进类型: {imp_type}"
 
-        print("    ✅ Smoke Test 通过")
+        print("    [OK] Smoke Test 通过")
         return True, "OK"
 
     def _replay_recent_events(
@@ -115,7 +115,7 @@ class ShadowValidator:
         ]
 
         if not agent_traces:
-            print("    ⚠️  无历史数据，跳过 Replay")
+            print("    [WARN]  无历史数据，跳过 Replay")
             return True, "无历史数据"
 
         # 取最近 N 条
@@ -143,7 +143,7 @@ class ShadowValidator:
         if predicted_avg_duration > current_avg_duration * 1.2:
             return False, f"耗时预计增加 {(predicted_avg_duration / current_avg_duration - 1)*100:.1f}%" if current_avg_duration > 0 else (False, "当前平均耗时为0，无法比较")
 
-        print("    ✅ Replay 通过")
+        print("    [OK] Replay 通过")
         return True, "OK"
 
     def _predict_impact(

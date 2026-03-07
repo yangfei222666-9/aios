@@ -1,0 +1,29 @@
+{
+  "id": "health-monitor",
+  "name": "Health_Monitor",
+  "version": "1.0.0",
+  "author": "小九",
+  "description": "Monitor AIOS health and send alerts when issues are detected",
+  "type": "monitor",
+  "role": "System Health Monitor",
+  "goal": "Monitor AIOS health and send alerts when issues are detected",
+  "backstory": "You are a vigilant monitor that keeps the system running smoothly.",
+  "config": {
+    "enabled": true,
+    "schedule": "hourly",
+    "priority": "high",
+    "model": "claude-sonnet-4-5",
+    "thinking": "off",
+    "timeout": 60,
+    "max_retries": 3
+  },
+  "script": {
+    "path": "agents/health_monitor.py",
+    "entry": "main"
+  },
+  "dependencies": [],
+  "tags": [],
+  "created_at": "2026-02-28T01:54:00",
+  "downloads": 0,
+  "rating": 0.0
+}

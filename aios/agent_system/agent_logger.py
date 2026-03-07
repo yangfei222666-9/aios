@@ -57,14 +57,23 @@ class AgentLogger:
         with open(log_file, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
-                    tasks.append(json.loads(line))
+                    try:
+                        tasks.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
 
         total = len(tasks)
-        successes = sum(1 for t in tasks if t["success"])
-        interventions = sum(1 for t in tasks if t["human_intervention"])
-        durations = [t["duration_sec"] for t in tasks if t["duration_sec"] > 0]
+        # 使用 .get() 防止 KeyError（空值保护）
+        successes = sum(1 for t in tasks if t.get("success", False))
+        interventions = sum(1 for t in tasks if t.get("human_intervention", False))
+        # 类型检查 + 范围验证
+        durations = [
+            t.get("duration_sec", 0) for t in tasks
+            if isinstance(t.get("duration_sec"), (int, float)) and t.get("duration_sec", 0) > 0
+        ]
         recoveries = [
-            t["failure_recovery_sec"] for t in tasks if t["failure_recovery_sec"] > 0
+            t.get("failure_recovery_sec", 0) for t in tasks
+            if isinstance(t.get("failure_recovery_sec"), (int, float)) and t.get("failure_recovery_sec", 0) > 0
         ]
 
         return {

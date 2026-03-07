@@ -47,6 +47,10 @@ SLO = {
 
 def load_jsonl(filename):
     path = os.path.join(BASE_DIR, filename)
+    return load_jsonl_path(path)
+
+
+def load_jsonl_path(path):
     if not os.path.exists(path):
         return []
     entries = []
@@ -163,12 +167,17 @@ def collect_task_metrics(date_str):
     durations = [
         t["result"]["duration"]
         for t in tasks
-        if t.get("result", {}).get("duration") is not None
+        if isinstance(t.get("result", {}).get("duration"), (int, float))
+        and t["result"]["duration"] >= 0
     ]
     avg_latency = round(sum(durations) / len(durations), 2) if durations else 0.0
 
     # Pending tasks from queue
-    queue = load_jsonl("task_queue.jsonl")
+    try:
+        from paths import TASK_QUEUE as _TQ
+        queue = load_jsonl_path(str(_TQ))
+    except ImportError:
+        queue = load_jsonl("task_queue.jsonl")
     pending = sum(1 for t in queue if t.get("status") == "pending")
 
     # Model usage breakdown
@@ -228,14 +237,16 @@ def collect_debate_metrics(date_str):
 
     debate_rate = round(debates_triggered / tasks_total * 100, 1) if tasks_total > 0 else 0.0
 
-    # Latency and rounds (if available)
+    # Latency and rounds (if available, with type validation)
     latencies = []
     rounds_list = []
     for d in debate_entries:
-        if "latency" in d:
-            latencies.append(d["latency"])
-        if "rounds" in d:
-            rounds_list.append(d["rounds"])
+        lat = d.get("latency")
+        if isinstance(lat, (int, float)) and lat >= 0:
+            latencies.append(lat)
+        rnd = d.get("rounds")
+        if isinstance(rnd, (int, float)) and rnd >= 0:
+            rounds_list.append(rnd)
 
     return {
         "debates_triggered": debates_triggered,
@@ -266,7 +277,8 @@ def collect_debate_effectiveness(date_str):
         if not lst:
             return 0.0
         s = sum(1 for t in lst if t.get("result", {}).get("success", False))
-        return round(s / len(lst) * 100, 1)
+        total = len(lst)
+        return round(s / total * 100, 1) if total > 0 else 0.0
 
     return {
         "tasks_with_debate": len(with_debate),
@@ -332,17 +344,22 @@ def collect_learning_metrics(date_str):
     attempts = len(regen)
     successes = sum(1 for r in regen if r.get("success", False))
 
-    # Regeneration times (if available)
+    # Regeneration times (if available, with type validation)
     times = []
     for r in regen:
-        if "duration" in r:
-            times.append(r["duration"])
+        dur = r.get("duration")
+        if isinstance(dur, (int, float)) and dur >= 0:
+            times.append(dur)
+
+    # Max regeneration attempts (from config or default to 3)
+    max_attempts = 3  # Default from Phase 3 config
 
     return {
         "regeneration_attempts": attempts,
         "regeneration_success": successes,
         "regeneration_rate": round(successes / attempts * 100, 1) if attempts > 0 else 0.0,
         "avg_regeneration_time_s": round(sum(times) / len(times), 2) if times else 0.0,
+        "max_regeneration_attempts": max_attempts,
     }
 
 
@@ -366,8 +383,10 @@ def check_slo(metrics):
         alerts.append(f"⚠️ debate_rate {dr}% > {SLO['debate_rate']['warn_high']}% (WARN)")
 
     lat = metrics["avg_latency"]
-    if lat > SLO["avg_task_latency"]["warn"]:
+    if lat > SLO["avg_task_latency"]["warn"] and not metrics.get("noise", False):
         alerts.append(f"⚠️ avg_latency {lat}s > {SLO['avg_task_latency']['warn']}s (WARN)")
+    elif lat > SLO["avg_task_latency"]["warn"] and metrics.get("noise", False):
+        alerts.append(f"ℹ️ avg_latency {lat}s high but noise=true (tasks<10, ignoring)")
 
     rr = metrics["regeneration"]["rate"]
     if rr > 0 and rr < SLO["regeneration_rate"]["warn"]:
@@ -406,6 +425,9 @@ def generate_md(metrics, date_str, alerts):
         f"  tasks_total: {metrics['tasks_total']}",
         f"  success_rate: {metrics['success_rate']}%",
         f"  avg_latency: {metrics['avg_latency']}s",
+        f"  latency_baseline_3d: {metrics.get('latency_baseline_3d', 0)}s",
+        f"  latency_spike: {metrics.get('latency_spike', False)}",
+        f"  noise: {metrics.get('noise', False)}",
         f"  tasks_pending: {metrics['tasks_pending']}",
         "",
         "## Router",
@@ -458,6 +480,7 @@ def generate_md(metrics, date_str, alerts):
         f"  success: {rg['success']}",
         f"  rate: {rg['rate']}%",
         f"  avg_time: {rg['avg_time']}s",
+        f"  max_attempts: {rg['max_regeneration_attempts']}",
     ])
 
     # Model usage
@@ -497,12 +520,42 @@ def collect_all_metrics(date_str):
     lm = collect_learning_metrics(date_str)
 
     # Unified structure per 珊瑚海's review
+    # Latency spike detection: compare against 3-day baseline
+    baseline_latencies = []
+    for i in range(1, 4):
+        prev_date = (datetime.strptime(date_str, "%Y-%m-%d") - timedelta(days=i)).strftime("%Y-%m-%d")
+        prev_path = os.path.join(REPORTS_DIR, f"daily_metrics_{prev_date}.json")
+        if os.path.exists(prev_path):
+            try:
+                with open(prev_path, "r", encoding="utf-8") as pf:
+                    prev = json.load(pf)
+                lat = prev.get("avg_latency", prev.get("task_metrics", {}).get("avg_task_latency_s"))
+                if lat is not None:
+                    baseline_latencies.append(lat)
+            except Exception:
+                pass
+    baseline_avg = round(sum(baseline_latencies) / len(baseline_latencies), 2) if baseline_latencies else 0.0
+    spike_threshold = round(baseline_avg * 1.5, 2)
+    current_latency = tm["avg_task_latency_s"]
+
+    # Sample protection: need >= 10 tasks to declare a spike (avoid single slow task → false spike)
+    MIN_SAMPLE_FOR_SPIKE = 10
+    tasks_today = tm["tasks_total"]
+    raw_spike = current_latency > spike_threshold if baseline_avg > 0 else False
+    latency_spike = raw_spike and tasks_today >= MIN_SAMPLE_FOR_SPIKE
+    # noise flag: spike signal present but sample too small to be meaningful
+    noise = raw_spike and tasks_today < MIN_SAMPLE_FOR_SPIKE
+
     return {
         "date": date_str,
         "generated_at": datetime.now(timezone(timedelta(hours=8))).isoformat(),
         "tasks_total": tm["tasks_total"],
         "success_rate": tm["success_rate"],
         "avg_latency": tm["avg_task_latency_s"],
+        "latency_baseline_3d": baseline_avg,
+        "latency_spike_threshold": spike_threshold,
+        "latency_spike": latency_spike,
+        "noise": noise,
         "tasks_pending": tm["tasks_pending"],
         "router": {
             "total": rm["router_total"],
@@ -529,6 +582,7 @@ def collect_all_metrics(date_str):
             "success": lm["regeneration_success"],
             "rate": lm["regeneration_rate"],
             "avg_time": lm["avg_regeneration_time_s"],
+            "max_regeneration_attempts": lm["max_regeneration_attempts"],
         },
         "model_usage": tm["model_usage"],
         # Keep raw sub-metrics for internal use
@@ -556,6 +610,95 @@ def quick_metrics(date_str):
         "avg_latency": tm["avg_task_latency_s"],
         "failure_counts": ft["failure_counts"],
     }
+
+
+def observation_line(date_str=None, day_number=None):
+    """Generate the one-line observation for 珊瑚海.
+    
+    Format:
+      Day{N} (22:00) obs_id=YYYY-MM-DD tasks=X success=X% debate=X% fast_ratio=X% latency=Xs spike=T/F top_failure=X system_state=X load_state=X sample_state=X regen_rate=X%
+    
+    Also appends to reports/observation_log.md for historical tracking.
+    """
+    if date_str is None:
+        date_str = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
+
+    metrics = collect_all_metrics(date_str)
+
+    tasks = metrics["tasks_total"]
+    success = metrics["success_rate"]
+    debate = metrics["debate"]["rate"]
+    fast_ratio = metrics["router"]["fast_ratio"]
+    latency = metrics["avg_latency"]
+    spike = metrics["latency_spike"]
+    regen_rate = metrics["regeneration"]["rate"]
+
+    # top_failure: most common failure component, or "none"
+    comp = metrics["failures"].get("by_component", {})
+    if comp:
+        top_failure = max(comp, key=comp.get)
+        sev = metrics["failures"].get("by_severity", {})
+        top_sev = max(sev, key=sev.get) if sev else ""
+        top_failure_str = f"{top_failure}({top_sev})" if top_sev else top_failure
+    else:
+        top_failure_str = "none"
+
+    # system_state: stable / defensive / abnormal
+    if success < 90 or debate > 30 or latency > 15:
+        system_state = "abnormal"
+    elif (debate > 15 and fast_ratio < 65) or latency > 12:
+        system_state = "defensive"
+    else:
+        system_state = "stable"
+
+    # load_state: low / normal / high
+    if tasks < 30:
+        load_state = "low"
+    elif tasks <= 150:
+        load_state = "normal"
+    else:
+        load_state = "high"
+
+    # sample_state: noise / warmup / valid
+    if tasks < 10:
+        sample_state = "noise"
+    elif tasks <= 50:
+        sample_state = "warmup"
+    else:
+        sample_state = "valid"
+
+    # Day number: auto-detect from freeze start (2026-03-05)
+    if day_number is None:
+        freeze_start = datetime(2026, 3, 5)
+        current = datetime.strptime(date_str, "%Y-%m-%d")
+        day_number = (current - freeze_start).days + 1
+
+    line = (
+        f"Day{day_number} (22:00) "
+        f"obs_id={date_str} "
+        f"tasks={tasks} "
+        f"success={success}% "
+        f"debate={debate}% "
+        f"fast_ratio={fast_ratio}% "
+        f"latency={latency}s "
+        f"spike={str(spike).lower()} "
+        f"top_failure={top_failure_str} "
+        f"system_state={system_state} "
+        f"load_state={load_state} "
+        f"sample_state={sample_state} "
+        f"regen_rate={regen_rate}%"
+    )
+
+    # Append to observation log file
+    log_path = os.path.join(REPORTS_DIR, "observation_log.md")
+    os.makedirs(REPORTS_DIR, exist_ok=True)
+    header_needed = not os.path.exists(log_path)
+    with open(log_path, "a", encoding="utf-8") as f:
+        if header_needed:
+            f.write("# AIOS Observation Log\n\n")
+        f.write(line + "\n")
+
+    return line
 
 
 def run(date_str=None, mode="full"):
@@ -621,6 +764,14 @@ def run(date_str=None, mode="full"):
     print(f"Output:")
     print(f"  JSON: {json_path}")
     print(f"  MD:   {md_path}")
+    
+    # Generate Skill Memory Dashboard (daily)
+    try:
+        from skill_memory_dashboard import generate_dashboard
+        print(f"\n[SKILL_MEMORY] Generating dashboard...")
+        generate_dashboard()
+    except Exception as e:
+        print(f"[WARN] Skill memory dashboard failed: {e}")
 
     return metrics
 
@@ -629,10 +780,15 @@ if __name__ == "__main__":
     mode = "full"
     date_str = None
     if len(sys.argv) > 1:
-        if sys.argv[1] == "quick":
-            mode = "quick"
+        if sys.argv[1] in ("quick", "observe"):
+            mode = sys.argv[1]
         else:
             date_str = sys.argv[1]
     if len(sys.argv) > 2:
         mode = sys.argv[2]
-    run(date_str=date_str, mode=mode)
+
+    if mode == "observe":
+        line = observation_line(date_str=date_str)
+        print(line)
+    else:
+        run(date_str=date_str, mode=mode)

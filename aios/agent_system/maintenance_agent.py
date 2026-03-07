@@ -73,10 +73,10 @@ class AIOSMaintenanceAgent:
         result = self.run_skill("aios-health-check", "check.py")
         
         if result["ok"]:
-            self.log("✅ 系统健康")
+            self.log("[OK] 系统健康")
         else:
             issues = result["result"].get("issues", [])
-            self.log(f"⚠️ 发现 {len(issues)} 个问题")
+            self.log(f"[WARN] 发现 {len(issues)} 个问题")
             
             for issue in issues:
                 self.log(f"  - [{issue['severity']}] {issue['message']}")
@@ -96,9 +96,9 @@ class AIOSMaintenanceAgent:
         
         if result["ok"]:
             cleaned = result["result"].get("cleaned_count", 0)
-            self.log(f"✅ 清理完成，处理了 {cleaned} 项")
+            self.log(f"[OK] 清理完成，处理了 {cleaned} 项")
         else:
-            self.log(f"❌ 清理失败: {result['result'].get('error')}")
+            self.log(f"[FAIL] 清理失败: {result['result'].get('error')}")
         
         return result
     
@@ -110,9 +110,9 @@ class AIOSMaintenanceAgent:
         if result["ok"]:
             backup_dir = result["result"].get("backup_dir")
             count = result["result"].get("backed_up_count", 0)
-            self.log(f"✅ 备份完成，{count} 个文件 → {backup_dir}")
+            self.log(f"[OK] 备份完成，{count} 个文件 → {backup_dir}")
         else:
-            self.log(f"❌ 备份失败: {result['result'].get('error')}")
+            self.log(f"[FAIL] 备份失败: {result['result'].get('error')}")
         
         return result
     
@@ -132,7 +132,7 @@ class AIOSMaintenanceAgent:
         
         for agent in degraded:
             agent_id = agent.get("id")
-            self.log(f"  🔄 重启 Agent: {agent_id}")
+            self.log(f"  [SYNC] 重启 Agent: {agent_id}")
             
             # 重置状态
             agent["state"] = "idle"
@@ -143,7 +143,7 @@ class AIOSMaintenanceAgent:
             for agent in agents:
                 f.write(json.dumps(agent, ensure_ascii=False) + '\n')
         
-        self.log(f"✅ 重启了 {len(degraded)} 个 Agent")
+        self.log(f"[OK] 重启了 {len(degraded)} 个 Agent")
     
     def run_daily_maintenance(self):
         """每日维护任务"""
@@ -174,10 +174,10 @@ class AIOSMaintenanceAgent:
         )
         
         if all_ok:
-            self.log("✅ 所有任务成功")
+            self.log("[OK] 所有任务成功")
             return "MAINTENANCE_OK"
         else:
-            self.log("⚠️ 部分任务失败，请检查日志")
+            self.log("[WARN] 部分任务失败，请检查日志")
             return "MAINTENANCE_PARTIAL"
     
     def analyze(self):
@@ -206,17 +206,17 @@ class AIOSMaintenanceAgent:
                 output = result.stdout.strip()
                 if "ANALYSIS_INSIGHTS:" in output:
                     count = output.split("ANALYSIS_INSIGHTS:")[1].strip()
-                    self.log(f"✅ 分析完成，发现 {count} 个洞察")
+                    self.log(f"[OK] 分析完成，发现 {count} 个洞察")
                 else:
-                    self.log("✅ 分析完成，无重要发现")
+                    self.log("[OK] 分析完成，无重要发现")
                 
                 return {"ok": True, "result": {}, "evidence": [], "next": []}
             else:
-                self.log(f"❌ 分析失败: {result.stderr}")
+                self.log(f"[FAIL] 分析失败: {result.stderr}")
                 return {"ok": False, "result": {"error": result.stderr}, "evidence": [], "next": []}
         
         except Exception as e:
-            self.log(f"❌ 分析失败: {str(e)}")
+            self.log(f"[FAIL] 分析失败: {str(e)}")
             return {"ok": False, "result": {"error": str(e)}, "evidence": [], "next": []}
 
 if __name__ == "__main__":

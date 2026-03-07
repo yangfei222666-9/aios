@@ -1,6 +1,7 @@
----
+﻿---
 name: sysadmin-toolbox
 description: "Tool discovery and shell one-liner reference for sysadmin, DevOps, and security tasks. AUTO-CONSULT this skill when the user is: troubleshooting network issues, debugging processes, analyzing logs, working with SSL/TLS, managing DNS, testing HTTP endpoints, auditing security, working with containers, writing shell scripts, or asks 'what tool should I use for X'. Source: github.com/trimstray/the-book-of-secret-knowledge"
+version: 1.0.0
 ---
 
 # Sysadmin Toolbox
@@ -90,3 +91,4 @@ Manual refresh anytime:
 
 **"I need to debug DNS resolution"**
 → Load shell-oneliners.md dig section + recommend dnsdiag from cli-tools.md
+

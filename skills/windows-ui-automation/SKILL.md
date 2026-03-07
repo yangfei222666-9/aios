@@ -1,6 +1,7 @@
----
+﻿---
 name: windows-ui-automation
 description: Automate Windows GUI interactions (mouse, keyboard, windows) using PowerShell. Use when the user needs to simulate user input on the desktop, such as moving the cursor, clicking buttons, typing text in non-web apps, or managing window states.
+version: 1.0.0
 ---
 
 # Windows UI Automation
@@ -54,3 +55,4 @@ $wshell = New-Object -ComObject WScript.Shell; $wshell.AppActivate("Notepad")
 1. **Safety**: Always move the mouse slowly or include delays between actions.
 2. **Verification**: Take a screenshot before and after complex UI actions to verify state.
 3. **Coordinates**: Remember that coordinates (0,0) are at the top-left of the primary monitor.
+

@@ -190,7 +190,7 @@ class ReleaseManager:
             # 6. 检查构建时间
             build_time = (datetime.now() - start_time).total_seconds()
             if build_time > QUALITY_GATES["max_build_time"]:
-                print(f"⚠️ 构建时间过长: {build_time:.1f}s (限制: {QUALITY_GATES['max_build_time']}s)")
+                print(f"[WARN] 构建时间过长: {build_time:.1f}s (限制: {QUALITY_GATES['max_build_time']}s)")
             
             # 7. 记录事件
             self.collector.collect_task_event(
@@ -225,7 +225,7 @@ class ReleaseManager:
                 error_message=str(e)
             )
             
-            print(f"❌ 构建失败: {e}")
+            print(f"[FAIL] 构建失败: {e}")
             return None
     
     def publish_to_github(self, zip_path: Path, version: Dict) -> bool:
@@ -272,8 +272,8 @@ class ReleaseManager:
                 timeout=60
             )
             
-            print(f"✅ 发布成功: {tag}")
-            print(f"📦 下载地址: https://github.com/{GITHUB_REPO}/releases/tag/{tag}")
+            print(f"[OK] 发布成功: {tag}")
+            print(f"[PACKAGE] 下载地址: https://github.com/{GITHUB_REPO}/releases/tag/{tag}")
             
             # 4. 记录事件
             self.collector.collect_task_event(
@@ -293,7 +293,7 @@ class ReleaseManager:
             return True
         
         except subprocess.CalledProcessError as e:
-            print(f"❌ 发布失败: {e}")
+            print(f"[FAIL] 发布失败: {e}")
             
             # 记录失败
             self.collector.collect_task_event(
@@ -358,7 +358,7 @@ class ReleaseManager:
                 timeout=10
             )
             
-            print(f"✅ 回滚成功: {prev_tag}")
+            print(f"[OK] 回滚成功: {prev_tag}")
             
             # 3. 记录事件
             self.collector.collect_task_event(
@@ -374,7 +374,7 @@ class ReleaseManager:
             return True
         
         except subprocess.CalledProcessError as e:
-            print(f"❌ 回滚失败: {e}")
+            print(f"[FAIL] 回滚失败: {e}")
             return False
     
     def release(self, bump_type: str = "patch") -> bool:
@@ -386,41 +386,41 @@ class ReleaseManager:
         Returns:
             是否成功
         """
-        print("🚀 开始发布流程...")
+        print("[START] 开始发布流程...")
         
         # 1. 检查质量门禁
         print("\n📋 检查质量门禁...")
         passed, failures = self.check_quality_gates()
         if not passed:
-            print("❌ 质量门禁未通过:")
+            print("[FAIL] 质量门禁未通过:")
             for failure in failures:
                 print(f"  - {failure}")
             return False
-        print("✅ 质量门禁通过")
+        print("[OK] 质量门禁通过")
         
         # 2. 递增版本号
         new_version = self._bump_version(bump_type)
-        print(f"\n📦 新版本: {new_version['tag']}")
+        print(f"\n[PACKAGE] 新版本: {new_version['tag']}")
         
         # 3. 构建发布包
         print("\n🔨 构建发布包...")
         zip_path = self.build_release_package(new_version)
         if not zip_path:
-            print("❌ 构建失败")
+            print("[FAIL] 构建失败")
             return False
-        print(f"✅ 构建成功: {zip_path.name} ({zip_path.stat().st_size / 1024:.1f} KB)")
+        print(f"[OK] 构建成功: {zip_path.name} ({zip_path.stat().st_size / 1024:.1f} KB)")
         
         # 4. 发布到 GitHub
         print("\n📤 发布到 GitHub...")
         if not self.publish_to_github(zip_path, new_version):
-            print("❌ 发布失败")
+            print("[FAIL] 发布失败")
             return False
         
         # 5. 更新版本文件
         new_version["released_at"] = datetime.now().isoformat()
         self._save_version(new_version)
         
-        print("\n🎉 发布完成!")
+        print("\n[SUCCESS] 发布完成!")
         return True
 
 
@@ -450,9 +450,9 @@ def main():
     if command == "check":
         passed, failures = manager.check_quality_gates()
         if passed:
-            print("✅ 质量门禁通过")
+            print("[OK] 质量门禁通过")
         else:
-            print("❌ 质量门禁未通过:")
+            print("[FAIL] 质量门禁未通过:")
             for failure in failures:
                 print(f"  - {failure}")
     
@@ -460,9 +460,9 @@ def main():
         version = manager._bump_version("patch")
         zip_path = manager.build_release_package(version)
         if zip_path:
-            print(f"✅ 构建成功: {zip_path}")
+            print(f"[OK] 构建成功: {zip_path}")
         else:
-            print("❌ 构建失败")
+            print("[FAIL] 构建失败")
     
     elif command == "publish":
         # 需要先 build

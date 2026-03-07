@@ -1,0 +1,117 @@
+# Web Monitor Configuration
+# 监控清单：AI 模型、LoL 数据、运行环境
+
+monitors:
+  # ========== A. AI / 大模型与接口变更 ==========
+  - name: "OpenAI ChatGPT Release Notes"
+    url: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
+    purpose: "new_entries"
+    frequency: "daily"
+    notify: ["heartbeat", "telegram_major"]
+    enabled: true
+
+  - name: "OpenAI Model Release Notes"
+    url: "https://help.openai.com/en/articles/9624314-model-release-notes"
+    purpose: "new_entries"
+    frequency: "daily"
+    notify: ["heartbeat", "telegram_major"]
+    enabled: true
+
+  - name: "OpenAI API Changelog"
+    url: "https://platform.openai.com/docs/changelog"
+    purpose: "new_entries_and_deprecations"
+    frequency: "6h"
+    notify: ["telegram", "heartbeat"]
+    enabled: true
+
+  - name: "Anthropic Newsroom"
+    url: "https://www.anthropic.com/news"
+    purpose: "new_articles"
+    frequency: "daily"
+    notify: ["heartbeat", "telegram_major"]
+    enabled: true
+
+  # ========== B. ARAM / LoL 数据与版本 ==========
+  - name: "LoL Patch Notes"
+    url: "https://www.leagueoflegends.com/en-us/news/tags/patch-notes/"
+    purpose: "new_patch_notes"
+    frequency: "daily"
+    notify: ["telegram", "heartbeat"]
+    enabled: true
+
+  - name: "LoL Patch Schedule"
+    url: "https://support-leagueoflegends.riotgames.com/hc/en-us/articles/360018987893-Patch-Schedule-League-of-Legends"
+    purpose: "schedule_changes"
+    frequency: "weekly_2x"
+    notify: ["heartbeat"]
+    enabled: true
+
+  - name: "Data Dragon Versions"
+    url: "https://ddragon.leagueoflegends.com/api/versions.json"
+    purpose: "version_changed"
+    frequency: "6h"
+    notify: ["telegram", "heartbeat"]
+    enabled: true
+    check_interval_hours: 6
+
+  - name: "Data Dragon Realms (NA)"
+    url: "https://ddragon.leagueoflegends.com/realms/na.json"
+    purpose: "realm_version_changed"
+    frequency: "daily"
+    notify: ["heartbeat"]
+    enabled: true
+
+  - name: "Riot API Change Log"
+    url: "https://www.riotgames.com/en/DevRel/riot-games-api-change-log"
+    purpose: "api_change_announcements"
+    frequency: "weekly"
+    notify: ["heartbeat"]
+    enabled: true
+
+  # ========== C. 运行环境更新 ==========
+  - name: "Node.js Blog"
+    url: "https://nodejs.org/en/blog"
+    purpose: "releases_and_vulns"
+    frequency: "weekly_2x"
+    notify: ["heartbeat", "telegram_on_vuln"]
+    enabled: true
+
+  - name: "Python Downloads"
+    url: "https://www.python.org/downloads/"
+    purpose: "latest_version_changed"
+    frequency: "weekly"
+    notify: ["heartbeat"]
+    enabled: true
+
+# 通知配置
+notification:
+  telegram_chat_id: "7986452220"
+  min_interval_hours: 24  # 同一条消息 24h 内不重复通知
+  
+# 检查频率映射（用于 cron 调度）
+frequency_map:
+  "6h": 6
+  "daily": 24
+  "weekly_2x": 84  # 每周2次 = 3.5天
+  "weekly": 168
+
+# 检测策略配置
+detection:
+  new_entries:
+    method: "first_item_title"  # 抓第一条标题
+    selector: "article h2, .article-title, h1"
+  
+  new_articles:
+    method: "first_item_title"
+    selector: "article h2, .post-title"
+  
+  version_changed:
+    method: "json_field"
+    field: "[0]"  # 数组第一个元素
+  
+  realm_version_changed:
+    method: "json_field"
+    field: "n.champion"  # realms.json 的版本字段
+  
+  schedule_changes:
+    method: "content_hash"  # 内容哈希对比

@@ -7,8 +7,10 @@ import time
 from pathlib import Path
 from datetime import datetime
 
+from paths import TASK_QUEUE as _TASK_QUEUE
+
 # 文件路径
-TASK_QUEUE = Path(__file__).parent / "task_queue.jsonl"
+TASK_QUEUE = _TASK_QUEUE
 EXECUTION_LOG = Path(__file__).parent / "execution_log.jsonl"
 
 def log(message):
@@ -39,14 +41,14 @@ def execute_task(task):
     
     # 根据任务类型返回结果
     results = {
-        "code": f"✅ Coder Agent 完成代码任务: {description}",
-        "analysis": f"✅ Analyst Agent 完成分析任务: {description}",
-        "monitor": f"✅ Monitor Agent 完成监控任务: {description}",
-        "research": f"✅ Researcher Agent 完成研究任务: {description}",
-        "design": f"✅ Designer Agent 完成设计任务: {description}"
+        "code": f"[OK] Coder Agent 完成代码任务: {description}",
+        "analysis": f"[OK] Analyst Agent 完成分析任务: {description}",
+        "monitor": f"[OK] Monitor Agent 完成监控任务: {description}",
+        "research": f"[OK] Researcher Agent 完成研究任务: {description}",
+        "design": f"[OK] Designer Agent 完成设计任务: {description}"
     }
     
-    return results.get(task_type, f"✅ 任务完成: {description}")
+    return results.get(task_type, f"[OK] 任务完成: {description}")
 
 def process_task_queue():
     """处理任务队列"""
@@ -104,14 +106,14 @@ def process_task_queue():
 def main():
     """主函数"""
     log("=" * 80)
-    log("🚀 AIOS Heartbeat Started")
+    log("[START] AIOS Heartbeat Started")
     log("=" * 80)
     
     # 处理任务队列
     result = process_task_queue()
     
     log("=" * 80)
-    log("✅ Heartbeat Completed")
+    log("[OK] Heartbeat Completed")
     log("=" * 80)
     print(f"\n{result}")
 

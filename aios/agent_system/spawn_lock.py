@@ -21,10 +21,13 @@ from pathlib import Path
 from contextlib import contextmanager
 from typing import Optional
 
+# Import unified paths
+from paths import SPAWN_LOCKS, SPAWN_LOCK_METRICS, TASK_QUEUE
+
 # ── 配置 ──────────────────────────────────────────────────────────────────────
 IDEMPOTENCY_TTL_SEC = 15 * 60   # 15 分钟窗口内同一任务只 spawn 一次
-LOCK_FILE = Path(__file__).parent / "spawn_locks.json"
-METRICS_FILE = Path(__file__).parent / "spawn_lock_metrics.json"
+LOCK_FILE = SPAWN_LOCKS
+METRICS_FILE = SPAWN_LOCK_METRICS
 WORKER_ID = f"worker-{os.getpid()}"
 
 
@@ -184,6 +187,26 @@ class LockStore:
             self._write_locks(locks)
         return True
 
+    def force_release(self, task_key: str) -> bool:
+        """
+        强制释放锁（不校验 token，用于 fallback 场景）。
+        
+        ⚠️ 危险操作：仅在确认原 executor 已死/假死时使用。
+        
+        幂等保证：锁不存在也返回 True（已释放状态）。
+        
+        Returns:
+            True - 锁已释放（无论之前是否存在）
+        """
+        with _file_mutex(self.lock_file):
+            locks = self._read_locks()
+            if task_key in locks:
+                del locks[task_key]
+                self._write_locks(locks)
+                self._metrics["force_release_total"] = self._metrics.get("force_release_total", 0) + 1
+                self._save_metrics()
+        return True  # 幂等：不存在也算成功
+
     def cleanup_expired(self) -> int:
         """
         清理所有过期锁（Heartbeat 启动时调用）。
@@ -295,6 +318,23 @@ def release_spawn_lock(task: dict, lock_token: str) -> bool:
     return store.release(key, lock_token)
 
 
+def force_release_spawn_lock(task: dict) -> bool:
+    """
+    强制释放锁（不校验 token，用于 fallback 场景）。
+    
+    ⚠️ 危险操作：仅在确认原 executor 已死/假死时使用。
+    
+    Args:
+        task: 任务对象（用于生成 idem_key）
+    
+    Returns:
+        True - 锁已释放（幂等保证）
+    """
+    store = get_lock_store()
+    key = idem_key(task)
+    return store.force_release(key)
+
+
 def get_idempotency_metrics() -> dict:
     """获取幂等指标（用于 Heartbeat 上报）"""
     return get_lock_store().get_metrics()
@@ -366,7 +406,7 @@ def recover_stale_locks(
     Returns:
         {"recovered": int, "retried": int, "failed": int}
     """
-    queue_file = Path(__file__).parent / "task_queue.jsonl"
+    queue_file = TASK_QUEUE
     if not queue_file.exists():
         return {"recovered": 0, "retried": 0, "failed": 0}
     

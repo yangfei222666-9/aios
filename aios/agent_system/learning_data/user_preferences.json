@@ -1,0 +1,18 @@
+{
+  "output_format_default": {
+    "preference_type": "output_format",
+    "key": "default",
+    "value": "brief",
+    "confidence": 0.1,
+    "sample_count": 1,
+    "last_updated": 1772436892.4910636
+  },
+  "auto_confirm_low": {
+    "preference_type": "auto_confirm",
+    "key": "low",
+    "value": true,
+    "confidence": 1.0,
+    "sample_count": 31,
+    "last_updated": 1772439832.705798
+  }
+}

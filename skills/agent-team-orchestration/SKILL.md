@@ -1,6 +1,7 @@
----
+﻿---
 name: agent-team-orchestration
 description: "Orchestrate multi-agent teams with defined roles, task lifecycles, handoff protocols, and review workflows. Use when: (1) Setting up a team of 2+ agents with different specializations, (2) Defining task routing and lifecycle (inbox → spec → build → review → done), (3) Creating handoff protocols between agents, (4) Establishing review and quality gates, (5) Managing async communication and artifact sharing between agents."
+version: 1.0.0
 ---
 
 # Agent Team Orchestration
@@ -126,3 +127,4 @@ The orchestrator routes and tracks — it doesn't build. The moment you start "j
 - **Simple question routing** — If you're just forwarding a question to a specialist, that's a message, not a workflow.
 
 This skill is for **sustained team workflows** — recurring collaboration patterns where agents depend on each other's output over multiple tasks.
+

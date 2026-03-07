@@ -141,7 +141,7 @@ CORE_AGENTS = [
 
 def activate_core_agents():
     """激活所有核心 Agent"""
-    print("🚀 AIOS 核心 Agent 激活开始...")
+    print("[START] AIOS 核心 Agent 激活开始...")
     
     # 读取现有数据
     if AGENTS_DATA_FILE.exists():
@@ -174,7 +174,7 @@ def activate_core_agents():
         
         data["agents"].append(agent)
         activated += 1
-        print(f"  ✅ {agent['name']} 已激活")
+        print(f"  [OK] {agent['name']} 已激活")
     
     # 更新统计
     data["summary"]["total_agents"] = len(data["agents"])
@@ -185,9 +185,9 @@ def activate_core_agents():
     with open(AGENTS_DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     
-    print(f"\n✅ 激活完成！共激活 {activated} 个核心 Agent")
-    print(f"📊 当前状态：总计 {data['summary']['total_agents']} 个 Agent，活跃 {data['summary']['active']} 个")
-    print("\n🎯 Agent 分工：")
+    print(f"\n[OK] 激活完成！共激活 {activated} 个核心 Agent")
+    print(f"[REPORT] 当前状态：总计 {data['summary']['total_agents']} 个 Agent，活跃 {data['summary']['active']} 个")
+    print("\n[TARGET] Agent 分工：")
     print("  - coder-agent → 优先处理 code 任务")
     print("  - analyst-agent → 处理 analysis 任务")
     print("  - monitor-agent → 实时监控资源")
@@ -195,7 +195,7 @@ def activate_core_agents():
     print("  - evolution-agent → Self-Improving Loop")
     print("  - researcher-agent → 知识积累")
     print("  - designer-agent → 架构优化")
-    print("\n💡 下一步：运行 python heartbeat_runner.py 开始工作")
+    print("\n[IDEA] 下一步：运行 python heartbeat_runner.py 开始工作")
 
 if __name__ == "__main__":
     activate_core_agents()

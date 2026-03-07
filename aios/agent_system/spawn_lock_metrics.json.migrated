@@ -1,0 +1,7 @@
+{
+  "acquire_total": 5,
+  "acquire_success": 5,
+  "idempotent_hit_total": 0,
+  "stale_lock_recovered_total": 0,
+  "acquire_latency_ms_sum": 7.038116455078125
+}

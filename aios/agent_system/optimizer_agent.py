@@ -249,10 +249,10 @@ class AIOSOptimizerAgent:
                 try:
                     # 这里实际执行优化
                     # 目前只是模拟
-                    print(f"  ✅ 应用: {plan['name']}")
+                    print(f"  [OK] 应用: {plan['name']}")
                     applied += 1
                 except Exception as e:
-                    print(f"  ❌ 失败: {plan['name']} - {e}")
+                    print(f"  [FAIL] 失败: {plan['name']} - {e}")
                     failed += 1
             else:
                 print(f"  ⏭️  跳过: {plan['name']} (需要人工确认)")

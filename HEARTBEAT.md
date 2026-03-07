@@ -1,8 +1,20 @@
-# AIOS 心跳机制 - 自动任务处理 v5.0
+# AIOS 心跳机制 - 自动任务处理 v5.1
 
 **触发：** 每 30 秒执行一次（OpenClaw 主会话心跳）
 
-**最新版本：** v5.0 - 集成 Task Queue 自动执行
+**最新版本：** v5.1 - 真实 sessions_spawn 执行
+
+## ⚡ 心跳必做：处理 spawn_pending.jsonl
+
+每次心跳，在运行 heartbeat_v5.py 之前，先检查：
+
+```
+C:\Users\A\.openclaw\workspace\aios\agent_system\spawn_pending.jsonl
+```
+
+如果文件非空，读取每一行，对每条记录调用真实的 sessions_spawn 工具，然后清空文件。
+
+**这是生产级闭环的关键步骤，不可跳过。**
 
 ## 🔧 编码配置（重要）
 
@@ -19,6 +31,19 @@
 ```powershell
 $env:PYTHONUTF8=1; $env:PYTHONIOENCODING='utf-8'; & "C:\Program Files\Python312\python.exe" -X utf8 <script.py>
 ```
+
+## ⛔ 命令格式硬约束（不可违反）
+
+执行 shell 命令时必须严格遵守以下规则：
+
+1. **禁止使用 `~\`** — 用绝对路径 `C:\Users\A\.openclaw\workspace\...` 或 `$HOME\.openclaw\workspace\...`
+2. **禁止使用 `&&`** — PowerShell 用 `;` 分隔命令
+3. **禁止简化或改写命令模板** — 复制粘贴上面的完整模板，只替换 `<script.py>` 部分
+4. **工作目录切换** — 用 `cd C:\Users\A\.openclaw\workspace\aios\agent_system;` 不用 `Set-Location`
+5. **命令必须原样复制执行** — 不允许改写分隔符、路径写法、引号或变量形式
+6. **命令示例统一放在反引号代码块或行内代码中**，避免被当成普通文本后再“智能改写”
+
+违反以上规则会导致 PowerShell 解析失败（已发生过：`cd ~\.openclaw\... && ...` 在字符 53 处报错）。
 
 ---
 

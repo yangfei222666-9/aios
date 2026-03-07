@@ -1,0 +1,42 @@
+{
+  "lessons": [
+    {
+      "id": "lesson-001",
+      "timestamp": "2026-03-04T11:00:00",
+      "error_type": "timeout",
+      "context": "Task: Generate complex report, took 90s but timeout at 60s",
+      "agent": "coder-dispatcher",
+      "severity": "medium"
+    },
+    {
+      "id": "lesson-002",
+      "timestamp": "2026-03-04T11:05:00",
+      "error_type": "dependency_error",
+      "context": "Task: Install pandas, but pip failed due to network issue",
+      "agent": "coder-dispatcher",
+      "severity": "high"
+    },
+    {
+      "id": "lesson-003",
+      "timestamp": "2026-03-04T11:10:00",
+      "error_type": "logic_error",
+      "context": "Task: Calculate average, but division by zero when list is empty",
+      "agent": "analyst-dispatcher",
+      "severity": "medium"
+    },
+    {
+      "id": "lesson-004",
+      "timestamp": "2026-03-04T11:15:00",
+      "error_type": "resource_exhausted",
+      "context": "Task: Process large file, but ran out of memory (8GB used)",
+      "agent": "monitor-dispatcher",
+      "severity": "high"
+    }
+  ],
+  "rules_derived": [
+    "Always check timeout before starting complex tasks",
+    "Verify dependencies before execution",
+    "Add input validation for all calculations",
+    "Monitor resource usage during file processing"
+  ]
+}

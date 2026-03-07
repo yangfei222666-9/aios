@@ -174,7 +174,7 @@ if __name__ == "__main__":
     ]
 
     for error, desc in test_errors:
-        print(f"\n🧪 测试：{desc}")
+        print(f"\n[TEST] 测试：{desc}")
         print(f"   错误：{error}")
 
         for retry in range(3):

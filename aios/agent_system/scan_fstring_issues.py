@@ -29,6 +29,6 @@ for filepath in learner_files:
         print()
 
 if not all_issues:
-    print("✅ 没有发现 f-string 问题")
+    print("[OK] 没有发现 f-string 问题")
 else:
     print(f"\n总计: {sum(len(v) for v in all_issues.values())} 个问题")

@@ -123,7 +123,7 @@ class TimeoutManager:
         
         self._save_config()
         
-        print(f"✅ {agent_id} 超时调整: {old_timeout}s → {timeout}s (原因: {reason})")
+        print(f"[OK] {agent_id} 超时调整: {old_timeout}s → {timeout}s (原因: {reason})")
 
     def learn_from_history(self, agent_id: str, lookback_days: int = 7) -> Optional[int]:
         """
@@ -199,7 +199,7 @@ class TimeoutManager:
         recommended = self.learn_from_history(agent_id)
         
         if recommended is None:
-            print(f"⚠️  {agent_id} 历史数据不足，无法自动调整")
+            print(f"[WARN]  {agent_id} 历史数据不足，无法自动调整")
             return False
         
         current = self.get_timeout(agent_id, agent_type)

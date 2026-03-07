@@ -47,7 +47,7 @@ def test_basic_flow():
     status = system.get_status()
     print(json.dumps(status, indent=2, ensure_ascii=False))
 
-    print("\n✅ 测试 1 通过")
+    print("\n[OK] 测试 1 通过")
 
 
 def test_multiple_types():
@@ -81,7 +81,7 @@ def test_multiple_types():
         f"  按类型分布: {json.dumps(status['summary']['by_template'], ensure_ascii=False)}"
     )
 
-    print("\n✅ 测试 2 通过")
+    print("\n[OK] 测试 2 通过")
 
 
 def test_task_routing():
@@ -113,7 +113,7 @@ def test_task_routing():
         assert analysis["task_type"] == expected_type
         assert analysis["recommended_template"] == expected_template
 
-    print("\n✅ 测试 3 通过")
+    print("\n[OK] 测试 3 通过")
 
 
 def test_cleanup():
@@ -141,12 +141,12 @@ def test_cleanup():
     print(f"  活跃 Agent: {status['total_active']}")
     print(f"  归档 Agent: {status['summary']['archived']}")
 
-    print("\n✅ 测试 4 通过")
+    print("\n[OK] 测试 4 通过")
 
 
 def main():
     """运行所有测试"""
-    print("\n🚀 AIOS Agent System 功能测试\n")
+    print("\n[START] AIOS Agent System 功能测试\n")
 
     try:
         test_basic_flow()
@@ -155,14 +155,14 @@ def main():
         test_cleanup()
 
         print("\n" + "=" * 60)
-        print("🎉 所有测试通过！")
+        print("[SUCCESS] 所有测试通过！")
         print("=" * 60)
 
     except AssertionError as e:
-        print(f"\n❌ 测试失败: {e}")
+        print(f"\n[FAIL] 测试失败: {e}")
         raise
     except Exception as e:
-        print(f"\n❌ 错误: {e}")
+        print(f"\n[FAIL] 错误: {e}")
         raise
 
 

@@ -4,8 +4,34 @@ AIOS Monitor Agent
 """
 
 import json
+import os
 from pathlib import Path
 from datetime import datetime, timedelta
+
+
+def _read_last_jsonl_line(file_path: Path) -> dict | None:
+    """高效读取 JSONL 文件最后一条有效记录，不加载整个文件。"""
+    if not file_path.exists() or file_path.stat().st_size == 0:
+        return None
+    with open(file_path, 'rb') as f:
+        f.seek(0, os.SEEK_END)
+        pos = f.tell()
+        buf = bytearray()
+        while pos > 0:
+            read_size = min(4096, pos)
+            pos -= read_size
+            f.seek(pos)
+            chunk = f.read(read_size)
+            buf[:0] = chunk
+            lines = buf.decode('utf-8', errors='replace').splitlines()
+            for line in reversed(lines):
+                line = line.strip()
+                if line:
+                    try:
+                        return json.loads(line)
+                    except Exception:
+                        continue
+    return None
 
 class MonitorAgent:
     def __init__(self):
@@ -45,7 +71,7 @@ class MonitorAgent:
             f.write(json.dumps(alert, ensure_ascii=False) + '\n')
         
         # 记录日志
-        emoji = {"info": "ℹ️", "warning": "⚠️", "critical": "🚨"}.get(severity, "")
+        emoji = {"info": "ℹ️", "warning": "[WARN]", "critical": "🚨"}.get(severity, "")
         self.log(f"{emoji} [{severity.upper()}] {message}")
         
         return alert
@@ -58,15 +84,13 @@ class MonitorAgent:
         if not metrics_file.exists():
             return None
         
-        # 读取最新的 metric
-        with open(metrics_file, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            if not lines:
-                return None
-            
-            last_metric = json.loads(lines[-1])
-            score = last_metric.get("evolution_score", 1.0)
-            grade = last_metric.get("grade", "unknown")
+        # 读取最新的 metric（流式：只读最后一行）
+        last_metric = _read_last_jsonl_line(metrics_file)
+        if not last_metric:
+            return None
+        
+        score = last_metric.get("evolution_score", 1.0)
+        grade = last_metric.get("grade", "unknown")
         
         # 检查阈值
         if score < 0.3:
@@ -95,19 +119,17 @@ class MonitorAgent:
         if not metrics_file.exists():
             return None
         
-        # 读取最新的 metric
-        with open(metrics_file, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            if not lines:
-                return None
-            
-            last_metric = json.loads(lines[-1])
-            resource = last_metric.get("resource", {})
-            
-            avg_cpu = resource.get("avg_cpu_percent", 0)
-            avg_memory = resource.get("avg_memory_percent", 0)
-            peak_cpu = resource.get("peak_cpu_percent", 0)
-            peak_memory = resource.get("peak_memory_percent", 0)
+        # 读取最新的 metric（流式：只读最后一行）
+        last_metric = _read_last_jsonl_line(metrics_file)
+        if not last_metric:
+            return None
+        
+        resource = last_metric.get("resource", {})
+        
+        avg_cpu = resource.get("avg_cpu_percent", 0)
+        avg_memory = resource.get("avg_memory_percent", 0)
+        peak_cpu = resource.get("peak_cpu_percent", 0)
+        peak_memory = resource.get("peak_memory_percent", 0)
         
         alerts = []
         

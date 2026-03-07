@@ -195,7 +195,10 @@ class MetaAgent:
     def _check_unhandled_tasks(self) -> List[Dict]:
         """检查未处理任务"""
         gaps = []
-        queue_file = self.workspace / "aios" / "agent_system" / "task_queue.jsonl"
+        try:
+            from paths import TASK_QUEUE as queue_file
+        except ImportError:
+            queue_file = self.workspace / "aios" / "agent_system" / "data" / "task_queue.jsonl"
 
         if not queue_file.exists():
             return gaps

@@ -59,7 +59,7 @@ def main():
         # 有新的改进
         new_improvements = current_count - last_count
         print(f"SELF_IMPROVING:+{new_improvements}")
-        print(f"\n🔧 {new_improvements} 个 Agent 应用了自动改进")
+        print(f"\n[FIX] {new_improvements} 个 Agent 应用了自动改进")
 
         # 更新计数
         state["last_improvement_count"] = current_count
@@ -68,7 +68,7 @@ def main():
     elif should_report():
         # 定期报告
         print("SELF_IMPROVING_OK")
-        print(f"\n📊 Self-Improving Loop 统计:")
+        print(f"\n[REPORT] Self-Improving Loop 统计:")
         print(f"  总 Agent: {stats['total_agents']}")
         print(f"  总改进次数: {stats['total_improvements']}")
         print(f"  已改进 Agent: {len(stats['agents_improved'])}")

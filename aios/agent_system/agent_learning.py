@@ -143,7 +143,7 @@ class AgentLearningLoop:
         if not lessons:
             return base_prompt
 
-        lesson_section = "\n\n## 📚 历史教训（避免重复错误）\n\n"
+        lesson_section = "\n\n## [DOCS] 历史教训（避免重复错误）\n\n"
         for i, lesson in enumerate(lessons, 1):
             lesson_section += f"{i}. **{lesson['error_type']}**: {lesson['lesson']}\n"
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     loop = AgentLearningLoop("test-agent")
 
     # 模拟失败执行
-    print("\n🧪 模拟失败执行...")
+    print("\n[TEST] 模拟失败执行...")
     loop.record_execution(
         task="编写一个 Python 脚本",
         result={"duration_sec": 10},
@@ -185,10 +185,10 @@ if __name__ == "__main__":
         error="API rate limit exceeded: 429",
     )
 
-    print("✅ 失败记录已保存")
+    print("[OK] 失败记录已保存")
 
     # 获取相关教训
-    print("\n📚 获取相关教训...")
+    print("\n[DOCS] 获取相关教训...")
     lessons = loop.get_relevant_lessons("编写一个新的 Python 脚本")
 
     if lessons:
@@ -201,7 +201,7 @@ if __name__ == "__main__":
         print("暂无相关教训")
 
     # 演示注入到 prompt
-    print("\n📝 注入到 prompt 演示...")
+    print("\n[NOTE] 注入到 prompt 演示...")
     base_prompt = "你是一个代码开发专员，负责编写高质量的代码。"
     enhanced_prompt = loop.inject_lessons_to_prompt(base_prompt, "编写 Python 脚本")
     print(enhanced_prompt)

@@ -1,0 +1,103 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.39,
+    "archive_date":  "2026-02-27",
+    "files_count":  16,
+    "total_size_bytes":  37547,
+    "timestamp":  "2026-02-27 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  312
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  5233
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\process_monitor.log",
+                      "Type":  "temp",
+                      "Size":  192
+                  },
+                  {
+                      "Path":  "aios\\demo_data\\api_health\\health_checks.log",
+                      "Type":  "temp",
+                      "Size":  1843
+                  },
+                  {
+                      "Path":  "aios\\demo_data\\file_monitor\\actions.log",
+                      "Type":  "temp",
+                      "Size":  4268
+                  },
+                  {
+                      "Path":  "aios\\demo_data\\log_analysis\\app.log",
+                      "Type":  "temp",
+                      "Size":  1461
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_auto_model.py",
+                      "Type":  "old_test",
+                      "Size":  808,
+                      "LastModified":  "2026-02-20"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_auto_model_v2.py",
+                      "Type":  "old_test",
+                      "Size":  703,
+                      "LastModified":  "2026-02-20"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_auto_switch_real.py",
+                      "Type":  "old_test",
+                      "Size":  1910,
+                      "LastModified":  "2026-02-20"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_concurrency.py",
+                      "Type":  "old_test",
+                      "Size":  2509,
+                      "LastModified":  "2026-02-20"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_dwell.py",
+                      "Type":  "old_test",
+                      "Size":  631,
+                      "LastModified":  "2026-02-20"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_edge_cases.py",
+                      "Type":  "old_test",
+                      "Size":  2078,
+                      "LastModified":  "2026-02-20"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_realistic_flow.py",
+                      "Type":  "old_test",
+                      "Size":  1788,
+                      "LastModified":  "2026-02-20"
+                  },
+                  {
+                      "Path":  "autolearn\\tests\\test_core.py",
+                      "Type":  "old_test",
+                      "Size":  3174,
+                      "LastModified":  "2026-02-20"
+                  },
+                  {
+                      "Path":  "scripts\\debug_critical.py",
+                      "Type":  "old_test",
+                      "Size":  1562,
+                      "LastModified":  "2026-02-20"
+                  },
+                  {
+                      "Path":  "scripts\\debug_events.py",
+                      "Type":  "old_test",
+                      "Size":  866,
+                      "LastModified":  "2026-02-20"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-02-27",
+    "total_size_mb":  0.04
+}

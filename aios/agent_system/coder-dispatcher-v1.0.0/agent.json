@@ -1,0 +1,29 @@
+{
+  "id": "coder-dispatcher",
+  "name": "coder-dispatcher",
+  "version": "1.0.0",
+  "author": "小九",
+  "description": "Write clean, maintainable, and well-tested Python code",
+  "type": "core",
+  "role": "Senior Python Developer",
+  "goal": "Write clean, maintainable, and well-tested Python code",
+  "backstory": "You are an experienced Python developer with expertise in writing production-ready code.",
+  "config": {
+    "enabled": true,
+    "schedule": "on_demand",
+    "priority": "high",
+    "model": "claude-opus-4-5",
+    "thinking": "on",
+    "timeout": 120,
+    "max_retries": 5
+  },
+  "script": {
+    "path": "",
+    "entry": "main"
+  },
+  "dependencies": [],
+  "tags": [],
+  "created_at": "2026-02-25T15:57:00",
+  "downloads": 0,
+  "rating": 0.0
+}

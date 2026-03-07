@@ -81,7 +81,7 @@ class AIOSEvaluationAgent:
         if not change_id:
             change = self._find_recent_change()
             if not change:
-                print("✅ 无待验证的变更")
+                print("[OK] 无待验证的变更")
                 return {"status": "no_changes"}
             change_id = change["id"]
         else:
@@ -106,7 +106,7 @@ class AIOSEvaluationAgent:
         print("[Phase 1] 加载 baseline...")
         baseline = self._load_baseline(change)
         if not baseline:
-            print("  ⚠️  无 baseline，执行 smoke test")
+            print("  [WARN]  无 baseline，执行 smoke test")
             smoke_result = self._smoke_test(change)
             report["smoke_test"] = smoke_result
             report["verdict"] = "pass" if smoke_result["passed"] else "fail"
@@ -114,13 +114,13 @@ class AIOSEvaluationAgent:
             return report
 
         report["baseline"] = baseline
-        print(f"  ✅ Baseline: 成功率 {baseline['success_rate']:.1%}, P95 {baseline['p95_duration']:.1f}s")
+        print(f"  [OK] Baseline: 成功率 {baseline['success_rate']:.1%}, P95 {baseline['p95_duration']:.1f}s")
 
         # Phase 2: 收集 after 指标
         print("[Phase 2] 收集 after 指标...")
         after = self._collect_after_metrics(change)
         report["after"] = after
-        print(f"  ✅ After: 成功率 {after['success_rate']:.1%}, P95 {after['p95_duration']:.1f}s")
+        print(f"  [OK] After: 成功率 {after['success_rate']:.1%}, P95 {after['p95_duration']:.1f}s")
 
         # Phase 3: 对比分析
         print("[Phase 3] 对比分析...")
@@ -129,7 +129,7 @@ class AIOSEvaluationAgent:
         
         # 显示对比结果
         for metric, result in comparison.items():
-            status = "✅" if result["passed"] else "❌"
+            status = "[OK]" if result["passed"] else "[FAIL]"
             print(f"  {status} {metric}: {result['change']:.1%}")
 
         # Phase 4: 判断是否回滚
@@ -138,12 +138,12 @@ class AIOSEvaluationAgent:
         report["verdict"] = verdict
         
         if verdict == "pass":
-            print("  ✅ 验证通过")
+            print("  [OK] 验证通过")
         elif verdict == "fail":
-            print("  ❌ 验证失败，建议回滚")
+            print("  [FAIL] 验证失败，建议回滚")
             self._trigger_rollback(change, report)
         else:
-            print("  ⚠️  需要人工判断")
+            print("  [WARN]  需要人工判断")
 
         # 保存报告
         self._save_report(report)
@@ -325,7 +325,7 @@ class AIOSEvaluationAgent:
 
     def _trigger_rollback(self, change: Dict, report: Dict):
         """触发回滚"""
-        print("  🔄 触发回滚...")
+        print("  [SYNC] 触发回滚...")
         
         # 生成回滚事件
         rollback_event = {
@@ -341,7 +341,7 @@ class AIOSEvaluationAgent:
         with open(events_file, 'a', encoding='utf-8') as f:
             f.write(json.dumps(rollback_event, ensure_ascii=False) + '\n')
 
-        print("  ✅ 回滚请求已发送")
+        print("  [OK] 回滚请求已发送")
 
     def _save_report(self, report: Dict):
         """保存验证报告"""

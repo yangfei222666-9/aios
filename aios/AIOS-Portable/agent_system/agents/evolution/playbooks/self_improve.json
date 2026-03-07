@@ -1,0 +1,1 @@
+﻿{"name": "self_improve", "trigger": "failure_3_times", "action": "generate_prompt_patch_and_apply"}

@@ -6,8 +6,10 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-AGENTS_FILE = Path(__file__).parent / "agents.json"
-SPAWN_RESULTS = Path(__file__).parent / "spawn_results.jsonl"
+from paths import AGENTS_STATE, SPAWN_RESULTS as _SPAWN_RESULTS
+
+AGENTS_FILE = AGENTS_STATE
+SPAWN_RESULTS = _SPAWN_RESULTS
 
 def load_agents():
     """加载 agents.json"""
@@ -41,7 +43,7 @@ def update_agent_stats(agent_name: str, success: bool, duration_seconds: float =
             break
     
     if not agent:
-        print(f"⚠️  Agent '{agent_name}' 不存在")
+        print(f"[WARN]  Agent '{agent_name}' 不存在")
         return False
     
     # 初始化 state（如果不存在）
@@ -76,7 +78,7 @@ def update_agent_stats(agent_name: str, success: bool, duration_seconds: float =
     data["metadata"]["last_updated"] = datetime.now().isoformat()
     save_agents(data)
     
-    print(f"✅ 已更新 {agent_name} 统计：")
+    print(f"[OK] 已更新 {agent_name} 统计：")
     print(f"   完成: {state['tasks_completed']}, 失败: {state['tasks_failed']}")
     print(f"   平均耗时: {state.get('avg_duration_seconds', 0)}s")
     
@@ -121,7 +123,7 @@ def main():
     args = parser.parse_args()
     
     if not args.success and not args.failed:
-        print("❌ 必须指定 --success 或 --failed")
+        print("[FAIL] 必须指定 --success 或 --failed")
         return
     
     success = args.success
@@ -138,9 +140,9 @@ def main():
     )
     
     if result:
-        print("\n✅ 更新成功")
+        print("\n[OK] 更新成功")
     else:
-        print("\n❌ 更新失败")
+        print("\n[FAIL] 更新失败")
 
 if __name__ == "__main__":
     main()

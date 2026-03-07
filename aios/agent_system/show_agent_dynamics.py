@@ -57,7 +57,7 @@ def show_agent_dynamics():
     active_agents = [a for a in agents if a.get("status") == "active"]
     archived_agents = [a for a in agents if a.get("status") == "archived"]
     
-    print(f"\n📊 总览")
+    print(f"\n[REPORT] 总览")
     print(f"  总 Agent 数: {len(agents)}")
     print(f"  活跃: {len(active_agents)}")
     print(f"  已归档: {len(archived_agents)}")
@@ -66,7 +66,7 @@ def show_agent_dynamics():
     try:
         loop = SelfImprovingLoop()
         stats = loop.get_improvement_stats()
-        print(f"\n🔧 Self-Improving Loop")
+        print(f"\n[FIX] Self-Improving Loop")
         print(f"  总改进次数: {stats.get('total_improvements', 0)}")
         print(f"  总回滚次数: {stats.get('total_rollbacks', 0)}")
         improved = stats.get('agents_improved', [])
@@ -79,7 +79,7 @@ def show_agent_dynamics():
     
     # 显示活跃 Agent
     if active_agents:
-        print(f"\n✅ 活跃 Agent ({len(active_agents)})")
+        print(f"\n[OK] 活跃 Agent ({len(active_agents)})")
         print("-" * 80)
         
         for agent in active_agents:
@@ -117,7 +117,7 @@ def show_agent_dynamics():
     
     # 显示已归档 Agent（简略）
     if archived_agents:
-        print(f"\n📦 已归档 Agent ({len(archived_agents)})")
+        print(f"\n[PACKAGE] 已归档 Agent ({len(archived_agents)})")
         print("-" * 80)
         for agent in archived_agents[:3]:
             agent_id = agent.get("id", "unknown")

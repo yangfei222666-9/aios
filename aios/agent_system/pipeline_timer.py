@@ -115,6 +115,40 @@ def timed_stage(timer: PipelineTimer, stage: str):
         timer.mark(stage)
 
 
+def record_fallback_latency(task_id: str, duration_ms: float):
+    """
+    记录 fallback 全流程耗时（从检测超时到新 executor 接管）。
+    
+    Args:
+        task_id: 任务 ID
+        duration_ms: 耗时（毫秒）
+    """
+    record = {
+        "task_id": task_id,
+        "timestamp": time.time(),
+        "fallback_latency_ms": round(duration_ms, 2),
+    }
+    with open(TIMINGS_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def record_dlq_enqueue_latency(task_id: str, duration_ms: float):
+    """
+    记录 DLQ enqueue 耗时（从决定入队到写入 dead_letters.jsonl）。
+    
+    Args:
+        task_id: 任务 ID
+        duration_ms: 耗时（毫秒）
+    """
+    record = {
+        "task_id": task_id,
+        "timestamp": time.time(),
+        "dlq_enqueue_latency_ms": round(duration_ms, 2),
+    }
+    with open(TIMINGS_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
 def get_timing_stats(limit: int = 100) -> dict:
     """
     读取最近 N 条耗时记录，计算统计摘要。

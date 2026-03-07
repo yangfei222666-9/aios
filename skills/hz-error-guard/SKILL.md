@@ -1,3 +1,9 @@
+---
+name: hz-error-guard
+version: 1.0.0
+description: 实时监控错误、自动拦截、预防问题
+---
+
 # error-guard - 错误守卫
 
 ## 功能

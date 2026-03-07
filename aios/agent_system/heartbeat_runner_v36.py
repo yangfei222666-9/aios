@@ -14,14 +14,15 @@ WORKSPACE = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(WORKSPACE / "aios" / "agent_system"))
 
 from learning_agents import LEARNING_AGENTS
+from paths import TASK_QUEUE as _TASK_QUEUE, SPAWN_REQUESTS as _SPAWN_REQUESTS, SPAWN_RESULTS as _SPAWN_RESULTS, AGENTS_STATE, HEARTBEAT_LOG as _HEARTBEAT_LOG
 
 # 文件路径
-TASK_QUEUE = Path(__file__).parent / "task_queue.jsonl"
-SPAWN_REQUESTS = Path(__file__).parent / "spawn_requests.jsonl"
-SPAWN_RESULTS = Path(__file__).parent / "spawn_results.jsonl"
-AGENTS_FILE = Path(__file__).parent / "data" / "agents.json"
+TASK_QUEUE = _TASK_QUEUE
+SPAWN_REQUESTS = _SPAWN_REQUESTS
+SPAWN_RESULTS = _SPAWN_RESULTS
+AGENTS_FILE = AGENTS_STATE
 STATE_FILE = WORKSPACE / "memory" / "selflearn-state.json"
-HEARTBEAT_LOG = Path(__file__).parent / "heartbeat.log"
+HEARTBEAT_LOG = _HEARTBEAT_LOG
 
 def structured_log(level, **kwargs):
     """结构化日志"""
@@ -58,26 +59,22 @@ def append_jsonl(file_path, data):
         f.write(json.dumps(data, ensure_ascii=False) + "\n")
 
 def process_task_queue():
-    """处理任务队列 - 每次最多5个"""
+    """处理任务队列 - 每次最多5个（流式读取，不全量加载）"""
     structured_log("info", message="📋 处理任务队列...")
     
     if not TASK_QUEUE.exists():
         structured_log("info", message="  队列为空")
         return "QUEUE_OK"
     
-    with open(TASK_QUEUE, "r", encoding="utf-8") as f:
-        lines = f.readlines()
-    
-    if not lines:
+    if TASK_QUEUE.stat().st_size == 0:
         structured_log("info", message="  队列为空")
         return "QUEUE_OK"
-    
-    structured_log("info", message=f"  队列中有 {len(lines)} 个任务")
     
     processed = 0
     failed = 0
     remaining = []
     stats = {}
+    total_lines = 0
     
     # 路由映射
     route_map = {
@@ -87,59 +84,64 @@ def process_task_queue():
         "research": "researcher-dispatcher"
     }
     
-    for line in lines:
-        if processed >= 5:
-            remaining.append(line)
-            continue
-        
-        try:
-            task = json.loads(line.strip())
-            task_id = task.get("id", "unknown")
-            task_type = task.get("type", "unknown")
-            agent_id = route_map.get(task_type, "coder-dispatcher")
+    # 流式逐行读取，处理前5个，剩余保留
+    with open(TASK_QUEUE, "r", encoding="utf-8") as f:
+        for line in f:
+            total_lines += 1
+            if processed >= 5:
+                remaining.append(line)
+                continue
             
-            structured_log("info", 
-                message=f"  处理任务 {task_id}",
-                type=task_type,
-                agent=agent_id,
-                description=task.get("description", "")[:50]
-            )
-            
-            # 创建spawn请求
-            spawn_request = {
-                "task_id": task_id,
-                "task_type": task_type,
-                "agent_id": agent_id,
-                "description": task.get("description", ""),
-                "priority": task.get("priority", "normal"),
-                "created_at": datetime.now().isoformat(),
-                "status": "pending"
-            }
-            
-            # 写入spawn请求
-            append_jsonl(SPAWN_REQUESTS, spawn_request)
-            
-            # 记录结果
-            result = {
-                "task_id": task_id,
-                "agent_id": agent_id,
-                "status": "spawned",
-                "spawned_at": datetime.now().isoformat()
-            }
-            append_jsonl(SPAWN_RESULTS, result)
-            
-            processed += 1
-            stats[task_type] = stats.get(task_type, 0) + 1
-            structured_log("info", message=f"    ✓ 已创建spawn请求")
-            
-        except Exception as e:
-            structured_log("error", 
-                message=f"  任务处理失败",
-                error=str(e),
-                line=line[:100]
-            )
-            failed += 1
-            remaining.append(line)
+            try:
+                task = json.loads(line.strip())
+                task_id = task.get("id", "unknown")
+                task_type = task.get("type", "unknown")
+                agent_id = route_map.get(task_type, "coder-dispatcher")
+                
+                structured_log("info", 
+                    message=f"  处理任务 {task_id}",
+                    type=task_type,
+                    agent=agent_id,
+                    description=task.get("description", "")[:50]
+                )
+                
+                # 创建spawn请求
+                spawn_request = {
+                    "task_id": task_id,
+                    "task_type": task_type,
+                    "agent_id": agent_id,
+                    "description": task.get("description", ""),
+                    "priority": task.get("priority", "normal"),
+                    "created_at": datetime.now().isoformat(),
+                    "status": "pending"
+                }
+                
+                # 写入spawn请求
+                append_jsonl(SPAWN_REQUESTS, spawn_request)
+                
+                # 记录结果
+                result = {
+                    "task_id": task_id,
+                    "agent_id": agent_id,
+                    "status": "spawned",
+                    "spawned_at": datetime.now().isoformat()
+                }
+                append_jsonl(SPAWN_RESULTS, result)
+                
+                processed += 1
+                stats[task_type] = stats.get(task_type, 0) + 1
+                structured_log("info", message=f"    ✓ 已创建spawn请求")
+                
+            except Exception as e:
+                structured_log("error", 
+                    message=f"  任务处理失败",
+                    error=str(e),
+                    line=line[:100]
+                )
+                failed += 1
+                remaining.append(line)
+    
+    structured_log("info", message=f"  队列中有 {total_lines} 个任务")
     
     # 写回剩余任务
     if remaining:
@@ -223,7 +225,7 @@ def activate_sleeping_learning_agents():
 
 def handle_coder_failure():
     """Coder 连续失败处理"""
-    structured_log("info", message="🔧 检查Coder状态...")
+    structured_log("info", message="[FIX] 检查Coder状态...")
     
     # 读取agents.json
     agents_data = load_json(AGENTS_FILE)
@@ -256,7 +258,7 @@ def handle_coder_failure():
         return "CODER_OK"
     
     # 失败≥3次，需要修复
-    structured_log("warn", message=f"  ⚠️ Coder连续失败{failed}次，应用修复...")
+    structured_log("warn", message=f"  [WARN] Coder连续失败{failed}次，应用修复...")
     
     # 修复策略
     fixes_applied = []
@@ -285,12 +287,12 @@ def handle_coder_failure():
         structured_log("info", message=f"  ✓ 已应用 {len(fixes_applied)} 个修复")
         return f"CODER_FIXED ({', '.join(fixes_applied)})"
     else:
-        structured_log("warn", message="  ⚠️ 无法自动修复，需要人工介入")
+        structured_log("warn", message="  [WARN] 无法自动修复，需要人工介入")
         return "CODER_NEEDS_ATTENTION"
 
 def check_self_improving_loop():
     """Self-Improving Loop 检查"""
-    structured_log("info", message="🔄 检查Self-Improving Loop...")
+    structured_log("info", message="[SYNC] 检查Self-Improving Loop...")
     
     # 读取loop状态
     loop_state_file = Path(__file__).parent / "data" / "loop_state.json"
@@ -330,7 +332,7 @@ def heartbeat():
     start = datetime.now()
     
     print("=" * 80)
-    structured_log("info", message="🚀 AIOS Heartbeat Started")
+    structured_log("info", message="[START] AIOS Heartbeat Started")
     print("=" * 80)
     
     results = []
@@ -360,7 +362,7 @@ def heartbeat():
         
         print("=" * 80)
         structured_log("info", 
-            message="✅ Heartbeat Completed",
+            message="[OK] Heartbeat Completed",
             duration=f"{duration:.2f}s"
         )
         print("=" * 80)
@@ -378,7 +380,7 @@ def heartbeat():
         
     except Exception as e:
         structured_log("error", 
-            message="❌ Heartbeat失败",
+            message="[FAIL] Heartbeat失败",
             error=str(e)
         )
         import traceback

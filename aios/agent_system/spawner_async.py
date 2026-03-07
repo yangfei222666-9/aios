@@ -113,7 +113,7 @@ def spawn_batch_async(requests: List[Dict], spawn_fn) -> Dict:
                 
                 # 如果使用了 Failover，记录日志
                 if provider != model:
-                    print(f"[Spawner] ⚡ Failover: {model} → {provider}")
+                    print(f"[Spawner] [ZAP] Failover: {model} → {provider}")
             else:
                 error = result.get("error", "unknown")
                 dlq = result.get("dlq", False)

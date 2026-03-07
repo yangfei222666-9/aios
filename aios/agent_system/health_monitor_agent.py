@@ -72,9 +72,9 @@ class AIOSHealthMonitorAgent:
         cpu_alert = self._check_cpu(cpu_metrics)
         if cpu_alert:
             report["alerts"].append(cpu_alert)
-            print(f"  ⚠️  {cpu_alert['message']}")
+            print(f"  [WARN]  {cpu_alert['message']}")
         else:
-            print(f"  ✅ CPU: {cpu_metrics['percent']:.1f}%")
+            print(f"  [OK] CPU: {cpu_metrics['percent']:.1f}%")
 
         # 2. 内存监控
         print("[2/5] 监控内存...")
@@ -83,9 +83,9 @@ class AIOSHealthMonitorAgent:
         memory_alert = self._check_memory(memory_metrics)
         if memory_alert:
             report["alerts"].append(memory_alert)
-            print(f"  ⚠️  {memory_alert['message']}")
+            print(f"  [WARN]  {memory_alert['message']}")
         else:
-            print(f"  ✅ 内存: {memory_metrics['percent']:.1f}%")
+            print(f"  [OK] 内存: {memory_metrics['percent']:.1f}%")
 
         # 3. 磁盘监控
         print("[3/5] 监控磁盘...")
@@ -94,16 +94,16 @@ class AIOSHealthMonitorAgent:
         disk_alert = self._check_disk(disk_metrics)
         if disk_alert:
             report["alerts"].append(disk_alert)
-            print(f"  ⚠️  {disk_alert['message']}")
+            print(f"  [WARN]  {disk_alert['message']}")
         else:
-            print(f"  ✅ 磁盘: {disk_metrics['percent']:.1f}%")
+            print(f"  [OK] 磁盘: {disk_metrics['percent']:.1f}%")
 
         # 4. GPU 监控（如果有）
         print("[4/5] 监控 GPU...")
         gpu_metrics = self._monitor_gpu()
         if gpu_metrics:
             report["metrics"]["gpu"] = gpu_metrics
-            print(f"  ✅ GPU: {gpu_metrics.get('utilization', 0):.1f}%")
+            print(f"  [OK] GPU: {gpu_metrics.get('utilization', 0):.1f}%")
         else:
             print(f"  ℹ️  无 GPU 或无法监控")
 
@@ -111,7 +111,7 @@ class AIOSHealthMonitorAgent:
         print("[5/5] 监控进程...")
         process_metrics = self._monitor_processes()
         report["metrics"]["processes"] = process_metrics
-        print(f"  ✅ 进程数: {process_metrics['count']}")
+        print(f"  [OK] 进程数: {process_metrics['count']}")
 
         # 确定整体状态
         if any(a["severity"] == "critical" for a in report["alerts"]):
@@ -129,9 +129,9 @@ class AIOSHealthMonitorAgent:
         print()
         print("=" * 60)
         if report["status"] == "healthy":
-            print(f"  ✅ 系统健康")
+            print(f"  [OK] 系统健康")
         elif report["status"] == "warning":
-            print(f"  ⚠️  资源紧张")
+            print(f"  [WARN]  资源紧张")
         else:
             print(f"  🚨 资源危险")
         print("=" * 60)
@@ -274,12 +274,12 @@ class AIOSHealthMonitorAgent:
         for alert in report["alerts"]:
             if alert["severity"] == "critical":
                 if alert["type"] == "memory":
-                    print("  🔄 清理内存缓存...")
+                    print("  [SYNC] 清理内存缓存...")
                     # 这里实际应该清理缓存
                     # 目前只是记录
                     
                 elif alert["type"] == "disk":
-                    print("  🔄 清理磁盘空间...")
+                    print("  [SYNC] 清理磁盘空间...")
                     # 这里实际应该运行清理脚本
                     # 目前只是记录
 

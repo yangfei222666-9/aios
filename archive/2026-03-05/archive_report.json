@@ -1,0 +1,40 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.57,
+    "archive_date":  "2026-03-05",
+    "files_count":  5,
+    "total_size_bytes":  24125,
+    "timestamp":  "2026-03-05 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  312
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\service_stderr.log",
+                      "Type":  "temp",
+                      "Size":  0
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\service_stdout.log",
+                      "Type":  "temp",
+                      "Size":  14484
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\process_test_tasks.py",
+                      "Type":  "old_test",
+                      "Size":  560,
+                      "LastModified":  "2026-02-26"
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Friend-Edition\\agent_system\\process_test_tasks.py",
+                      "Type":  "old_test",
+                      "Size":  560,
+                      "LastModified":  "2026-02-26"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-05",
+    "total_size_mb":  0.02
+}

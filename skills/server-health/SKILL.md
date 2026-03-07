@@ -1,6 +1,7 @@
----
+﻿---
 name: server-health
 description: Comprehensive server health monitoring showing system stats, top processes, OpenClaw gateway status, and running services. Perfect for quick health checks via Telegram or CLI.
+version: 1.0.0
 ---
 
 # Server Health Skill
@@ -80,3 +81,4 @@ Active: 3 | Heartbeat: 30m | Last: 1m ago
 Docker: ✅ 3 containers
 PostgreSQL: ✅ Running
 ```
+

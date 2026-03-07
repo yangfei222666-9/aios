@@ -136,7 +136,7 @@ class SafetyValve:
         if failures >= 2:
             self.circuit_breaker_state["broken"] = True
             self.circuit_breaker_state["broken_at"] = datetime.now().isoformat()
-            print("⚠️ 熔断器触发：连续失败 ≥2 次，24h 内禁止自动改进")
+            print("[WARN] 熔断器触发：连续失败 ≥2 次，24h 内禁止自动改进")
 
         self._save_circuit_breaker_state()
 

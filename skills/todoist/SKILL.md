@@ -1,6 +1,7 @@
----
+﻿---
 name: todoist
 description: Manage tasks and projects in Todoist. Use when user asks about tasks, to-dos, reminders, or productivity.
+version: 1.0.0
 homepage: https://todoist.com
 metadata:
   clawdbot:
@@ -137,3 +138,4 @@ Todoist supports powerful filter queries:
 - Due dates support natural language ("tomorrow", "next monday", "jan 15")
 - Priority 1 is highest, 4 is lowest
 - Use `--order <n>` (1-based) or `--order top` to insert a task at a specific position within a project/section
+

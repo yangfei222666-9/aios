@@ -1,8 +1,9 @@
 """查看 Coder 失败详情"""
 import json
 from pathlib import Path
+from paths import AGENTS_STATE
 
-agents_file = Path("data/agents.json")
+agents_file = AGENTS_STATE
 with open(agents_file, encoding="utf-8") as f:
     data = json.load(f)
 
@@ -60,7 +61,7 @@ print("=" * 80)
 print()
 
 if failed >= 3:
-    print("⚠️ Coder 连续失败 3 次")
+    print("[WARN] Coder 连续失败 3 次")
     print()
     print("可能原因:")
     print("  1. 任务太复杂（需要拆分）")

@@ -1,0 +1,7 @@
+# Minimal dependencies for AIOS demo
+requests
+portalocker
+
+# Optional: full runtime dependencies
+# lancedb
+# sentence-transformers

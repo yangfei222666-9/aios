@@ -1,0 +1,1 @@
+﻿{"name": "health_check", "trigger": "every_heartbeat", "action": "check_resources_and_alert"}

@@ -105,7 +105,7 @@ class Evaluator:
     
     def run_test(self, test_case: Dict) -> Dict:
         """运行单个测试"""
-        print(f"\n🧪 测试: {test_case['name']}")
+        print(f"\n[TEST] 测试: {test_case['name']}")
         print(f"   描述: {test_case['description']}")
         
         start_time = time.time()
@@ -131,9 +131,9 @@ class Evaluator:
         result["passed"] = passed
         
         if passed:
-            print(f"   ✅ 通过")
+            print(f"   [OK] 通过")
         else:
-            print(f"   ❌ 失败")
+            print(f"   [FAIL] 失败")
         
         return result
     
@@ -159,7 +159,7 @@ class Evaluator:
     def run_suite(self) -> Dict:
         """运行完整测试集"""
         print("=" * 80)
-        print("🚀 开始回归测试")
+        print("[START] 开始回归测试")
         print("=" * 80)
         
         results = []
@@ -176,12 +176,13 @@ class Evaluator:
                 failed += 1
         
         # 生成报告
+        total_tests = len(self.test_suite)
         report = {
             "timestamp": datetime.now().isoformat(),
-            "total": len(self.test_suite),
+            "total": total_tests,
             "passed": passed,
             "failed": failed,
-            "success_rate": (passed / len(self.test_suite)) * 100,
+            "success_rate": (passed / total_tests * 100) if total_tests > 0 else 0.0,
             "results": results
         }
         
@@ -191,7 +192,7 @@ class Evaluator:
             json.dump(report, f, indent=2, ensure_ascii=False)
         
         print("\n" + "=" * 80)
-        print("📊 测试完成")
+        print("[REPORT] 测试完成")
         print("=" * 80)
         print(f"总计: {report['total']}")
         print(f"通过: {report['passed']}")
@@ -207,7 +208,7 @@ class Evaluator:
         result_files = sorted(RESULTS_DIR.glob("result_*.json"), reverse=True)
         
         if len(result_files) < 2:
-            print("⚠️ 需要至少2次测试结果才能对比")
+            print("[WARN] 需要至少2次测试结果才能对比")
             return None
         
         # 读取最新和基线结果
@@ -228,7 +229,7 @@ class Evaluator:
         }
         
         print("\n" + "=" * 80)
-        print("📈 性能对比")
+        print("[COMPARE] 性能对比")
         print("=" * 80)
         print(f"基线: {baseline['timestamp']}")
         print(f"当前: {current['timestamp']}")
@@ -237,9 +238,9 @@ class Evaluator:
         print(f"失败: {baseline['failed']} → {current['failed']} ({comparison['failed_change']:+d})")
         
         if comparison["regression"]:
-            print("\n⚠️ 检测到性能退化！")
+            print("\n[WARN] 检测到性能退化！")
         else:
-            print("\n✅ 性能保持或提升")
+            print("\n[OK] 性能保持或提升")
         
         return comparison
     
@@ -255,15 +256,15 @@ class Evaluator:
             latest = json.load(f)
         
         report = f"""
-📊 评测报告 - {latest['timestamp']}
+[REPORT] 评测报告 - {latest['timestamp']}
 
-✅ 通过: {latest['passed']}/{latest['total']} ({latest['success_rate']:.1f}%)
-❌ 失败: {latest['failed']}/{latest['total']}
+[OK] 通过: {latest['passed']}/{latest['total']} ({latest['success_rate']:.1f}%)
+[FAIL] 失败: {latest['failed']}/{latest['total']}
 
 详细结果:
 """
         for result in latest['results']:
-            status = "✅" if result['passed'] else "❌"
+            status = "[OK]" if result['passed'] else "[FAIL]"
             report += f"{status} {result['test_name']}: {result['duration_ms']}ms\n"
         
         return report
@@ -281,7 +282,7 @@ def compare_performance():
 
 if __name__ == "__main__":
     # 测试
-    print("🧪 Evaluator Agent 测试\n")
+    print("[TEST] Evaluator Agent 测试\n")
     
     evaluator = Evaluator()
     

@@ -73,27 +73,27 @@ def generate_agent_warnings(patterns: Dict[str, Any]) -> str:
     if patterns["network_errors"]:
         count = len(patterns["network_errors"])
         warnings.append(
-            f"⚠️ 最近发生了 {count} 次网络错误，执行网络请求时请增加重试机制"
+            f"[WARN] 最近发生了 {count} 次网络错误，执行网络请求时请增加重试机制"
         )
 
     if patterns["rate_limit_errors"]:
         count = len(patterns["rate_limit_errors"])
         warnings.append(
-            f"⚠️ 最近发生了 {count} 次 API 限流，请降低请求频率或增加等待时间"
+            f"[WARN] 最近发生了 {count} 次 API 限流，请降低请求频率或增加等待时间"
         )
 
     if patterns["timeout_errors"]:
         count = len(patterns["timeout_errors"])
         warnings.append(
-            f"⚠️ 最近发生了 {count} 次超时错误，请增加超时时间或优化执行逻辑"
+            f"[WARN] 最近发生了 {count} 次超时错误，请增加超时时间或优化执行逻辑"
         )
 
     if patterns["api_errors"]:
         count = len(patterns["api_errors"])
-        warnings.append(f"⚠️ 最近发生了 {count} 次 API 错误，请检查认证和权限")
+        warnings.append(f"[WARN] 最近发生了 {count} 次 API 错误，请检查认证和权限")
 
     if not warnings:
-        return "✅ 最近没有发现重大错误，可以正常执行"
+        return "[OK] 最近没有发现重大错误，可以正常执行"
 
     return "\n".join(warnings)
 
@@ -137,7 +137,7 @@ def inject_warnings_to_prompt(base_prompt: str, check_result: Dict) -> str:
 
     warning_section = f"""
 
-## ⚠️ 历史错误警告（最近 7 天）
+## [WARN] 历史错误警告（最近 7 天）
 
 {check_result["warnings"]}
 
@@ -166,13 +166,13 @@ if __name__ == "__main__":
 
         result = agent_pre_check()
 
-        print(f"\n📊 统计：")
+        print(f"\n[REPORT] 统计：")
         print(f"  总错误数: {result['total_errors']}")
         print(f"  错误分类: {result['patterns']}")
 
         print(f"\n{result['warnings']}")
 
         if result["suggestions"]:
-            print(f"\n💡 建议：")
+            print(f"\n[IDEA] 建议：")
             for s in result["suggestions"]:
                 print(f"  - {s}")

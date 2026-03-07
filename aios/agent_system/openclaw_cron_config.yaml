@@ -1,0 +1,96 @@
+# OpenClaw Cron 配置 - Site Monitor
+# 复制以下内容到 OpenClaw 配置的 cron.jobs 部分
+
+cron:
+  jobs:
+    # ========== Site Monitor - 每 6 小时（高优先级）==========
+    - name: "Site Monitor - 6h (DataDragon Versions)"
+      schedule:
+        kind: "every"
+        everyMs: 21600000  # 6 小时
+        anchorMs: 1020000  # 从 00:17 开始
+      payload:
+        kind: "systemEvent"
+        text: |
+          cd C:\Users\A\.openclaw\workspace\aios\agent_system;
+          & "C:\Program Files\Python312\python.exe" site_monitor.py --config monitors.yaml --only "DataDragon Versions";
+          if (Test-Path site_monitor_notify.json) {
+            $notify = Get-Content site_monitor_notify.json -Raw | ConvertFrom-Json;
+            if ($notify -and $notify.Count -gt 0) {
+              foreach ($n in $notify) {
+                Write-Output "🔔 Site Monitor Alert:`n$($n.message)"
+              }
+              Remove-Item site_monitor_notify.json -Force
+            }
+          }
+      sessionTarget: "main"
+      enabled: true
+
+    # ========== Site Monitor - 每 12 小时（LoL 补丁）==========
+    - name: "Site Monitor - 12h (LoL Patch Notes)"
+      schedule:
+        kind: "every"
+        everyMs: 43200000  # 12 小时
+        anchorMs: 1260000  # 从 00:21 开始
+      payload:
+        kind: "systemEvent"
+        text: |
+          cd C:\Users\A\.openclaw\workspace\aios\agent_system;
+          & "C:\Program Files\Python312\python.exe" site_monitor.py --config monitors.yaml --only "LoL Patch Notes";
+          if (Test-Path site_monitor_notify.json) {
+            $notify = Get-Content site_monitor_notify.json -Raw | ConvertFrom-Json;
+            if ($notify -and $notify.Count -gt 0) {
+              foreach ($n in $notify) {
+                Write-Output "🔔 Site Monitor Alert:`n$($n.message)"
+              }
+              Remove-Item site_monitor_notify.json -Force
+            }
+          }
+      sessionTarget: "main"
+      enabled: true
+
+    # ========== Site Monitor - 每天 09:05（每日汇总）==========
+    - name: "Site Monitor - Daily (09:05)"
+      schedule:
+        kind: "cron"
+        expr: "5 9 * * *"
+        tz: "Asia/Shanghai"
+      payload:
+        kind: "systemEvent"
+        text: |
+          cd C:\Users\A\.openclaw\workspace\aios\agent_system;
+          & "C:\Program Files\Python312\python.exe" site_monitor.py --config monitors.yaml --only "DataDragon Realms NA Champion,AIOS GitHub Releases,AIOS GitHub Commits,OpenClaw GitHub Releases,PyPI openclaw,OpenAI API Changelog,Anthropic Newsroom";
+          if (Test-Path site_monitor_notify.json) {
+            $notify = Get-Content site_monitor_notify.json -Raw | ConvertFrom-Json;
+            if ($notify -and $notify.Count -gt 0) {
+              foreach ($n in $notify) {
+                Write-Output "🔔 Site Monitor Alert:`n$($n.message)"
+              }
+              Remove-Item site_monitor_notify.json -Force
+            }
+          }
+      sessionTarget: "main"
+      enabled: true
+
+    # ========== Site Monitor - 每周一 10:15（Node.js）==========
+    - name: "Site Monitor - Weekly (Monday 10:15)"
+      schedule:
+        kind: "cron"
+        expr: "15 10 * * 1"
+        tz: "Asia/Shanghai"
+      payload:
+        kind: "systemEvent"
+        text: |
+          cd C:\Users\A\.openclaw\workspace\aios\agent_system;
+          & "C:\Program Files\Python312\python.exe" site_monitor.py --config monitors.yaml --only "Node.js Latest Version";
+          if (Test-Path site_monitor_notify.json) {
+            $notify = Get-Content site_monitor_notify.json -Raw | ConvertFrom-Json;
+            if ($notify -and $notify.Count -gt 0) {
+              foreach ($n in $notify) {
+                Write-Output "🔔 Site Monitor Alert:`n$($n.message)"
+              }
+              Remove-Item site_monitor_notify.json -Force
+            }
+          }
+      sessionTarget: "main"
+      enabled: true

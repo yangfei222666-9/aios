@@ -1,11 +1,19 @@
 ---
 name: agent-deployer
+version: 1.1.0
 description: Deploy Skills as AIOS Agents. Automatically generates Agent configurations from SKILL.md and integrates them into the AIOS Agent System. Use when you want to turn a Skill into an executable Agent that can be scheduled and managed by AIOS.
 ---
 
-# Agent Deployer
+# Agent Deployer v1.1
 
 **将 Skill 配置转换为 AIOS Agent 的自动化工具。**
+
+## 🆕 v1.1 新特性
+
+- ✅ **批量部署** - 一键部署所有 Skill（`deploy --batch`）
+- ✅ **版本同步** - 自动检测 Skill 更新并同步（`check-updates`, `sync`）
+- ✅ **覆盖保护** - 部署时自动覆盖同名 Agent
+- ✅ **详细报告** - 批量部署后显示成功/跳过/失败统计
 
 ## 核心功能
 
@@ -16,7 +24,7 @@ description: Deploy Skills as AIOS Agents. Automatically generates Agent configu
 
 ## 使用方法
 
-### 1. 部署 Skill 为 Agent
+### 1. 部署单个 Skill
 
 ```bash
 python agent_deployer.py deploy <skill_dir>
@@ -29,6 +37,37 @@ python agent_deployer.py deploy document-agent
 
 # 或使用绝对路径
 python agent_deployer.py deploy C:\Users\A\.openclaw\workspace\skills\document-agent
+```
+
+### 1.1 批量部署所有 Skill（新功能）
+
+```bash
+python agent_deployer.py deploy --batch
+```
+
+**输出示例：**
+```
+[BATCH] Scanning C:\Users\A\.openclaw\workspace\skills for Skills...
+
+[1] Deploying api-testing-skill...
+  [OK] api-testing-skill v1.0.0
+
+[2] Deploying cloudrouter-skill...
+  [OK] cloudrouter-skill v1.0.0
+
+...
+
+============================================================
+[BATCH] Deployment Complete
+============================================================
+  Deployed: 15
+  Skipped:  32 (no skill.yaml)
+  Errors:   0
+
+[DEPLOYED]
+  - api-testing-skill (v1.0.0) <- api-testing-skill
+  - cloudrouter-skill (v1.0.0) <- cloudrouter-skill
+  ...
 ```
 
 ### 2. 列出已部署的 Agents
@@ -57,6 +96,44 @@ python agent_deployer.py remove <agent_name>
 **示例：**
 ```bash
 python agent_deployer.py remove document_agent
+```
+
+### 4. 检查 Skill 更新（新功能）
+
+```bash
+python agent_deployer.py check-updates
+```
+
+**输出示例：**
+```
+[UPDATES] Found 2 Agents with updates:
+
+  - api-testing-skill
+    Current: 1.0.0
+    New:     1.1.0
+
+  - cloudrouter-skill
+    Current: 1.0.0
+    New:     1.2.0
+```
+
+### 5. 同步 Agent 与 Skill（新功能）
+
+```bash
+# 同步单个 Agent
+python agent_deployer.py sync <agent_name>
+
+# 同步所有 Agent
+python agent_deployer.py sync --all
+```
+
+**示例：**
+```bash
+# 同步单个
+python agent_deployer.py sync api-testing-skill
+
+# 同步所有
+python agent_deployer.py sync --all
 ```
 
 ## Skill 配置格式

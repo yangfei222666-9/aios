@@ -125,11 +125,11 @@ def main():
     
     # 判断是否有显著改进
     if success_rate_delta > 5 or timeout_delta < -3:
-        print("\n✅ 改进效果显著！")
+        print("\n[OK] 改进效果显著！")
     elif success_rate_delta < -5 or timeout_delta > 3:
-        print("\n⚠️ 性能下降，需要调查")
+        print("\n[WARN] 性能下降，需要调查")
     else:
-        print("\n📊 持续监控中...")
+        print("\n[REPORT] 持续监控中...")
 
 if __name__ == "__main__":
     main()

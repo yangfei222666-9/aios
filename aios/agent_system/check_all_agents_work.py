@@ -22,13 +22,16 @@ if agents_file.exists():
             failed = stats.get('tasks_failed', 0)
             total = completed + failed
             
-            status = "✅ 有活干" if total > 0 else "❌ 没活干"
+            status = "[OK] 有活干" if total > 0 else "[FAIL] 没活干"
             print(f"  {agent['id']}: {status} (完成{completed}/失败{failed})")
 print()
 
 # 2. 任务队列
 print("【2. 任务队列】")
-queue_file = workspace / "aios" / "agent_system" / "task_queue.jsonl"
+try:
+    from paths import TASK_QUEUE as queue_file
+except ImportError:
+    queue_file = workspace / "aios" / "agent_system" / "data" / "task_queue.jsonl"
 if queue_file.exists():
     with open(queue_file, encoding="utf-8") as f:
         tasks = [json.loads(line) for line in f if line.strip()]
@@ -43,7 +46,7 @@ if queue_file.exists():
     for task_type, count in task_types.items():
         print(f"    - {task_type}: {count} 个")
 else:
-    print("  队列为空 ❌")
+    print("  队列为空 [FAIL]")
 print()
 
 # 3. 学习 Agent
@@ -75,7 +78,7 @@ try:
             hours_ago = (now - last_time).total_seconds() / 3600
             
             if hours_ago < 24:
-                status = f"✅ 最近运行 ({hours_ago:.1f}小时前)"
+                status = f"[OK] 最近运行 ({hours_ago:.1f}小时前)"
                 active_count += 1
             else:
                 status = f"⏰ 等待运行 ({hours_ago:.1f}小时前)"

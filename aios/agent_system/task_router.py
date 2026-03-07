@@ -23,7 +23,10 @@ from dataclasses import dataclass, asdict
 
 BASE_DIR = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE_DIR / "unified_registry.json"
-QUEUE_PATH = BASE_DIR / "task_queue.jsonl"
+try:
+    from paths import TASK_QUEUE as QUEUE_PATH
+except ImportError:
+    QUEUE_PATH = BASE_DIR / "data" / "task_queue.jsonl"
 ROUTE_LOG_PATH = BASE_DIR / "route_log.jsonl"
 STATS_PATH = BASE_DIR / "router_stats.json"
 

@@ -13,16 +13,17 @@ WORKSPACE = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(WORKSPACE / "aios" / "agent_system"))
 
 from learning_agents import LEARNING_AGENTS
+from paths import TASK_QUEUE as _TASK_QUEUE, SPAWN_REQUESTS as _SPAWN_REQUESTS, SPAWN_RESULTS as _SPAWN_RESULTS, AGENTS_STATE, HEARTBEAT_LOG as _HEARTBEAT_LOG, HEARTBEAT_STATS as _HEARTBEAT_STATS
 
 # 文件路径
-TASK_QUEUE = Path(__file__).parent / "task_queue.jsonl"
-SPAWN_REQUESTS = Path(__file__).parent / "spawn_requests.jsonl"
-SPAWN_RESULTS = Path(__file__).parent / "spawn_results.jsonl"
-AGENTS_FILE = Path(__file__).parent / "data" / "agents.json"
+TASK_QUEUE = _TASK_QUEUE
+SPAWN_REQUESTS = _SPAWN_REQUESTS
+SPAWN_RESULTS = _SPAWN_RESULTS
+AGENTS_FILE = AGENTS_STATE
 AGENTS_DATA_FILE = Path(__file__).parent / "agents_data.json"
 STATE_FILE = WORKSPACE / "memory" / "selflearn-state.json"
-HEARTBEAT_LOG = Path(__file__).parent / "heartbeat.log"
-HEARTBEAT_STATS = Path(__file__).parent / "heartbeat_stats.json"
+HEARTBEAT_LOG = _HEARTBEAT_LOG
+HEARTBEAT_STATS = _HEARTBEAT_STATS
 
 def log(message):
     """记录日志"""
@@ -207,7 +208,7 @@ def activate_sleeping_learning_agents():
 
 def handle_coder_failure():
     """处理Coder连续失败"""
-    log("🔧 检查Coder状态...")
+    log("[FIX] 检查Coder状态...")
     
     # 读取agents_data.json（新的动态数据）
     agents_data = load_json(AGENTS_DATA_FILE)
@@ -236,7 +237,7 @@ def handle_coder_failure():
         return "CODER_OK"
     
     # 失败≥3次，需要修复
-    log(f"  ⚠️ Coder连续失败{failed}次，应用修复...")
+    log(f"  [WARN] Coder连续失败{failed}次，应用修复...")
     
     # 修复策略
     fixes_applied = []
@@ -265,12 +266,12 @@ def handle_coder_failure():
         log(f"  ✓ 已应用 {len(fixes_applied)} 个修复")
         return f"CODER_FIXED ({', '.join(fixes_applied)})"
     else:
-        log("  ⚠️ 无法自动修复，需要人工介入")
+        log("  [WARN] 无法自动修复，需要人工介入")
         return "CODER_NEEDS_ATTENTION"
 
 def check_self_improving_loop():
     """检查Self-Improving Loop"""
-    log("🔄 检查Self-Improving Loop...")
+    log("[SYNC] 检查Self-Improving Loop...")
     
     # 读取loop状态
     loop_state_file = Path(__file__).parent / "data" / "loop_state.json"
@@ -333,7 +334,7 @@ def update_stats(results):
 def heartbeat():
     """心跳主函数"""
     log("=" * 80)
-    log("🚀 AIOS Heartbeat Started @ " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    log("[START] AIOS Heartbeat Started @ " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     log("=" * 80)
     
     results = []
@@ -363,7 +364,7 @@ def heartbeat():
         update_stats(results)
         
         log("=" * 80)
-        log("✅ Heartbeat Completed")
+        log("[OK] Heartbeat Completed")
         log("=" * 80)
         
         # 输出摘要
@@ -378,7 +379,7 @@ def heartbeat():
             print("\nHEARTBEAT_OK")
         
     except Exception as e:
-        log(f"❌ Heartbeat失败: {e}")
+        log(f"[FAIL] Heartbeat失败: {e}")
         import traceback
         log(traceback.format_exc())
         print(f"\nHEARTBEAT_ERROR: {e}")

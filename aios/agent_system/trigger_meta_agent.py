@@ -17,7 +17,7 @@ def create_failure_pattern():
     dispatcher = AutoDispatcher(workspace)
     
     print("=" * 60)
-    print("🔥 创建失败模式（触发 Meta-Agent 缺口检测）")
+    print("[FIRE] 创建失败模式（触发 Meta-Agent 缺口检测）")
     print("=" * 60)
     
     # 场景 1：某类任务频繁失败（≥3次/7天）
@@ -54,7 +54,7 @@ def create_failure_pattern():
         print(f"  ✓ 入队: {task['message']}")
     
     print("\n" + "=" * 60)
-    print("✅ 场景创建完成")
+    print("[OK] 场景创建完成")
     print("=" * 60)
     print(f"总任务数: {dispatcher.status()['queue_size']}")
     print("\n下一步：运行 meta_agent.py heartbeat 检测缺口")
@@ -62,10 +62,11 @@ def create_failure_pattern():
 
 def create_event_pattern():
     """创建事件模式（触发事件覆盖缺口）"""
-    events_file = Path(__file__).parent.parent / "data" / "events.jsonl"
+    from paths import EVENTS_LOG
+    events_file = EVENTS_LOG
     
     print("\n" + "=" * 60)
-    print("📊 创建事件模式（触发事件覆盖缺口）")
+    print("[REPORT] 创建事件模式（触发事件覆盖缺口）")
     print("=" * 60)
     
     # 创建未处理的事件
@@ -103,7 +104,7 @@ def create_event_pattern():
         for event in events:
             f.write(json.dumps(event, ensure_ascii=False) + '\n')
     
-    print(f"✅ 创建了 {len(events)} 个事件")
+    print(f"[OK] 创建了 {len(events)} 个事件")
     print(f"   - 资源告警: 10 个")
     print(f"   - 错误事件: 5 个")
     print(f"\n下一步：运行 meta_agent.py heartbeat 检测缺口")

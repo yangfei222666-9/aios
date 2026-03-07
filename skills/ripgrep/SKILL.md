@@ -1,6 +1,7 @@
----
+﻿---
 name: ripgrep
 description: Blazingly fast text search tool - recursively searches directories for regex patterns with respect to gitignore rules.
+version: 1.0.0
 homepage: https://github.com/BurntSushi/ripgrep
 metadata: {"clawdbot":{"emoji":"🔎","requires":{"bins":["rg"]},"install":[{"id":"brew","kind":"brew","formula":"ripgrep","bins":["rg"],"label":"Install ripgrep (brew)"},{"id":"apt","kind":"apt","package":"ripgrep","bins":["rg"],"label":"Install ripgrep (apt)"}]}}
 ---
@@ -148,3 +149,4 @@ rg -C 2 --color always "error" | less -R
 
 GitHub: https://github.com/BurntSushi/ripgrep
 User Guide: https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md
+

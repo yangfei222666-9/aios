@@ -1,0 +1,63 @@
+# Site Monitor Configuration
+# 支持 4 种监控类型：json_key / list_regex / github_atom / pypi
+
+monitors:
+  # ========== JSON 字段监控 ==========
+  - name: "Data Dragon Versions"
+    type: "json_key"
+    url: "https://ddragon.leagueoflegends.com/api/versions.json"
+    json_path: "0"  # 数组第一个元素
+    priority: "high"
+    min_interval_hours: 6
+
+  - name: "Data Dragon Realms (NA)"
+    type: "json_key"
+    url: "https://ddragon.leagueoflegends.com/realms/na.json"
+    json_path: "n.champion"  # 嵌套字段
+    priority: "daily"
+    min_interval_hours: 24
+
+  # ========== 列表页 Regex 监控 ==========
+  - name: "LoL Patch Notes"
+    type: "list_regex"
+    url: "https://www.leagueoflegends.com/en-us/news/tags/patch-notes/"
+    pattern: '<h2[^>]*>(?P<title>Patch [0-9.]+[^<]*)</h2>'
+    priority: "high"
+    min_interval_hours: 12
+
+  - name: "OpenAI ChatGPT Release Notes"
+    type: "list_regex"
+    url: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
+    pattern: '<h2[^>]*>(?P<title>[^<]+)</h2>.*?<time[^>]*>(?P<date>[^<]+)</time>'
+    priority: "daily"
+    min_interval_hours: 24
+
+  # ========== GitHub Atom 监控 ==========
+  - name: "OpenClaw Releases"
+    type: "github_atom"
+    url: "https://github.com/openclaw/openclaw"
+    feed_url: "https://github.com/openclaw/openclaw/releases.atom"
+    priority: "high"
+    min_interval_hours: 24
+
+  - name: "AIOS Commits"
+    type: "github_atom"
+    url: "https://github.com/agiresearch/AIOS"
+    feed_url: "https://github.com/agiresearch/AIOS/commits/main.atom"
+    priority: "daily"
+    min_interval_hours: 24
+
+  # ========== PyPI 包监控 ==========
+  - name: "openclaw-cn Package"
+    type: "pypi"
+    package: "openclaw-cn"
+    url: "https://pypi.org/project/openclaw-cn/"
+    priority: "high"
+    min_interval_hours: 24
+
+  - name: "requests Package"
+    type: "pypi"
+    package: "requests"
+    url: "https://pypi.org/project/requests/"
+    priority: "daily"
+    min_interval_hours: 168  # 每周检查一次

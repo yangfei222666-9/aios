@@ -1,0 +1,37 @@
+{
+  "name": "root_cause_analysis",
+  "description": "分析失败根因（5-Why分析法）",
+  "trigger": {
+    "event_type": "task_failed",
+    "conditions": {
+      "retry_count": {"$gte": 3}
+    }
+  },
+  "actions": [
+    {
+      "type": "log",
+      "message": "任务连续失败3次，启动根因分析"
+    },
+    {
+      "type": "collect_context",
+      "include": ["error_logs", "system_metrics", "recent_changes"]
+    },
+    {
+      "type": "analyze_pattern",
+      "method": "5-why",
+      "depth": 5
+    },
+    {
+      "type": "generate_report",
+      "format": "markdown",
+      "output": "data/analysis/root_cause_{timestamp}.md"
+    },
+    {
+      "type": "notify",
+      "channel": "telegram",
+      "message": "根因分析完成：{report_summary}"
+    }
+  ],
+  "priority": "high",
+  "enabled": true
+}

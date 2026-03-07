@@ -1,0 +1,96 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.82,
+    "archive_date":  "2026-03-04",
+    "files_count":  14,
+    "total_size_bytes":  48708,
+    "timestamp":  "2026-03-04 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  156
+                  },
+                  {
+                      "Path":  "smoke_test.py",
+                      "Type":  "old_test",
+                      "Size":  554,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\scripts\\check_test_coverage.py",
+                      "Type":  "old_test",
+                      "Size":  5535,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\scripts\\clean_all_test_traces.py",
+                      "Type":  "old_test",
+                      "Size":  1412,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\scripts\\clean_test_traces.py",
+                      "Type":  "old_test",
+                      "Size":  942,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\scripts\\submit_test_tasks.py",
+                      "Type":  "old_test",
+                      "Size":  4487,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_reactor.py",
+                      "Type":  "old_test",
+                      "Size":  6940,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_reactor_parallel.py",
+                      "Type":  "old_test",
+                      "Size":  1835,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_reactor_retry.py",
+                      "Type":  "old_test",
+                      "Size":  3155,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_reactor_verify.py",
+                      "Type":  "old_test",
+                      "Size":  1850,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_security_fixes.py",
+                      "Type":  "old_test",
+                      "Size":  1516,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "skills\\ui-test-automation\\ui_test_runner.py",
+                      "Type":  "old_test",
+                      "Size":  10509,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "debug_trace.py",
+                      "Type":  "old_test",
+                      "Size":  421,
+                      "LastModified":  "2026-02-25"
+                  },
+                  {
+                      "Path":  "aios\\debug_improvements.py",
+                      "Type":  "old_test",
+                      "Size":  1187,
+                      "LastModified":  "2026-02-25"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-04",
+    "total_size_mb":  0.05
+}

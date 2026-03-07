@@ -1,6 +1,7 @@
----
+﻿---
 name: news-summary
 description: This skill should be used when the user asks for news updates, daily briefings, or what's happening in the world. Fetches news from trusted international RSS feeds and can create voice summaries.
+version: 1.0.0
 ---
 
 # News Summary
@@ -102,3 +103,4 @@ curl -s https://api.openai.com/v1/audio/speech \
 - For voice: ~2 minutes max
 - Balance perspectives (Western + Global South)
 - Cite source if asked
+

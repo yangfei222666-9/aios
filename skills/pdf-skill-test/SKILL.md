@@ -1,5 +1,6 @@
 ---
 name: pdf-skill-test
+version: 1.0.0
 description: PDF processing skill
 ---
 

@@ -1,9 +1,10 @@
 ---
 name: file-organizer-skill
+version: 1.0.0
 description: Organize files in directories by grouping them into folders based on their extensions or date. Includes Dry-Run, Recursive, and Undo capabilities.
 ---
 
-# File Organizer (Gold Standard)
+# File Organizer v1.0 (Gold Standard)
 
 ## Features
 - **Smart Sorting**: Group by Extension (Default) or Date (Year/Month).

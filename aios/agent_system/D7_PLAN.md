@@ -62,12 +62,27 @@
 ### Week 1（恢复能力）
 **目标：** 故障可恢复，路径可回滚
 
-- [ ] executor 故障 fallback（超时/崩溃自动切换备用路径）
-- [ ] 死信队列（DLQ）：重试耗尽后进入 dlq.jsonl，触发人工介入通知
-- [ ] chaos/e2e 回归（随机杀 executor + 恢复验证）
-- [ ] 回滚步骤文档化
+**实现顺序（最小风险）：**
+1. DLQ 入队与结构（`dead_letters.jsonl`，含 task_id/attempts/last_error/timestamp）
+2. 人工介入通道（`replay` / `discard`，必须审计日志）
+3. Executor fallback（心跳超时自动切换，fallback 前强制 `spawn_lock.force_release(task_id)` 防双写）
+4. `pipeline_timings.jsonl` 基线采集（Week 1 chaos 测试对比用）
+5. Chaos/e2e 回归（随机 kill executor，验证"失败→DLQ→介入→恢复"全链路）
 
-**DoD：** 故障可恢复、路径可回滚
+**DoD：**
+- [ ] DLQ 漏记率 = 0（有监控）
+- [ ] replay/discard 有审计日志
+- [ ] fallback 无双写（force_release 验证）
+- [ ] pipeline_timings 基线有至少 10 条真实数据
+- [ ] chaos 全链路通过，MTTR ≤ 10min
+- [ ] 重复误执行率 = 0（硬门槛不变）
+- [ ] submit→execute p95 增幅 ≤ 20%
+
+**⚠️ 最容易踩的坑：**
+- fallback 触发时原 executor 可能假死，必须先 `force_release` 再切换，否则双写
+- DLQ 漏记：重试耗尽判断条件要和 retry_config 保持一致
+
+**详细清单：** `D7_WEEK1_CHECKLIST.md`
 
 ---
 

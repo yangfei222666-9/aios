@@ -1,0 +1,29 @@
+{
+  "id": "analyst-dispatcher",
+  "name": "analyst-dispatcher",
+  "version": "1.0.0",
+  "author": "小九",
+  "description": "Analyze data and generate insights",
+  "type": "core",
+  "role": "Data Analyst",
+  "goal": "Analyze data and generate insights",
+  "backstory": "You are a data analyst skilled at finding patterns and generating actionable insights.",
+  "config": {
+    "enabled": true,
+    "schedule": "on_demand",
+    "priority": "normal",
+    "model": "claude-sonnet-4-6",
+    "thinking": "off",
+    "timeout": 60,
+    "max_retries": 3
+  },
+  "script": {
+    "path": "",
+    "entry": "main"
+  },
+  "dependencies": [],
+  "tags": [],
+  "created_at": "2026-02-25T15:57:00",
+  "downloads": 0,
+  "rating": 0.0
+}

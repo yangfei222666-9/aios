@@ -15,10 +15,10 @@ for filepath in learner_files:
         
         # 尝试编译
         compile(content, str(filepath), 'exec')
-        print(f"✅ {filepath.name} 无编码问题")
+        print(f"[OK] {filepath.name} 无编码问题")
     
     except SyntaxError as e:
-        print(f"❌ {filepath.name}:")
+        print(f"[FAIL] {filepath.name}:")
         print(f"   L{e.lineno}: {e.msg}")
         print(f"   {e.text.strip() if e.text else '(无法显示)'}")
         print()

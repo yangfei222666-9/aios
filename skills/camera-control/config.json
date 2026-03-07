@@ -1,0 +1,8 @@
+{
+  "default_device": 0,
+  "default_output": "./snapshots",
+  "default_interval": 5,
+  "default_duration": 60,
+  "image_quality": 95,
+  "image_format": "jpg"
+}

@@ -1,0 +1,95 @@
+# Site Monitor Configuration
+# 完整监控清单：LoL 数据 + GitHub + PyPI + 列表页
+
+monitors:
+  # ========== LoL Data Dragon 监控 ==========
+  
+  # JSON 监控：Data Dragon versions[0]
+  - name: "DataDragon Versions"
+    type: "json_key"
+    url: "https://ddragon.leagueoflegends.com/api/versions.json"
+    json_path: "0"
+    priority: "high"
+    min_interval_hours: 6  # 补丁周期间更频繁检查
+
+  # JSON 监控：realms 里的 n.champion
+  - name: "DataDragon Realms NA Champion"
+    type: "json_key"
+    url: "https://ddragon.leagueoflegends.com/realms/na.json"
+    json_path: "n.champion"
+    priority: "high"
+    min_interval_hours: 24
+
+  # ========== GitHub 监控 ==========
+  
+  # AIOS GitHub Releases
+  - name: "AIOS GitHub Releases"
+    type: "github_atom"
+    url: "https://github.com/agiresearch/AIOS"
+    feed_url: "https://github.com/agiresearch/AIOS/releases.atom"
+    priority: "high"
+    min_interval_hours: 24
+
+  # AIOS GitHub Commits
+  - name: "AIOS GitHub Commits"
+    type: "github_atom"
+    url: "https://github.com/agiresearch/AIOS"
+    feed_url: "https://github.com/agiresearch/AIOS/commits/main.atom"
+    priority: "daily"
+    min_interval_hours: 24
+
+  # OpenClaw GitHub Releases
+  - name: "OpenClaw GitHub Releases"
+    type: "github_atom"
+    url: "https://github.com/openclaw/openclaw"
+    feed_url: "https://github.com/openclaw/openclaw/releases.atom"
+    priority: "high"
+    min_interval_hours: 24
+
+  # ========== PyPI 包监控 ==========
+  
+  # PyPI openclaw-cn（如果包名正确）
+  - name: "PyPI openclaw"
+    type: "pypi"
+    url: "https://pypi.org/project/openclaw/"
+    package: "openclaw"
+    priority: "high"
+    min_interval_hours: 24
+
+  # ========== AI 模型更新监控 ==========
+  
+  # OpenAI API Changelog（JSON 监控更可靠）
+  - name: "OpenAI API Changelog"
+    type: "list_regex"
+    url: "https://platform.openai.com/docs/changelog"
+    pattern: '(?s)<h3[^>]*>(?P<title>[^<]{5,100})</h3>'
+    priority: "high"
+    min_interval_hours: 24
+
+  # Anthropic Newsroom
+  - name: "Anthropic Newsroom"
+    type: "list_regex"
+    url: "https://www.anthropic.com/news"
+    pattern: '(?s)<article.*?<a[^>]+href="(?P<link>[^"]+)".*?<h2[^>]*>(?P<title>[^<]{5,200})</h2>'
+    priority: "high"
+    min_interval_hours: 24
+
+  # ========== LoL 补丁说明监控 ==========
+  
+  # LoL Patch Notes（匹配实际结构）
+  - name: "LoL Patch Notes"
+    type: "list_regex"
+    url: "https://www.leagueoflegends.com/en-us/news/tags/patch-notes/"
+    pattern: '(?s)(?P<title>(?:League of Legends )?Patch [0-9.]+[^<\n]{0,50})'
+    priority: "high"
+    min_interval_hours: 12
+
+  # ========== 运行环境监控 ==========
+  
+  # Node.js 版本（改用 GitHub Releases）
+  - name: "Node.js Latest Version"
+    type: "github_atom"
+    url: "https://github.com/nodejs/node"
+    feed_url: "https://github.com/nodejs/node/releases.atom"
+    priority: "daily"
+    min_interval_hours: 168  # 每周检查

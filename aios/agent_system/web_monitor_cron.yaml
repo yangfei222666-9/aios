@@ -1,0 +1,77 @@
+# Web Monitor Cron Jobs
+# 添加到 OpenClaw 配置的 cron.jobs 部分
+
+# ========== 高频监控（每 6 小时）==========
+- name: "Web Monitor - 6h"
+  schedule:
+    kind: "every"
+    everyMs: 21600000  # 6 小时
+  payload:
+    kind: "systemEvent"
+    text: |
+      cd C:\Users\A\.openclaw\workspace\aios\agent_system;
+      & "C:\Program Files\Python312\python.exe" web_monitor.py --filter 6h;
+      $notify = & "C:\Program Files\Python312\python.exe" web_monitor_handler.py | Out-String;
+      if ($notify -match 'NOTIFY:') {
+        $msg = $notify -replace '.*NOTIFY:', '';
+        Write-Output "TELEGRAM:$msg"
+      }
+  sessionTarget: "main"
+  enabled: true
+
+# ========== 每日监控（每天 09:00）==========
+- name: "Web Monitor - Daily"
+  schedule:
+    kind: "cron"
+    expr: "0 9 * * *"
+    tz: "Asia/Shanghai"
+  payload:
+    kind: "systemEvent"
+    text: |
+      cd C:\Users\A\.openclaw\workspace\aios\agent_system;
+      & "C:\Program Files\Python312\python.exe" web_monitor.py --filter daily;
+      $notify = & "C:\Program Files\Python312\python.exe" web_monitor_handler.py | Out-String;
+      if ($notify -match 'NOTIFY:') {
+        $msg = $notify -replace '.*NOTIFY:', '';
+        Write-Output "TELEGRAM:$msg"
+      }
+  sessionTarget: "main"
+  enabled: true
+
+# ========== 每周监控（每周一/周四 10:00）==========
+- name: "Web Monitor - Weekly 2x"
+  schedule:
+    kind: "cron"
+    expr: "0 10 * * 1,4"  # 周一和周四
+    tz: "Asia/Shanghai"
+  payload:
+    kind: "systemEvent"
+    text: |
+      cd C:\Users\A\.openclaw\workspace\aios\agent_system;
+      & "C:\Program Files\Python312\python.exe" web_monitor.py --filter weekly_2x;
+      $notify = & "C:\Program Files\Python312\python.exe" web_monitor_handler.py | Out-String;
+      if ($notify -match 'NOTIFY:') {
+        $msg = $notify -replace '.*NOTIFY:', '';
+        Write-Output "TELEGRAM:$msg"
+      }
+  sessionTarget: "main"
+  enabled: true
+
+# ========== 每周监控（每周一 11:00）==========
+- name: "Web Monitor - Weekly"
+  schedule:
+    kind: "cron"
+    expr: "0 11 * * 1"  # 每周一
+    tz: "Asia/Shanghai"
+  payload:
+    kind: "systemEvent"
+    text: |
+      cd C:\Users\A\.openclaw\workspace\aios\agent_system;
+      & "C:\Program Files\Python312\python.exe" web_monitor.py --filter weekly;
+      $notify = & "C:\Program Files\Python312\python.exe" web_monitor_handler.py | Out-String;
+      if ($notify -match 'NOTIFY:') {
+        $msg = $notify -replace '.*NOTIFY:', '';
+        Write-Output "TELEGRAM:$msg"
+      }
+  sessionTarget: "main"
+  enabled: true

@@ -15,9 +15,10 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from real_coder import execute_code_task
 from data_collector import DataCollector, collect_task, collect_api_call, collect_execution
+from paths import TASK_QUEUE as _TASK_QUEUE
 
 # 文件路径
-TASK_QUEUE = Path(__file__).parent / "task_queue.jsonl"
+TASK_QUEUE = _TASK_QUEUE
 EXECUTION_LOG = Path(__file__).parent / "execution_log_real.jsonl"
 
 def log(message):
@@ -87,12 +88,12 @@ def process_task_queue():
                 )
                 
                 if result["success"]:
-                    log(f"      ✅ Coder Agent 完成代码任务")
+                    log(f"      [OK] Coder Agent 完成代码任务")
                     log(f"      📁 代码文件: {result['filepath']}")
                     if result['execution']['stdout']:
                         log(f"      📤 输出: {result['execution']['stdout'][:100]}")
                 else:
-                    log(f"      ❌ 任务失败")
+                    log(f"      [FAIL] 任务失败")
                     if result.get('error'):
                         log(f"      错误: {result['error']}")
                     elif result['execution']['stderr']:
@@ -111,7 +112,7 @@ def process_task_queue():
             
             else:
                 # 其他类型任务（暂时模拟）
-                log(f"      ⚠️ {task_type} 任务暂不支持真实执行，跳过")
+                log(f"      [WARN] {task_type} 任务暂不支持真实执行，跳过")
             
         except Exception as e:
             log(f"      ✗ 失败: {e}")
@@ -124,14 +125,14 @@ def process_task_queue():
 def main():
     """主函数"""
     log("=" * 80)
-    log("🚀 AIOS Heartbeat Started (Real Execution Mode)")
+    log("[START] AIOS Heartbeat Started (Real Execution Mode)")
     log("=" * 80)
     
     # 处理任务队列
     result = process_task_queue()
     
     log("=" * 80)
-    log("✅ Heartbeat Completed")
+    log("[OK] Heartbeat Completed")
     log("=" * 80)
     print(f"\n{result}")
 

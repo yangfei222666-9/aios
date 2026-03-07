@@ -1,0 +1,43 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.59,
+    "archive_date":  "2026-03-01",
+    "files_count":  5,
+    "total_size_bytes":  20662,
+    "timestamp":  "2026-03-01 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\tests\\test_p4_p5.py",
+                      "Type":  "old_test",
+                      "Size":  2481,
+                      "LastModified":  "2026-02-22"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_pipeline.py",
+                      "Type":  "old_test",
+                      "Size":  2021,
+                      "LastModified":  "2026-02-22"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_reactor_direct.py",
+                      "Type":  "old_test",
+                      "Size":  2485,
+                      "LastModified":  "2026-02-22"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_reactor_trigger.py",
+                      "Type":  "old_test",
+                      "Size":  2346,
+                      "LastModified":  "2026-02-22"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_v07.py",
+                      "Type":  "old_test",
+                      "Size":  3120,
+                      "LastModified":  "2026-02-22"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-01",
+    "total_size_mb":  0.02
+}

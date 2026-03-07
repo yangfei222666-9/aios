@@ -6,9 +6,11 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-SPAWN_REQUESTS = Path(__file__).parent / "spawn_requests.jsonl"
-SPAWN_RESULTS = Path(__file__).parent / "spawn_results.jsonl"
-AGENTS_FILE = Path(__file__).parent / "agents.json"
+from paths import SPAWN_REQUESTS as _SPAWN_REQUESTS, SPAWN_RESULTS as _SPAWN_RESULTS, AGENTS_STATE
+
+SPAWN_REQUESTS = _SPAWN_REQUESTS
+SPAWN_RESULTS = _SPAWN_RESULTS
+AGENTS_FILE = AGENTS_STATE
 
 def load_agents():
     """加载 Agent 配置"""
@@ -70,7 +72,7 @@ def main():
     
     # 加载配置
     agents = load_agents()
-    print(f"✅ 加载了 {len(agents)} 个 Agent")
+    print(f"[OK] 加载了 {len(agents)} 个 Agent")
     
     # 加载 spawn 请求
     requests = load_spawn_requests()
@@ -87,13 +89,13 @@ def main():
         agent_config = agents.get(agent_id)
         
         if not agent_config:
-            print(f"⚠️  [{i}] Agent '{agent_id}' 不存在，跳过")
+            print(f"[WARN]  [{i}] Agent '{agent_id}' 不存在，跳过")
             continue
         
         cmd = execute_spawn_request(request, agent_config)
         commands.append(cmd)
         
-        print(f"✅ [{i}] {agent_id}: {request['description'][:50]}...")
+        print(f"[OK] [{i}] {agent_id}: {request['description'][:50]}...")
     
     # 输出执行命令（JSON 格式，供 OpenClaw 调用）
     print("\n" + "=" * 60)
@@ -109,7 +111,7 @@ def main():
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(commands, f, ensure_ascii=False, indent=2)
     
-    print(f"✅ 命令已保存到：{output_file}")
+    print(f"[OK] 命令已保存到：{output_file}")
     print("\n使用方式：")
     print("在 OpenClaw 中调用 sessions_spawn，传入上述参数")
 

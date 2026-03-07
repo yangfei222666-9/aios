@@ -45,7 +45,7 @@ class CollaborationDemo:
             feature: 功能描述
         """
         print("\n" + "=" * 60)
-        print(f"🚀 启动代码审查工作流: {feature}")
+        print(f"[START] 启动代码审查工作流: {feature}")
         print("=" * 60)
         
         # Step 1: Coder 写代码
@@ -89,7 +89,7 @@ class CollaborationDemo:
         
         # Step 5: 生成报告
         print("\n" + "=" * 60)
-        print("📊 工作流报告")
+        print("[REPORT] 工作流报告")
         print("=" * 60)
         print(f"总步骤: {len(self.workflow_log)}")
         print(f"处理任务: {len(results)}")
@@ -108,7 +108,7 @@ class CollaborationDemo:
             tasks: 任务列表 [{"type": "code", "message": "...", "priority": "high"}, ...]
         """
         print("\n" + "=" * 60)
-        print(f"⚡ 启动并行工作流: {len(tasks)} 个任务")
+        print(f"[ZAP] 启动并行工作流: {len(tasks)} 个任务")
         print("=" * 60)
         
         # 批量入队
@@ -142,7 +142,7 @@ def demo_code_review():
     with open(log_file, 'w', encoding='utf-8') as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
     
-    print(f"\n✅ 日志已保存: {log_file}")
+    print(f"\n[OK] 日志已保存: {log_file}")
 
 
 def demo_parallel():
@@ -157,7 +157,7 @@ def demo_parallel():
     ]
     
     results = demo.parallel_workflow(tasks)
-    print(f"\n✅ 并行处理完成: {len(results)} 个任务")
+    print(f"\n[OK] 并行处理完成: {len(results)} 个任务")
 
 
 if __name__ == "__main__":

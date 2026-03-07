@@ -1,0 +1,56 @@
+{
+  "budget": {
+    "daily_limit": 1000000,
+    "weekly_limit": 5000000,
+    "monthly_limit": 20000000
+  },
+  "thresholds": {
+    "warning": 0.7,
+    "critical": 0.9
+  },
+  "optimization": {
+    "enabled": true,
+    "strategies": [
+      {
+        "name": "switch_to_cheaper_model",
+        "trigger": 0.8,
+        "action": "switch_model",
+        "params": {
+          "from": "claude-opus-4-6",
+          "to": "claude-sonnet-4-6"
+        }
+      },
+      {
+        "name": "reduce_heartbeat_frequency",
+        "trigger": 0.85,
+        "action": "reduce_frequency",
+        "params": {
+          "from": 30,
+          "to": 60
+        }
+      },
+      {
+        "name": "batch_processing",
+        "trigger": 0.9,
+        "action": "enable_batch",
+        "params": {
+          "batch_size": 5
+        }
+      }
+    ]
+  },
+  "pricing": {
+    "claude-opus-4-6": {
+      "input": 15.0,
+      "output": 75.0
+    },
+    "claude-sonnet-4-6": {
+      "input": 3.0,
+      "output": 15.0
+    },
+    "claude-haiku-4-5": {
+      "input": 0.8,
+      "output": 4.0
+    }
+  }
+}

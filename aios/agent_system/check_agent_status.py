@@ -49,7 +49,10 @@ else:
 print()
 
 # 检查任务队列
-queue_file = workspace / "aios" / "agent_system" / "task_queue.jsonl"
+try:
+    from paths import TASK_QUEUE as queue_file
+except ImportError:
+    queue_file = workspace / "aios" / "agent_system" / "data" / "task_queue.jsonl"
 print("=== 任务队列 ===")
 if queue_file.exists():
     tasks = []

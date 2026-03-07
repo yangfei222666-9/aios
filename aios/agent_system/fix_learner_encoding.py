@@ -38,7 +38,7 @@ for filename, line_fixes in fixes.items():
             continue
     
     if content is None:
-        print(f"❌ 无法读取 {filename}")
+        print(f"[FAIL] 无法读取 {filename}")
         continue
     
     # 修复指定行
@@ -50,7 +50,7 @@ for filename, line_fixes in fixes.items():
             if 'print(f"' in old_line and not old_line.endswith('")'):
                 content[idx] = new_line + '\n'
                 modified = True
-                print(f"✅ {filename}:{line_num} 已修复")
+                print(f"[OK] {filename}:{line_num} 已修复")
     
     # 写回文件（UTF-8）
     if modified:
@@ -64,6 +64,6 @@ for filename in fixes.keys():
     filepath = base_dir / filename
     try:
         py_compile.compile(str(filepath), doraise=True)
-        print(f"✅ {filename} 语法正确")
+        print(f"[OK] {filename} 语法正确")
     except SyntaxError as e:
-        print(f"❌ {filename} 仍有错误: {e}")
+        print(f"[FAIL] {filename} 仍有错误: {e}")

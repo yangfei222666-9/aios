@@ -28,6 +28,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
+from paths import EVOLUTION_SCORE as _EVOLUTION_SCORE, TASK_QUEUE as _TASK_QUEUE, LESSONS as _LESSONS
 
 # 确保能导入同级模块
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -102,7 +103,7 @@ class EvolutionEngine:
 
         if observe_result["total_traces"] < 5:
             report["summary"] = {"status": "insufficient_data", "message": "数据不足，跳过进化"}
-            print("\n⚠️ 数据不足（< 5 条追踪），跳过进化")
+            print("\n[WARN] 数据不足（< 5 条追踪），跳过进化")
             self._save_report(report)
             return report
 
@@ -288,7 +289,7 @@ class EvolutionEngine:
                 ok, msg = validator.validate_before_apply(agent_id, improvement)
                 
                 if not ok:
-                    print(f"  ⚠️  {agent_id} Prompt 补丁被拦截: {msg}")
+                    print(f"  [WARN]  {agent_id} Prompt 补丁被拦截: {msg}")
                     validation_blocked += 1
                     self.emitter.emit_blocked(agent_id, improvement, msg)
                     continue
@@ -323,7 +324,7 @@ class EvolutionEngine:
                     ok, msg = validator.validate_before_apply(agent["id"], improvement)
                     
                     if not ok:
-                        print(f"  ⚠️  {agent['id']} 配置调整被拦截: {msg}")
+                        print(f"  [WARN]  {agent['id']} 配置调整被拦截: {msg}")
                         validation_blocked += 1
                         self.emitter.emit_blocked(agent["id"], improvement, msg)
                     else:
@@ -407,6 +408,65 @@ class EvolutionEngine:
         }
 
 
+def _update_evolution_score_file(engine, result):
+    """每次 run 后更新 evolution_score.json（统一数据源）"""
+    try:
+        score_file = _EVOLUTION_SCORE
+        
+        # 读取旧值（回退用）
+        old_data = {}
+        if score_file.exists():
+            with open(score_file, 'r', encoding='utf-8') as f:
+                old_data = json.load(f)
+        old_score = old_data.get('score', 0)
+        
+        # 从 task_queue 实时计算 evolution score
+        task_queue = _TASK_QUEUE
+        new_score = old_score  # 默认保留旧值
+        
+        if task_queue.exists():
+            with open(task_queue, 'r', encoding='utf-8') as f:
+                tasks = [json.loads(line) for line in f.readlines()[-100:] if line.strip()]
+            if tasks:
+                completed = sum(1 for t in tasks if t.get('status') == 'completed')
+                failed = sum(1 for t in tasks if t.get('status') == 'failed')
+                finished = completed + failed  # 排除 pending，只看已完成任务
+                success_rate = (completed / finished * 100) if finished > 0 else 0
+                new_score = min(99.5, success_rate * 0.9 + 10)
+        
+        # 回退逻辑：不允许写入 0 或异常低值
+        if new_score < 10 and old_score > 10:
+            print(f"[WARN] Refusing to write low score {new_score:.1f}, keeping {old_score:.1f}")
+            new_score = old_score
+        
+        # 写入
+        lessons_file = _LESSONS
+        lessons_count = 0
+        if lessons_file.exists():
+            with open(lessons_file, 'r', encoding='utf-8') as f:
+                lessons_count = len(json.load(f))
+        
+        new_data = {
+            "score": round(new_score, 1),
+            "lessons_learned": lessons_count,
+            "last_update": datetime.now().isoformat()
+        }
+        with open(score_file, 'w', encoding='utf-8') as f:
+            json.dump(new_data, f, indent=2, ensure_ascii=False)
+        
+        # 写后校验
+        with open(score_file, 'r', encoding='utf-8') as f:
+            verify = json.load(f)
+        if abs(verify['score'] - new_data['score']) > 0.1:
+            print(f"[ERROR] Write verification failed! Expected {new_data['score']}, got {verify['score']}")
+        else:
+            print(f"[EVOLUTION] evolution_score.json updated: {old_score:.1f} -> {new_data['score']:.1f}")
+    
+    except Exception as e:
+        print(f"[ERROR] Failed to update evolution_score.json: {e}")
+        # 不覆盖旧文件，保留上次有效值
+
+
 def main():
     """CLI 入口"""
     import argparse
@@ -421,6 +481,10 @@ def main():
     if args.command == "run":
         result = engine.run_full_cycle(dry_run=False)
         status = result["summary"]["status"]
+        
+        # 更新 evolution_score.json（统一数据源）
+        _update_evolution_score_file(engine, result)
+        
         if status == "evolved":
             print(f"\nEVOLUTION_APPLIED:{result['summary']['total_changes']}")
         else:

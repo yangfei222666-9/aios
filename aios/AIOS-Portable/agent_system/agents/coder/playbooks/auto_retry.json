@@ -1,0 +1,1 @@
+﻿{"name": "auto_retry", "trigger": "task_failed", "max_retries": 3, "action": "increase_timeout_and_restart"}

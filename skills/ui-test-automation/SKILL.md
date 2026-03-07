@@ -1,3 +1,9 @@
+﻿---
+name: ui-test-automation
+version: 1.0.0
+description: UI automation and testing skill
+---
+
 # UI Test Automation Skill
 
 UI 测试自动化框架，支持录制、回放、断言、报告生成。
@@ -448,3 +454,4 @@ steps:
 ## 更新日志
 
 - 2026-02-25: 初始版本
+

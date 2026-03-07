@@ -238,7 +238,7 @@ def collect_cost(cost_type, provider, model, cost_usd, budget_daily, budget_used
 
 if __name__ == "__main__":
     # 测试
-    print("📊 DataCollector Agent 测试")
+    print("[REPORT] DataCollector Agent 测试")
     
     # 测试任务事件
     trace_id = DataCollector.generate_trace_id()
@@ -254,5 +254,5 @@ if __name__ == "__main__":
         trace_id=trace_id
     )
     
-    print(f"✅ 事件已记录到: {EVENTS_FILE}")
-    print(f"✅ 按日期分类: {EVENTS_BY_DATE_DIR}")
+    print(f"[OK] 事件已记录到: {EVENTS_FILE}")
+    print(f"[OK] 按日期分类: {EVENTS_BY_DATE_DIR}")

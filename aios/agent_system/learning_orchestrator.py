@@ -114,7 +114,7 @@ class LearningOrchestrator:
         print(f"低优先级：{summary['low_priority']}")
         
         if summary["top_suggestions"]:
-            print("\n🔥 Top 3 建议：")
+            print("\n[FIRE] Top 3 建议：")
             for i, suggestion in enumerate(summary["top_suggestions"][:3], 1):
                 print(f"  {i}. [{suggestion['priority'].upper()}] {suggestion['description']}")
         
@@ -179,9 +179,9 @@ class LearningOrchestrator:
         
         # 打印结果
         if result["success"]:
-            print(f"✅ 成功！生成 {len(result['suggestions'])} 条建议")
+            print(f"[OK] 成功！生成 {len(result['suggestions'])} 条建议")
         else:
-            print(f"❌ 失败：{result['error']}")
+            print(f"[FAIL] 失败：{result['error']}")
         
         return result
 

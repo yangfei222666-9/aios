@@ -1,0 +1,8 @@
+{
+  "task-001:v0": {
+    "worker_id": "worker-57044",
+    "lock_token": "941f2afb-e294-4eac-91d3-971cc9f8c639",
+    "locked_at": 1772851990.9073012,
+    "task_key": "task-001:v0"
+  }
+}

@@ -8,8 +8,10 @@ from pathlib import Path
 from datetime import datetime
 import subprocess
 
-AGENTS_FILE = Path(__file__).parent / "agents.json"
-SPAWN_RESULTS = Path(__file__).parent / "spawn_results.jsonl"
+from paths import AGENTS_STATE, SPAWN_RESULTS as _SPAWN_RESULTS
+
+AGENTS_FILE = AGENTS_STATE
+SPAWN_RESULTS = _SPAWN_RESULTS
 PROCESSED_SESSIONS = Path(__file__).parent / "processed_sessions.json"
 
 def load_processed_sessions():
@@ -69,7 +71,7 @@ def update_agent_stats(agent_name: str, success: bool, duration_seconds: float):
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         return result.returncode == 0
     except Exception as e:
-        print(f"❌ 更新失败：{e}")
+        print(f"[FAIL] 更新失败：{e}")
         return False
 
 def main():
@@ -103,10 +105,10 @@ def main():
             time.sleep(30)
         
         except KeyboardInterrupt:
-            print("\n\n✅ 服务已停止")
+            print("\n\n[OK] 服务已停止")
             break
         except Exception as e:
-            print(f"❌ 错误：{e}")
+            print(f"[FAIL] 错误：{e}")
             time.sleep(5)
 
 if __name__ == "__main__":

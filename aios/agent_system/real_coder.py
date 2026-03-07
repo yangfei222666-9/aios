@@ -3,6 +3,7 @@
 Real Coder Agent - 真实代码生成执行
 直接调用 Claude API，生成并执行代码
 集成 CostGuardian 成本控制
+集成 Fast/Slow Router 智能模型选择
 """
 import json
 import subprocess
@@ -12,8 +13,14 @@ from datetime import datetime
 import anthropic
 import os
 import time
+import sys
+
+# 添加项目根目录到路径
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 from cost_guardian import CostGuardian
+from agents.router.agent_router import route_task, TaskIndicators
 
 # Claude API 配置
 def load_api_key():
@@ -35,7 +42,7 @@ def load_api_key():
     if api_key:
         return api_key
     
-    print("⚠️ 警告：未设置 ANTHROPIC_API_KEY")
+    print("[WARN] 警告：未设置 ANTHROPIC_API_KEY")
     print("请在 config.json 中设置或使用环境变量：$env:ANTHROPIC_API_KEY='your-api-key'")
     return None
 
@@ -45,10 +52,35 @@ ANTHROPIC_API_KEY = load_api_key()
 OUTPUT_DIR = Path(__file__).parent / "workspace" / "generated_code"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-def call_claude_api(prompt: str, model: str = "claude-sonnet-4-6") -> str:
-    """调用 Claude API 生成代码"""
+def call_claude_api(prompt: str, model: str = None, task_description: str = None) -> str:
+    """调用 Claude API 生成代码（集成 Fast/Slow Router）"""
     if not ANTHROPIC_API_KEY:
         return "# Error: ANTHROPIC_API_KEY not set"
+    
+    # === Fast/Slow Router 集成 ===
+    if model is None and task_description:
+        # 分析任务指标
+        indicators: TaskIndicators = {
+            "needs_code": True,
+            "high_risk": any(word in task_description.lower() for word in ["修复", "critical", "重构", "优化"]),
+            "est_lines": len(task_description.split()) * 3,  # 粗略估算
+            "dependencies": task_description.count("import") + task_description.count("库"),
+            "requires_reasoning": any(word in task_description.lower() for word in ["算法", "优化", "设计", "架构"]),
+            "task_description": task_description
+        }
+        
+        # 路由决策
+        model_choice = route_task(
+            task_id=f"coder-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            task_description=task_description,
+            indicators=indicators
+        )
+        
+        # 映射到实际模型名称
+        model = "claude-opus-4-6" if model_choice == "slow" else "claude-sonnet-4-6"
+        print(f"🚦 Router 决策: {model_choice} → {model}")
+    elif model is None:
+        model = "claude-sonnet-4-6"  # 默认快模型
     
     # 读取 base_url（如果有）
     config_file = Path(__file__).parent / "config.json"
@@ -151,7 +183,7 @@ def run_in_sandbox(filepath: Path, timeout: int = 30) -> dict:
 
 def execute_code_task(description: str) -> dict:
     """执行代码任务（完整流程）"""
-    print(f"📝 任务描述: {description}")
+    print(f"[NOTE] 任务描述: {description}")
     
     # 1. 成本检查
     guardian = CostGuardian()
@@ -159,7 +191,7 @@ def execute_code_task(description: str) -> dict:
     
     check = guardian.should_allow_task(estimated_cost)
     if not check["allowed"]:
-        print(f"❌ 任务被拒绝: {check['message']}")
+        print(f"[FAIL] 任务被拒绝: {check['message']}")
         return {
             "success": False,
             "error": check["message"],
@@ -171,8 +203,8 @@ def execute_code_task(description: str) -> dict:
     print(f"🤖 调用 Claude API 生成代码...")
     start_time = time.time()
     
-    # 1. 生成代码
-    code = call_claude_api(f"请写一个 Python 代码：{description}")
+    # 1. 生成代码（传入 task_description 触发 Router）
+    code = call_claude_api(f"请写一个 Python 代码：{description}", task_description=description)
     
     if code.startswith("# Error"):
         return {
@@ -183,22 +215,22 @@ def execute_code_task(description: str) -> dict:
             "execution": None
         }
     
-    print(f"✅ 代码生成完成 ({len(code)} 字符)")
+    print(f"[OK] 代码生成完成 ({len(code)} 字符)")
     
     # 2. 保存代码
     filepath = save_code(code)
     print(f"💾 代码已保存: {filepath}")
     
     # 3. 执行代码
-    print(f"⚡ 执行代码...")
+    print(f"[ZAP] 执行代码...")
     execution_result = run_in_sandbox(filepath)
     
     if execution_result["success"]:
-        print(f"✅ 执行成功")
+        print(f"[OK] 执行成功")
         if execution_result["stdout"]:
             print(f"📤 输出:\n{execution_result['stdout']}")
     else:
-        print(f"❌ 执行失败")
+        print(f"[FAIL] 执行失败")
         if execution_result["stderr"]:
             print(f"📤 错误:\n{execution_result['stderr']}")
     
@@ -226,10 +258,10 @@ def main():
     # 输出结果摘要
     print("\n" + "="*80)
     if result["success"]:
-        print("✅ 任务完成")
+        print("[OK] 任务完成")
         print(f"📁 代码文件: {result['filepath']}")
     else:
-        print("❌ 任务失败")
+        print("[FAIL] 任务失败")
         if result.get("error"):
             print(f"错误: {result['error']}")
 

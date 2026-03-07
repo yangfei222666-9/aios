@@ -150,25 +150,19 @@ class AutoRollback:
         improvement_id = backup["improvement_id"]
 
         try:
-            # 这里应该调用 AgentManager 恢复配置
-            # 简化版：只记录回滚日志
-            rollback_entry = {
-                "rollback_id": f"rollback_{int(time.time())}",
-                "agent_id": agent_id,
-                "backup_id": backup_id,
-                "improvement_id": improvement_id,
-                "timestamp": datetime.now().isoformat(),
-                "config_restored": config,
-            }
+            # 真回滚：把配置写回 agents.json（或后续接入 AgentManager）
+            from aios_store import rollback_apply
 
-            with open(ROLLBACK_LOG, "a", encoding="utf-8") as f:
-                f.write(json.dumps(rollback_entry, ensure_ascii=False) + "\n")
+            result = rollback_apply(agent_id, backup_id)
+            if not result.get("success"):
+                return {"success": False, "error": result.get("error")}
 
             return {
                 "success": True,
                 "backup_id": backup_id,
                 "improvement_id": improvement_id,
                 "config": config,
+                "rollback_id": result.get("rollback_id")
             }
 
         except Exception as e:

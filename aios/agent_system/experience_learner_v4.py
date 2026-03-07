@@ -24,9 +24,12 @@ from datetime import datetime
 from collections import defaultdict
 
 # ── 配置 ──────────────────────────────────────────────────────────────────────
+# Import unified paths
+from paths import EXPERIENCE_DB_V4, RECOMMENDATION_LOG
+
 AIOS_DIR = Path(__file__).resolve().parent
-EXPERIENCE_DB_FILE = AIOS_DIR / "experience_db_v4.jsonl"
-RECOMMENDATION_LOG = AIOS_DIR / "recommendation_log.jsonl"
+EXPERIENCE_DB_FILE = EXPERIENCE_DB_V4
+RECOMMENDATION_LOG_FILE = RECOMMENDATION_LOG
 LEARNER_CONFIG_FILE = AIOS_DIR / "learner_v4_config.json"
 LEARNER_METRICS_FILE = AIOS_DIR / "learner_v4_metrics.json"
 
@@ -354,7 +357,7 @@ class ExperienceLearnerV4:
             "success": success,
             "strategy_version": STRATEGY_VERSION,
         }
-        with open(RECOMMENDATION_LOG, "a", encoding="utf-8") as f:
+        with open(RECOMMENDATION_LOG_FILE, "a", encoding="utf-8") as f:
             f.write(json.dumps(outcome, ensure_ascii=False) + "\n")
 
     def get_metrics(self) -> dict:
@@ -398,7 +401,7 @@ class ExperienceLearnerV4:
             "error_type": error_type,
             **result,
         }
-        with open(RECOMMENDATION_LOG, "a", encoding="utf-8") as f:
+        with open(RECOMMENDATION_LOG_FILE, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 

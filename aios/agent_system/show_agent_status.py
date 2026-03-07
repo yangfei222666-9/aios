@@ -25,7 +25,7 @@ for i, agent in enumerate(agents, 1):
     print(f"   类型: {agent.get('type', 'unknown')}")
     print(f"   环境: {agent.get('env', 'unknown')}")
     print(f"   模型: {agent.get('model', 'unknown')}")
-    print(f"   状态: {'✅ active' if agent.get('status') == 'active' else '❌ inactive'}")
+    print(f"   状态: {'[OK] active' if agent.get('status') == 'active' else '[FAIL] inactive'}")
     
     # 角色信息
     if agent.get('role'):
@@ -99,7 +99,7 @@ try:
     if executions:
         print(f"\n最近执行:")
         for exec in executions[-5:]:
-            status_icon = "✅" if exec['status'] == 'completed' else "🔄" if exec['status'] == 'running' else "❌"
+            status_icon = "[OK]" if exec['status'] == 'completed' else "[SYNC]" if exec['status'] == 'running' else "[FAIL]"
             print(f"  {status_icon} {exec['execution_id']}")
             print(f"     Agent: {exec['agent_id']}")
             print(f"     工作流: {exec['workflow_id']}")
@@ -114,7 +114,10 @@ print("=" * 80)
 print("任务队列状态")
 print("=" * 80)
 
-queue_file = workspace / "aios" / "agent_system" / "task_queue.jsonl"
+try:
+    from paths import TASK_QUEUE as queue_file
+except ImportError:
+    queue_file = workspace / "aios" / "agent_system" / "data" / "task_queue.jsonl"
 if queue_file.exists():
     with open(queue_file, encoding="utf-8") as f:
         tasks = [json.loads(line) for line in f if line.strip()]

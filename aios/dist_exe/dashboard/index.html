@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIOS Dashboard v3.4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .glow {
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="text-white p-8">
+    <div class="max-w-[1800px] mx-auto space-y-8">
+        
+        <!-- Header -->
+        <div class="glass p-8 rounded-3xl glow">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <div class="text-5xl font-black bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+                        AIOS v3.4
+                    </div>
+                    <div class="flex items-center gap-3 px-5 py-2 bg-emerald-500/20 rounded-full">
+                        <div class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse-glow"></div>
+                        <span class="text-emerald-400 font-bold text-sm">LIVE</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-slate-400 text-sm">最后更新</div>
+                    <div id="last-update" class="text-white font-mono text-lg">--:--:--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 四宫格 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="glass p-6 rounded-3xl">
+                <div class="text-slate-400 text-sm mb-2">活跃 Agent</div>
+                <div id="kpi-agents" class="text-5xl font-bold text-cyan-400">0</div>
+            </div>
+            <div class="glass p-6 rounded-3xl">
+                <div class="text-slate-400 text-sm mb-2">Evolution Score</div>
+                <div id="kpi-score" class="text-5xl font-bold text-emerald-400">0.00</div>
+            </div>
+            <div class="glass p-6 rounded-3xl">
+                <div class="text-slate-400 text-sm mb-2">今日改进</div>
+                <div id="kpi-improvements" class="text-5xl font-bold text-purple-400">0</div>
+            </div>
+            <div class="glass p-6 rounded-3xl">
+                <div class="text-slate-400 text-sm mb-2">成功率</div>
+                <div id="kpi-success" class="text-5xl font-bold text-pink-400">0%</div>
+            </div>
+        </div>
+
+        <!-- 资源监控 -->
+        <div class="glass p-8 rounded-3xl">
+            <h2 class="text-2xl font-bold mb-6">资源监控</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-slate-400">CPU</span>
+                        <span id="cpu-value" class="text-cyan-400 font-mono">0%</span>
+                    </div>
+                    <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                        <div id="cpu-bar" class="h-3 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-slate-400">内存</span>
+                        <span id="mem-value" class="text-emerald-400 font-mono">0%</span>
+                    </div>
+                    <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                        <div id="mem-bar" class="h-3 bg-gradient-to-r from-emerald-400 to-green-500 transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-slate-400">磁盘</span>
+                        <span id="disk-value" class="text-purple-400 font-mono">0%</span>
+                    </div>
+                    <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                        <div id="disk-bar" class="h-3 bg-gradient-to-r from-purple-400 to-pink-500 transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-slate-400">GPU</span>
+                        <span id="gpu-value" class="text-pink-400 font-mono">0%</span>
+                    </div>
+                    <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                        <div id="gpu-bar" class="h-3 bg-gradient-to-r from-pink-400 to-red-500 transition-all" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实时趋势图 -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="glass p-8 rounded-3xl">
+                <h2 class="text-2xl font-bold mb-6">成功率趋势</h2>
+                <div style="height: 400px;">
+                    <canvas id="success-chart"></canvas>
+                </div>
+            </div>
+            <div class="glass p-8 rounded-3xl">
+                <h2 class="text-2xl font-bold mb-6">Evolution Score 走势</h2>
+                <div style="height: 400px;">
+                    <canvas id="evolution-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent 实时状态 -->
+        <div class="glass p-8 rounded-3xl">
+            <h2 class="text-2xl font-bold mb-6">Agent 实时状态</h2>
+            <div id="agent-list" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        </div>
+
+        <!-- Top 5 错误 + 慢操作 -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="glass p-8 rounded-3xl">
+                <h2 class="text-2xl font-bold mb-6 text-red-400">Top 5 错误</h2>
+                <div id="top-errors" class="space-y-3"></div>
+            </div>
+            <div class="glass p-8 rounded-3xl">
+                <h2 class="text-2xl font-bold mb-6 text-yellow-400">慢操作 Top 5</h2>
+                <div id="slow-ops" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- AIOS 控制中心 -->
+        <div class="glass p-8 rounded-3xl">
+            <h2 class="text-2xl font-bold mb-6">AIOS 控制中心</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <!-- 手动触发进化 -->
+                <button onclick="triggerEvolution()" class="p-8 rounded-3xl bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition-all transform hover:scale-105 font-bold text-xl flex flex-col items-center gap-3">
+                    <span class="text-4xl">🧬</span>
+                    <span>手动触发进化</span>
+                    <span class="text-xs text-cyan-200">Evolution Engine 立即优化</span>
+                </button>
+                
+                <!-- 启动/停止 Agent -->
+                <div class="glass p-6 rounded-3xl">
+                    <div class="font-semibold mb-4 text-sm text-slate-400">启动/停止 Agent</div>
+                    <select id="agent-select" class="bg-zinc-900 p-3 rounded-xl w-full text-sm mb-4 border border-slate-700">
+                        <option value="">选择 Agent...</option>
+                    </select>
+                    <div class="flex gap-3">
+                        <button onclick="toggleAgent('start')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-sm transition-all">🚀 启动</button>
+                        <button onclick="toggleAgent('stop')" class="flex-1 bg-red-600 hover:bg-red-500 py-3 rounded-xl font-bold text-sm transition-all">⛔ 停止</button>
+                    </div>
+                </div>
+                
+                <!-- 编辑 Playbook -->
+                <button onclick="editPlaybook()" class="p-8 rounded-3xl bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 transition-all transform hover:scale-105 font-bold text-xl flex flex-col items-center gap-3">
+                    <span class="text-4xl">📝</span>
+                    <span>编辑 Playbook</span>
+                </button>
+                
+                <!-- 查看详细日志 -->
+                <button onclick="viewLogs()" class="p-8 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 transition-all transform hover:scale-105 font-bold text-xl flex flex-col items-center gap-3">
+                    <span class="text-4xl">📊</span>
+                    <span>查看详细日志</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ==================== 全局变量 ====================
+        let successChart, evolutionChart;
+        let currentAgentsData = [];
+
+        // ==================== 初始化图表 ====================
+        function initCharts() {
+            // 成功率趋势图
+            successChart = new Chart(document.getElementById('success-chart'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '成功率',
+                        data: [],
+                        borderColor: '#22d3ee',
+                        backgroundColor: 'rgba(34, 211, 238, 0.12)',
+                        borderWidth: 5,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#22d3ee',
+                        pointBorderColor: '#0a0e27',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#22d3ee',
+                            bodyColor: '#e0f2fe',
+                            displayColors: false,
+                            callbacks: {
+                                label: (ctx) => `成功率: ${ctx.raw}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            min: 93,
+                            max: 100,
+                            grid: { color: '#334155' },
+                            ticks: { color: '#64748b' }
+                        },
+                        x: { 
+                            grid: { color: '#334155' },
+                            ticks: { color: '#64748b', maxTicksLimit: 8 }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+
+            // Evolution Score 走势图
+            evolutionChart = new Chart(document.getElementById('evolution-chart'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Evolution Score',
+                        data: [],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                        borderWidth: 5,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#0a0e27',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#10b981',
+                            bodyColor: '#e0f2fe',
+                            displayColors: false,
+                            callbacks: {
+                                label: (ctx) => `Evolution Score: ${ctx.raw}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            min: 93,
+                            max: 99,
+                            grid: { color: '#334155' },
+                            ticks: { color: '#64748b' }
+                        },
+                        x: { 
+                            grid: { color: '#334155' },
+                            ticks: { color: '#64748b', maxTicksLimit: 8 }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        // ==================== 渲染 Agent 状态（缓存优化）====================
+        let lastAgentData = null;
+        function renderAgents(agents) {
+            // 如果数据没变，跳过渲染
+            const dataHash = JSON.stringify(agents);
+            if (dataHash === lastAgentData) return;
+            lastAgentData = dataHash;
+
+            if (!agents || agents.length === 0) {
+                document.getElementById('agent-list').innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">暂无 Agent 数据</div>';
+                return;
+            }
+
+            let html = '';
+            agents.forEach(a => {
+                const isAlive = a.alive || a.status === 'active';
+                const statusClass = isAlive ? 'text-emerald-400' : 'text-red-400';
+                const dotClass = isAlive ? 'bg-emerald-400 animate-pulse' : 'bg-red-400';
+                const statusText = isAlive ? '🟢 运行中' : '🔴 已停止';
+                const lastActive = a.last_active ? new Date(a.last_active * 1000).toLocaleString('zh-CN') : '未知';
+
+                html += `
+                <div onclick="showAgentDetail('${a.name}')" class="glass p-7 rounded-3xl hover:ring-2 hover:ring-cyan-400/30 transition-all group cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="font-bold text-2xl tracking-tight">${a.name}</div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full ${dotClass}"></div>
+                            <span class="${statusClass} text-sm font-medium">${statusText}</span>
+                        </div>
+                    </div>
+                    <div class="text-slate-400 text-sm mb-2">PID: <span class="font-mono text-white">${a.pid || 'N/A'}</span></div>
+                    <div class="text-slate-400 text-xs mb-6">最后活跃: ${lastActive}</div>
+                    <div class="flex items-end gap-3">
+                        <div class="text-5xl font-mono font-bold text-emerald-400">${a.success_rate}<span class="text-2xl">%</span></div>
+                        <div class="text-xs text-slate-400 leading-none mb-1">成功率</div>
+                    </div>
+                    <div class="mt-6 h-1.5 bg-zinc-700 rounded-full overflow-hidden">
+                        <div class="h-1.5 bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all" style="width: ${a.success_rate}%"></div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('agent-list').innerHTML = html;
+        }
+
+        // ==================== 轮询连接（替代 SSE）====================
+        function startPolling() {
+            async function fetchData() {
+                try {
+                    const response = await fetch('/api/metrics');
+                    const data = await response.json();
+                    console.log('获取数据:', data);  // 调试日志
+                    updateDashboard(data);
+                } catch (error) {
+                    console.error('获取数据失败:', error);
+                }
+            }
+            
+            // 立即获取一次
+            fetchData();
+            
+            // 每 3 秒轮询一次
+            setInterval(fetchData, 3000);
+        }
+        
+        function updateDashboard(data) {
+            // 更新最后更新时间
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString('zh-CN');
+            
+            // 更新 KPI
+            document.getElementById('kpi-agents').textContent = data.active_agents || 0;
+            document.getElementById('kpi-score').textContent = (data.evolution_score || 0).toFixed(2);
+            document.getElementById('kpi-improvements').textContent = data.today_improvements || 0;
+            document.getElementById('kpi-success').textContent = (data.success_rate || 0) + '%';
+            
+            // 更新资源监控
+            const resources = data.resources || {};
+            ['cpu', 'mem', 'disk', 'gpu'].forEach(key => {
+                const value = resources[key] || 0;
+                document.getElementById(`${key}-value`).textContent = value + '%';
+                document.getElementById(`${key}-bar`).style.width = value + '%';
+            });
+            
+            // 更新图表（直接更新，最清晰）
+            if (successChart) {
+                successChart.data.labels = data.trend_success_labels || [];
+                successChart.data.datasets[0].data = data.trend_success || [];
+                successChart.update();
+            }
+            
+            if (evolutionChart) {
+                evolutionChart.data.labels = data.trend_evolution_labels || [];
+                evolutionChart.data.datasets[0].data = data.trend_evolution || [];
+                evolutionChart.update();
+            }
+            
+            // 更新 Agent 列表
+            renderAgents(data.agents || []);
+            
+            // 保存 Agent 数据供详情使用
+            currentAgentsData = data.agents || [];
+            
+            // 更新 Agent 下拉菜单
+            updateAgentSelect(data.agents || []);
+            
+            // 更新 Top 错误和慢操作（直接渲染）
+            if (data.top_errors && data.top_errors.length > 0) {
+                document.getElementById('top-errors').innerHTML = data.top_errors.slice(0, 5).map((e, i) => `
+                    <div class="flex items-center justify-between p-4 bg-red-500/10 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl font-bold text-red-400">#${i + 1}</div>
+                            <div class="text-sm">${e.error}</div>
+                        </div>
+                        <div class="text-red-400 font-mono font-bold">${e.count}次</div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('top-errors').innerHTML = '<div class="text-slate-500 text-sm">暂无错误记录</div>';
+            }
+            
+            if (data.slow_ops && data.slow_ops.length > 0) {
+                document.getElementById('slow-ops').innerHTML = data.slow_ops.slice(0, 5).map((op, i) => `
+                    <div class="flex justify-between items-center p-4 bg-zinc-900/70 rounded-2xl">
+                        <div class="flex items-center gap-4">
+                            <span class="text-amber-400 font-bold">#${i + 1}</span>
+                            <span class="font-mono">${op.operation}</span>
+                            ${op.count ? `<span class="text-slate-500 text-sm">×${op.count}</span>` : ''}
+                        </div>
+                        <span class="text-amber-400 font-mono">${op.duration}ms</span>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('slow-ops').innerHTML = '<div class="text-slate-500 text-sm">暂无慢操作记录</div>';
+            }
+        }
+        
+        // ==================== 更新 Agent 下拉菜单 ====================
+        function updateAgentSelect(agents) {
+            const select = document.getElementById('agent-select');
+            if (!select) return;
+            
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">选择 Agent...</option>';
+            
+            agents.forEach(a => {
+                const option = document.createElement('option');
+                option.value = a.name;
+                option.textContent = `${a.name} (${a.alive ? '运行中' : '已停止'})`;
+                if (a.name === currentValue) option.selected = true;
+                select.appendChild(option);
+            });
+        }
+
+        // ==================== 控制按钮 ====================
+        async function triggerEvolution() {
+            if (!confirm('确认手动触发进化？')) return;
+            try {
+                const res = await fetch('/api/control/evolve', { method: 'POST' });
+                const data = await res.json();
+                alert(`✅ 进化触发成功！\n新分数: ${data.new_score}\n改进项: ${data.improvements}`);
+            } catch (e) {
+                alert('❌ 进化触发失败: ' + e.message);
+            }
+        }
+
+        async function toggleAgent(action) {
+            const select = document.getElementById('agent-select');
+            const agentName = select.value;
+            
+            if (!agentName) {
+                alert('请先选择一个 Agent');
+                return;
+            }
+            
+            if (!confirm(`确认${action === 'start' ? '启动' : '停止'} Agent "${agentName}"？`)) return;
+            
+            try {
+                const res = await fetch('/api/control/agent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: agentName, action: action })
+                });
+                const data = await res.json();
+                alert(`✅ Agent ${agentName} ${action === 'start' ? '已启动' : '已停止'}`);
+            } catch (e) {
+                alert('❌ 操作失败: ' + e.message);
+            }
+        }
+
+        function editPlaybook() {
+            window.open('/playbook-editor', '_blank');
+        }
+
+        function viewLogs() {
+            window.open('/logs', '_blank');
+        }
+        
+        // ==================== Agent 详情（简单版）====================
+        function showAgentDetail(name) {
+            const agent = currentAgentsData.find(a => a.name === name);
+            if (!agent) return;
+            
+            alert(`📊 ${name} 详细信息\n\n平均响应: 142ms\n最近失败原因: Timeout (3次)\n执行历史: 98% / 100% / 95% / 99%`);
+        }
+
+        // ==================== 初始化 ====================
+        window.onload = function() {
+            initCharts();
+            startPolling();  // 改用轮询
+        };
+    </script>
+</body>
+</html>

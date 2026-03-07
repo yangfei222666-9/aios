@@ -54,7 +54,12 @@ class AutoDispatcher:
 
     def __init__(self, workspace: Path):
         self.workspace = Path(workspace)
-        self.queue_file = self.workspace / "aios" / "agent_system" / "task_queue.jsonl"
+        # 统一路径真源：所有队列文件从 paths.py 获取
+        try:
+            from paths import TASK_QUEUE as _UNIFIED_QUEUE
+            self.queue_file = _UNIFIED_QUEUE
+        except ImportError:
+            self.queue_file = self.workspace / "aios" / "agent_system" / "data" / "task_queue.jsonl"
         self.state_file = self.workspace / "memory" / "agent_dispatch_state.json"
         self.log_file = self.workspace / "aios" / "agent_system" / "dispatcher.log"
         self.event_bus = EventBus() if EventBus else None
@@ -121,6 +126,58 @@ class AutoDispatcher:
         with open(self.log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
+    def _log_duplicate_attempt(self, task: Dict, result: Dict):
+        """记录 task_queue 重复入队尝试"""
+        duplicate_log = Path(__file__).parent / "data" / "duplicate_enqueue_attempts.jsonl"
+        duplicate_log.parent.mkdir(parents=True, exist_ok=True)
+
+        reason_text = result.get("reason", "")
+        duplicate_reason = "same_task_id"
+        if "dedup_key" in reason_text.lower() or result.get("action") == "skipped_duplicate":
+            duplicate_reason = "same_dedup_key"
+
+        entry = {
+            "target": "task_queue",
+            "task_id": task.get("id"),
+            "workflow_id": task.get("workflow_id"),
+            "dedup_key": result.get("dedup_key"),
+            "source": "auto_dispatcher",
+            "created_by": "auto_dispatcher.py",
+            "created_at": datetime.now().isoformat(),
+            "duplicate_reason": duplicate_reason,
+            "existing_record_hint": result.get("reason"),
+        }
+
+        with open(duplicate_log, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+    def _log_spawn_duplicate(self, request: Dict, result: Dict):
+        """记录 spawn_requests 重复写入尝试"""
+        duplicate_log = Path(__file__).parent / "data" / "duplicate_enqueue_attempts.jsonl"
+        duplicate_log.parent.mkdir(parents=True, exist_ok=True)
+
+        reason_text = result.get("reason", "")
+        duplicate_reason = "same_task_id"
+        if "window" in reason_text.lower():
+            duplicate_reason = "same_payload_window"
+        elif "dedup_key" in reason_text.lower() or result.get("action") == "skipped_duplicate":
+            duplicate_reason = "same_dedup_key"
+
+        entry = {
+            "target": "spawn_requests",
+            "task_id": request.get("task_id"),
+            "workflow_id": request.get("workflow_id"),
+            "dedup_key": result.get("dedup_key"),
+            "source": "auto_dispatcher",
+            "created_by": "auto_dispatcher.py",
+            "created_at": datetime.now().isoformat(),
+            "duplicate_reason": duplicate_reason,
+            "existing_record_hint": result.get("reason"),
+        }
+
+        with open(duplicate_log, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
     def _subscribe_events(self):
         """订阅感知层事件"""
         if not self.event_bus:
@@ -184,33 +241,70 @@ class AutoDispatcher:
 
     def enqueue_task(self, task: Dict):
         """
-        任务入队（支持优先级）
+        任务入队（支持优先级）- 通过 TaskQueueManager 统一入口
         
         优先级：
         - high: 立即处理（插队）
         - normal: 正常处理
         - low: 延迟处理（队列空闲时）
         """
-        task["enqueued_at"] = datetime.now().isoformat()
-        task["id"] = f"{int(time.time() * 1000)}"
-        task["status"] = "pending"
+        # 导入统一管理器
+        from task_queue_manager import TaskQueueManager
+        
+        # 补充必要字段
+        if "id" not in task:
+            task["id"] = f"task-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        
+        if "status" not in task:
+            task["status"] = "pending"
         
         # 默认优先级
         if "priority" not in task:
             task["priority"] = "normal"
-
-        self.queue_file.parent.mkdir(parents=True, exist_ok=True)
-
-        with open(self.queue_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(task, ensure_ascii=False) + "\n")
         
-        self._log(
-            "info",
-            "Task enqueued",
-            task_id=task["id"],
-            type=task.get("type"),
-            priority=task["priority"]
-        )
+        # Tracing: task_created
+        try:
+            from tracer import TaskTracer
+            tracer = TaskTracer(
+                task_id=task["id"],
+                source="auto_dispatcher",
+                agent_name=task.get("agent_id", "unknown"),
+            )
+            task["trace_id"] = tracer.trace_id  # 注入 trace_id，后续步骤沿用
+            tracer.created(result_summary=task.get("description", "")[:200])
+        except Exception:
+            pass  # trace 写失败不阻塞主流程
+        
+        # 通过统一入口写入（带幂等保护）
+        queue_mgr = TaskQueueManager(queue_file=self.queue_file)
+        result = queue_mgr.enqueue_task(task, source="auto_dispatcher")
+        
+        if result["success"]:
+            self._log(
+                "info",
+                "Task enqueued",
+                task_id=result["task_id"],
+                type=task.get("type"),
+                priority=task["priority"],
+                dedup_key=result["dedup_key"]
+            )
+            # Tracing: task_enqueued
+            try:
+                tracer.enqueued(result_summary=f"priority={task['priority']}")
+            except Exception:
+                pass
+        else:
+            # 记录重复/跳过
+            self._log(
+                "warn",
+                f"Task {result['action']}",
+                task_id=result.get("task_id"),
+                dedup_key=result.get("dedup_key"),
+                reason=result.get("reason")
+            )
+            
+            # 记录到 duplicate 日志
+            self._log_duplicate_attempt(task, result)
 
     def process_queue(self, max_tasks: int = 5) -> List[Dict]:
         """
@@ -492,24 +586,38 @@ class AutoDispatcher:
             "workflow_id": workflow["workflow_id"] if workflow else None,
         }
 
-        # 写入待执行文件
+        # 通过 SpawnRequestManager 统一写入（带幂等保护）
+        from task_queue_manager import SpawnRequestManager
+        
         spawn_file = (
-            self.workspace / "aios" / "agent_system" / "spawn_requests.jsonl"
+            self.workspace / "aios" / "agent_system" / "data" / "spawn_requests.jsonl"
         )
-        spawn_file.parent.mkdir(parents=True, exist_ok=True)
-
-        with open(spawn_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(spawn_request, ensure_ascii=False) + "\n")
-
-        self._log(
-            "info",
-            "Spawn request created",
-            task_id=task.get("id"),
-            task_type=task_type,
-            model=template["model"],
-            label=template["label"],
-            role=agent_config.get("role") if agent_config else None,
-        )
+        spawn_mgr = SpawnRequestManager(spawn_file=spawn_file)
+        spawn_result = spawn_mgr.create_spawn_request(spawn_request, source="auto_dispatcher")
+        
+        if spawn_result["success"]:
+            self._log(
+                "info",
+                "Spawn request created",
+                task_id=task.get("id"),
+                task_type=task_type,
+                model=template["model"],
+                label=template["label"],
+                role=agent_config.get("role") if agent_config else None,
+                dedup_key=spawn_result["dedup_key"],
+            )
+        else:
+            # spawn 被拦截（重复）
+            self._log(
+                "warn",
+                f"Spawn request {spawn_result['action']}",
+                task_id=task.get("id"),
+                dedup_key=spawn_result.get("dedup_key"),
+                reason=spawn_result.get("reason"),
+                target="spawn_requests",
+            )
+            # 记录到 duplicate 日志
+            self._log_spawn_duplicate(spawn_request, spawn_result)
 
         # 记录成功（重置熔断器）
         if self.circuit_breaker:

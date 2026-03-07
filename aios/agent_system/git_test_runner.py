@@ -156,7 +156,7 @@ class GitTestRunner:
         
         # Alternative: Look for Chinese summary format
         if result["total"] == 0:
-            cn_pattern = r'总计:\s*(\d+)\s*\|\s*✅\s*(\d+)\s*\|\s*❌\s*(\d+)'
+            cn_pattern = r'总计:\s*(\d+)\s*\|\s*[OK]\s*(\d+)\s*\|\s*[FAIL]\s*(\d+)'
             match = re.search(cn_pattern, stdout)
             if match:
                 result["total"] = int(match.group(1))

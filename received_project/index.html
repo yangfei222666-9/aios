@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三AI协同 · 豆包调度 · 拆分版</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 顶部统计栏 -->
+<div class="stats-bar" id="statsBar">
+    <div class="stat-item">📊 轮数: <span class="stat-value" id="topRound">0/0</span></div>
+    <div class="stat-item">💰 Token: <span class="stat-value" id="topTokens">0</span></div>
+    <div class="stat-item">⚙️ DS调用: <span class="stat-value" id="topDs">0</span></div>
+    <div class="stat-item">🎨 GLM调用: <span class="stat-value" id="topGlm">0</span></div>
+</div>
+
+<!-- API 配置栏 -->
+<div class="api-bar" id="apiBar">
+    <div class="api-item">
+        <label>🔑 API Key</label>
+        <input type="password" id="apiKey" placeholder="volc_xxxxxxxx" value="">
+    </div>
+    <div class="api-item">
+        <label>🌐 端点</label>
+        <input type="text" id="apiEndpoint" value="https://ark.cn-beijing.volces.com/api/v3/chat/completions" style="width:260px;">
+    </div>
+    <div class="api-item">
+        <label>🧠 豆包1.8</label>
+        <input type="text" id="modelDoubao" placeholder="ep-xxxxx-doubao-1.8">
+    </div>
+    <div class="api-item">
+        <label>⚙️ DeepSeek V3.2</label>
+        <input type="text" id="modelDeepseek" placeholder="ep-xxxxx-deepseek-v3.2">
+    </div>
+    <div class="api-item">
+        <label>🎨 GLM-4.7</label>
+        <input type="text" id="modelGLM" placeholder="ep-xxxxx-glm-4.7">
+    </div>
+</div>
+
+<!-- 主网格 -->
+<div class="main-grid" id="mainGrid">
+    <!-- 左侧面板 -->
+    <div class="left-panel">
+        <!-- 项目模板 -->
+        <div class="stat-card">
+            <div class="stat-title">📁 项目模板</div>
+            <div class="template-buttons">
+                <button class="template-btn" onclick="engine.loadTemplate('english')">高中英语陪练</button>
+                <button class="template-btn" onclick="engine.loadTemplate('voice')">流式语音Demo</button>
+                <button class="template-btn" onclick="engine.loadTemplate('login')">暗黑模式登录</button>
+            </div>
+        </div>
+
+        <!-- 讨论阶段控制 -->
+        <div class="phase-control">
+            <div class="phase-title">🗣️ 讨论阶段</div>
+            <div class="preset-btns">
+                <button class="preset-btn" onclick="engine.setDiscussionPreset(2)">⚡快速(2轮)</button>
+                <button class="preset-btn" onclick="engine.setDiscussionPreset(3)">📝标准(3轮)</button>
+                <button class="preset-btn" onclick="engine.setDiscussionPreset(5)">🔍深度(5轮)</button>
+            </div>
+            <div class="slider-label">
+                <span>讨论轮数</span>
+                <span id="discussionRoundsDisplay">3</span>
+            </div>
+            <input type="range" id="discussionRoundsSlider" min="1" max="10" value="3">
+
+            <div class="phase-progress">
+                <div class="progress-ring" id="discussionProgressRing">0/3</div>
+                <div class="phase-info">
+                    <div id="discussionStatus">空闲</div>
+                    <div style="font-size:10px; color:var(--text-dim);">预计剩余 <span id="discussionTimeRemaining">-</span></div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="startDiscussionBtn">▶ 开始讨论</button>
+                <button class="btn" id="pauseDiscussionBtn" disabled>⏸ 暂停</button>
+                <button class="btn" id="stopDiscussionBtn" disabled>⏹ 停止</button>
+            </div>
+        </div>
+
+        <!-- 制作阶段控制 -->
+        <div class="phase-control production">
+            <div class="phase-title">⚙️ 制作阶段</div>
+            <div class="preset-btns">
+                <button class="preset-btn" onclick="engine.setProductionPreset(10)">快速(10轮)</button>
+                <button class="preset-btn" onclick="engine.setProductionPreset(13)">标准(13轮)</button>
+                <button class="preset-btn" onclick="engine.setProductionPreset(20)">深度(20轮)</button>
+            </div>
+            <div class="slider-label">
+                <span>制作轮数</span>
+                <span id="productionRoundsDisplay">13</span>
+            </div>
+            <input type="range" id="productionRoundsSlider" min="1" max="100" value="13">
+
+            <div class="phase-progress">
+                <div class="progress-ring" id="productionProgressRing">0/13</div>
+                <div class="phase-info">
+                    <div id="productionStatus">空闲</div>
+                    <div style="font-size:10px; color:var(--text-dim);">预计剩余 <span id="productionTimeRemaining">-</span></div>
+                </div>
+            </div>
+
+            <!-- 紧急插队指令 -->
+            <div class="interrupt-area">
+                <input type="text" id="interruptInput" placeholder="输入插队指令 (如 @DS 改用React)" value="">
+                <button class="btn" id="sendInterrupt" style="background:#ffaa00; color:black;">🚨 插队</button>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="startProductionBtn" style="background:var(--primary);">▶ 开始制作</button>
+                <button class="btn" id="pauseProductionBtn" disabled>⏸ 暂停</button>
+                <button class="btn" id="stopProductionBtn" disabled>⏹ 停止</button>
+            </div>
+        </div>
+
+        <!-- 温度/摘要等 -->
+        <div class="stat-card">
+            <div class="stat-title">🌡️ 温度调节</div>
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>严谨 (0.1)</span>
+                    <span id="tempDisplay">0.3</span>
+                    <span>创意 (1.0)</span>
+                </div>
+                <input type="range" id="temperatureSlider" min="0.1" max="1.0" step="0.1" value="0.3">
+            </div>
+            <div style="margin-top: 16px;">
+                <div class="slider-label">
+                    <span>📏 最大输出长度 (token)</span>
+                    <span id="maxTokensDisplay">8000</span>
+                </div>
+                <input type="range" id="maxTokensSlider" min="1000" max="16000" step="500" value="8000">
+            </div>
+            <div style="margin-top: 16px;">
+                <div class="slider-label">
+                    <span>📝 摘要字数限制</span>
+                    <span id="summaryLimitDisplay">300</span>
+                </div>
+                <input type="range" id="summaryLimitSlider" min="50" max="1000" step="10" value="300">
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="showThinking" checked>
+                <label>显示调度过程</label>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">💾 持久化</div>
+            <button class="btn" style="width:100%; margin-bottom:8px;" id="exportChatBtn">💬 保存聊天记录 (TXT)</button>
+            <button class="btn" style="width:100%;" id="packCodeBtn">📦 打包当前代码为ZIP</button>
+            <button class="btn btn-danger" style="width:100%; margin-top:8px;" id="clearChatBtn">🧹 清空对话 (需确认)</button>
+        </div>
+    </div>
+
+    <!-- 中间聊天区 -->
+    <div class="chat-area">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message assistant">
+                <div class="bubble">
+                    🧠 <strong>豆包1.8 · 三AI调度官</strong><br>
+                    - 讨论阶段：三个模型轮流发言，形成共识<br>
+                    - 制作阶段：调度DeepSeek/GLM输出代码，可插队<br>
+                    - 打包按目录自动分类<br>
+                    <span style="color:#9ec3ff;">⸻ 指挥官，请指示 ⸻</span>
+                </div>
+                <div class="message-meta">豆包1.8 • 上下文管家</div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-wrapper">
+                <textarea id="userInput" placeholder="输入项目需求（或选择上方模板）…" rows="2"></textarea>
+                <button class="send-btn" id="sendBtn">🚀 发送单轮</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧面板 -->
+    <div class="right-panel">
+        <div class="stat-card">
+            <div class="stat-title">🤖 三AI分工</div>
+            <div class="role-card role-deepseek">
+                <strong style="color:var(--ds-color);">DeepSeek V3.2</strong>
+                <div style="font-size:12px;">逻辑/算法/后端代码</div>
+            </div>
+            <div class="role-card role-glm">
+                <strong style="color:var(--glm-color);">GLM-4.7</strong>
+                <div style="font-size:12px;">界面/样式/暗黑交互</div>
+            </div>
+            <div class="role-card role-doubao">
+                <strong style="color:var(--accent);">豆包1.8</strong>
+                <div style="font-size:12px;">调度、摘要、清洗</div>
+            </div>
+        </div>
+
+        <div class="preview-card">
+            <div class="preview-header">
+                <span style="color: var(--primary);">🖥️ 实时预览</span>
+                <div class="auto-refresh-toggle">
+                    <span>自动刷新</span>
+                    <label class="switch">
+                        <input type="checkbox" id="autoRefreshPreview">
+                        <span class="slider round"></span>
+                    </label>
+                    <button class="btn" id="refreshPreviewBtn" style="padding:4px 8px;">🔄</button>
+                    <button class="btn" id="openNewWindowBtn" style="padding:4px 8px;">🌐</button>
+                </div>
+            </div>
+            <div class="preview-frame" id="previewContainer">
+                <div class="preview-placeholder">⚡ 等待豆包输出 index.html ...</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">📎 代码打包规范</div>
+            <div style="font-size:12px; line-height:1.6;">
+                豆包输出时请用以下格式标记文件：<br>
+                <code style="background:#0e1217; padding:4px;">=== filename: 文件名.扩展名 ===</code><br>
+                打包按钮自动按目录结构生成ZIP。
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 第三方库 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<!-- 拆分后的JS模块 -->
+<script src="js/config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

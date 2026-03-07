@@ -1,0 +1,161 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.74,
+    "archive_date":  "2026-03-03",
+    "files_count":  25,
+    "total_size_bytes":  163663,
+    "timestamp":  "2026-03-03 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  472
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\logs\\site_monitor.log",
+                      "Type":  "temp",
+                      "Size":  28
+                  },
+                  {
+                      "Path":  "generate_test_decisions.py",
+                      "Type":  "old_test",
+                      "Size":  3527,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "generate_timeout_test_data.py",
+                      "Type":  "old_test",
+                      "Size":  2729,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\create_test_data.py",
+                      "Type":  "old_test",
+                      "Size":  2224,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\evolution_ab_test.py",
+                      "Type":  "old_test",
+                      "Size":  5957,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\github_learner_testing.py",
+                      "Type":  "old_test",
+                      "Size":  10611,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Friend-Edition\\agent_system\\create_test_data.py",
+                      "Type":  "old_test",
+                      "Size":  2224,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Friend-Edition\\agent_system\\evolution_ab_test.py",
+                      "Type":  "old_test",
+                      "Size":  5957,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Friend-Edition\\agent_system\\github_learner_testing.py",
+                      "Type":  "old_test",
+                      "Size":  10611,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Friend-Edition\\agent_system\\test.py",
+                      "Type":  "old_test",
+                      "Size":  5124,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\stress_test_v2.py",
+                      "Type":  "old_test",
+                      "Size":  13385,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_circuit_breaker.py",
+                      "Type":  "old_test",
+                      "Size":  6293,
+                      "LastModified":  "2026-02-23"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_critical_path.py",
+                      "Type":  "old_test",
+                      "Size":  7252,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_edge_cases_new.py",
+                      "Type":  "old_test",
+                      "Size":  5495,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_integration.py",
+                      "Type":  "old_test",
+                      "Size":  11795,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_integration_flows.py",
+                      "Type":  "old_test",
+                      "Size":  4150,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_memory.py",
+                      "Type":  "old_test",
+                      "Size":  1734,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_mocks.py",
+                      "Type":  "old_test",
+                      "Size":  7934,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_optimization.py",
+                      "Type":  "old_test",
+                      "Size":  10507,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_practical.py",
+                      "Type":  "old_test",
+                      "Size":  9120,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_recovery_mechanisms.py",
+                      "Type":  "old_test",
+                      "Size":  4620,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_scheduler_v2.py",
+                      "Type":  "old_test",
+                      "Size":  15002,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_stress_performance.py",
+                      "Type":  "old_test",
+                      "Size":  2904,
+                      "LastModified":  "2026-02-24"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_threshold_monitor.py",
+                      "Type":  "old_test",
+                      "Size":  5799,
+                      "LastModified":  "2026-02-23"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-03",
+    "total_size_mb":  0.16
+}

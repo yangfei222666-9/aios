@@ -1,3 +1,9 @@
+﻿---
+name: ui-inspector
+version: 1.0.0
+description: UI automation and testing skill
+---
+
 # UI Inspector Skill
 
 UI 元素检查器，用于获取窗口信息、控件信息、坐标等。
@@ -97,3 +103,5 @@ PID: 12345
 ## 更新日志
 
 - 2026-02-25: 初始版本
+
+

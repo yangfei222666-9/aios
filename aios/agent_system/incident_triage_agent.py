@@ -79,7 +79,7 @@ class AIOSIncidentTriageAgent:
         print(f"  发现 {len(signals)} 个异常信号")
 
         if not signals:
-            print("\n✅ 无异常，系统正常")
+            print("\n[OK] 无异常，系统正常")
             return report
 
         # Phase 2: 聚类错误（找 root cause）
@@ -380,7 +380,7 @@ class AIOSIncidentTriageAgent:
             message += f"{inc['title']}\n"
             message += f"建议: {inc['recommendations'][0] if inc['recommendations'] else '需要人工分析'}\n\n"
         
-        print(f"\n📢 通知: {message}")
+        print(f"\n[ANNOUNCE] 通知: {message}")
 
 
 def main():

@@ -1,6 +1,7 @@
----
+﻿---
 name: web-monitor
 description: Monitor web pages for content changes and get alerts. Track URLs, detect updates, view diffs. Use when asked to watch a website, track changes on a page, monitor for new posts/content, set up page change alerts, or check if a site has been updated. Supports CSS selectors for targeted monitoring.
+version: 1.0.0
 ---
 
 # Web Monitor
@@ -65,3 +66,4 @@ Stored in `~/.web-monitor/` (override with `WEB_MONITOR_DIR` env var):
 - Use `--format json` for programmatic checking (heartbeat integration)
 - CSS selectors require beautifulsoup4 (included via `--with` flag)
 - Text is normalized to reduce noise from timestamps, whitespace, ads
+

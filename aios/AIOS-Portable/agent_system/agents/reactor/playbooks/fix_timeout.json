@@ -1,0 +1,1 @@
+﻿{"name": "fix_timeout", "trigger": "TimeoutError", "action": "increase_timeout_30s_and_restart"}

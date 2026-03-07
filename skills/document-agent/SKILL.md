@@ -1,9 +1,10 @@
 ---
 name: document-agent
+version: 1.0.0
 description: Process documents (docx/pdf/txt) to extract text, generate summaries, extract outlines, and identify keywords. Use when users need to analyze documents, create summaries, or extract structured information from files.
 ---
 
-# Document Agent - 文档处理 Agent
+# Document Agent v1.0 - 文档处理 Agent
 
 ## 核心功能
 

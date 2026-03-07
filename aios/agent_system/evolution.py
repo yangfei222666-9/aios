@@ -274,21 +274,21 @@ class AgentEvolution:
         report += f"**生成时间：** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
 
         # 性能分析
-        report += "## 📊 性能分析（最近24小时）\n\n"
+        report += "## [REPORT] 性能分析（最近24小时）\n\n"
         report += f"- 总任务数：{analysis['total_tasks']}\n"
         report += f"- 失败任务数：{analysis['failed_tasks']}\n"
         report += f"- 失败率：{analysis['failure_rate']:.1%}\n\n"
 
         # 失败模式
         if analysis['failure_patterns']:
-            report += "## ⚠️ 失败模式\n\n"
+            report += "## [WARN] 失败模式\n\n"
             for task_type, data in analysis['failure_patterns'].items():
                 report += f"- **{task_type}**：失败 {data['count']} 次\n"
             report += "\n"
 
         # 改进建议
         if analysis['suggestions']:
-            report += "## 💡 改进建议\n\n"
+            report += "## [IDEA] 改进建议\n\n"
             for i, suggestion in enumerate(analysis['suggestions'], 1):
                 report += f"{i}. {suggestion}\n"
             report += "\n"

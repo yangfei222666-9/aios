@@ -71,45 +71,45 @@ class AIOSSecurityAgent:
         frequent_failures = self._detect_frequent_failures()
         if frequent_failures:
             report["risks"].extend(frequent_failures)
-            print(f"  ⚠️  发现 {len(frequent_failures)} 个频繁失败风险")
+            print(f"  [WARN]  发现 {len(frequent_failures)} 个频繁失败风险")
         else:
-            print(f"  ✅ 无频繁失败")
+            print(f"  [OK] 无频繁失败")
 
         # 2. 检测异常调用
         print("[2/5] 检测异常调用...")
         abnormal_calls = self._detect_abnormal_calls()
         if abnormal_calls:
             report["risks"].extend(abnormal_calls)
-            print(f"  ⚠️  发现 {len(abnormal_calls)} 个异常调用风险")
+            print(f"  [WARN]  发现 {len(abnormal_calls)} 个异常调用风险")
         else:
-            print(f"  ✅ 无异常调用")
+            print(f"  [OK] 无异常调用")
 
         # 3. 检测权限异常
         print("[3/5] 检测权限异常...")
         permission_issues = self._detect_permission_issues()
         if permission_issues:
             report["risks"].extend(permission_issues)
-            print(f"  ⚠️  发现 {len(permission_issues)} 个权限异常")
+            print(f"  [WARN]  发现 {len(permission_issues)} 个权限异常")
         else:
-            print(f"  ✅ 无权限异常")
+            print(f"  [OK] 无权限异常")
 
         # 4. 检测资源滥用
         print("[4/5] 检测资源滥用...")
         resource_abuse = self._detect_resource_abuse()
         if resource_abuse:
             report["risks"].extend(resource_abuse)
-            print(f"  ⚠️  发现 {len(resource_abuse)} 个资源滥用")
+            print(f"  [WARN]  发现 {len(resource_abuse)} 个资源滥用")
         else:
-            print(f"  ✅ 无资源滥用")
+            print(f"  [OK] 无资源滥用")
 
         # 5. 检测数据异常
         print("[5/5] 检测数据异常...")
         data_anomalies = self._detect_data_anomalies()
         if data_anomalies:
             report["risks"].extend(data_anomalies)
-            print(f"  ⚠️  发现 {len(data_anomalies)} 个数据异常")
+            print(f"  [WARN]  发现 {len(data_anomalies)} 个数据异常")
         else:
-            print(f"  ✅ 无数据异常")
+            print(f"  [OK] 无数据异常")
 
         # 保存报告
         self._save_report(report)
@@ -122,9 +122,9 @@ class AIOSSecurityAgent:
         print()
         print("=" * 60)
         if report["risks"]:
-            print(f"  ⚠️  发现 {len(report['risks'])} 个安全风险")
+            print(f"  [WARN]  发现 {len(report['risks'])} 个安全风险")
         else:
-            print(f"  ✅ 系统安全")
+            print(f"  [OK] 系统安全")
         print("=" * 60)
 
         return report

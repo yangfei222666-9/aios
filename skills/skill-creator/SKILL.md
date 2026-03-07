@@ -1,5 +1,6 @@
 ---
 name: skill-creator
+version: 1.0.0
 description: Create or update agent skills. Use when designing, building, or packaging skills that include scripts, references, and resources. Analyzes code, extracts patterns, generates SKILL.md documentation, and packages skills for sharing.
 ---
 

@@ -188,11 +188,11 @@ class IncidentAgent:
         )
         
         if result["success"]:
-            print(f"✅ Playbook 执行成功")
+            print(f"[OK] Playbook 执行成功")
             for action in result["actions_executed"]:
                 print(f"   - {action['type']}: {action}")
         else:
-            print(f"❌ Playbook 执行失败: {result['error']}")
+            print(f"[FAIL] Playbook 执行失败: {result['error']}")
         
         # 3. 记录故障事件
         collect_incident(
@@ -314,14 +314,14 @@ def create_default_playbooks():
         with open(playbook_file, "w", encoding="utf-8") as f:
             json.dump(playbook, f, indent=2, ensure_ascii=False)
     
-    print(f"✅ 已创建 {len(playbooks)} 个默认 Playbook")
+    print(f"[OK] 已创建 {len(playbooks)} 个默认 Playbook")
 
 if __name__ == "__main__":
     # 创建默认 Playbook
     create_default_playbooks()
     
     # 测试故障检测
-    print("\n📊 测试故障检测:")
+    print("\n[REPORT] 测试故障检测:")
     
     test_errors = [
         "ModuleNotFoundError: No module named 'bs4'",

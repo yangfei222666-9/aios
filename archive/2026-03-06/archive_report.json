@@ -1,0 +1,70 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.62,
+    "archive_date":  "2026-03-06",
+    "files_count":  11,
+    "total_size_bytes":  616754,
+    "timestamp":  "2026-03-06 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  312
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\heartbeat_clean.log",
+                      "Type":  "temp",
+                      "Size":  5112
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\heartbeat_test.log",
+                      "Type":  "temp",
+                      "Size":  67593
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\experience_library.jsonl.bak-20260306-2112",
+                      "Type":  "temp",
+                      "Size":  8147
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\learner_v4_config.json.bak-20260306-2112",
+                      "Type":  "temp",
+                      "Size":  157
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\learner_v4_metrics.json.bak-pre-regression",
+                      "Type":  "temp",
+                      "Size":  371
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\recommendation_log.jsonl.bak-pre-regression",
+                      "Type":  "temp",
+                      "Size":  6928
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\spawn_requests.jsonl.bak-pre-regression",
+                      "Type":  "temp",
+                      "Size":  5419
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\task_executions.jsonl.bak-20260306-2112",
+                      "Type":  "temp",
+                      "Size":  495562
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Friend-Edition\\agent_system\\git_test_runner.py",
+                      "Type":  "old_test",
+                      "Size":  17261,
+                      "LastModified":  "2026-02-27"
+                  },
+                  {
+                      "Path":  "skills\\pdf-skill\\create_test_pdf.py",
+                      "Type":  "old_test",
+                      "Size":  1683,
+                      "LastModified":  "2026-02-27"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-06",
+    "total_size_mb":  0.59
+}

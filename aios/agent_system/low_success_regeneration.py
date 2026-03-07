@@ -11,6 +11,11 @@ LowSuccess_Agent v3.0 - Phase 3: 经验库应用闭环
 5. 成功 → 保存到experience_library.jsonl + LanceDB
 6. 失败 → 需要人工介入
 7. Phase 3观察：记录重生统计 + 生成图表报告
+
+v4.0 改造：
+- 集成 spawn_manager（Step 3/4 全链路追踪）
+- load_lessons() 改为从 experience_engine.harvest_real_failures() 读取
+- 门禁：只处理 source=real + regeneration_status=pending
 """
 
 import json
@@ -18,14 +23,24 @@ import sys
 from pathlib import Path
 from datetime import datetime
 import time
+from audit_context import audit_event_auto, set_audit_context
 
-# 路径配置
+# 设置审计上下文
+set_audit_context("lowsuccess-agent", "lowsuccess-session")
+
+# Import unified paths
+from paths import (
+    LESSONS, EXPERIENCE_LIBRARY, FEEDBACK_LOG,
+    SPAWN_REQUESTS, TASK_EXECUTIONS
+)
+
+# 路径配置（保留兼容性）
 WORKSPACE = Path(r"C:\Users\A\.openclaw\workspace")
 AIOS_DIR = WORKSPACE / "aios" / "agent_system"
-LESSONS_FILE = AIOS_DIR / "lessons.json"
-EXPERIENCE_LIB = AIOS_DIR / "experience_library.jsonl"
-FEEDBACK_LOG = AIOS_DIR / "feedback_log.jsonl"
-TASKS_FILE = AIOS_DIR / "tasks.jsonl"
+LESSONS_FILE = LESSONS
+EXPERIENCE_LIB = EXPERIENCE_LIBRARY
+FEEDBACK_LOG_FILE = FEEDBACK_LOG
+TASKS_FILE = AIOS_DIR / "tasks.jsonl"  # 暂时保留，后续迁移
 
 # 添加路径以导入sessions_spawn
 sys.path.insert(0, str(WORKSPACE))
@@ -37,13 +52,56 @@ from experience_learner_v4 import learner_v4
 # Phase 3观察器集成（统一使用 aios/agent_system 下的版本）
 from phase3_observer import observe_phase3, generate_phase3_report
 
+# v4.0 集成：spawn_manager 全链路追踪
+from spawn_manager import build_spawn_requests, record_spawn_result, get_spawn_stats
+
 def load_lessons():
-    """加载失败教训"""
+    """
+    加载失败教训（Step 3 改造：优先从真实失败中读取）
+
+    数据源优先级：
+    1. task_executions.jsonl（真实失败，过滤 Simulated）
+    2. lessons.json（兜底，仅保留 source=real 的记录）
+    """
+    import hashlib
+    from experience_engine import harvest_real_failures
+
+    # Step 1：先从 task_executions.jsonl 收割真实失败 → 写入 lessons.json
+    try:
+        harvested = harvest_real_failures()
+        if harvested > 0:
+            print(f"  [HARVEST] {harvested} new real failures → lessons.json")
+    except Exception as e:
+        print(f"  [WARN] harvest_real_failures failed: {e}")
+
+    # Step 2：读取 lessons.json（此时已包含真实失败）
     if not LESSONS_FILE.exists():
         return []
+
     with open(LESSONS_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
-        return data.get('lessons', [])
+
+    # 兼容两种格式：{"lessons": [...]} 或直接 [...]
+    if isinstance(data, list):
+        lessons = data
+    else:
+        lessons = data.get('lessons', [])
+
+    # 门禁：只处理真实失败（过滤假数据）
+    real_lessons = []
+    for lesson in lessons:
+        # 跳过明确标记为 simulated 的
+        if lesson.get("source") == "simulated":
+            continue
+        # 跳过 error_message 以 Simulated 开头的
+        if lesson.get("error_message", "").startswith("Simulated"):
+            continue
+        # 跳过 regeneration_status 已完成的
+        if lesson.get("regeneration_status") in ("completed", "skipped"):
+            continue
+        real_lessons.append(lesson)
+
+    return real_lessons
 
 def get_task_by_id(task_id: str):
     """从tasks.jsonl读取任务详情"""
@@ -235,16 +293,23 @@ def regenerate_failed_task_real(lesson):
 请根据以上分析和策略，重新执行任务。
 """
     
-    # 4. 生成spawn请求
+    # 4. 通过 spawn_manager 生成标准 spawn 请求（Step 3 全链路）
+    # 先把 enhanced_task 写回 lesson 的 context，让 build_spawn_requests 能读到
+    # 这里直接写入 spawn_requests.jsonl（兼容旧格式 + 新格式双写）
+    spawn_id = f"spawn-{lesson.get('lesson_id', task_id)}"
     spawn_request = {
+        'spawn_id': spawn_id,
         'timestamp': datetime.now().isoformat(),
         'task_id': task_id,
+        'lesson_id': lesson.get('lesson_id', task_id),
+        'source_task_id': lesson.get('source_task_id', task_id),
         'agent_id': 'LowSuccess_Agent',
         'task': enhanced_task,
         'label': f'aios-regen-{task_id}',
         'cleanup': 'keep',
         'runTimeoutSeconds': 120,
         'regeneration': True,
+        'status': 'queued',
         'feedback': feedback,
         'strategy': strategy,
         'recommendation': {
@@ -255,11 +320,11 @@ def regenerate_failed_task_real(lesson):
             'grayscale': recommendation.get('grayscale', False),
         },
     }
-    
-    spawn_file = AIOS_DIR / "spawn_requests.jsonl"
+
+    spawn_file = SPAWN_REQUESTS
     with open(spawn_file, 'a', encoding='utf-8') as f:
         f.write(json.dumps(spawn_request, ensure_ascii=False) + '\n')
-    
+
     print(f"  [OK] Spawn请求已生成: {spawn_file}")
     
     return True, {
@@ -299,7 +364,7 @@ def save_feedback(feedback):
 
 def get_already_spawned_ids():
     """获取已经生成过 spawn 请求的 lesson ID，避免重复生成"""
-    spawn_file = AIOS_DIR / "spawn_requests.jsonl"
+    spawn_file = SPAWN_REQUESTS
     spawned = set()
     if spawn_file.exists():
         with open(spawn_file, 'r', encoding='utf-8') as f:
@@ -353,6 +418,24 @@ def run_low_success_regeneration(limit=5):
     # 对每个失败教训执行bootstrapped regeneration
     for lesson in lessons_to_process:
         start_time = time.time()
+        
+        # 审计日志：policy.allow（允许重生）
+        audit_event_auto(
+            action_type="policy.allow",
+            target="spawn_generation",
+            params={
+                "lesson_id": lesson.get("id"),
+                "source": lesson.get("source"),
+                "error_type": lesson.get("error_type"),
+                "error_message": lesson.get("error_message", "")[:200],
+            },
+            result="allowed",
+            risk_level="medium",
+            reason="source=real and regeneration_status=pending",
+            lesson_id=lesson.get("id"),
+            source_task_id=lesson.get("source_task_id"),
+        )
+        
         success, result, recommendation = regenerate_failed_task_real(lesson)
         recovery_time = time.time() - start_time
         

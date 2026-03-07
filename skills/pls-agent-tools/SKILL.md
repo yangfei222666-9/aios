@@ -1,6 +1,7 @@
----
+﻿---
 name: agent-tools
 description: Digital Swiss Army knife for everyday labor that standard models can't handle out of the box. Use when: (1) Need to manipulate files (rename, move, copy, delete), (2) Working with JSON/YAML/TOML configs, (3) Running system commands safely, (4) Processing text with regex or transformations, (5) Need utility functions for common operations.
+version: 1.0.0
 ---
 
 # Agent Tools - Universal Utility Belt
@@ -167,3 +168,4 @@ check-jsonschema --schemafile schema.json document.json
 | YAML read | `yq '.key'` |
 | Port check | `lsof -i :PORT` |
 | Base64 decode | `base64 -d` |
+

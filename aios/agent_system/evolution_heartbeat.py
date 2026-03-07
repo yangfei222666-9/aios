@@ -167,7 +167,7 @@ class EvolutionHeartbeat:
             
             # 检查是否反复进化
             if self.check_repeated_evolution(agent_id, lookback_hours=24):
-                print(f"⚠️ {agent_id} 24h 内已进化过，跳过")
+                print(f"[WARN] {agent_id} 24h 内已进化过，跳过")
                 
                 # 发送阻止事件
                 emitter.emit_blocked(
@@ -191,7 +191,7 @@ class EvolutionHeartbeat:
                         "changes": plan["changes"]
                     })
                 
-                print(f"✅ {agent_id} 应用了 {len(result['plans'])} 个进化改进")
+                print(f"[OK] {agent_id} 应用了 {len(result['plans'])} 个进化改进")
             
             elif result["status"] == "pending_review":
                 # 记录需要审核的策略

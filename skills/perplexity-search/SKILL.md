@@ -1,6 +1,7 @@
----
+﻿---
 name: perplexity-search
 description: AI-powered search with citations via Perplexity API. Supports basic search, conversational search, and deep research.
+version: 1.0.0
 homepage: https://www.perplexity.ai
 metadata: {"clawdbot":{"emoji":"🔍","requires":{"bins":["node"],"env":["PERPLEXITY_API_KEY"]},"primaryEnv":"PERPLEXITY_API_KEY"}}
 ---
@@ -165,3 +166,4 @@ result = await run_skill("perplexity-search", {
 - **Perplexity:** Deep research, need citations, conversational search
 - **Tavily:** Quick searches, cost-sensitive, simple queries
 - **Google:** High-volume, basic search, no API needed
+

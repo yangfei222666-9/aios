@@ -12,6 +12,7 @@ Changes from v4.0:
 import sys
 import io
 import time
+import logging
 from pathlib import Path
 
 # Fix Windows encoding (safe fallback)
@@ -26,11 +27,25 @@ AIOS_ROOT = Path(__file__).resolve().parent.parent
 if str(AIOS_ROOT) not in sys.path:
     sys.path.insert(0, str(AIOS_ROOT))
 
+# Setup logging (file + console)
+HEARTBEAT_LOG = AIOS_ROOT / "data" / "heartbeat.log"
+HEARTBEAT_LOG.parent.mkdir(parents=True, exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)-8s | %(message)s',
+    handlers=[
+        logging.FileHandler(HEARTBEAT_LOG, encoding='utf-8'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
 from core.task_submitter import list_tasks, queue_stats
 from core.task_executor import execute_batch
 # from low_success_regeneration import run_low_success_regeneration  # Temporarily disabled for service
 from experience_learner_v4 import learner_v4
 from token_monitor import check_and_alert, auto_optimize, generate_report
+from diary_extractor import extract_diary_from_session, save_diary
 
 # ── Memory model warm-up (background, non-blocking) ──────────────────────────
 import threading as _threading
@@ -58,7 +73,7 @@ def start_self_healing_loop():
     healing_loop = SelfHealingLoopV2()
     # 在后台启动异步任务
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
     except RuntimeError:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -98,6 +113,14 @@ from spawn_lock import (
     recover_stale_locks,
     transition_status
 )
+from paths import (
+    TASK_QUEUE, TASK_EXECUTIONS,
+    SPAWN_REQUESTS, SPAWN_PENDING, SPAWN_RESULTS,
+    HEARTBEAT_LOG, HEARTBEAT_STATE, HEARTBEAT_STATS,
+    ALERTS, EXECUTED_ACTIONS
+)
+from reality_ledger import create_action, transition_action
+from ledger_summary import compute_ledger_summary, format_heartbeat_summary
 
 
 def reclaim_zombie_tasks(timeout_seconds: int = 300, max_retries: int = 2) -> dict:
@@ -108,7 +131,7 @@ def reclaim_zombie_tasks(timeout_seconds: int = 300, max_retries: int = 2) -> di
     Returns:
         {"reclaimed": int, "retried": int, "permanently_failed": int}
     """
-    queue_file = Path(__file__).parent / "task_queue.jsonl"
+    queue_file = TASK_QUEUE
     if not queue_file.exists():
         return {"reclaimed": 0, "retried": 0, "permanently_failed": 0}
 
@@ -165,6 +188,19 @@ def reclaim_zombie_tasks(timeout_seconds: int = 300, max_retries: int = 2) -> di
             if ok:
                 permanently_failed += 1
                 print(f"  [ZOMBIE] {task_id}: running {age_hr:.1f}h → permanently failed (max retries)")
+                # DLQ: 重试耗尽 → 写入死信队列
+                try:
+                    from dlq import enqueue_dead_letter
+                    enqueue_dead_letter(
+                        task_id=task_id,
+                        attempts=retry_count + 1,
+                        last_error=task.get("zombie_note", f"timeout after {age_hr:.1f}h"),
+                        error_type="timeout",
+                        metadata={"agent_id": task.get("agent_id"), "description": task.get("description", "")[:200]}
+                    )
+                    print(f"  [DLQ] {task_id}: enqueued to dead letters")
+                except Exception as e:
+                    print(f"  [DLQ] {task_id}: failed to enqueue: {e}")
 
         if ok:
             reclaimed += 1
@@ -201,20 +237,74 @@ def process_task_queue(max_tasks: int = 5) -> dict:
     results = []
     skipped = 0
     for task in tasks[:max_tasks]:
+        # Reality Ledger: create action (proposed)
+        action = create_action(
+            actor="heartbeat",
+            source="heartbeat_v5",
+            resource_type="task",
+            resource_id=task.get("id", "unknown"),
+            action_type="execute_task",
+            payload={"task_type": task.get("type", task.get("task_type", "")), "task_id": task.get("id")},
+            idempotency_key=f"task:execute:{task.get('id', 'unknown')}",
+            lock_resource=f"task:{task.get('id', 'unknown')}",
+            tags=["task_execution", "heartbeat"],
+        )
+        # 将 action_id 注入 task，供 executor 使用
+        task["action_id"] = action.action_id
+        print(f"  [LEDGER] Created action {action.action_id} for task {task.get('id')}")
+
         token = try_acquire_spawn_lock(task)
         if token is None:
             skipped += 1
+            # Reality Ledger: skipped (resource busy / duplicate)
+            try:
+                transition_action(action.action_id, "skipped", actor="heartbeat", payload={"reason": "resource_busy"})
+            except Exception:
+                pass
             continue
+        
+        # Reality Ledger: locked
+        try:
+            transition_action(action.action_id, "locked", actor="heartbeat", payload={"lock_token": token})
+        except Exception as e:
+            print(f"  [LEDGER] locked transition failed: {e}")
+            release_spawn_lock(task, token)
+            skipped += 1
+            continue
+
         try:
             batch_results = execute_batch([task], max_tasks=1)
             results.extend(batch_results)
-            # Release lock on terminal state
-            if batch_results and not batch_results[0].get("success"):
-                pass  # Keep lock until zombie reclaim handles it
-            else:
-                release_spawn_lock(task, token)
-        except Exception:
+
+            # execute_batch 内部已推进 executing → completed/failed
+            # 这里只需要 completed/failed → released
             release_spawn_lock(task, token)
+            try:
+                transition_action(
+                    action.action_id, "released", actor="heartbeat",
+                    payload={"release_reason": "execution_done"},
+                )
+            except Exception as e:
+                print(f"  [LEDGER] released transition failed: {e}")
+
+        except Exception as exc:
+            # execute_batch 异常：可能 executing 已推进也可能没有
+            # 先尝试补 failed，再 released；如果状态不允许，catch 住继续
+            release_spawn_lock(task, token)
+            try:
+                transition_action(
+                    action.action_id, "failed", actor="heartbeat",
+                    payload={"error": str(exc)[:300]},
+                )
+            except Exception:
+                pass  # 可能 executor 内部已经 transition 到 failed 了
+            try:
+                transition_action(
+                    action.action_id, "released", actor="heartbeat",
+                    payload={"release_reason": "execution_done"},
+                )
+            except Exception:
+                pass  # 如果 failed transition 也失败了，released 也会失败，记录即可
             raise
     
     if skipped:
@@ -233,54 +323,78 @@ def process_task_queue(max_tasks: int = 5) -> dict:
 
 def execute_spawn_requests() -> int:
     """
-    Phase 2.5 桥接层：读取spawn_requests.jsonl并真实执行
-    
+    Phase 2.5 桥接层：读取spawn_requests.jsonl，输出待执行列表供OpenClaw主会话真实调用。
+
+    协议：
+    - 将待执行请求写入 spawn_pending.jsonl（OpenClaw主会话读取并调用sessions_spawn）
+    - 已输出的请求从 spawn_requests.jsonl 移除（避免重复）
+    - 使用 ActionLock 防止同一 action 重复执行
+    - 返回输出的请求数量
+
     Returns:
-        Number of successfully executed spawn requests
+        Number of spawn requests queued for execution
     """
-    spawn_file = Path(__file__).parent / 'spawn_requests.jsonl'
-    
+    from action_lock import ActionLock
+    action_lock = ActionLock()
+
+    spawn_file = SPAWN_REQUESTS
+    pending_file = SPAWN_PENDING
+
     if not spawn_file.exists():
-        print("✅ [BRIDGE] spawn_requests.jsonl为空，无需执行")
         return 0
-    
-    executed_count = 0
-    executed_ids = []
-    new_lines = []
-    
+
     with open(spawn_file, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-    
+        lines = [l for l in f.readlines() if l.strip()]
+
+    if not lines:
+        return 0
+
+    queued = 0
+    skipped = 0
     for line in lines:
-        if not line.strip():
-            continue
-        
         try:
             req = json.loads(line)
             task_id = req.get('task_id', 'unknown')
-            print(f"🔄 [BRIDGE] 正在执行spawn请求: {task_id}")
+            action_id = req.get('id', task_id)
+            resource_id = req.get('agent_id', 'spawn-queue')
+
+            # Action Lock: 防止重复执行
+            if not action_lock.acquire(resource_id, action_id, timeout=600):
+                print(f"  [BRIDGE] Skipped (idempotent/locked): {task_id}")
+                skipped += 1
+                continue
+
+            # 追加到 pending 文件（OpenClaw主会话消费）
+            with open(pending_file, 'a', encoding='utf-8') as pf:
+                pf.write(line if line.endswith('\n') else line + '\n')
+            print(f"  [BRIDGE] Queued for real execution: {task_id}")
+            queued += 1
             
-            # 注意：这里需要调用真实的sessions_spawn
-            # 由于我们在Python脚本中，无法直接调用OpenClaw的sessions_spawn
-            # 所以这里先标记为"待执行"，实际执行需要在OpenClaw主会话中完成
-            # 
-            # 临时方案：将spawn请求写入一个OpenClaw可以读取的文件
-            # 让OpenClaw主会话的heartbeat来执行
+            # Tracing: spawn_consumed
+            try:
+                from tracer import trace_event
+                trace_event(
+                    trace_id=req.get("trace_id", f"trace-{task_id}"),
+                    task_id=task_id,
+                    step_name="spawn_consumed",
+                    source="heartbeat",
+                    agent_name=req.get("agent_id", ""),
+                    result_summary="moved to spawn_pending",
+                )
+            except Exception:
+                pass  # trace 写失败不阻塞主流程
             
-            # 这里我们先模拟执行（实际应该调用sessions_spawn）
-            print(f"⚠️ [BRIDGE] spawn请求已生成，等待OpenClaw主会话执行: {task_id}")
-            new_lines.append(line)  # 保留，等待OpenClaw执行
-            
+            # 执行成功后释放锁（标记为已执行）
+            action_lock.release(resource_id, action_id, success=True)
         except Exception as e:
-            print(f"❌ [BRIDGE] 执行异常: {e}")
-            new_lines.append(line)
-    
-    # 保留所有请求（等待OpenClaw主会话执行）
-    with open(spawn_file, 'w', encoding='utf-8') as f:
-        f.writelines(new_lines)
-    
-    print(f"🎉 [BRIDGE] 本次检查到 {len(lines)} 个spawn请求（等待OpenClaw执行）")
-    return executed_count
+            print(f"  [BRIDGE] Parse error: {e}")
+
+    # 清空已输出的请求
+    spawn_file.write_text('', encoding='utf-8')
+    if skipped:
+        print(f"  [BRIDGE] {skipped} requests skipped (idempotent)")
+    print(f"  [BRIDGE] {queued} requests moved to spawn_pending.jsonl")
+    return queued
 
 
 def run_evolution_guard_precheck() -> dict:
@@ -565,6 +679,14 @@ def main():
             check_spawn_lock_health()
         except Exception as e:
             print(f"[WARN] Spawn lock monitor failed: {e}")
+        
+        # Skill Memory aggregation (every hour)
+        try:
+            from skill_memory_aggregator import aggregate_all_skills
+            print(f"\n[SKILL_MEMORY] Aggregating skill statistics...")
+            aggregate_all_skills()
+        except Exception as e:
+            print(f"[WARN] Skill memory aggregation failed: {e}")
     
     # 2.8. Learnings Extractor (每天0点和12点提炼黄金法则)
     if current_minute == 0 and current_hour in (0, 12):
@@ -578,6 +700,19 @@ def main():
         except Exception as e:
             print(f"[WARN] Learnings extractor failed: {e}")
 
+    # 2.9. Diary Extraction (每天23:00自动提取对话)
+    if current_minute == 0 and current_hour == 23:
+        try:
+            print(f"\n[DIARY] Extracting daily conversations...")
+            diary_entry = extract_diary_from_session()
+            if diary_entry:
+                save_diary(diary_entry)
+                print(f"   ✅ Diary saved: {diary_entry['date']}")
+            else:
+                print(f"   ℹ️  No conversations to extract today")
+        except Exception as e:
+            print(f"[WARN] Diary extraction failed: {e}")
+    
     # 3. Token Report (每天0点生成)
     if current_minute == 0 and datetime.now().hour == 0:
         print(f"\n[REPORT] Daily Token Report:")
@@ -603,7 +738,12 @@ def main():
         except Exception as e:
             print(f"[WARN] Quick metrics failed: {e}")
     
-    # 4. Output summary
+    # 4. Ledger Summary (24h)
+    print(f"\n[LEDGER] 24h Summary:")
+    ledger_summary = compute_ledger_summary(hours=24.0)
+    print(format_heartbeat_summary(ledger_summary))
+    
+    # 5. Output summary
     idem_metrics = get_idempotency_metrics()
     print(f"\n{'=' * 62}")
     if queue_result["processed"] > 0:

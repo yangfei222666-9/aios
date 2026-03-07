@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+aiogram==3.13.1
+python-dotenv
+lancedb
+sentence-transformers
+numpy
+pydantic
+streamlit
+plotly
+pandas

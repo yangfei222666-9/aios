@@ -9,9 +9,11 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent))
 from learning_agents import LEARNING_AGENTS
 
+from paths import SPAWN_REQUESTS
+
 workspace = Path("C:/Users/A/.openclaw/workspace")
 state_file = workspace / "memory" / "selflearn-state.json"
-spawn_file = Path(__file__).parent / "spawn_requests.jsonl"
+spawn_file = SPAWN_REQUESTS
 
 # 读取状态
 state = {}

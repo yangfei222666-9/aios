@@ -1,6 +1,7 @@
----
+﻿---
 name: Screenshot
 description: Capture screens, windows, and regions across platforms with the right tools.
+version: 1.0.0
 metadata: {"clawdbot":{"emoji":"📸","os":["linux","darwin","win32"]}}
 ---
 
@@ -41,3 +42,4 @@ metadata: {"clawdbot":{"emoji":"📸","os":["linux","darwin","win32"]}}
 - Add timestamps to filenames: `screenshot-$(date +%Y%m%d-%H%M%S).png` — prevents overwrites in batch jobs
 - For comparison testing, use identical viewport sizes — different resolutions create false diffs
 - CI screenshot artifacts: compress with `pngquant` or `jpegoptim` before upload — saves storage and transfer time
+

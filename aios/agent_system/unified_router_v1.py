@@ -570,13 +570,13 @@ def demo():
     print(f"Reason: {decision4.reason_codes}")
     
     print("\n" + "=" * 80)
-    print("✅ UnifiedRouter v1.0 演示完成")
+    print("[OK] UnifiedRouter v1.0 演示完成")
     print("=" * 80)
     print("\n核心护栏验证：")
-    print("1. ✅ 解释性 - 每次决策落盘到 router_decisions.jsonl")
-    print("2. ✅ 防抖 - sticky agent（10 分钟）")
-    print("3. ✅ 滞回 - 进入 30%/退出 20%（防止抖动）")
-    print("4. ✅ 内存缓存 - 30 秒刷盘一次（性能优化）")
+    print("1. [OK] 解释性 - 每次决策落盘到 router_decisions.jsonl")
+    print("2. [OK] 防抖 - sticky agent（10 分钟）")
+    print("3. [OK] 滞回 - 进入 30%/退出 20%（防止抖动）")
+    print("4. [OK] 内存缓存 - 30 秒刷盘一次（性能优化）")
 
 
 if __name__ == "__main__":

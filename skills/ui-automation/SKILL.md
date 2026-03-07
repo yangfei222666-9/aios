@@ -1,3 +1,9 @@
+﻿---
+name: ui-automation
+version: 1.0.0
+description: UI automation and testing skill
+---
+
 # UI Automation Skill
 
 Windows UI 自动化工具，支持鼠标点击、键盘输入、窗口操作等。
@@ -200,3 +206,5 @@ Start-Sleep -Milliseconds 500
 ## 更新日志
 
 - 2026-02-25: 初始版本
+
+

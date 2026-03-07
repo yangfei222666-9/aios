@@ -1,138 +1,53 @@
-"""
-Activate Sleeping Learning Agents
-
-Finds Learning Agents that have never been run and activates them.
-
-Usage:
-    python activate_learning_agents.py
-"""
+#!/usr/bin/env python3
+"""激活所有学习 Agent 去学习"""
 import json
-import time
 from pathlib import Path
+from datetime import datetime
+from paths import AGENTS_STATE, SPAWN_REQUESTS
 
-AIOS_ROOT = Path(__file__).resolve().parent.parent
-AGENTS_FILE = AIOS_ROOT / "agent_system" / "agents.json"
+agents_file = AGENTS_STATE
+spawn_file = SPAWN_REQUESTS
 
+# 读取 agents
+agents_data = json.loads(agents_file.read_text(encoding='utf-8'))
+learning_agents = [a for a in agents_data['agents'] if a.get('type') == 'learning']
 
-def load_agents():
-    """Load agents from agents.json."""
-    with open(AGENTS_FILE, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    return data["agents"]
+print(f"找到 {len(learning_agents)} 个学习 Agent")
+print("=" * 60)
 
+# 为每个学习 Agent 创建学习任务
+tasks = {
+    "Document_Agent": "学习最新的文档处理技术和 NLP 方法",
+    "Skill_Creator": "学习如何从代码中提取模式并生成更好的 Skill 文档",
+    "Aios_Health_Check": "学习系统监控最佳实践和健康度评估方法",
+    "Knowledge_Base_Manager": "学习知识管理和索引优化技术",
+    "Feedback_Collector": "学习用户反馈分析和情感分析方法",
+    "Documentation_Generator": "学习自动文档生成和代码注释最佳实践",
+    "Error_Pattern_Learner": "学习错误模式识别和自动修复策略"
+}
 
-def find_sleeping_agents(agents):
-    """Find agents that have never been run."""
-    sleeping = []
+spawned = 0
+for agent in learning_agents:
+    agent_name = agent['name'].replace(' Agent', '').replace('_', '_')
+    task = tasks.get(agent_name, f"学习 {agent_name} 相关的最新技术和最佳实践")
     
-    for agent in agents:
-        # Check if agent has state field
-        if "state" not in agent:
-            sleeping.append(agent)
-        # Or if state exists but no last_active
-        elif agent.get("state", {}).get("last_active") is None:
-            sleeping.append(agent)
+    spawn_request = {
+        "timestamp": datetime.now().isoformat(),
+        "agent_id": agent['id'],
+        "agent_name": agent['name'],
+        "task": task,
+        "priority": "normal",
+        "source": "manual_activation",
+        "status": "pending"
+    }
     
-    return sleeping
+    # 追加到 spawn_requests.jsonl
+    with open(spawn_file, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(spawn_request, ensure_ascii=False) + '\n')
+    
+    print(f"[OK] {agent['name']}")
+    print(f"  Task: {task}")
+    spawned += 1
 
-
-def activate_agent(agent):
-    """
-    Activate a sleeping agent by submitting a test task.
-    
-    For now, we'll just print what would be done.
-    In production, this would call sessions_spawn or submit a task.
-    """
-    agent_id = agent.get("id") or agent.get("name")
-    agent_type = agent.get("type", "unknown")
-    goal = agent.get("goal", "No goal specified")
-    
-    print(f"\n[Activating] {agent_id}")
-    print(f"  Type: {agent_type}")
-    print(f"  Goal: {goal[:80]}...")
-    
-    # Determine test task based on agent type
-    if "document" in agent_id.lower():
-        task_desc = "Test document processing"
-        task_type = "analysis"
-    elif "skill" in agent_id.lower():
-        task_desc = "Test skill creation"
-        task_type = "code"
-    elif "health" in agent_id.lower():
-        task_desc = "Test health check"
-        task_type = "monitor"
-    else:
-        task_desc = f"Test {agent_id}"
-        task_type = "test"
-    
-    # Submit task using AIOS task submitter
-    try:
-        import sys
-        sys.path.insert(0, str(AIOS_ROOT))
-        from core.task_submitter import submit_task
-        
-        task_id = submit_task(
-            description=task_desc,
-            task_type=task_type,
-            priority="normal",
-            metadata={"agent_id": agent_id, "activation": True}
-        )
-        
-        print(f"  ✓ Task submitted: {task_id}")
-        return True
-    except Exception as e:
-        print(f"  ✗ Failed to submit task: {e}")
-        return False
-
-
-def main():
-    print("=" * 70)
-    print("Activate Sleeping Learning Agents")
-    print("=" * 70)
-    
-    # Load agents
-    print("\n[1] Loading agents...")
-    agents = load_agents()
-    print(f"  Total agents: {len(agents)}")
-    
-    # Find sleeping agents
-    print("\n[2] Finding sleeping agents...")
-    sleeping = find_sleeping_agents(agents)
-    print(f"  Sleeping agents: {len(sleeping)}")
-    
-    if not sleeping:
-        print("\n✓ All agents are active!")
-        return
-    
-    # List sleeping agents
-    print("\n[3] Sleeping agents:")
-    for i, agent in enumerate(sleeping, 1):
-        agent_id = agent.get("id") or agent.get("name")
-        agent_type = agent.get("type", "unknown")
-        print(f"  {i}. {agent_id} ({agent_type})")
-    
-    # Activate agents
-    print("\n[4] Activating agents...")
-    activated_count = 0
-    for agent in sleeping:
-        if activate_agent(agent):
-            activated_count += 1
-            time.sleep(0.5)  # Small delay between submissions
-    
-    # Summary
-    print("\n" + "=" * 70)
-    print("Summary:")
-    print("=" * 70)
-    print(f"  Sleeping agents found: {len(sleeping)}")
-    print(f"  Tasks submitted: {activated_count}")
-    print(f"  Failed: {len(sleeping) - activated_count}")
-    
-    if activated_count > 0:
-        print("\n✓ Activation tasks submitted!")
-        print("  Run 'python aios.py heartbeat' to execute them.")
-    else:
-        print("\n✗ No tasks submitted.")
-
-
-if __name__ == "__main__":
-    main()
+print(f"\n已创建 {spawned} 个学习任务")
+print(f"spawn_requests.jsonl 已更新")

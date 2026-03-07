@@ -9,8 +9,10 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Optional
 
+from paths import TASK_QUEUE as _TASK_QUEUE
+
 # 文件路径
-TASK_QUEUE = Path(__file__).parent / "task_queue.jsonl"
+TASK_QUEUE = _TASK_QUEUE
 CONTEXT_FILE = Path(__file__).parent / "orchestrator_context.json"
 
 # 任务类型关键词映射
@@ -136,7 +138,7 @@ def is_complex_task(text: str) -> bool:
 
 def decompose_task(instruction: str) -> List[dict]:
     """拆解复杂任务"""
-    print(f"🔍 检测到复杂任务，正在拆解...")
+    print(f"[SEARCH] 检测到复杂任务，正在拆解...")
     
     # 简单的拆解规则（可以用 LLM 做更智能的拆解）
     subtasks = []
@@ -177,7 +179,7 @@ def create_task(instruction: str, context: OrchestratorContext) -> List[dict]:
     if context.is_continuation(instruction):
         last_task = context.get_last_task()
         if last_task:
-            print(f"💡 检测到延续任务，基于上一个任务：{last_task['description']}")
+            print(f"[IDEA] 检测到延续任务，基于上一个任务：{last_task['description']}")
             # 合并描述
             description = f"{last_task['description']} + {instruction}"
             task = {
@@ -223,20 +225,20 @@ def orchestrate(instruction: str) -> List[dict]:
     tasks = create_task(instruction, context)
     
     if len(tasks) > 1:
-        print(f"📦 拆解为 {len(tasks)} 个子任务：")
+        print(f"[PACKAGE] 拆解为 {len(tasks)} 个子任务：")
         for i, task in enumerate(tasks, 1):
             print(f"  {i}. [{task['type']}] {task['description']} (优先级: {task['priority']})")
     else:
         task = tasks[0]
-        print(f"🎯 任务类型: {task['type']}")
-        print(f"📝 任务描述: {task['description']}")
-        print(f"⚡ 优先级: {task['priority']}")
+        print(f"[TARGET] 任务类型: {task['type']}")
+        print(f"[NOTE] 任务描述: {task['description']}")
+        print(f"[ZAP] 优先级: {task['priority']}")
     
     # 写入队列
     for task in tasks:
         append_task(task)
     
-    print(f"✅ {len(tasks)} 个任务已加入队列")
+    print(f"[OK] {len(tasks)} 个任务已加入队列")
     
     # 更新上下文
     context.update(instruction, tasks[0] if len(tasks) == 1 else {"type": "complex", "subtasks": tasks})

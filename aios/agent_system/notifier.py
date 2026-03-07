@@ -6,7 +6,9 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-ALERTS_FILE = Path(__file__).parent / "alerts.jsonl"
+from paths import ALERTS
+
+ALERTS_FILE = ALERTS
 
 
 def write_alert(level: str, title: str, body: str):

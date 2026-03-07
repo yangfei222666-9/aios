@@ -155,7 +155,7 @@ class TraceAnalyzer:
 
     def get_agent_stats(self, agent_id: str) -> Dict:
         """获取特定 Agent 的统计数据"""
-        agent_traces = [t for t in self.traces if t["agent_id"] == agent_id]
+        agent_traces = [t for t in self.traces if t.get("agent_id") == agent_id]
 
         if not agent_traces:
             return {"error": "No traces found for this agent"}
@@ -164,14 +164,19 @@ class TraceAnalyzer:
         successes = sum(1 for t in agent_traces if t.get("success"))
         failures = total - successes
 
-        avg_duration = sum(t.get("duration_sec", 0) for t in agent_traces) / total
+        # 除零保护 + 类型检查
+        durations = [
+            t.get("duration_sec", 0) for t in agent_traces
+            if isinstance(t.get("duration_sec"), (int, float))
+        ]
+        avg_duration = (sum(durations) / len(durations)) if durations else 0.0
 
         return {
             "agent_id": agent_id,
             "total_tasks": total,
             "successes": successes,
             "failures": failures,
-            "success_rate": successes / total if total > 0 else 0,
+            "success_rate": (successes / total) if total > 0 else 0,  # 除零保护
             "avg_duration_sec": avg_duration,
             "most_common_tools": self._get_most_common_tools(agent_traces),
         }

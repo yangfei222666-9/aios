@@ -32,7 +32,7 @@ class TelegramNotifier:
         if not self.enabled:
             return
 
-        message = f"🔧 Self-Improving Loop\n\n"
+        message = f"[FIX] Self-Improving Loop\n\n"
         message += f"Agent: {agent_id}\n"
         message += f"应用了 {improvements_applied} 项自动改进\n"
         
@@ -57,7 +57,7 @@ class TelegramNotifier:
         if not self.enabled:
             return
 
-        message = f"⚠️ 自动回滚告警\n\n"
+        message = f"[WARN] 自动回滚告警\n\n"
         message += f"Agent: {agent_id}\n"
         message += f"原因: {reason}\n"
         
@@ -86,7 +86,7 @@ class TelegramNotifier:
         if not self.enabled:
             return
 
-        message = f"📊 Self-Improving Loop 每日报告\n\n"
+        message = f"[REPORT] Self-Improving Loop 每日报告\n\n"
         message += f"总 Agent: {stats.get('total_agents', 0)}\n"
         message += f"总改进次数: {stats.get('total_improvements', 0)}\n"
         message += f"总回滚次数: {stats.get('total_rollbacks', 0)}\n"
@@ -130,7 +130,7 @@ class TelegramNotifier:
         message += f"  • 冷却期: {profile.get('cooldown_hours', 0)} 小时\n"
         
         if profile.get('is_critical'):
-            message += f"\n⚠️ 关键任务 Agent"
+            message += f"\n[WARN] 关键任务 Agent"
         
         message += f"\n时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
 

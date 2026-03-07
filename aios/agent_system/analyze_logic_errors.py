@@ -4,9 +4,10 @@
 import json
 from pathlib import Path
 from collections import Counter
+from paths import DATA_DIR
 
 # 读取报告
-report_file = Path(r"C:\Users\A\.openclaw\workspace\aios\agent_system\data\evolution\reports\evolution_20260224_162958.json")
+report_file = DATA_DIR / "evolution" / "reports" / "evolution_20260224_162958.json"
 with open(report_file, 'r', encoding='utf-8') as f:
     report = json.load(f)
 
@@ -80,11 +81,11 @@ print("=" * 60)
 print()
 
 if len(div_zero_failures) > 0:
-    print("⚠️ Division by zero 错误来自测试环境")
+    print("[WARN] Division by zero 错误来自测试环境")
     print("   这些是测试数据，不是真实的生产问题")
     print("   建议: 清理测试数据或分离测试/生产追踪")
 else:
-    print("✅ 生产环境没有 division by zero 错误")
+    print("[OK] 生产环境没有 division by zero 错误")
     print("   真实问题是:")
     if prod_failures:
         prod_errors = Counter([f.get('error', 'Unknown') for f in prod_failures])

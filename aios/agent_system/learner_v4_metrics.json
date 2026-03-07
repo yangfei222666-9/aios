@@ -1,0 +1,15 @@
+{
+  "recommend_total": 274,
+  "recommend_hit": 199,
+  "recommend_default": 39,
+  "recommend_skipped_grayscale": 36,
+  "recommend_skipped_disabled": 0,
+  "regen_total": 0,
+  "regen_success": 0,
+  "regen_failed": 0,
+  "manual_intervention": 0,
+  "post_recommend_success": 0,
+  "post_recommend_failed": 0,
+  "post_default_success": 0,
+  "post_default_failed": 0
+}

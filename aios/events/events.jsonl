@@ -1308,3 +1308,5 @@
 {"ts": "2026-02-26T09:15:07", "epoch": 1772068507, "layer": "KERNEL", "event": "reflection_complete", "status": "ok", "severity": "INFO", "payload": {"strategy_count": 1, "priorities": ["low"]}}
 {"ts": "2026-02-26T09:15:42", "epoch": 1772068542, "layer": "KERNEL", "event": "reflection_complete", "status": "ok", "severity": "INFO", "payload": {"strategy_count": 1, "priorities": ["low"]}}
 {"ts": "2026-02-27T09:15:17", "epoch": 1772154917, "layer": "KERNEL", "event": "reflection_complete", "status": "ok", "severity": "INFO", "payload": {"strategy_count": 1, "priorities": ["low"]}}
+{"ts": "2026-03-02T09:15:45", "epoch": 1772414145, "layer": "KERNEL", "event": "reflection_complete", "status": "ok", "severity": "INFO", "payload": {"strategy_count": 0, "priorities": []}}
+{"ts": "2026-03-03T09:15:42", "epoch": 1772500542, "layer": "KERNEL", "event": "reflection_complete", "status": "ok", "severity": "INFO", "payload": {"strategy_count": 1, "priorities": ["low"]}}

@@ -1,0 +1,7 @@
+{
+  "enable_recommendation": true,
+  "grayscale_ratio": 0.5,
+  "min_confidence": 0.6,
+  "max_experience_age_days": 30,
+  "strategy_version": "v4.1.0"
+}

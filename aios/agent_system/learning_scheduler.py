@@ -6,9 +6,11 @@ from pathlib import Path
 from datetime import datetime
 from learning_agents import LEARNING_AGENTS, get_agent_config
 
+from paths import SPAWN_REQUESTS as _SPAWN_REQUESTS
+
 WORKSPACE = Path(__file__).parent.parent.parent
 STATE_FILE = WORKSPACE / "memory" / "selflearn-state.json"
-SPAWN_REQUESTS = Path(__file__).parent / "spawn_requests.jsonl"
+SPAWN_REQUESTS = _SPAWN_REQUESTS
 
 def load_state():
     """加载状态"""

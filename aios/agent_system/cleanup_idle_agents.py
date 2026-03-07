@@ -72,4 +72,4 @@ with open(agents_file, 'w', encoding='utf-8') as f:
     for agent in agents:
         f.write(json.dumps(agent, ensure_ascii=False) + '\n')
 
-print(f"\n✅ 已归档 {archived_count} 个 Agent")
+print(f"\n[OK] 已归档 {archived_count} 个 Agent")

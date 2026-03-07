@@ -4,10 +4,36 @@ Execution History - 执行历史持久化
 """
 
 import json
+import os
 import time
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 from datetime import datetime
+
+
+def _tail_lines(file_path: Path, n: int) -> list[str]:
+    """高效读取文件末尾 n 行，不加载整个文件到内存。"""
+    if not file_path.exists() or file_path.stat().st_size == 0:
+        return []
+    with open(file_path, 'rb') as f:
+        # 从末尾向前扫描，找到第 n 个换行符
+        f.seek(0, os.SEEK_END)
+        size = f.tell()
+        buf = bytearray()
+        newlines = 0
+        pos = size
+        chunk = 4096
+        while pos > 0 and newlines <= n:
+            read_size = min(chunk, pos)
+            pos -= read_size
+            f.seek(pos)
+            data = f.read(read_size)
+            buf[:0] = data
+            newlines += data.count(b'\n')
+        # 解码并返回最后 n 行（非空）
+        text = buf.decode('utf-8', errors='replace')
+        lines = text.splitlines()
+        return [l for l in lines[-n:] if l.strip()]
 
 
 class ExecutionHistory:
@@ -60,15 +86,11 @@ class ExecutionHistory:
             return []
         
         records = []
-        with open(self.history_file, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            for line in lines[-limit:]:
-                if line.strip():
-                    try:
-                        records.append(json.loads(line))
-                    except:
-                        pass
-        
+        for line in _tail_lines(self.history_file, limit):
+            try:
+                records.append(json.loads(line))
+            except Exception:
+                pass
         return list(reversed(records))  # 最新的在前
     
     def get_by_date(self, date: str) -> List[Dict[str, Any]]:

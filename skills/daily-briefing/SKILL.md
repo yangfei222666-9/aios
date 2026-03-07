@@ -1,11 +1,12 @@
 ---
 name: daily-briefing
+version: 1.0.0
 description: Generates a warm, compact daily briefing with weather, calendar, reminders, birthdays, and important emails for cron or chat delivery.
 metadata: {"openclaw":{"emoji":"🌅","requires":{"os":["darwin"],"bins":["curl","bash"]},"optional_bins":["icalpal","gog","himalaya"]}}
 user-invocable: true
 ---
 
-# daily-briefing
+# daily-briefing v1.0
 
 Generates a compact, warm daily message suitable for cron delivery (stdout/chat reply). Always succeeds even with minimal context.
 

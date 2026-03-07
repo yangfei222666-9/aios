@@ -74,7 +74,13 @@ class TaskRecord:
 class TaskQueue:
     """Durable task queue with atomic state transitions."""
     
-    def __init__(self, queue_file: str = "task_queue.jsonl"):
+    def __init__(self, queue_file: str = None):
+        if queue_file is None:
+            try:
+                from paths import TASK_QUEUE
+                queue_file = str(TASK_QUEUE)
+            except ImportError:
+                queue_file = "data/task_queue.jsonl"
         self.queue_file = Path(queue_file)
         self.queue_file.parent.mkdir(parents=True, exist_ok=True)
         if not self.queue_file.exists():

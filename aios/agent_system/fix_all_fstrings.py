@@ -57,7 +57,7 @@ for filename, line_fixes in fixes.items():
     with open(filepath, 'w', encoding='utf-8') as f:
         f.writelines(lines)
     
-    print(f"✅ {filename} 已修复 {len(line_fixes)} 行")
+    print(f"[OK] {filename} 已修复 {len(line_fixes)} 行")
 
 print(f"\n总计修复: {fixed_count} 行")
 
@@ -69,12 +69,12 @@ for filename in fixes.keys():
     filepath = base_dir / filename
     try:
         py_compile.compile(str(filepath), doraise=True)
-        print(f"✅ {filename} 语法正确")
+        print(f"[OK] {filename} 语法正确")
     except SyntaxError as e:
-        print(f"❌ {filename} 仍有错误: {e}")
+        print(f"[FAIL] {filename} 仍有错误: {e}")
         all_passed = False
 
 if all_passed:
-    print("\n🎉 所有文件修复成功！")
+    print("\n[SUCCESS] 所有文件修复成功！")
 else:
-    print("\n⚠️  部分文件仍有问题")
+    print("\n[WARN]  部分文件仍有问题")

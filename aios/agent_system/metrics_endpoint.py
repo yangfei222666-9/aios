@@ -18,6 +18,7 @@ Usage:
 """
 
 import json
+import os
 import psutil
 from pathlib import Path
 from datetime import datetime
@@ -25,6 +26,32 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Dict
 
 AIOS_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _read_last_jsonl_line(file_path: Path) -> dict | None:
+    """高效读取 JSONL 文件最后一条有效记录，不加载整个文件。"""
+    if not file_path.exists() or file_path.stat().st_size == 0:
+        return None
+    with open(file_path, 'rb') as f:
+        f.seek(0, os.SEEK_END)
+        pos = f.tell()
+        buf = bytearray()
+        while pos > 0:
+            read_size = min(4096, pos)
+            pos -= read_size
+            f.seek(pos)
+            chunk = f.read(read_size)
+            buf[:0] = chunk
+            lines = buf.decode('utf-8', errors='replace').splitlines()
+            # 从末尾找第一条非空行
+            for line in reversed(lines):
+                line = line.strip()
+                if line:
+                    try:
+                        return json.loads(line)
+                    except Exception:
+                        continue
+    return None
 
 class MetricsCollector:
     """Collect metrics from AIOS system"""
@@ -88,12 +115,9 @@ class MetricsCollector:
         # Evolution score (from baseline)
         baseline_file = self.aios_root / "learning" / "metrics_history.jsonl"
         if baseline_file.exists():
-            # Read last line
-            with open(baseline_file, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-                if lines:
-                    last_metric = json.loads(lines[-1])
-                    metrics["evolution_score"] = last_metric.get("evolution_score", 0)
+            last_metric = _read_last_jsonl_line(baseline_file)
+            if last_metric:
+                metrics["evolution_score"] = last_metric.get("evolution_score", 0)
         
         return metrics
     

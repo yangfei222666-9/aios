@@ -1,0 +1,1 @@
+﻿{"name": "auto_fix", "trigger": "any_error", "action": "match_playbook_and_execute"}

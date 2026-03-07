@@ -1,0 +1,11 @@
+{
+  "agent_id": "analyst-dispatcher",
+  "metrics": {
+    "tasks_total": 3,
+    "tasks_success": 3,
+    "tasks_failed": 0,
+    "avg_latency_ms": 0.0,
+    "last_run_timestamp": "2026-03-05T00:14:31.063609"
+  },
+  "last_updated": "2026-03-05T00:14:31.063609"
+}

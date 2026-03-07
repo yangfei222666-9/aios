@@ -288,16 +288,20 @@ class AgentSystem:
     def _update_system_state(self):
         """更新系统状态（从事件日志计算）"""
         try:
+            from paths import EVENTS_LOG
             # 读取最近的事件
-            events_file = Path("aios/data/events.jsonl")
+            events_file = EVENTS_LOG
             if not events_file.exists():
                 return
             
-            # 简单统计（最近 100 条事件）
+            # 流式读取末尾 100 行（不加载整个文件）
             recent_events = []
-            with open(events_file, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-                recent_events = [json.loads(line) for line in lines[-100:]]
+            tail = _tail_lines(events_file, 100)
+            for line in tail:
+                try:
+                    recent_events.append(json.loads(line))
+                except Exception:
+                    pass
             
             if not recent_events:
                 return

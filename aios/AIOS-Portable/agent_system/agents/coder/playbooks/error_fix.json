@@ -1,0 +1,32 @@
+{
+  "name": "error_fix",
+  "description": "自动修复常见错误（语法错误、导入错误、类型错误）",
+  "trigger": {
+    "event_type": "code_error",
+    "conditions": {
+      "error_type": {"$in": ["SyntaxError", "ImportError", "TypeError", "NameError"]}
+    }
+  },
+  "actions": [
+    {
+      "type": "log",
+      "message": "检测到 {error_type}，尝试自动修复"
+    },
+    {
+      "type": "analyze_error",
+      "error_message": "{error_message}",
+      "code_context": "{code_context}"
+    },
+    {
+      "type": "apply_fix",
+      "fix_type": "auto",
+      "backup": true
+    },
+    {
+      "type": "verify_fix",
+      "run_tests": true
+    }
+  ],
+  "priority": "high",
+  "enabled": true
+}

@@ -34,7 +34,7 @@ class SafeSelfImprovingAgent(SelfImprovingAgent):
 
         # 检查熔断器
         if self.safety_valve._is_circuit_broken():
-            print("⚠️ 熔断器已触发，24h 内禁止自动改进")
+            print("[WARN] 熔断器已触发，24h 内禁止自动改进")
             return {"status": "circuit_broken"}
 
         # 运行基础分析
@@ -138,7 +138,7 @@ def main():
 
     # 打印摘要
     if report.get("status") == "circuit_broken":
-        print("\n⚠️ 熔断器已触发，请检查系统状态")
+        print("\n[WARN] 熔断器已触发，请检查系统状态")
         return
 
     if report.get("status") == "healthy":
@@ -153,7 +153,7 @@ def main():
     print(f"成功: {summary.get('success', 0)}")
 
     if args.dry_run:
-        print("\n💡 这是 dry-run 模式，没有实际应用任何改进")
+        print("\n[IDEA] 这是 dry-run 模式，没有实际应用任何改进")
         print("   移除 --dry-run 参数以实际应用")
 
 

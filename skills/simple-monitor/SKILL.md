@@ -1,6 +1,7 @@
----
+﻿---
 name: simple-monitor
 description: Simple server monitoring tool
+version: 1.0.0
 ---
 
 # Simple Monitor
@@ -56,3 +57,4 @@ python test_monitor.py
 **版本:** 1.0  
 **创建者:** skill-creator  
 **最后更新:** 2026-02-26
+

@@ -1,6 +1,7 @@
----
+﻿---
 name: Monitoring
 description: "Set up observability for applications and infrastructure with metrics, logs, traces, and alerts."
+version: 1.0.0
 ---
 
 ## Complexity Levels
@@ -78,3 +79,4 @@ For alert configuration, severities, and on-call setup, see `alerting.md`.
 - Missing runbooks (alert fires, nobody knows what to do)
 - Not monitoring from outside (only internal checks)
 - Storing logs forever (cost explodes)
+

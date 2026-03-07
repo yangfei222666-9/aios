@@ -96,17 +96,28 @@ class AdaptiveThreshold:
         Returns:
             "high" | "medium" | "low"
         """
-        if not task_history:
+        # 输入验证：空列表检查
+        if not task_history or not isinstance(task_history, list):
             return "medium"
 
         # 计算最近 24 小时的任务数
         now = datetime.now()
         cutoff = now - timedelta(hours=24)
 
-        recent_tasks = [
-            t for t in task_history
-            if datetime.fromisoformat(t.get("start_time", "")) > cutoff
-        ]
+        recent_tasks = []
+        for t in task_history:
+            # 空值检查：确保任务对象有效
+            if not t or not isinstance(t, dict):
+                continue
+            start_time = t.get("start_time")
+            if not start_time:
+                continue
+            try:
+                if datetime.fromisoformat(start_time) > cutoff:
+                    recent_tasks.append(t)
+            except (ValueError, TypeError):
+                # 忽略无效的时间戳
+                continue
 
         tasks_per_day = len(recent_tasks)
 
@@ -192,13 +203,22 @@ class AdaptiveThreshold:
         is_critical = self._is_critical_agent(agent_id)
         threshold, window, cooldown = self.get_threshold(agent_id, task_history)
 
-        # 计算任务频率
+        # 计算任务频率（带空值检查）
         now = datetime.now()
         cutoff = now - timedelta(hours=24)
-        recent_tasks = [
-            t for t in task_history
-            if datetime.fromisoformat(t.get("start_time", "")) > cutoff
-        ]
+        recent_tasks = []
+        if task_history and isinstance(task_history, list):
+            for t in task_history:
+                if not t or not isinstance(t, dict):
+                    continue
+                start_time = t.get("start_time")
+                if not start_time:
+                    continue
+                try:
+                    if datetime.fromisoformat(start_time) > cutoff:
+                        recent_tasks.append(t)
+                except (ValueError, TypeError):
+                    continue
         tasks_per_day = len(recent_tasks)
 
         return {

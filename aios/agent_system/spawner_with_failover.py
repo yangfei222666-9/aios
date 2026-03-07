@@ -174,5 +174,5 @@ if __name__ == "__main__":
         print(f"  进入 DLQ: {result.get('dlq', False)}")
     
     print("\n" + "=" * 60)
-    print("✅ 测试完成！")
+    print("[OK] 测试完成！")
     print("=" * 60)
