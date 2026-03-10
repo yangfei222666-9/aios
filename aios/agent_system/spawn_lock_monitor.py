@@ -99,5 +99,9 @@ def monitor_loop():
             print(f"[ERROR] {e}")
             time.sleep(CHECK_INTERVAL_SEC)
 
+def check_spawn_lock_health():
+    """Compatibility wrapper for heartbeat integration."""
+    return check_stale_locks()
+
 if __name__ == '__main__':
     monitor_loop()

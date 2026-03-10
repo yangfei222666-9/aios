@@ -1,14 +1,10 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 AIOS Data Flush - 21:59 pre-observation flush
 
-确保所有日志写入完成，避免 22:00 统计时遗漏最后一分钟的数据。
-
-操作：
-1. 强制 flush 所有 .jsonl 文件的写缓冲
-2. 同步 agent stats（从 task_executions.jsonl → agents.json）
-3. 输出 flush 状态
-"""
+纭繚鎵€鏈夋棩蹇楀啓鍏ュ畬鎴愶紝閬垮厤 22:00 缁熻鏃堕仐婕忔渶鍚庝竴鍒嗛挓鐨勬暟鎹€?
+鎿嶄綔锛?1. 寮哄埗 flush 鎵€鏈?.jsonl 鏂囦欢鐨勫啓缂撳啿
+2. 鍚屾 agent stats锛堜粠 task_executions_v2.jsonl 鈫?agents.json锛?3. 杈撳嚭 flush 鐘舵€?"""
 
 import os
 import sys
@@ -19,7 +15,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TZ = timezone(timedelta(hours=8))
 
 JSONL_FILES = [
-    "task_executions.jsonl",
+    "task_executions_v2.jsonl",
     "route_log.jsonl",
     "decision_log.jsonl",
     "experience_library.jsonl",
@@ -88,3 +84,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

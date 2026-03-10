@@ -1,0 +1,31 @@
+AIOS Heartbeat v5.0 Started
+
+[SKILL_FAILURES]
+⚠️ Skill 连续失败告警：
+  • api-testing-skill — 连续失败 3 次，原因：network_error
+  • docker-skill — 连续失败 3 次，原因：resource_exhausted
+  • pdf-skill — 连续失败 2 次，原因：timeout
+
+[MODULE_ERRORS]
+⚠️ 模块错误：
+  • low_success_regeneration.py 第209行 SyntaxError
+  • spawn_lock_monitor 导入失败
+
+[SYSTEM_SIGNALS]
+ℹ️ 系统信号：
+  • evolution_score.json 已过期
+  • memory build latency degraded
+
+[QUEUE] No pending tasks
+
+[HEALTH] Checking system health...
+   Health Score: 74.29/100
+   Total Tasks: 7
+   Completed: 5
+   Failed: 2
+   Pending: 0
+   Status: WARNING
+
+HEARTBEAT_OK (no_tasks, health=74)
+
+Heartbeat Completed

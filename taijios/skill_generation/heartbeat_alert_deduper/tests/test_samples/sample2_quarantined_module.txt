@@ -1,0 +1,11 @@
+AIOS Heartbeat v5.0 Started
+
+[MODULE_ERRORS]
+low_success_regeneration.py 第209行 SyntaxError: invalid syntax
+spawn_lock_monitor 导入失败
+
+[HEALTH] Checking system health...
+   Health Score: 72.00/100
+   Status: WARNING
+
+Heartbeat Completed

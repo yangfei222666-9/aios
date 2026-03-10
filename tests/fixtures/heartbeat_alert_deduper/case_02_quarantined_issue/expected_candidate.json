@@ -1,0 +1,11 @@
+{
+  "pattern_type": "quarantine_status_check",
+  "frequency": 1,
+  "source_events_count": 1,
+  "confidence": 0.60,
+  "suggested_skill_name": null,
+  "evidence": [
+    "low_success_regeneration.py - SyntaxError - quarantined since 2026-03-05"
+  ],
+  "reasoning": "This is a known quarantined issue, not a new alert pattern. Should NOT generate alert dedup candidate. Used as negative test case."
+}

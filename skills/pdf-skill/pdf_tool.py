@@ -8,10 +8,27 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 import json
 
+
+def safe_print(text: str) -> None:
+    """
+    安全输出函数 - 兼容 Windows GBK 终端
+    优先正常打印，失败时自动降级为可编码文本
+    """
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        encoding = sys.stdout.encoding or "gbk"
+        encoded = text.encode(encoding, errors="replace").decode(encoding, errors="replace")
+        try:
+            print(encoded)
+        except UnicodeEncodeError:
+            sys.stdout.buffer.write(encoded.encode(encoding, errors="replace") + os.linesep.encode(encoding, errors="replace"))
+
+
 try:
     from PyPDF2 import PdfReader, PdfWriter, PdfMerger
 except ImportError:
-    print("❌ 缺少依赖：pip install PyPDF2")
+    safe_print("[ERROR] Missing dependency: pip install PyPDF2")
     sys.exit(1)
 
 
@@ -19,13 +36,14 @@ class PDFTool:
     """PDF 工具类"""
     
     @staticmethod
-    def extract_text(pdf_path: str, pages: Optional[List[int]] = None) -> str:
+    def extract_text(pdf_path: str, pages: Optional[List[int]] = None, max_pages: int = 100) -> str:
         """
-        提取 PDF 文本
+        提取 PDF 文本（优化：大文件自动限制页数）
         
         Args:
             pdf_path: PDF 文件路径
             pages: 页码列表（从0开始），None 表示全部页
+            max_pages: 最大处理页数（防止超时）
         
         Returns:
             提取的文本内容
@@ -35,20 +53,28 @@ class PDFTool:
             total_pages = len(reader.pages)
             
             if pages is None:
-                pages = range(total_pages)
+                # 大文件自动限制
+                if total_pages > max_pages:
+                    pages = range(max_pages)
+                    warning = f"[WARN] File too large ({total_pages} pages), extracting first {max_pages} only\n\n"
+                else:
+                    pages = range(total_pages)
+                    warning = ""
+            else:
+                warning = ""
             
-            text_parts = []
+            text_parts = [warning] if warning else []
             for page_num in pages:
                 if 0 <= page_num < total_pages:
                     page = reader.pages[page_num]
-                    text_parts.append(f"--- 第 {page_num + 1} 页 ---\n")
+                    text_parts.append(f"--- Page {page_num + 1} ---\n")
                     text_parts.append(page.extract_text())
                     text_parts.append("\n\n")
             
             return "".join(text_parts)
         
         except Exception as e:
-            return f"❌ 提取失败：{str(e)}"
+            return f"[ERROR] Extract failed: {str(e)}"
     
     @staticmethod
     def get_info(pdf_path: str) -> Dict[str, Any]:
@@ -95,26 +121,27 @@ class PDFTool:
             
             for pdf_path in input_paths:
                 if not os.path.exists(pdf_path):
-                    return f"❌ 文件不存在：{pdf_path}"
+                    return f"[ERROR] File not found: {pdf_path}"
                 merger.append(pdf_path)
             
             merger.write(output_path)
             merger.close()
             
-            return f"✅ 合并成功：{len(input_paths)} 个文件 → {output_path}"
+            return f"[OK] Merged {len(input_paths)} files -> {output_path}"
         
         except Exception as e:
-            return f"❌ 合并失败：{str(e)}"
+            return f"[ERROR] Merge failed: {str(e)}"
     
     @staticmethod
-    def split_pdf(input_path: str, output_dir: str, pages_per_file: int = 1) -> str:
+    def split_pdf(input_path: str, output_dir: str, pages_per_file: int = 1, max_files: int = 100) -> str:
         """
-        拆分 PDF
+        拆分 PDF（优化：限制输出文件数）
         
         Args:
             input_path: 输入 PDF 路径
             output_dir: 输出目录
             pages_per_file: 每个文件包含的页数
+            max_files: 最大输出文件数（防止超时）
         
         Returns:
             成功消息或错误信息
@@ -129,6 +156,9 @@ class PDFTool:
             file_count = 0
             
             for start_page in range(0, total_pages, pages_per_file):
+                if file_count >= max_files:
+                    return f"[WARN] Max file limit reached ({max_files}), remaining pages skipped"
+                
                 writer = PdfWriter()
                 
                 end_page = min(start_page + pages_per_file, total_pages)
@@ -145,10 +175,10 @@ class PDFTool:
                 
                 file_count += 1
             
-            return f"✅ 拆分成功：{total_pages} 页 → {file_count} 个文件（{output_dir}）"
+            return f"[OK] Split done: {total_pages} pages -> {file_count} files ({output_dir})"
         
         except Exception as e:
-            return f"❌ 拆分失败：{str(e)}"
+            return f"[ERROR] Split failed: {str(e)}"
     
     @staticmethod
     def extract_pages(input_path: str, output_path: str, pages: List[int]) -> str:
@@ -173,15 +203,15 @@ class PDFTool:
                 if 0 <= page_num < total_pages:
                     writer.add_page(reader.pages[page_num])
                 else:
-                    return f"❌ 页码超出范围：{page_num + 1}（总页数：{total_pages}）"
+                    return f"[ERROR] Page out of range: {page_num + 1} (total: {total_pages})"
             
             with open(output_path, "wb") as output_file:
                 writer.write(output_file)
             
-            return f"✅ 提取成功：{len(pages)} 页 → {output_path}"
+            return f"[OK] Extracted {len(pages)} pages -> {output_path}"
         
         except Exception as e:
-            return f"❌ 提取失败：{str(e)}"
+            return f"[ERROR] Extract pages failed: {str(e)}"
 
 
 def main():
@@ -195,6 +225,7 @@ def main():
     extract_parser = subparsers.add_parser("extract", help="提取文本")
     extract_parser.add_argument("pdf", help="PDF 文件路径")
     extract_parser.add_argument("--pages", nargs="+", type=int, help="页码（从1开始）")
+    extract_parser.add_argument("--max-pages", type=int, default=100, help="最大处理页数（防止超时）")
     extract_parser.add_argument("--output", "-o", help="输出文件路径")
     
     # info 命令
@@ -211,6 +242,7 @@ def main():
     split_parser.add_argument("pdf", help="PDF 文件路径")
     split_parser.add_argument("--output-dir", "-o", required=True, help="输出目录")
     split_parser.add_argument("--pages-per-file", "-p", type=int, default=1, help="每个文件的页数")
+    split_parser.add_argument("--max-files", type=int, default=100, help="最大输出文件数（防止超时）")
     
     # extract-pages 命令
     extract_pages_parser = subparsers.add_parser("extract-pages", help="提取指定页面")
@@ -228,30 +260,30 @@ def main():
     
     if args.command == "extract":
         pages = [p - 1 for p in args.pages] if args.pages else None
-        text = tool.extract_text(args.pdf, pages)
+        text = tool.extract_text(args.pdf, pages, args.max_pages)
         
         if args.output:
             Path(args.output).write_text(text, encoding="utf-8")
-            print(f"✅ 文本已保存到：{args.output}")
+            safe_print(f"[OK] Text saved to: {args.output}")
         else:
-            print(text)
+            safe_print(text)
     
     elif args.command == "info":
         info = tool.get_info(args.pdf)
-        print(json.dumps(info, indent=2, ensure_ascii=False))
+        safe_print(json.dumps(info, indent=2, ensure_ascii=False))
     
     elif args.command == "merge":
         result = tool.merge_pdfs(args.inputs, args.output)
-        print(result)
+        safe_print(result)
     
     elif args.command == "split":
-        result = tool.split_pdf(args.pdf, args.output_dir, args.pages_per_file)
-        print(result)
+        result = tool.split_pdf(args.pdf, args.output_dir, args.pages_per_file, args.max_files)
+        safe_print(result)
     
     elif args.command == "extract-pages":
         pages = [p - 1 for p in args.pages]
         result = tool.extract_pages(args.pdf, args.output, pages)
-        print(result)
+        safe_print(result)
 
 
 if __name__ == "__main__":

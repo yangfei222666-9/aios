@@ -427,7 +427,7 @@ def recover_stale_locks(
             continue
         
         # 超时了
-        task_id = task.get("id", "?")
+        task_id = task.get("id") or task.get("task_id") or "?"
         age_hr = age / 3600
         retry_count = task.get("zombie_retries", 0)
         

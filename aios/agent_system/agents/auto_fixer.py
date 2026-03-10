@@ -1,4 +1,4 @@
-"""Auto Fixer Agent - 自动修复失败的任务"""
+﻿"""Auto Fixer Agent - 鑷姩淇澶辫触鐨勪换鍔?""
 import json
 from datetime import datetime
 from pathlib import Path
@@ -6,14 +6,13 @@ import re
 
 class AutoFixer:
     def __init__(self):
-        self.execution_file = Path("task_executions.jsonl")
+        self.execution_file = Path(TASK_EXECUTIONS)
         self.events_file = Path("data/events/events.jsonl")
         self.fix_history_file = Path("data/fixes/auto_fix_history.jsonl")
         
-        # 错误模式和修复策略
-        self.fix_patterns = {
+        # 閿欒妯″紡鍜屼慨澶嶇瓥鐣?        self.fix_patterns = {
             "timeout": {
-                "pattern": r"timeout|超时|timed out",
+                "pattern": r"timeout|瓒呮椂|timed out",
                 "fixes": [
                     {"action": "increase_timeout", "params": {"factor": 1.5}},
                     {"action": "split_task", "params": {}},
@@ -52,35 +51,34 @@ class AutoFixer:
         }
     
     def auto_fix(self):
-        """自动修复失败的任务"""
+        """鑷姩淇澶辫触鐨勪换鍔?""
         print("=" * 80)
-        print("Auto Fixer - 自动修复失败任务")
+        print("Auto Fixer - 鑷姩淇澶辫触浠诲姟")
         print("=" * 80)
         
-        # 1. 查找失败的任务
-        failed_tasks = self._find_failed_tasks()
+        # 1. 鏌ユ壘澶辫触鐨勪换鍔?        failed_tasks = self._find_failed_tasks()
         
         if not failed_tasks:
-            print("\n✓ 没有失败的任务")
+            print("\n鉁?娌℃湁澶辫触鐨勪换鍔?)
             return
         
-        print(f"\n🔍 发现 {len(failed_tasks)} 个失败任务\n")
+        print(f"\n馃攳 鍙戠幇 {len(failed_tasks)} 涓け璐ヤ换鍔n")
         
-        # 2. 逐个修复
+        # 2. 閫愪釜淇
         fixed = 0
         for task in failed_tasks:
             try:
                 if self._fix_task(task):
                     fixed += 1
             except Exception as e:
-                print(f"✗ 修复失败: {e}")
+                print(f"鉁?淇澶辫触: {e}")
         
         print(f"\n{'=' * 80}")
-        print(f"修复完成: {fixed}/{len(failed_tasks)} 个任务")
+        print(f"淇瀹屾垚: {fixed}/{len(failed_tasks)} 涓换鍔?)
         print(f"{'=' * 80}")
     
     def _find_failed_tasks(self):
-        """查找失败的任务"""
+        """鏌ユ壘澶辫触鐨勪换鍔?""
         failed = []
         
         if not self.execution_file.exists():
@@ -93,14 +91,14 @@ class AutoFixer:
                 
                 record = json.loads(line)
                 if record.get("status") == "failed":
-                    # 检查是否已经修复过
+                    # 妫€鏌ユ槸鍚﹀凡缁忎慨澶嶈繃
                     if not self._is_already_fixed(record.get("task_id")):
                         failed.append(record)
         
         return failed
     
     def _is_already_fixed(self, task_id):
-        """检查任务是否已经修复过"""
+        """妫€鏌ヤ换鍔℃槸鍚﹀凡缁忎慨澶嶈繃"""
         if not self.fix_history_file.exists():
             return False
         
@@ -116,44 +114,44 @@ class AutoFixer:
         return False
     
     def _fix_task(self, task):
-        """修复单个任务"""
+        """淇鍗曚釜浠诲姟"""
         task_id = task.get("task_id", "unknown")
         error = task.get("error", "")
         
-        print(f"🔧 修复任务: {task_id}")
-        print(f"   错误: {error[:100]}...")
+        print(f"馃敡 淇浠诲姟: {task_id}")
+        print(f"   閿欒: {error[:100]}...")
         
-        # 1. 识别错误类型
+        # 1. 璇嗗埆閿欒绫诲瀷
         error_type = self._classify_error(error)
-        print(f"   类型: {error_type}")
+        print(f"   绫诲瀷: {error_type}")
         
-        # 2. 选择修复策略
+        # 2. 閫夋嫨淇绛栫暐
         fixes = self.fix_patterns.get(error_type, {}).get("fixes", [])
         
         if not fixes:
-            print(f"   ✗ 未找到修复策略")
+            print(f"   鉁?鏈壘鍒颁慨澶嶇瓥鐣?)
             return False
         
-        # 3. 尝试修复
+        # 3. 灏濊瘯淇
         for i, fix in enumerate(fixes, 1):
-            print(f"   尝试修复 {i}/{len(fixes)}: {fix['action']}...", end=" ")
+            print(f"   灏濊瘯淇 {i}/{len(fixes)}: {fix['action']}...", end=" ")
             
             success = self._apply_fix(task, fix)
             
             if success:
-                print("✓")
+                print("鉁?)
                 self._record_fix(task_id, error_type, fix, "success")
                 return True
             else:
-                print("✗")
+                print("鉁?)
         
-        # 4. 所有修复都失败
-        print(f"   ✗ 所有修复策略都失败")
+        # 4. 鎵€鏈変慨澶嶉兘澶辫触
+        print(f"   鉁?鎵€鏈変慨澶嶇瓥鐣ラ兘澶辫触")
         self._record_fix(task_id, error_type, None, "failed")
         return False
     
     def _classify_error(self, error):
-        """分类错误类型"""
+        """鍒嗙被閿欒绫诲瀷"""
         error_lower = error.lower()
         
         for error_type, config in self.fix_patterns.items():
@@ -163,11 +161,11 @@ class AutoFixer:
         return "unknown"
     
     def _apply_fix(self, task, fix):
-        """应用修复策略"""
+        """搴旂敤淇绛栫暐"""
         action = fix["action"]
         params = fix["params"]
         
-        # 根据不同的修复动作执行不同的操作
+        # 鏍规嵁涓嶅悓鐨勪慨澶嶅姩浣滄墽琛屼笉鍚岀殑鎿嶄綔
         if action == "increase_timeout":
             return self._increase_timeout(task, params)
         elif action == "retry_with_backoff":
@@ -184,12 +182,12 @@ class AutoFixer:
             return False
     
     def _increase_timeout(self, task, params):
-        """增加超时时间"""
-        # 更新 Agent 配置
+        """澧炲姞瓒呮椂鏃堕棿"""
+        # 鏇存柊 Agent 閰嶇疆
         agent = task.get("agent")
         factor = params.get("factor", 1.5)
         
-        # 读取 agents.json
+        # 璇诲彇 agents.json
         agents_file = Path("agents.json")
         if not agents_file.exists():
             return False
@@ -199,14 +197,13 @@ class AutoFixer:
         
         agents = data if isinstance(data, list) else data.get("agents", [])
         
-        # 找到对应 Agent 并更新超时
-        for a in agents:
+        # 鎵惧埌瀵瑰簲 Agent 骞舵洿鏂拌秴鏃?        for a in agents:
             if a.get("name") == agent or a.get("id") == agent:
                 old_timeout = a.get("timeout", 60)
                 new_timeout = int(old_timeout * factor)
                 a["timeout"] = new_timeout
                 
-                # 保存
+                # 淇濆瓨
                 if isinstance(data, list):
                     with open(agents_file, "w", encoding="utf-8") as f:
                         json.dump(agents, f, ensure_ascii=False, indent=2)
@@ -214,24 +211,24 @@ class AutoFixer:
                     with open(agents_file, "w", encoding="utf-8") as f:
                         json.dump(data, f, ensure_ascii=False, indent=2)
                 
-                print(f"(超时: {old_timeout}s → {new_timeout}s)", end=" ")
+                print(f"(瓒呮椂: {old_timeout}s 鈫?{new_timeout}s)", end=" ")
                 return True
         
         return False
     
     def _retry_with_backoff(self, task, params):
-        """重试（带延迟）"""
+        """閲嶈瘯锛堝甫寤惰繜锛?""
         import time
         delay = params.get("delay", 5)
         
-        print(f"(等待 {delay}s)", end=" ")
+        print(f"(绛夊緟 {delay}s)", end=" ")
         time.sleep(delay)
         
-        # 重新提交任务
+        # 閲嶆柊鎻愪氦浠诲姟
         task_id = task.get("task_id")
         description = task.get("description", "")
         
-        # 创建新的任务
+        # 鍒涘缓鏂扮殑浠诲姟
         new_task = {
             "id": f"{task_id}-retry",
             "type": task.get("type", "code"),
@@ -242,17 +239,17 @@ class AutoFixer:
             "created_at": datetime.now().isoformat()
         }
         
-        # 写入队列
+        # 鍐欏叆闃熷垪
         with open("task_queue.jsonl", "a", encoding="utf-8") as f:
             f.write(json.dumps(new_task, ensure_ascii=False) + "\n")
         
         return True
     
     def _use_faster_model(self, task, params):
-        """切换到更快的模型"""
+        """鍒囨崲鍒版洿蹇殑妯″瀷"""
         model = params.get("model", "claude-sonnet-4-5")
         
-        # 更新 Agent 配置
+        # 鏇存柊 Agent 閰嶇疆
         agent = task.get("agent")
         agents_file = Path("agents.json")
         
@@ -269,7 +266,7 @@ class AutoFixer:
                 old_model = a.get("model", "unknown")
                 a["model"] = model
                 
-                # 保存
+                # 淇濆瓨
                 if isinstance(data, list):
                     with open(agents_file, "w", encoding="utf-8") as f:
                         json.dump(agents, f, ensure_ascii=False, indent=2)
@@ -277,39 +274,38 @@ class AutoFixer:
                     with open(agents_file, "w", encoding="utf-8") as f:
                         json.dump(data, f, ensure_ascii=False, indent=2)
                 
-                print(f"(模型: {old_model} → {model})", end=" ")
+                print(f"(妯″瀷: {old_model} 鈫?{model})", end=" ")
                 return True
         
         return False
     
     def _split_task(self, task, params):
-        """拆分任务"""
-        # 简化实现：标记任务需要拆分
-        print("(标记为需要拆分)", end=" ")
+        """鎷嗗垎浠诲姟"""
+        # 绠€鍖栧疄鐜帮細鏍囪浠诲姟闇€瑕佹媶鍒?        print("(鏍囪涓洪渶瑕佹媶鍒?", end=" ")
         return True
     
     def _fix_syntax(self, task, params):
-        """修复语法错误"""
-        # 简化实现：重新生成代码
-        print("(重新生成代码)", end=" ")
+        """淇璇硶閿欒"""
+        # 绠€鍖栧疄鐜帮細閲嶆柊鐢熸垚浠ｇ爜
+        print("(閲嶆柊鐢熸垚浠ｇ爜)", end=" ")
         return self._retry_with_backoff(task, {"delay": 1})
     
     def _install_dependency(self, task, params):
-        """安装依赖"""
-        # 从错误信息中提取包名
+        """瀹夎渚濊禆"""
+        # 浠庨敊璇俊鎭腑鎻愬彇鍖呭悕
         error = task.get("error", "")
         match = re.search(r"no module named ['\"]([^'\"]+)['\"]", error.lower())
         
         if match:
             package = match.group(1)
-            print(f"(安装 {package})", end=" ")
-            # 实际应该执行 pip install
+            print(f"(瀹夎 {package})", end=" ")
+            # 瀹為檯搴旇鎵ц pip install
             return True
         
         return False
     
     def _record_fix(self, task_id, error_type, fix, status):
-        """记录修复历史"""
+        """璁板綍淇鍘嗗彶"""
         record = {
             "timestamp": datetime.now().isoformat(),
             "task_id": task_id,
@@ -325,3 +321,5 @@ class AutoFixer:
 if __name__ == "__main__":
     fixer = AutoFixer()
     fixer.auto_fix()
+
+

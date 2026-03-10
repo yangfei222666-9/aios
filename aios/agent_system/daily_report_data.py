@@ -1,4 +1,4 @@
-import json
+﻿import json
 from pathlib import Path
 from datetime import datetime, timedelta
 
@@ -6,7 +6,7 @@ base = Path('C:/Users/A/.openclaw/workspace/aios/agent_system')
 today = datetime.now().strftime('%Y-%m-%d')
 yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-exec_file = base / 'task_executions.jsonl'
+exec_file = base / TASK_EXECUTIONS
 agents_file = base / 'agents.json'
 lessons_file = base / 'lessons.json'
 evolution_file = base / 'evolution_score.json'
@@ -91,3 +91,5 @@ if spawn_file.exists():
         except:
             pass
     print(f"spawns_24h={len(spawns)}")
+
+

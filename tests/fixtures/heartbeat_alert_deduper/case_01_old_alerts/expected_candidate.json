@@ -1,0 +1,13 @@
+{
+  "pattern_type": "repeated_alert_dedup_judgment",
+  "frequency": 3,
+  "source_events_count": 3,
+  "confidence": 0.85,
+  "suggested_skill_name": "heartbeat_alert_deduper",
+  "evidence": [
+    "api-testing-skill v1.0.0 - CRIT (network_error) - already reported 2026-03-06",
+    "docker-skill v0.9.0 - CRIT (resource_exhausted) - already reported 2026-03-06",
+    "pdf-skill v2.1.0 - WARN (timeout) - already reported 2026-03-06"
+  ],
+  "reasoning": "All three alerts are old alerts (first reported 2026-03-06), should be deduplicated unless severity changed or error type changed"
+}

@@ -1,6 +1,6 @@
-"""
+﻿"""
 AIOS Memory Retrieval System v1.0
-LanceDB-based semantic memory: ingest → query → rerank → inject → feedback
+LanceDB-based semantic memory: ingest 鈫?query 鈫?rerank 鈫?inject 鈫?feedback
 """
 
 import json
@@ -14,13 +14,13 @@ import lancedb
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-# ── Config ──────────────────────────────────────────────────────────────────
+# 鈹€鈹€ Config 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 DB_PATH = Path(__file__).parent / "lancedb_memory"
 TABLE_NAME = "task_memory"
 MODEL_NAME = "all-MiniLM-L6-v2"
 TOP_K = 10
 
-# ── Singleton model (lazy load) ──────────────────────────────────────────────
+# 鈹€鈹€ Singleton model (lazy load) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 _model: Optional[SentenceTransformer] = None
 
 def _get_model() -> SentenceTransformer:
@@ -33,7 +33,7 @@ def _embed(text: str) -> list[float]:
     return _get_model().encode(text, normalize_embeddings=True).tolist()
 
 
-# ── Schema ───────────────────────────────────────────────────────────────────
+# 鈹€鈹€ Schema 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 # id, text, vector, task_type, outcome, timestamp, tags, helpfulness
 # helpfulness: float 0.0~1.0, updated via feedback()
 
@@ -60,7 +60,7 @@ def _get_table():
     return tbl
 
 
-# ── Ingest ───────────────────────────────────────────────────────────────────
+# 鈹€鈹€ Ingest 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 def ingest(
     text: str,
     task_type: str = "",
@@ -85,7 +85,7 @@ def ingest(
     return rid
 
 
-# ── Query ────────────────────────────────────────────────────────────────────
+# 鈹€鈹€ Query 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 def query(
     question: str,
     top_k: int = TOP_K,
@@ -108,7 +108,7 @@ def query(
     now_ts = time.time()
     reranked = []
     for r in results:
-        sim = max(0.0, 1.0 - float(r.get("_distance", 1.0)) / 2.0)  # L2 dist → [0,1] sim
+        sim = max(0.0, 1.0 - float(r.get("_distance", 1.0)) / 2.0)  # L2 dist 鈫?[0,1] sim
         # time decay: half-life ~7 days
         try:
             age_days = (now_ts - datetime.fromisoformat(r["timestamp"]).timestamp()) / 86400
@@ -124,7 +124,7 @@ def query(
     return reranked[:top_k]
 
 
-# ── Inject context ───────────────────────────────────────────────────────────
+# 鈹€鈹€ Inject context 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 def build_context(question: str, top_k: int = 5, task_type: str | None = None) -> str:
     """Return a formatted context string to inject before task execution."""
     t0 = time.time()
@@ -142,7 +142,7 @@ def build_context(question: str, top_k: int = 5, task_type: str | None = None) -
     return "\n".join(lines)
 
 
-# ── Feedback ─────────────────────────────────────────────────────────────────
+# 鈹€鈹€ Feedback 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 def feedback(record_id: str, helpful: bool) -> bool:
     """Update helpfulness score for a memory record."""
     tbl = _get_table()
@@ -157,9 +157,9 @@ def feedback(record_id: str, helpful: bool) -> bool:
 
 from paths import TASK_EXECUTIONS
 
-# ── Bulk ingest from task_executions.jsonl ───────────────────────────────────
+# 鈹€鈹€ Bulk ingest from task_executions_v2.jsonl 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 def ingest_from_executions(path: str | None = None, limit: int = 500) -> int:
-    """Bootstrap: load existing task_executions.jsonl into LanceDB."""
+    """Bootstrap: load existing task_executions_v2.jsonl into LanceDB."""
     p = Path(path or TASK_EXECUTIONS)
     if not p.exists():
         return 0
@@ -203,7 +203,7 @@ def ingest_from_executions(path: str | None = None, limit: int = 500) -> int:
     return count
 
 
-# ── CLI ──────────────────────────────────────────────────────────────────────
+# 鈹€鈹€ CLI 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 if __name__ == "__main__":
     import sys
 
@@ -211,7 +211,7 @@ if __name__ == "__main__":
 
     if cmd == "ingest-all":
         n = ingest_from_executions()
-        print(f"[OK] Ingested {n} records from task_executions.jsonl")
+        print(f"[OK] Ingested {n} records from task_executions_v2.jsonl")
 
     elif cmd == "query":
         q = " ".join(sys.argv[2:]) or "task failed timeout"
@@ -233,3 +233,4 @@ if __name__ == "__main__":
 
     else:
         print("Usage: memory_retrieval.py [status|ingest-all|query <text>|context <text>]")
+

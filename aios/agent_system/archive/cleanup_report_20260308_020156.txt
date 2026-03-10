@@ -1,0 +1,16 @@
+﻿=== AIOS Cleanup Report ===
+Date: 2026-03-08 02:01:55
+
+Cleaned Items:
+1. __pycache__ directories (3 dirs) - 0.95 MB freed
+2. Old daily logs (10 files) - 46.2 KB archived
+3. Old analysis logs (13 files) - 50.2 KB archived
+4. Temp files - None found
+
+Total Space Freed: ~1.04 MB
+Final System Size: 13.4 MB (was 14.25 MB)
+
+Archive Location: C:\Users\A\.openclaw\workspace\aios\agent_system\archive
+Archived Files: 23 files
+
+Status: ✅ Cleanup completed successfully

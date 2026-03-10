@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-AIOS Baseline Snapshot - 可靠性关键指标基线
-用于 48h 观测期前后对比
-
-基线时间：2026-03-06 11:31
-复盘时间：2026-03-08 11:05
+AIOS Baseline Snapshot - 鍙潬鎬у叧閿寚鏍囧熀绾?鐢ㄤ簬 48h 瑙傛祴鏈熷墠鍚庡姣?
+鍩虹嚎鏃堕棿锛?026-03-06 11:31
+澶嶇洏鏃堕棿锛?026-03-08 11:05
 """
 
 import json
@@ -15,18 +13,18 @@ from datetime import datetime
 WORKSPACE = Path(__file__).parent
 BASELINE_FILE = WORKSPACE / "baseline_snapshot.json"
 
-# 指标文件路径 - 统一从 paths.py 获取
+# 鎸囨爣鏂囦欢璺緞 - 缁熶竴浠?paths.py 鑾峰彇
 try:
     from paths import TASK_QUEUE, TASK_EXECUTIONS
 except ImportError:
     TASK_QUEUE = WORKSPACE / "data" / "task_queue.jsonl"
-    TASK_EXECUTIONS = WORKSPACE / "data" / "task_executions.jsonl"
+    TASK_EXECUTIONS = WORKSPACE / "data" / "task_executions_v2.jsonl"
 PHASE3_LOG = WORKSPACE / "phase3_observations.jsonl"
 SPAWN_LOCK_METRICS = WORKSPACE / "spawn_lock_metrics.json"
 
 
 def load_phase3_metrics() -> dict:
-    """Phase 3 字段完整率"""
+    """Phase 3 瀛楁瀹屾暣鐜?""
     if not PHASE3_LOG.exists():
         return {"total": 0, "complete_fields": 0, "completeness_rate": 0.0}
     
@@ -38,7 +36,7 @@ def load_phase3_metrics() -> dict:
                 continue
             total += 1
             obs = json.loads(line)
-            # 检查关键字段：agent_id / reborn_at / outcome
+            # 妫€鏌ュ叧閿瓧娈碉細agent_id / reborn_at / outcome
             if all(k in obs for k in ["agent_id", "reborn_at", "outcome"]):
                 complete += 1
     
@@ -50,7 +48,7 @@ def load_phase3_metrics() -> dict:
 
 
 def load_zombie_metrics() -> dict:
-    """僵尸任务回收率、重试耗尽率、永久失败率"""
+    """鍍靛案浠诲姟鍥炴敹鐜囥€侀噸璇曡€楀敖鐜囥€佹案涔呭け璐ョ巼"""
     if not TASK_QUEUE.exists():
         return {
             "total_tasks": 0,
@@ -88,7 +86,7 @@ def load_zombie_metrics() -> dict:
 
 
 def load_failure_classification() -> dict:
-    """simulation 与真实失败分层成功率"""
+    """simulation 涓庣湡瀹炲け璐ュ垎灞傛垚鍔熺巼"""
     if not TASK_EXECUTIONS.exists():
         return {
             "total_executions": 0,
@@ -123,7 +121,7 @@ def load_failure_classification() -> dict:
 
 
 def load_spawn_lock_metrics() -> dict:
-    """spawn_lock 冲突率、超时释放率、误拦截率"""
+    """spawn_lock 鍐茬獊鐜囥€佽秴鏃堕噴鏀剧巼銆佽鎷︽埅鐜?""
     if not SPAWN_LOCK_METRICS.exists():
         return {
             "idempotent_hit_rate": 0.0,
@@ -152,7 +150,7 @@ def load_spawn_lock_metrics() -> dict:
 
 
 def capture_baseline() -> dict:
-    """捕获当前基线快照"""
+    """鎹曡幏褰撳墠鍩虹嚎蹇収"""
     baseline = {
         "timestamp": datetime.now().isoformat(),
         "phase3": load_phase3_metrics(),
@@ -167,43 +165,43 @@ def capture_baseline() -> dict:
 
 
 def print_baseline(baseline: dict):
-    """打印基线快照"""
+    """鎵撳嵃鍩虹嚎蹇収"""
     print("\n" + "=" * 70)
-    print("AIOS Baseline Snapshot - 可靠性关键指标")
+    print("AIOS Baseline Snapshot - 鍙潬鎬у叧閿寚鏍?)
     print("=" * 70)
-    print(f"时间: {baseline['timestamp']}")
+    print(f"鏃堕棿: {baseline['timestamp']}")
     print()
     
-    print("[Phase 3] 字段完整率")
+    print("[Phase 3] 瀛楁瀹屾暣鐜?)
     p3 = baseline["phase3"]
-    print(f"  总观测数: {p3['total']}")
-    print(f"  完整字段: {p3['complete_fields']}")
-    print(f"  完整率: {p3['completeness_rate']:.1%}")
+    print(f"  鎬昏娴嬫暟: {p3['total']}")
+    print(f"  瀹屾暣瀛楁: {p3['complete_fields']}")
+    print(f"  瀹屾暣鐜? {p3['completeness_rate']:.1%}")
     print()
     
-    print("[Zombie] 僵尸任务回收")
+    print("[Zombie] 鍍靛案浠诲姟鍥炴敹")
     z = baseline["zombie"]
-    print(f"  总任务数: {z['total_tasks']}")
-    print(f"  已回收: {z['zombie_reclaimed']}")
-    print(f"  重试中: {z['zombie_retried']}")
-    print(f"  永久失败: {z['zombie_permanently_failed']}")
-    print(f"  回收率: {z['reclaim_rate']:.1%}")
+    print(f"  鎬讳换鍔℃暟: {z['total_tasks']}")
+    print(f"  宸插洖鏀? {z['zombie_reclaimed']}")
+    print(f"  閲嶈瘯涓? {z['zombie_retried']}")
+    print(f"  姘镐箙澶辫触: {z['zombie_permanently_failed']}")
+    print(f"  鍥炴敹鐜? {z['reclaim_rate']:.1%}")
     print()
     
-    print("[Failure] 失败分类")
+    print("[Failure] 澶辫触鍒嗙被")
     f = baseline["failure_classification"]
-    print(f"  总失败数: {f['total_failures']}")
-    print(f"  模拟失败: {f['simulation_failures']}")
-    print(f"  真实失败: {f['real_failures']}")
-    print(f"  模拟占比: {f['simulation_rate']:.1%}")
+    print(f"  鎬诲け璐ユ暟: {f['total_failures']}")
+    print(f"  妯℃嫙澶辫触: {f['simulation_failures']}")
+    print(f"  鐪熷疄澶辫触: {f['real_failures']}")
+    print(f"  妯℃嫙鍗犳瘮: {f['simulation_rate']:.1%}")
     print()
     
-    print("[Spawn Lock] 幂等锁")
+    print("[Spawn Lock] 骞傜瓑閿?)
     sl = baseline["spawn_lock"]
-    print(f"  冲突率: {sl['idempotent_hit_rate']:.1%}")
-    print(f"  平均延迟: {sl['lock_acquire_latency_ms_avg']:.2f}ms")
-    print(f"  过期锁恢复: {sl['stale_lock_recovered_total']}")
-    print(f"  总获取次数: {sl.get('acquire_total', 0)}")
+    print(f"  鍐茬獊鐜? {sl['idempotent_hit_rate']:.1%}")
+    print(f"  骞冲潎寤惰繜: {sl['lock_acquire_latency_ms_avg']:.2f}ms")
+    print(f"  杩囨湡閿佹仮澶? {sl['stale_lock_recovered_total']}")
+    print(f"  鎬昏幏鍙栨鏁? {sl.get('acquire_total', 0)}")
     print()
     print("=" * 70)
 
@@ -211,3 +209,4 @@ def print_baseline(baseline: dict):
 if __name__ == "__main__":
     baseline = capture_baseline()
     print_baseline(baseline)
+

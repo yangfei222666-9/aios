@@ -38,8 +38,9 @@ def activate_daguo_emergency(state: dict) -> dict:
         success_rate=state.get('real_success_rate', state.get('success_rate', 33.3))  # 鐢ㄧ湡瀹炲€硷紒
     )
     
-    # 绀轰緥琛屽姩璁″垝锛堝疄闄呮帴LLM锛?    plan = {
-        "current_hex": "澶ц繃鍗?,
+    # 绀轰緥琛屽姩璁″垝锛堝疄闄呮帴LLM锛?
+    plan = {
+        "current_hex": "澶ц繃鍗?",
         "risk": "high",
         "confidence": state.get('confidence', 88.0),
         "success_rate": state.get('success_rate', 33.3),
@@ -47,20 +48,21 @@ def activate_daguo_emergency(state: dict) -> dict:
             {"step": 1, "action": "pause_generator", "detail": "鏆傚仠浠诲姟鐢熸垚15鍒嗛挓", "priority": "critical"},
             {"step": 2, "action": "kill_duplicates", "detail": "娓呯悊閲嶅浠诲姟", "priority": "high"},
             {"step": 3, "action": "scale_workers", "detail": "+1 Worker", "priority": "high"},
-            {"step": 4, "action": "alert_telegram", "detail": "鍙戦€佸嵄鏈烘姤璀?, "priority": "high"}
+            {"step": 4, "action": "alert_telegram", "detail": "鍙戦€佸嵄鏈烘姤璀?", "priority": "high"}
         ],
         "immediate_stop": True,
         "scale_up": True,
         "alert_sent": True,
         "learning_points": [
-            "浠诲姟瓒?55鏃跺繀椤绘彁鍓嶈妭娴?,
-            "婊戝姩绐楀彛蹇呴』寮哄埗鐢ㄦ渶杩?00鏉?,
-            "澶ц繃鍗︽寔缁?3娆¤嚜鍔ㄦ眰鎻?
+            "浠诲姟瓒?55鏃跺繀椤绘彁鍓嶈妭娴?",
+            "婊戝姩绐楀彛蹇呴』寮哄埗鐢ㄦ渶杩?00鏉?",
+            "澶ц繃鍗︽寔缁?3娆¤嚜鍔ㄦ眰鎻?"
         ],
         "timestamp": datetime.now().isoformat()
     }
     
-    # 淇濆瓨鍒板巻鍙?    with open('daguo_history.jsonl', 'a', encoding='utf-8') as f:
+    # 淇濆瓨鍒板巻鍙?
+    with open('daguo_history.jsonl', 'a', encoding='utf-8') as f:
         f.write(json.dumps(plan, ensure_ascii=False) + '\n')
     
     # 淇濆瓨鎶ヨ
@@ -92,7 +94,7 @@ def check_daguo_consecutive():
             lines = f.readlines()
             if len(lines) >= 2:
                 # 妫€鏌ユ渶杩?娆?                recent = [json.loads(line) for line in lines[-2:]]
-                return all(r.get('current_hex') == '澶ц繃鍗? for r in recent)
+                return all(r.get('current_hex') == '澶ц繃鍗?' for r in recent)
     except FileNotFoundError:
         return False
     
@@ -102,7 +104,7 @@ def check_daguo_consecutive():
 if __name__ == "__main__":
     # 娴嬭瘯
     test_state = {
-        "hex_name": "澶ц繃鍗?,
+        "hex_name": "澶ц繃鍗?",
         "confidence": 88.0,
         "success_rate": 33.3,
         "real_success_rate": 33.3,

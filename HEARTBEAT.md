@@ -4,6 +4,23 @@
 
 **最新版本：** v5.1 - 真实 sessions_spawn 执行
 
+## 🔕 告警去重规则（2026-03-08 珊瑚海确认）
+
+Skill 连续失败告警默认去重，**已发过的告警不重复通知**。
+
+仅在以下情况重新通知：
+- 连续失败次数继续增加
+- 错误类型发生变化
+- 等级升级（WARN → CRIT）
+- 修复后再次复发
+
+当前已抑制的旧告警（2026-03-06，已发送）：
+- `api-testing-skill v1.0.0` - CRIT (network_error)
+- `docker-skill v0.9.0` - CRIT (resource_exhausted)
+- `pdf-skill v2.1.0` - WARN (timeout)
+
+---
+
 ## ⚡ 心跳必做：处理 spawn_pending.jsonl
 
 每次心跳，在运行 heartbeat_v5.py 之前，先检查：

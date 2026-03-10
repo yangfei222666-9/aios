@@ -1,0 +1,9 @@
+{
+  "pattern_type": null,
+  "frequency": 0,
+  "source_events_count": 0,
+  "confidence": 0.0,
+  "suggested_skill_name": null,
+  "evidence": [],
+  "reasoning": "Clean heartbeat with no alerts, no failures, no system issues. Should NOT generate any candidate. Used as negative test case to verify detector doesn't produce false positives."
+}

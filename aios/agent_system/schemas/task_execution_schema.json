@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIOS Task Execution Record",
+  "description": "统一的任务执行记录格式 - AIOS 执行账本",
+  "type": "object",
+  "required": [
+    "task_id",
+    "agent_id",
+    "task_type",
+    "status",
+    "started_at",
+    "finished_at"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "description": "任务唯一标识符",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "执行该任务的 Agent ID",
+      "examples": ["coder-dispatcher", "GitHub_Researcher", "monitor-dispatcher"]
+    },
+    "task_type": {
+      "type": "string",
+      "description": "任务类型",
+      "enum": ["code", "analysis", "monitor", "learning", "improvement", "cleanup", "other"]
+    },
+    "status": {
+      "type": "string",
+      "description": "任务执行状态",
+      "enum": ["completed", "failed", "timeout", "cancelled"]
+    },
+    "description": {
+      "type": "string",
+      "description": "任务描述（人类可读）",
+      "maxLength": 500
+    },
+    "started_at": {
+      "type": "number",
+      "description": "任务开始时间（Unix timestamp）"
+    },
+    "finished_at": {
+      "type": "number",
+      "description": "任务结束时间（Unix timestamp）"
+    },
+    "duration_ms": {
+      "type": "number",
+      "description": "任务执行时长（毫秒）",
+      "minimum": 0
+    },
+    "success": {
+      "type": "boolean",
+      "description": "任务是否成功（快速判断字段）"
+    },
+    "error_type": {
+      "type": "string",
+      "description": "错误类型（失败时必填）",
+      "enum": ["timeout", "network_error", "model_error", "validation_error", "resource_exhausted", "unknown", null]
+    },
+    "error_message": {
+      "type": "string",
+      "description": "错误详细信息（失败时必填）",
+      "maxLength": 1000
+    },
+    "output_summary": {
+      "type": "string",
+      "description": "执行结果摘要（成功时必填，最多 500 字符）",
+      "maxLength": 500
+    },
+    "output_full": {
+      "type": "string",
+      "description": "完整输出（可选，用于详细分析）"
+    },
+    "source": {
+      "type": "string",
+      "description": "任务来源",
+      "enum": ["heartbeat", "user_request", "cron", "self_improving", "learning_agent", "manual", "other"]
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "追踪 ID（用于关联多个相关任务）",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "retry_count": {
+      "type": "integer",
+      "description": "重试次数",
+      "minimum": 0,
+      "default": 0
+    },
+    "total_attempts": {
+      "type": "integer",
+      "description": "总尝试次数（包括首次执行）",
+      "minimum": 1,
+      "default": 1
+    },
+    "tokens": {
+      "type": "object",
+      "description": "Token 使用统计（可选）",
+      "properties": {
+        "input": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "额外元数据（可选，用于扩展）",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

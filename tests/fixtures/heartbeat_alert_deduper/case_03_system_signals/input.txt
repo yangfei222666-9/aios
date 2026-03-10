@@ -1,0 +1,25 @@
+AIOS Heartbeat v5.0 Started
+
+[SYSTEM] System signals detected:
+  ℹ️ evolution_score expired (last update: 2026-03-07 22:15:30)
+     Current score: 67.2 (stale)
+     Recommendation: Trigger evolution_score recalculation
+  
+  ⚠️ memory latency degraded
+     Average query time: 2.8s (baseline: 0.8s)
+     Possible cause: Embedding model cold start
+     Recommendation: Check memory_server status
+
+[QUEUE] No pending tasks
+
+[HEALTH] Checking system health...
+   Health Score: 81.43/100
+   Total Tasks: 7
+   Completed: 6
+   Failed: 1
+   Pending: 0
+   Status: GOOD
+
+HEARTBEAT_OK (system_signals_only, health=81)
+
+Heartbeat Completed

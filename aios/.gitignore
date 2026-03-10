@@ -30,3 +30,26 @@ reports/
 
 # Backups
 *_backup_*
+backups/
+
+# Build artifacts
+build/
+dist/
+dist_exe/
+dist_full/
+build_full_tmp/
+build_output/
+*.egg-info/
+*.spec
+*.zip
+
+# Test coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Portable builds
+AIOS-Portable/
+
+# Events (runtime data)
+events/

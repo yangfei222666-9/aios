@@ -12,6 +12,7 @@ Skill Memory - 让技能成为有记忆、可演化的知识单元
 """
 
 import json
+import re
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -32,6 +33,30 @@ class SkillMemory:
         self.executions_file = SKILL_EXECUTIONS_FILE
         self._ensure_files()
     
+    @staticmethod
+    def normalize_skill_id(raw_name: str) -> str:
+        """
+        Skill 名称规范化（硬规则）
+        
+        规则：
+        1. 全部小写
+        2. 空格/下划线 → 连字符
+        3. 去掉多余连字符
+        4. 去掉前后连字符
+        
+        示例：
+          "PDF Skill"   → "pdf-skill"
+          "pdf_skill"   → "pdf-skill"
+          "PDF-Skill"   → "pdf-skill"
+          "pdf"         → "pdf"
+          " Git  Skill" → "git-skill"
+        """
+        s = raw_name.strip().lower()
+        s = re.sub(r'[\s_]+', '-', s)   # 空格/下划线 → 连字符
+        s = re.sub(r'-+', '-', s)        # 多个连字符 → 一个
+        s = s.strip('-')                 # 去掉首尾连字符
+        return s
+    
     def _ensure_files(self):
         """确保数据文件存在"""
         self.memory_file.parent.mkdir(parents=True, exist_ok=True)
@@ -48,6 +73,7 @@ class SkillMemory:
         command: str,
         status: str,
         duration_ms: int,
+        skill_version: str = "1.0.0",
         input_params: Optional[Dict] = None,
         output_summary: Optional[str] = None,
         error: Optional[str] = None,
@@ -57,12 +83,13 @@ class SkillMemory:
         记录一次 Skill 执行
         
         Args:
-            skill_id: 技能 ID（如 "pdf-skill"）
-            skill_name: 技能名称
+            skill_id: 技能 ID（自动规范化，如 "PDF Skill" → "pdf-skill"）
+            skill_name: 技能显示名称
             task_id: 任务 ID
             command: 执行的命令
             status: 执行状态（success/failed）
             duration_ms: 执行耗时（毫秒）
+            skill_version: 技能版本号（默认 "1.0.0"）
             input_params: 输入参数
             output_summary: 输出摘要
             error: 错误信息（如果失败）
@@ -71,6 +98,9 @@ class SkillMemory:
         Returns:
             execution_id: 执行记录 ID
         """
+        # 硬规则：强制规范化 skill_id
+        skill_id = self.normalize_skill_id(skill_id)
+        
         now = datetime.now()
         execution_id = f"exec-{now.strftime('%Y%m%d-%H%M%S')}-{task_id[-3:]}"
         
@@ -78,6 +108,7 @@ class SkillMemory:
             "execution_id": execution_id,
             "skill_id": skill_id,
             "skill_name": skill_name,
+            "skill_version": skill_version,
             "task_id": task_id,
             "command": command,
             "started_at": now.isoformat(),
@@ -100,11 +131,14 @@ class SkillMemory:
         更新指定 Skill 的统计信息
         
         Args:
-            skill_id: 技能 ID
+            skill_id: 技能 ID（自动规范化）
         
         Returns:
             更新后的技能记忆条目
         """
+        # 硬规则：强制规范化
+        skill_id = self.normalize_skill_id(skill_id)
+        
         # 读取所有执行记录
         executions = self._load_executions(skill_id)
         
@@ -120,6 +154,12 @@ class SkillMemory:
         avg_duration = sum(e["duration_ms"] for e in executions) / total
         
         last_execution = max(executions, key=lambda e: e["started_at"])
+        
+        # 版本追踪：取最新执行记录的版本，收集所有历史版本
+        latest_version = last_execution.get("skill_version", "1.0.0")
+        seen_versions = sorted(set(
+            e.get("skill_version", "1.0.0") for e in executions
+        ))
         
         # 识别常见模式（基于 command）
         command_stats = defaultdict(lambda: {"count": 0, "success": 0})
@@ -145,10 +185,11 @@ class SkillMemory:
         evolution_score = self._calculate_evolution_score(success_rate, total)
         
         # 构建技能记忆条目
-        skill_memory = {
+        skill_memory_entry = {
             "skill_id": skill_id,
             "skill_name": last_execution.get("skill_name", skill_id),
-            "version": "1.0.0",  # TODO: 从 SKILL.md 读取
+            "skill_version": latest_version,
+            "version_history": seen_versions,
             "last_used": last_execution["started_at"],
             "usage_count": total,
             "success_count": success,
@@ -162,12 +203,12 @@ class SkillMemory:
         }
         
         # 更新到 skill_memory.jsonl
-        self._update_memory_file(skill_id, skill_memory)
+        self._update_memory_file(skill_id, skill_memory_entry)
         
-        return skill_memory
+        return skill_memory_entry
     
     def _load_executions(self, skill_id: str) -> List[Dict]:
-        """加载指定 Skill 的所有执行记录"""
+        """加载指定 Skill 的所有执行记录（skill_id 已规范化）"""
         if not self.executions_file.exists():
             return []
         
@@ -176,7 +217,8 @@ class SkillMemory:
             for line in f:
                 if line.strip():
                     record = json.loads(line)
-                    if record.get("skill_id") == skill_id:
+                    # 对比时也规范化存储的 skill_id（兼容旧数据）
+                    if self.normalize_skill_id(record.get("skill_id", "")) == skill_id:
                         executions.append(record)
         
         return executions
@@ -207,7 +249,7 @@ class SkillMemory:
         """分类错误类型"""
         error_lower = error_msg.lower()
         
-        if "timeout" in error_lower:
+        if "timeout" in error_lower or "timed out" in error_lower:
             return "timeout"
         elif "encoding" in error_lower or "decode" in error_lower:
             return "encoding_error"
@@ -215,8 +257,22 @@ class SkillMemory:
             return "file_not_found"
         elif "permission" in error_lower:
             return "permission_denied"
-        elif "memory" in error_lower or "out of memory" in error_lower:
+        elif any(kw in error_lower for kw in [
+            "memory", "out of memory", "oom",
+            "resource", "resources exhausted", "insufficient resources",
+            "quota exceeded", "disk space", "cpu"
+        ]):
             return "resource_exhausted"
+        elif any(kw in error_lower for kw in [
+            "network", "connection", "dns", "unreachable",
+            "502", "503", "504", "gateway"
+        ]):
+            return "network_error"
+        elif any(kw in error_lower for kw in [
+            "dependency", "module not found", "import error",
+            "package", "version conflict"
+        ]):
+            return "dependency_error"
         else:
             return "unknown"
     
@@ -228,6 +284,8 @@ class SkillMemory:
             "file_not_found": "check_file_path_and_retry",
             "permission_denied": "check_permissions_and_retry",
             "resource_exhausted": "reduce_batch_size_and_retry",
+            "network_error": "switch_to_backup_endpoint",
+            "dependency_error": "check_dependencies_and_reinstall",
             "unknown": "default_recovery"
         }
         return strategies.get(error_type, "default_recovery")
@@ -267,6 +325,7 @@ class SkillMemory:
     
     def get_skill_memory(self, skill_id: str) -> Optional[Dict]:
         """获取指定 Skill 的记忆条目"""
+        skill_id = self.normalize_skill_id(skill_id)
         if not self.memory_file.exists():
             return None
         
@@ -274,7 +333,7 @@ class SkillMemory:
             for line in f:
                 if line.strip():
                     memory = json.loads(line)
-                    if memory.get("skill_id") == skill_id:
+                    if self.normalize_skill_id(memory.get("skill_id", "")) == skill_id:
                         return memory
         
         return None

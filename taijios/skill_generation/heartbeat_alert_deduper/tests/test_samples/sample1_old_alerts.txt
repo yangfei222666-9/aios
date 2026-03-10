@@ -1,0 +1,18 @@
+AIOS Heartbeat v5.0 Started
+
+[SKILL_ALERTS]
+api-testing-skill — 连续失败 3 次，原因：network_error
+docker-skill — 连续失败 3 次，原因：resource_exhausted
+pdf-skill — 连续失败 2 次，原因：timeout
+
+[HEALTH] Checking system health...
+   Health Score: 85.71/100
+   Total Tasks: 7
+   Completed: 6
+   Failed: 1
+   Pending: 0
+   Status: GOOD
+
+HEARTBEAT_OK (no_tasks, health=85)
+
+Heartbeat Completed

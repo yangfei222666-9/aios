@@ -160,10 +160,10 @@ def generate_visualization():
     return {"status": "failed", "error": result.get('error')}
 
 def calculate_health_score():
-    """计算系统健康度"""
+    """计算系统健康度（基于已完成任务的成功率）"""
     queue_file = _TASK_QUEUE_PATH
     if not queue_file.exists():
-        return 0.0
+        return 100.0  # 文件不存在 = 没任务 = 健康
     
     tasks = []
     with open(queue_file, 'r', encoding='utf-8') as f:
@@ -171,12 +171,16 @@ def calculate_health_score():
             tasks.append(json.loads(line))
     
     if not tasks:
-        return 100.0
+        return 100.0  # 空队列 = 健康
     
     completed = sum(1 for t in tasks if t.get('status') == 'completed')
-    total = len(tasks)
+    failed = sum(1 for t in tasks if t.get('status') == 'failed')
+    finished = completed + failed
     
-    return (completed / total * 100) if total > 0 else 0.0
+    if finished == 0:
+        return 100.0  # 没有已完成任务 = 全是 pending = 健康（避免除零）
+    
+    return (completed / finished * 100)
 
 def main():
     print("╔══════════════════════════════════════════════════════════════╗")

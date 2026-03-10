@@ -1,0 +1,31 @@
+AIOS Heartbeat v5.0 Started
+
+[SKILL_HEALTH] Checking skill health...
+  ⚠️ api-testing-skill v1.0.0 - CRIT (network_error)
+     Last success: 2026-03-06 10:23:15
+     Consecutive failures: 5
+     Error: Connection timeout after 30s
+  
+  ⚠️ docker-skill v0.9.0 - CRIT (resource_exhausted)
+     Last success: 2026-03-06 09:45:22
+     Consecutive failures: 4
+     Error: Docker daemon not responding
+  
+  ⚠️ pdf-skill v2.1.0 - WARN (timeout)
+     Last success: 2026-03-06 14:12:08
+     Consecutive failures: 2
+     Error: PDF parsing timeout (>60s)
+
+[QUEUE] No pending tasks
+
+[HEALTH] Checking system health...
+   Health Score: 72.14/100
+   Total Tasks: 14
+   Completed: 10
+   Failed: 4
+   Pending: 0
+   Status: WARNING
+
+HEARTBEAT_OK (no_tasks, health=72)
+
+Heartbeat Completed

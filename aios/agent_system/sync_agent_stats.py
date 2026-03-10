@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-Agent 统计同步工具 - 从 task_executions.jsonl 同步真实数据到 agents.json
+Agent 缁熻鍚屾宸ュ叿 - 浠?task_executions_v2.jsonl 鍚屾鐪熷疄鏁版嵁鍒?agents.json
 """
 import json
 from pathlib import Path
@@ -11,8 +11,8 @@ AGENTS_FILE = AGENTS_STATE
 EXECUTIONS_FILE = TASK_EXECUTIONS
 
 def sync_agent_stats():
-    """同步 Agent 统计数据"""
-    # 1. 读取真实执行记录
+    """鍚屾 Agent 缁熻鏁版嵁"""
+    # 1. 璇诲彇鐪熷疄鎵ц璁板綍
     agent_stats = defaultdict(lambda: {
         'tasks_completed': 0,
         'tasks_failed': 0,
@@ -27,7 +27,7 @@ def sync_agent_stats():
                     continue
                 try:
                     record = json.loads(line)
-                    # 新格式：agent_id, status
+                    # 鏂版牸寮忥細agent_id, status
                     agent = record.get('agent_id', 'unknown')
                     status = record.get('status', 'unknown')
                     
@@ -37,13 +37,13 @@ def sync_agent_stats():
                     elif status == 'failed':
                         agent_stats[agent]['tasks_failed'] += 1
                     
-                    # 新格式：duration_ms（毫秒）
+                    # 鏂版牸寮忥細duration_ms锛堟绉掞級
                     duration_ms = record.get('duration_ms', 0)
-                    agent_stats[agent]['total_duration'] += duration_ms / 1000.0  # 转换为秒
+                    agent_stats[agent]['total_duration'] += duration_ms / 1000.0  # 杞崲涓虹
                 except:
                     continue
     
-    # 2. 更新 agents.json
+    # 2. 鏇存柊 agents.json
     with open(AGENTS_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
@@ -51,7 +51,7 @@ def sync_agent_stats():
     for agent in data['agents']:
         agent_id = agent.get('id') or agent.get('name')
         
-        # 尝试匹配统计数据
+        # 灏濊瘯鍖归厤缁熻鏁版嵁
         stats = None
         if agent_id in agent_stats:
             stats = agent_stats[agent_id]
@@ -72,7 +72,7 @@ def sync_agent_stats():
             updated += 1
             print(f"[SYNC] {agent_id}: {stats['tasks_completed']}/{stats['tasks_total']} tasks")
     
-    # 3. 保存更新
+    # 3. 淇濆瓨鏇存柊
     with open(AGENTS_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     
@@ -81,3 +81,4 @@ def sync_agent_stats():
 
 if __name__ == '__main__':
     sync_agent_stats()
+

@@ -76,5 +76,5 @@ def apply_bigua_strategy(state: dict) -> dict:
     with open('bigua_history.jsonl', 'a', encoding='utf-8') as f:
         f.write(json.dumps(action_plan, ensure_ascii=False) + '\n')
     
-    print(f"✅ 比卦策略已激活！协作分数：{action_plan['collaboration_score']}")
+    print(f"比卦策略已激活！协作分数：{action_plan['collaboration_score']}")
     return action_plan

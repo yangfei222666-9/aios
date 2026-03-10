@@ -1,21 +1,16 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-LowSuccess_Agent v3.0 - Phase 3: 经验库应用闭环
-集成到Heartbeat，每小时自动触发Bootstrapped Regeneration + Phase 3观察
+LowSuccess_Agent v3.0 - Phase 3: 缁忛獙搴撳簲鐢ㄩ棴鐜?闆嗘垚鍒癏eartbeat锛屾瘡灏忔椂鑷姩瑙﹀彂Bootstrapped Regeneration + Phase 3瑙傚療
 
-核心流程：
-1. 从lessons.json读取失败任务
-2. 生成feedback（问题分析 + 改进建议）
-3. regenerate新策略（可执行action列表）
-4. 通过sessions_spawn真实执行
-5. 成功 → 保存到experience_library.jsonl + LanceDB
-6. 失败 → 需要人工介入
-7. Phase 3观察：记录重生统计 + 生成图表报告
+鏍稿績娴佺▼锛?1. 浠巐essons.json璇诲彇澶辫触浠诲姟
+2. 鐢熸垚feedback锛堥棶棰樺垎鏋?+ 鏀硅繘寤鸿锛?3. regenerate鏂扮瓥鐣ワ紙鍙墽琛宎ction鍒楄〃锛?4. 閫氳繃sessions_spawn鐪熷疄鎵ц
+5. 鎴愬姛 鈫?淇濆瓨鍒癳xperience_library.jsonl + LanceDB
+6. 澶辫触 鈫?闇€瑕佷汉宸ヤ粙鍏?7. Phase 3瑙傚療锛氳褰曢噸鐢熺粺璁?+ 鐢熸垚鍥捐〃鎶ュ憡
 
-v4.0 改造：
-- 集成 spawn_manager（Step 3/4 全链路追踪）
-- load_lessons() 改为从 experience_engine.harvest_real_failures() 读取
-- 门禁：只处理 source=real + regeneration_status=pending
+v4.0 鏀归€狅細
+- 闆嗘垚 spawn_manager锛圫tep 3/4 鍏ㄩ摼璺拷韪級
+- load_lessons() 鏀逛负浠?experience_engine.harvest_real_failures() 璇诲彇
+- 闂ㄧ锛氬彧澶勭悊 source=real + regeneration_status=pending
 """
 
 import json
@@ -25,8 +20,7 @@ from datetime import datetime
 import time
 from audit_context import audit_event_auto, set_audit_context
 
-# 设置审计上下文
-set_audit_context("lowsuccess-agent", "lowsuccess-session")
+# 璁剧疆瀹¤涓婁笅鏂?set_audit_context("lowsuccess-agent", "lowsuccess-session")
 
 # Import unified paths
 from paths import (
@@ -34,69 +28,63 @@ from paths import (
     SPAWN_REQUESTS, TASK_EXECUTIONS
 )
 
-# 路径配置（保留兼容性）
+# 璺緞閰嶇疆锛堜繚鐣欏吋瀹规€э級
 WORKSPACE = Path(r"C:\Users\A\.openclaw\workspace")
 AIOS_DIR = WORKSPACE / "aios" / "agent_system"
 LESSONS_FILE = LESSONS
 EXPERIENCE_LIB = EXPERIENCE_LIBRARY
 FEEDBACK_LOG_FILE = FEEDBACK_LOG
-TASKS_FILE = AIOS_DIR / "tasks.jsonl"  # 暂时保留，后续迁移
-
-# 添加路径以导入sessions_spawn
+TASKS_FILE = AIOS_DIR / "tasks.jsonl"  # 鏆傛椂淇濈暀锛屽悗缁縼绉?
+# 娣诲姞璺緞浠ュ鍏essions_spawn
 sys.path.insert(0, str(WORKSPACE))
 
-# Phase 3 v3.0集成：LanceDB经验学习
-# Phase 4.0 升级：灰度 + 幂等 + 版本归因
+# Phase 3 v3.0闆嗘垚锛歀anceDB缁忛獙瀛︿範
+# Phase 4.0 鍗囩骇锛氱伆搴?+ 骞傜瓑 + 鐗堟湰褰掑洜
 from experience_learner_v4 import learner_v4
 
-# Phase 3观察器集成（统一使用 aios/agent_system 下的版本）
-from phase3_observer import observe_phase3, generate_phase3_report
+# Phase 3瑙傚療鍣ㄩ泦鎴愶紙缁熶竴浣跨敤 aios/agent_system 涓嬬殑鐗堟湰锛?from phase3_observer import observe_phase3, generate_phase3_report
 
-# v4.0 集成：spawn_manager 全链路追踪
-from spawn_manager import build_spawn_requests, record_spawn_result, get_spawn_stats
+# v4.0 闆嗘垚锛歴pawn_manager 鍏ㄩ摼璺拷韪?from spawn_manager import build_spawn_requests, record_spawn_result, get_spawn_stats
 
 def load_lessons():
     """
-    加载失败教训（Step 3 改造：优先从真实失败中读取）
-
-    数据源优先级：
-    1. task_executions.jsonl（真实失败，过滤 Simulated）
-    2. lessons.json（兜底，仅保留 source=real 的记录）
+    鍔犺浇澶辫触鏁欒锛圫tep 3 鏀归€狅細浼樺厛浠庣湡瀹炲け璐ヤ腑璇诲彇锛?
+    鏁版嵁婧愪紭鍏堢骇锛?    1. task_executions_v2.jsonl锛堢湡瀹炲け璐ワ紝杩囨护 Simulated锛?    2. lessons.json锛堝厹搴曪紝浠呬繚鐣?source=real 鐨勮褰曪級
     """
     import hashlib
     from experience_engine import harvest_real_failures
 
-    # Step 1：先从 task_executions.jsonl 收割真实失败 → 写入 lessons.json
+    # Step 1锛氬厛浠?task_executions_v2.jsonl 鏀跺壊鐪熷疄澶辫触 鈫?鍐欏叆 lessons.json
     try:
         harvested = harvest_real_failures()
         if harvested > 0:
-            print(f"  [HARVEST] {harvested} new real failures → lessons.json")
+            print(f"  [HARVEST] {harvested} new real failures 鈫?lessons.json")
     except Exception as e:
         print(f"  [WARN] harvest_real_failures failed: {e}")
 
-    # Step 2：读取 lessons.json（此时已包含真实失败）
+    # Step 2锛氳鍙?lessons.json锛堟鏃跺凡鍖呭惈鐪熷疄澶辫触锛?
     if not LESSONS_FILE.exists():
         return []
 
     with open(LESSONS_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    # 兼容两种格式：{"lessons": [...]} 或直接 [...]
+    # 鍏煎涓ょ鏍煎紡锛歿"lessons": [...]} 鎴栫洿鎺?[...]
     if isinstance(data, list):
         lessons = data
     else:
         lessons = data.get('lessons', [])
 
-    # 门禁：只处理真实失败（过滤假数据）
+    # 闂ㄧ锛氬彧澶勭悊鐪熷疄澶辫触锛堣繃婊ゅ亣鏁版嵁锛?
     real_lessons = []
     for lesson in lessons:
-        # 跳过明确标记为 simulated 的
+        # 璺宠繃鏄庣‘鏍囪涓?simulated 鐨?
         if lesson.get("source") == "simulated":
             continue
-        # 跳过 error_message 以 Simulated 开头的
+        # 璺宠繃 error_message 浠?Simulated 寮€澶寸殑
         if lesson.get("error_message", "").startswith("Simulated"):
             continue
-        # 跳过 regeneration_status 已完成的
+        # 璺宠繃 regeneration_status 宸插畬鎴愮殑
         if lesson.get("regeneration_status") in ("completed", "skipped"):
             continue
         real_lessons.append(lesson)
@@ -104,7 +92,7 @@ def load_lessons():
     return real_lessons
 
 def get_task_by_id(task_id: str):
-    """从tasks.jsonl读取任务详情"""
+    """浠巘asks.jsonl璇诲彇浠诲姟璇︽儏"""
     if not TASKS_FILE.exists():
         return None
     
@@ -119,62 +107,69 @@ def get_task_by_id(task_id: str):
 
 def generate_feedback(lesson):
     """
-    从失败轨迹生成feedback（sirius核心机制）
-    
+    浠庡け璐ヨ建杩圭敓鎴恌eedback锛坰irius鏍稿績鏈哄埗锛?    
     Args:
-        lesson: 失败教训记录
+        lesson: 澶辫触鏁欒璁板綍
     
     Returns:
-        feedback字典（包含问题分析和改进建议）
-    """
+        feedback瀛楀吀锛堝寘鍚棶棰樺垎鏋愬拰鏀硅繘寤鸿锛?
+        """
     error_type = lesson.get('error_type', 'unknown')
     context = lesson.get('context', '')
     
-    # 根据错误类型生成针对性feedback
+    # 鏍规嵁閿欒绫诲瀷鐢熸垚閽堝鎬eedback
     feedback_templates = {
         'timeout': {
-            'problem': '任务超时，可能是任务复杂度过高或资源不足',
+            'problem': '浠诲姟瓒呮椂锛屽彲鑳芥槸浠诲姟澶嶆潅搴﹁繃楂樻垨璧勬簮涓嶈冻',
             'suggestions': [
-                '拆分任务为更小的子任务',
-                '增加超时时间（60s → 120s）',
-                '优化算法复杂度'
+                '鎷嗗垎浠诲姟涓烘洿灏忕殑瀛愪换鍔?',
+                '澧炲姞瓒呮椂鏃堕棿锛?0s 鈫?120s锛?',
+                '浼樺寲绠楁硶澶嶆潅搴?'
             ]
         },
         'dependency_error': {
-            'problem': '依赖缺失或版本冲突',
+            'problem': '渚濊禆缂哄け鎴栫増鏈啿绐?',
             'suggestions': [
-                '在任务开始前检查依赖',
-                '使用虚拟环境隔离依赖',
-                '明确指定依赖版本'
+                '鍦ㄤ换鍔″紑濮嬪墠妫€鏌ヤ緷璧?',
+                '浣跨敤铏氭嫙鐜闅旂渚濊禆',
+                '鏄庣‘鎸囧畾渚濊禆鐗堟湰'
             ]
         },
         'logic_error': {
-            'problem': '代码逻辑错误（如除零、空指针）',
+            'problem': '浠ｇ爜閫昏緫閿欒锛堝闄ら浂銆佺┖鎸囬拡锛?',
             'suggestions': [
-                '增加输入验证',
-                '添加异常处理',
-                '使用防御性编程'
+                '澧炲姞杈撳叆楠岃瘉',
+                '娣诲姞寮傚父澶勭悊',
+                '浣跨敤闃插尽鎬х紪绋?'
             ]
         },
         'resource_exhausted': {
-            'problem': '资源耗尽（内存/磁盘/网络）',
+            'problem': '璧勬簮鑰楀敖锛堝唴瀛?纾佺洏/缃戠粶锛?',
             'suggestions': [
-                '优化资源使用',
-                '增加资源限制检查',
-                '使用流式处理'
+                '浼樺寲璧勬簮浣跨敤',
+                '澧炲姞璧勬簮闄愬埗妫€鏌?',
+                '浣跨敤娴佸紡澶勭悊'
+            ]
+        },
+        'api_error': {
+            'problem': 'API 璋冪敤澶辫触锛堢綉缁滈敊璇€佹湇鍔′笉鍙敤銆佽璇佸け璐ワ級',
+            'suggestions': [
+                '瀹炵幇鎸囨暟閫€閬块噸璇曪紙1s 鈫?2s 鈫?4s锛?',
+                '娣诲姞澶囩敤 API 绔偣',
+                '澧炲姞瓒呮椂鍜岀啍鏂満鍒?',
+                '璁板綍璇︾粏閿欒鏃ュ織'
             ]
         }
     }
     
     template = feedback_templates.get(error_type, {
-        'problem': '未知错误类型',
-        'suggestions': ['增加日志记录', '添加错误处理', '人工审查']
+        'problem': '鏈煡閿欒绫诲瀷',
+        'suggestions': ['澧炲姞鏃ュ織璁板綍', '娣诲姞閿欒澶勭悊', '浜哄伐瀹℃煡']
     })
     
     return {
         'timestamp': datetime.now().isoformat(),
-        'lesson_id': lesson.get('id', 'unknown'),
-        'error_type': error_type,
+        'lesson_id': lesson.get('lesson_id', 'unknown'),  # 淇锛氫娇鐢ㄦ纭殑瀛楁鍚?        'error_type': error_type,
         'problem': template['problem'],
         'suggestions': template['suggestions'],
         'context': context
@@ -182,17 +177,16 @@ def generate_feedback(lesson):
 
 def regenerate_strategy(feedback):
     """
-    基于feedback重新生成策略（sirius核心机制）
-    
+    鍩轰簬feedback閲嶆柊鐢熸垚绛栫暐锛坰irius鏍稿績鏈哄埗锛?    
     Args:
-        feedback: feedback字典
+        feedback: feedback瀛楀吀
     
     Returns:
-        新策略字典
-    """
+        鏂扮瓥鐣ュ瓧鍏?
+        """
     suggestions = feedback['suggestions']
     
-    # 将建议转化为可执行策略
+    # 灏嗗缓璁浆鍖栦负鍙墽琛岀瓥鐣?
     strategy = {
         'timestamp': datetime.now().isoformat(),
         'feedback_id': feedback.get('lesson_id', 'unknown'),
@@ -200,34 +194,34 @@ def regenerate_strategy(feedback):
     }
     
     for suggestion in suggestions:
-        if '拆分任务' in suggestion:
+        if '鎷嗗垎浠诲姟' in suggestion:
             strategy['actions'].append({
                 'type': 'task_decomposition',
-                'description': '将任务拆分为更小的子任务',
+                'description': '灏嗕换鍔℃媶鍒嗕负鏇村皬鐨勫瓙浠诲姟',
                 'priority': 'high'
             })
-        elif '增加超时' in suggestion:
+        elif '澧炲姞瓒呮椂' in suggestion:
             strategy['actions'].append({
                 'type': 'timeout_adjustment',
-                'description': '增加超时时间到120秒',
+                'description': '澧炲姞瓒呮椂鏃堕棿鍒?20绉?',
                 'priority': 'medium'
             })
-        elif '检查依赖' in suggestion:
+        elif '妫€鏌ヤ緷璧? in suggestion:'
             strategy['actions'].append({
                 'type': 'dependency_check',
-                'description': '在任务开始前验证所有依赖',
+                'description': '鍦ㄤ换鍔″紑濮嬪墠楠岃瘉鎵€鏈変緷璧?',
                 'priority': 'high'
             })
-        elif '异常处理' in suggestion:
+        elif '寮傚父澶勭悊' in suggestion:
             strategy['actions'].append({
                 'type': 'error_handling',
-                'description': '添加try-catch和输入验证',
+                'description': '娣诲姞try-catch鍜岃緭鍏ラ獙璇?',
                 'priority': 'high'
             })
-        elif '资源限制' in suggestion:
+        elif '璧勬簮闄愬埗' in suggestion:
             strategy['actions'].append({
                 'type': 'resource_limit',
-                'description': '添加资源使用监控和限制',
+                'description': '娣诲姞璧勬簮浣跨敤鐩戞帶鍜岄檺鍒?',
                 'priority': 'medium'
             })
     
@@ -235,19 +229,17 @@ def regenerate_strategy(feedback):
 
 def regenerate_failed_task_real(lesson):
     """
-    真实重生执行（Phase 2核心 + Phase 4.0 v4集成）
-    
+    鐪熷疄閲嶇敓鎵ц锛圥hase 2鏍稿績 + Phase 4.0 v4闆嗘垚锛?    
     Args:
-        lesson: 失败教训记录
+        lesson: 澶辫触鏁欒璁板綍
     
     Returns:
         (success: bool, result: dict, recommendation: dict)
     """
-    task_id = lesson.get('id', 'unknown')
-    error_type = lesson.get('error_type', 'unknown')
-    print(f"[REGEN] 正在为任务 {task_id} 执行Bootstrapped Regeneration...")
+    task_id = lesson.get('lesson_id', 'unknown')  # 淇锛氫娇鐢ㄦ纭殑瀛楁鍚?    error_type = lesson.get('error_type', 'unknown')
+    print(f"[REGEN] 姝ｅ湪涓轰换鍔?{task_id} 鎵цBootstrapped Regeneration...")
     
-    # Phase 4.0集成：从经验库推荐（含灰度 + 回滚开关）
+    # Phase 4.0闆嗘垚锛氫粠缁忛獙搴撴帹鑽愶紙鍚伆搴?+ 鍥炴粴寮€鍏筹級
     recommendation = learner_v4.recommend({
         'error_type': error_type,
         'task_id': task_id,
@@ -258,44 +250,44 @@ def regenerate_failed_task_real(lesson):
     rec_version = recommendation['strategy_version']
     print(f"  [REC] Strategy: {rec_strategy} | Source: {rec_source} | Version: {rec_version}")
     
-    # 1. 生成feedback
+    # 1. 鐢熸垚feedback
     feedback = generate_feedback(lesson)
-    print(f"  [OK] 生成feedback: {feedback['problem']}")
+    print(f"  [OK] 鐢熸垚feedback: {feedback['problem']}")
     
-    # 2. regenerate新策略
+    # 2. regenerate鏂扮瓥鐣?
     strategy = regenerate_strategy(feedback)
-    print(f"  [OK] 生成策略: {len(strategy['actions'])} 个action")
+    print(f"  [OK] 鐢熸垚绛栫暐: {len(strategy['actions'])} 涓猘ction")
     
-    # 3. 构建增强的任务描述（包含feedback、strategy和经验推荐）
+    # 3. 鏋勫缓澧炲己鐨勪换鍔℃弿杩帮紙鍖呭惈feedback銆乻trategy鍜岀粡楠屾帹鑽愶級
     rec_block = ""
     if rec_source == "experience":
-        rec_block = f"""
-[历史经验推荐 (v={rec_version}, confidence={recommendation['confidence']:.2f})]
-推荐策略: {rec_strategy}
+        rec_block = f
+        """
+[鍘嗗彶缁忛獙鎺ㄨ崘 (v={rec_version}, confidence={recommendation['confidence']:.2f})]
+鎺ㄨ崘绛栫暐: {rec_strategy}
 """
     
-    enhanced_task = f"""
-任务重生（Bootstrapped Regeneration v4.0）
-
-原始任务ID: {task_id}
-错误类型: {feedback['error_type']}
-策略版本: {rec_version}
+    enhanced_task = f
+    """
+浠诲姟閲嶇敓锛圔ootstrapped Regeneration v4.0锛?
+鍘熷浠诲姟ID: {task_id}
+閿欒绫诲瀷: {feedback['error_type']}
+绛栫暐鐗堟湰: {rec_version}
 {rec_block}
-问题分析:
+闂鍒嗘瀽:
 {feedback['problem']}
 
-改进建议:
+鏀硅繘寤鸿:
 {chr(10).join(f"- {s}" for s in feedback['suggestions'])}
 
-执行策略:
+鎵ц绛栫暐:
 {chr(10).join(f"- [{a['priority']}] {a['description']}" for a in strategy['actions'])}
 
-请根据以上分析和策略，重新执行任务。
+璇锋牴鎹互涓婂垎鏋愬拰绛栫暐锛岄噸鏂版墽琛屼换鍔°€?
 """
     
-    # 4. 通过 spawn_manager 生成标准 spawn 请求（Step 3 全链路）
-    # 先把 enhanced_task 写回 lesson 的 context，让 build_spawn_requests 能读到
-    # 这里直接写入 spawn_requests.jsonl（兼容旧格式 + 新格式双写）
+    # 4. 閫氳繃 spawn_manager 鐢熸垚鏍囧噯 spawn 璇锋眰锛圫tep 3 鍏ㄩ摼璺級
+    # 鍏堟妸 enhanced_task 鍐欏洖 lesson 鐨?context锛岃 build_spawn_requests 鑳借鍒?    # 杩欓噷鐩存帴鍐欏叆 spawn_requests.jsonl锛堝吋瀹规棫鏍煎紡 + 鏂版牸寮忓弻鍐欙級
     spawn_id = f"spawn-{lesson.get('lesson_id', task_id)}"
     spawn_request = {
         'spawn_id': spawn_id,
@@ -325,7 +317,7 @@ def regenerate_failed_task_real(lesson):
     with open(spawn_file, 'a', encoding='utf-8') as f:
         f.write(json.dumps(spawn_request, ensure_ascii=False) + '\n')
 
-    print(f"  [OK] Spawn请求已生成: {spawn_file}")
+    print(f"  [OK] Spawn璇锋眰宸茬敓鎴? {spawn_file}")
     
     return True, {
         'timestamp': datetime.now().isoformat(),
@@ -336,12 +328,11 @@ def regenerate_failed_task_real(lesson):
 
 def save_to_experience_library(feedback, strategy, result):
     """
-    保存成功轨迹到experience_library（sirius核心机制）
-    
+    淇濆瓨鎴愬姛杞ㄨ抗鍒癳xperience_library锛坰irius鏍稿績鏈哄埗锛?    
     Args:
-        feedback: feedback字典
-        strategy: 策略字典
-        result: 执行结果
+        feedback: feedback瀛楀吀
+        strategy: 绛栫暐瀛楀吀
+        result: 鎵ц缁撴灉
     """
     experience = {
         'timestamp': datetime.now().isoformat(),
@@ -353,17 +344,17 @@ def save_to_experience_library(feedback, strategy, result):
         'success': result.get('success', False)
     }
     
-    # 追加到experience_library.jsonl
+    # 杩藉姞鍒癳xperience_library.jsonl
     with open(EXPERIENCE_LIB, 'a', encoding='utf-8') as f:
         f.write(json.dumps(experience, ensure_ascii=False) + '\n')
 
 def save_feedback(feedback):
-    """保存feedback到日志"""
+    """淇濆瓨feedback鍒版棩蹇?""
     with open(FEEDBACK_LOG, 'a', encoding='utf-8') as f:
         f.write(json.dumps(feedback, ensure_ascii=False) + '\n')
 
 def get_already_spawned_ids():
-    """获取已经生成过 spawn 请求的 lesson ID，避免重复生成"""
+    """鑾峰彇宸茬粡鐢熸垚杩?spawn 璇锋眰鐨?lesson ID锛岄伩鍏嶉噸澶嶇敓鎴?""
     spawn_file = SPAWN_REQUESTS
     spawned = set()
     if spawn_file.exists():
@@ -384,20 +375,19 @@ def get_already_spawned_ids():
 
 def run_low_success_regeneration(limit=5):
     """
-    运行LowSuccess_Agent重生流程（Heartbeat调用）+ Phase 3观察
+    杩愯LowSuccess_Agent閲嶇敓娴佺▼锛圚eartbeat璋冪敤锛? Phase 3瑙傚療
     
     Args:
-        limit: 每次最多处理的任务数
-    
+        limit: 姣忔鏈€澶氬鐞嗙殑浠诲姟鏁?    
     Returns:
-        处理统计
+        澶勭悊缁熻
     """
-    # 加载失败教训
+    # 鍔犺浇澶辫触鏁欒
     lessons = load_lessons()
     if not lessons:
         return {'processed': 0, 'success': 0, 'failed': 0, 'pending': 0}
     
-    # 去重：跳过已经生成过 spawn 请求的 lesson
+    # 鍘婚噸锛氳烦杩囧凡缁忕敓鎴愯繃 spawn 璇锋眰鐨?lesson
     already_spawned = get_already_spawned_ids()
     lessons = [l for l in lessons if l.get('id') not in already_spawned]
     
@@ -405,7 +395,7 @@ def run_low_success_regeneration(limit=5):
         print(f"  [OK] All {len(already_spawned)} lessons already have spawn requests, skipping")
         return {'processed': 0, 'success': 0, 'failed': 0, 'pending': 0}
     
-    # 限制处理数量
+    # 闄愬埗澶勭悊鏁伴噺
     lessons_to_process = lessons[:limit]
     
     stats = {
@@ -415,11 +405,11 @@ def run_low_success_regeneration(limit=5):
         'pending': 0
     }
     
-    # 对每个失败教训执行bootstrapped regeneration
+    # 瀵规瘡涓け璐ユ暀璁墽琛宐ootstrapped regeneration
     for lesson in lessons_to_process:
         start_time = time.time()
         
-        # 审计日志：policy.allow（允许重生）
+        # 瀹¤鏃ュ織锛歱olicy.allow锛堝厑璁搁噸鐢燂級
         audit_event_auto(
             action_type="policy.allow",
             target="spawn_generation",
@@ -441,10 +431,7 @@ def run_low_success_regeneration(limit=5):
         
         stats['processed'] += 1
         
-        # Phase 3观察：记录每次重生
-        task_id = lesson.get('id', 'unknown')
-        task_description = lesson.get('description', '')
-        observe_phase3(task_id, task_description, success, recovery_time)
+        # Phase 3瑙傚療锛氳褰曟瘡娆￠噸鐢?        task_id = lesson.get('lesson_id', 'unknown')  # 淇锛氫娇鐢ㄦ纭殑瀛楁鍚?        task_description = lesson.get('task_description', '')  # 淇锛氫娇鐢ㄦ纭殑瀛楁鍚?        observe_phase3(task_id, task_description, success, recovery_time)
         
         if success:
             if result.get('status') == 'pending':
@@ -452,7 +439,7 @@ def run_low_success_regeneration(limit=5):
             else:
                 stats['success'] += 1
                 
-                # Phase 4.0集成：保存成功轨迹（幂等 + 版本）
+                # Phase 4.0闆嗘垚锛氫繚瀛樻垚鍔熻建杩癸紙骞傜瓑 + 鐗堟湰锛?
                 learner_v4.save_success({
                     'task_id': task_id,
                     'error_type': lesson.get('error_type', 'unknown'),
@@ -462,7 +449,7 @@ def run_low_success_regeneration(limit=5):
                     'strategy_version': recommendation.get('strategy_version', 'v4.0.0'),
                 })
                 
-                # 追踪推荐后结果（分桶）
+                # 杩借釜鎺ㄨ崘鍚庣粨鏋滐紙鍒嗘《锛?
                 learner_v4.track_outcome(
                     task_id=task_id,
                     strategy=recommendation.get('recommended_strategy', 'default_recovery'),
@@ -472,7 +459,7 @@ def run_low_success_regeneration(limit=5):
         else:
             stats['failed'] += 1
             
-            # 追踪推荐后失败（分桶）
+            # 杩借釜鎺ㄨ崘鍚庡け璐ワ紙鍒嗘《锛?
             learner_v4.track_outcome(
                 task_id=task_id,
                 strategy=recommendation.get('recommended_strategy', 'default_recovery'),
@@ -480,7 +467,7 @@ def run_low_success_regeneration(limit=5):
                 success=False,
             )
     
-    # Phase 3观察：生成报告
+    # Phase 3瑙傚療锛氱敓鎴愭姤鍛?
     if stats['processed'] > 0:
         generate_phase3_report()
     
@@ -488,8 +475,8 @@ def run_low_success_regeneration(limit=5):
     return stats
 
 def main():
-    """主函数（用于测试）"""
-    print("LowSuccess_Agent v3.0 - Phase 2: 真实Agent执行")
+    """main function"""
+    print("LowSuccess_Agent v3.0 - Phase 2: 鐪熷疄Agent鎵ц")
     print("=" * 60)
     
     stats = run_low_success_regeneration(limit=5)
@@ -508,3 +495,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

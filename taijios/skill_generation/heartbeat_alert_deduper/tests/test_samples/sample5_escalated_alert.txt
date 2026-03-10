@@ -1,0 +1,10 @@
+AIOS Heartbeat v5.0 Started
+
+[SKILL_ALERTS]
+api-testing-skill — 连续失败 5 次，原因：network_error
+
+[HEALTH] Checking system health...
+   Health Score: 60.00/100
+   Status: CRITICAL
+
+Heartbeat Completed

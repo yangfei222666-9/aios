@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-07T08:16:31.731178",
+  "simulation": true,
+  "results": [
+    {
+      "scenario_id": "sim-001",
+      "skill_id": "api-testing-skill",
+      "classification": "api_error",
+      "classification_pass": true,
+      "recovery_strategy": "switch_to_backup_endpoint",
+      "strategy_pass": true,
+      "spawn_created": true,
+      "overall_pass": true
+    },
+    {
+      "scenario_id": "sim-002",
+      "skill_id": "docker-skill",
+      "classification": "resource_exhausted",
+      "classification_pass": true,
+      "recovery_strategy": "reduce_batch_size_and_retry",
+      "strategy_pass": true,
+      "spawn_created": true,
+      "overall_pass": true
+    },
+    {
+      "scenario_id": "sim-003",
+      "skill_id": "pdf-skill",
+      "classification": "timeout",
+      "classification_pass": true,
+      "recovery_strategy": "increase_timeout_and_retry",
+      "strategy_pass": true,
+      "spawn_created": true,
+      "overall_pass": true
+    }
+  ]
+}

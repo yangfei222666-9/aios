@@ -1,0 +1,11 @@
+AIOS Heartbeat v5.0 Started
+
+[SYSTEM_SIGNALS]
+evolution_score.json 已过期，正在重算...
+memory build latency degraded: 9.2s (threshold: 3s)
+
+[HEALTH] Checking system health...
+   Health Score: 68.00/100
+   Status: WARNING
+
+Heartbeat Completed

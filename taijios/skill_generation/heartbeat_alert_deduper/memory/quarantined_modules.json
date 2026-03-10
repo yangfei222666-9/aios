@@ -1,0 +1,10 @@
+[
+  {
+    "module_name": "low_success_regeneration.py",
+    "status": "quarantined",
+    "reason": "file_corruption_syntax_error",
+    "impact": "non_core",
+    "since": "2026-03-09T07:30:00+08:00",
+    "notes": "已隔离，等待修复"
+  }
+]

@@ -1,7 +1,7 @@
 ---
 name: pdf-skill
 description: PDF 提取、生成、合并、拆分工具。打工人刚需，支持文本提取、PDF 信息查询、多文件合并、按页拆分、指定页面提取。
-version: 1.0.0
+version: 2.0.0
 author: 小九 + 珊瑚海
 category: office
 keywords:
@@ -28,12 +28,16 @@ triggers:
 
 打工人刚需！提取内容、生成新 PDF、合并拆分、打工人刚需。
 
+**v2.0 优化：** 大文件自动限制页数，防止超时。Windows GBK 终端兼容已修复（safe_print + ASCII 标签）。
+
+> 本轮 v2.0.0 优化已从单元测试通过，推进到真实环境回归验证。大文件保护与 Windows 终端兼容均已完成关键行为验证。
+
 ## 功能
 
-1. **提取文本** - 从 PDF 中提取文本内容
+1. **提取文本** - 从 PDF 中提取文本内容（大文件自动限制前 100 页）
 2. **查看信息** - 获取 PDF 页数、元数据、文件大小
 3. **合并 PDF** - 将多个 PDF 合并为一个
-4. **拆分 PDF** - 将 PDF 按页数拆分为多个文件
+4. **拆分 PDF** - 将 PDF 按页数拆分为多个文件（最多 100 个文件）
 5. **提取页面** - 提取指定页面生成新 PDF
 
 ## 依赖
@@ -47,8 +51,11 @@ pip install PyPDF2
 ### 1. 提取文本
 
 ```bash
-# 提取全部文本
+# 提取全部文本（大文件自动限制前 100 页）
 python pdf_tool.py extract document.pdf
+
+# 自定义最大页数
+python pdf_tool.py extract document.pdf --max-pages 50
 
 # 提取指定页（页码从1开始）
 python pdf_tool.py extract document.pdf --pages 1 3 5
@@ -85,11 +92,14 @@ python pdf_tool.py merge file1.pdf file2.pdf file3.pdf --output merged.pdf
 ### 4. 拆分 PDF
 
 ```bash
-# 每页一个文件
+# 每页一个文件（最多 100 个文件）
 python pdf_tool.py split document.pdf --output-dir output/
 
 # 每3页一个文件
 python pdf_tool.py split document.pdf --output-dir output/ --pages-per-file 3
+
+# 自定义最大文件数
+python pdf_tool.py split document.pdf --output-dir output/ --max-files 50
 ```
 
 ### 5. 提取指定页面
@@ -106,8 +116,8 @@ from pdf_tool import PDFTool
 
 tool = PDFTool()
 
-# 提取文本
-text = tool.extract_text("document.pdf")
+# 提取文本（大文件自动限制）
+text = tool.extract_text("document.pdf", max_pages=100)
 print(text)
 
 # 提取指定页（页码从0开始）
@@ -124,11 +134,12 @@ result = tool.merge_pdfs(
 )
 print(result)
 
-# 拆分 PDF
+# 拆分 PDF（限制最大文件数）
 result = tool.split_pdf(
     "document.pdf",
     "output/",
-    pages_per_file=3
+    pages_per_file=3,
+    max_files=100
 )
 print(result)
 
@@ -171,6 +182,13 @@ python pdf_tool.py extract document.pdf --output text.txt
 1. **仅支持文本 PDF** - 扫描版 PDF（图片）无法提取文字，需要 OCR
 2. **不支持加密 PDF** - 需要先解密
 3. **不支持编辑内容** - 只能提取、合并、拆分，不能修改文字
+4. **大文件自动限制** - 提取文本默认最多 100 页，拆分默认最多 100 个文件（防止超时）
+
+## 性能优化（v2.0）
+
+- **提取文本** - 大文件（>100页）自动限制，避免超时
+- **拆分 PDF** - 最多输出 100 个文件，避免资源耗尽
+- **可配置** - 通过 `--max-pages` 和 `--max-files` 自定义限制
 
 ## 进阶功能（未来）
 
@@ -186,6 +204,7 @@ python pdf_tool.py extract document.pdf --output text.txt
 - **库：** PyPDF2（纯 Python，零依赖）
 - **性能：** 处理 100 页 PDF < 1 秒
 - **内存：** 流式处理，不会占用大量内存
+- **超时保护：** 自动限制大文件处理
 
 ## 故障排查
 
@@ -200,6 +219,14 @@ python pdf_tool.py extract document.pdf --output text.txt
 **问题3：扫描版 PDF 提取不到文字**
 - 原因：扫描版是图片，不是文本
 - 解决：需要 OCR（未来支持）
+
+**问题4：超时（v2.0 已修复）**
+- 原因：大文件处理时间过长
+- 解决：自动限制页数/文件数，或通过 `--max-pages` / `--max-files` 调整
+
+**问题5：Windows 终端输出乱码或崩溃（v2.0 已修复）**
+- 原因：emoji 和中文在 GBK 控制台触发 `UnicodeEncodeError`
+- 解决：`safe_print()` 三层兜底 + 所有输出改为 ASCII 标签
 
 ## 示例文件
 
@@ -223,16 +250,28 @@ def handle_pdf_request(action: str, **kwargs):
     tool = PDFTool()
     
     if action == "extract":
-        return tool.extract_text(kwargs["pdf"], kwargs.get("pages"))
+        return tool.extract_text(
+            kwargs["pdf"],
+            kwargs.get("pages"),
+            kwargs.get("max_pages", 100)
+        )
     elif action == "merge":
         return tool.merge_pdfs(kwargs["inputs"], kwargs["output"])
     elif action == "split":
-        return tool.split_pdf(kwargs["pdf"], kwargs["output_dir"])
+        return tool.split_pdf(
+            kwargs["pdf"],
+            kwargs["output_dir"],
+            kwargs.get("pages_per_file", 1),
+            kwargs.get("max_files", 100)
+        )
     # ...
 ```
 
 ---
 
-**版本：** 1.0.0  
-**最后更新：** 2026-02-27  
-**维护者：** 小九 + 珊瑚海
+**版本：** 2.0.0  
+**最后更新：** 2026-03-08  
+**维护者：** 小九 + 珊瑚海  
+**变更日志：** 详见 [CHANGELOG.md](./CHANGELOG.md)  
+- v2.0.0 (2026-03-08) - 大文件超时保护；Windows GBK 终端兼容修复（safe_print + ASCII 标签）；真实回归验证通过
+- v1.0.0 (2026-02-27) - 初始版本

@@ -1,4 +1,4 @@
-"""
+﻿"""
 AIOS Unified Path Configuration
 
 Centralizes all file paths to avoid path fragmentation.
@@ -22,7 +22,7 @@ LOCKS_DIR = AIOS_ROOT / "locks"
 
 # Task Queue & Execution
 TASK_QUEUE = DATA_DIR / "task_queue.jsonl"
-TASK_EXECUTIONS = DATA_DIR / "task_executions.jsonl"
+TASK_EXECUTIONS = DATA_DIR / "task_executions_v2.jsonl"  # 缁熶竴 Schema v2
 
 # Spawn System
 SPAWN_REQUESTS = DATA_DIR / "spawn_requests.jsonl"
@@ -105,8 +105,8 @@ MEMORY_QUEUE_LOG = DATA_DIR / "memory_queue.log"
 
 # ============== Reality Ledger ==============
 
-ACTION_LEDGER = DATA_DIR / "action_ledger.jsonl"   # append-only 事件流
-ACTIONS_STATE = DATA_DIR / "actions_state.jsonl"   # 当前动作快照，可重建
+ACTION_LEDGER = DATA_DIR / "action_ledger.jsonl"   # append-only event stream
+ACTIONS_STATE = DATA_DIR / "actions_state.jsonl"   # 褰撳墠鍔ㄤ綔蹇収锛屽彲閲嶅缓
 
 # ============== Action Lock ==============
 
@@ -211,7 +211,7 @@ def migrate_file(filename: str, target_path: Path, backup: bool = True):
     # Copy file
     import shutil
     shutil.copy2(legacy_path, target_path)
-    print(f"[MIGRATE] {filename} → {target_path.relative_to(AIOS_ROOT)}")
+    print(f"[MIGRATE] {filename} 鈫?{target_path.relative_to(AIOS_ROOT)}")
     
     # Backup or remove original
     if backup:
@@ -237,7 +237,7 @@ def migrate_all(backup: bool = True):
     # Core files to migrate
     migrations = [
         ("task_queue.jsonl", TASK_QUEUE),
-        ("task_executions.jsonl", TASK_EXECUTIONS),
+        ("task_executions_v2.jsonl", TASK_EXECUTIONS),
         ("spawn_requests.jsonl", SPAWN_REQUESTS),
         ("spawn_pending.jsonl", SPAWN_PENDING),
         ("spawn_results.jsonl", SPAWN_RESULTS),
@@ -283,3 +283,4 @@ if __name__ == "__main__":
     print("Directories created:")
     print(f"  {DATA_DIR.exists()} - {DATA_DIR}")
     print(f"  {LOCKS_DIR.exists()} - {LOCKS_DIR}")
+

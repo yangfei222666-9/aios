@@ -1,4 +1,4 @@
-"""Task Queue Processor - 自动处理任务队列"""
+﻿"""Task Queue Processor - 鑷姩澶勭悊浠诲姟闃熷垪"""
 import json
 import time
 from datetime import datetime
@@ -7,60 +7,60 @@ from pathlib import Path
 class TaskQueueProcessor:
     def __init__(self):
         self.queue_file = Path("task_queue.jsonl")
-        self.execution_file = Path("task_executions.jsonl")
+        self.execution_file = Path(TASK_EXECUTIONS)
         self.max_tasks_per_run = 5
         
     def process_queue(self):
-        """处理队列中的待处理任务"""
+        """澶勭悊闃熷垪涓殑寰呭鐞嗕换鍔?""
         print("=" * 80)
-        print("Task Queue Processor - 开始处理任务队列")
+        print("Task Queue Processor - 寮€濮嬪鐞嗕换鍔￠槦鍒?)
         print("=" * 80)
         
-        # 读取队列
+        # 璇诲彇闃熷垪
         tasks = self._load_queue()
         pending_tasks = [t for t in tasks if t.get("status") == "pending"]
         
         if not pending_tasks:
-            print("\n✓ 队列为空，无待处理任务")
+            print("\n鉁?闃熷垪涓虹┖锛屾棤寰呭鐞嗕换鍔?)
             return
         
-        print(f"\n发现 {len(pending_tasks)} 个待处理任务")
-        print(f"本次处理前 {min(len(pending_tasks), self.max_tasks_per_run)} 个任务\n")
+        print(f"\n鍙戠幇 {len(pending_tasks)} 涓緟澶勭悊浠诲姟")
+        print(f"鏈澶勭悊鍓?{min(len(pending_tasks), self.max_tasks_per_run)} 涓换鍔n")
         
-        # 按优先级排序
+        # 鎸変紭鍏堢骇鎺掑簭
         priority_order = {"urgent": 0, "high": 1, "normal": 2, "low": 3}
         pending_tasks.sort(key=lambda t: priority_order.get(t.get("priority", "normal"), 2))
         
-        # 处理任务
+        # 澶勭悊浠诲姟
         processed = 0
         for task in pending_tasks[:self.max_tasks_per_run]:
             try:
                 self._process_task(task)
                 processed += 1
             except Exception as e:
-                print(f"✗ 任务处理失败: {e}")
+                print(f"鉁?浠诲姟澶勭悊澶辫触: {e}")
         
         print(f"\n{'=' * 80}")
-        print(f"处理完成: {processed}/{min(len(pending_tasks), self.max_tasks_per_run)} 个任务")
-        print(f"剩余待处理: {len(pending_tasks) - processed} 个任务")
+        print(f"澶勭悊瀹屾垚: {processed}/{min(len(pending_tasks), self.max_tasks_per_run)} 涓换鍔?)
+        print(f"鍓╀綑寰呭鐞? {len(pending_tasks) - processed} 涓换鍔?)
         print(f"{'=' * 80}")
     
     def _process_task(self, task):
-        """处理单个任务"""
+        """澶勭悊鍗曚釜浠诲姟"""
         task_id = task.get("id", "unknown")
         task_type = task.get("type", "unknown")
         priority = task.get("priority", "normal")
-        desc = task.get("description", "无描述")
+        desc = task.get("description", "鏃犳弿杩?)
         
-        print(f"\n[{priority.upper()}] 处理任务: {task_id}")
-        print(f"  类型: {task_type}")
-        print(f"  描述: {desc}")
+        print(f"\n[{priority.upper()}] 澶勭悊浠诲姟: {task_id}")
+        print(f"  绫诲瀷: {task_type}")
+        print(f"  鎻忚堪: {desc}")
         
-        # 路由到对应 Agent
+        # 璺敱鍒板搴?Agent
         agent = self._route_to_agent(task_type)
-        print(f"  路由到: {agent}")
+        print(f"  璺敱鍒? {agent}")
         
-        # 创建 spawn 请求
+        # 鍒涘缓 spawn 璇锋眰
         spawn_request = {
             "timestamp": datetime.now().isoformat(),
             "agent": agent,
@@ -70,20 +70,19 @@ class TaskQueueProcessor:
             "status": "spawned"
         }
         
-        # 写入 spawn 请求
+        # 鍐欏叆 spawn 璇锋眰
         with open("spawn_requests.jsonl", "a", encoding="utf-8") as f:
             f.write(json.dumps(spawn_request, ensure_ascii=False) + "\n")
         
-        # 更新任务状态
-        task["status"] = "processing"
+        # 鏇存柊浠诲姟鐘舵€?        task["status"] = "processing"
         task["started_at"] = datetime.now().isoformat()
         task["agent"] = agent
         self._update_task(task)
         
-        print(f"  ✓ 已创建 spawn 请求")
+        print(f"  鉁?宸插垱寤?spawn 璇锋眰")
     
     def _route_to_agent(self, task_type):
-        """根据任务类型路由到对应 Agent"""
+        """鏍规嵁浠诲姟绫诲瀷璺敱鍒板搴?Agent"""
         routing = {
             "code": "coder-dispatcher",
             "analysis": "analyst-dispatcher",
@@ -97,7 +96,7 @@ class TaskQueueProcessor:
         return routing.get(task_type, "coder-dispatcher")
     
     def _load_queue(self):
-        """加载任务队列"""
+        """鍔犺浇浠诲姟闃熷垪"""
         if not self.queue_file.exists():
             return []
         
@@ -109,7 +108,7 @@ class TaskQueueProcessor:
         return tasks
     
     def _update_task(self, task):
-        """更新任务状态"""
+        """鏇存柊浠诲姟鐘舵€?""
         tasks = self._load_queue()
         updated_tasks = []
         
@@ -119,7 +118,7 @@ class TaskQueueProcessor:
             else:
                 updated_tasks.append(t)
         
-        # 重写队列
+        # 閲嶅啓闃熷垪
         with open(self.queue_file, "w", encoding="utf-8") as f:
             for t in updated_tasks:
                 f.write(json.dumps(t, ensure_ascii=False) + "\n")
@@ -127,3 +126,5 @@ class TaskQueueProcessor:
 if __name__ == "__main__":
     processor = TaskQueueProcessor()
     processor.process_queue()
+
+

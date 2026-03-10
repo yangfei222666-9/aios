@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 daily_eval.py - Memory Retrieval 7-Day Evaluation Panel
 
-Reads memory_retrieval_log.jsonl + task_executions.jsonl,
+Reads memory_retrieval_log.jsonl + task_executions_v2.jsonl,
 computes daily metrics, outputs Markdown report.
 
 Usage:
@@ -20,11 +20,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 MEMORY_LOG = BASE_DIR / "memory_retrieval_log.jsonl"
-EXEC_LOG    = BASE_DIR / "task_executions.jsonl"
+EXEC_LOG    = BASE_DIR / "task_executions_v2.jsonl"
 REPORTS_DIR = BASE_DIR / "reports"
 REPORTS_DIR.mkdir(exist_ok=True)
 
-# ── Thresholds ────────────────────────────────────────────────────────────────
+# 鈹€鈹€ Thresholds 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 THRESHOLDS = {
     "latency_p95_ms":   {"pass": 100,  "warn": 300},   # ms
     "hit_rate":         {"pass": 0.80, "warn": 0.60},   # fraction
@@ -71,7 +71,7 @@ def compute_day_metrics(date: datetime.date) -> dict:
     day_start = datetime(date.year, date.month, date.day, tzinfo=timezone.utc)
     day_end   = day_start + timedelta(days=1)
 
-    # ── Memory retrieval log ─────────────────────────────────────────────────
+    # 鈹€鈹€ Memory retrieval log 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     mem_rows = _load_jsonl(MEMORY_LOG)
     day_mem  = [r for r in mem_rows
                 if day_start <= _parse_ts(r.get("ts", "")) < day_end]
@@ -80,7 +80,7 @@ def compute_day_metrics(date: datetime.date) -> dict:
     helpful_count    = sum(1 for r in day_mem if r.get("helpful", False))
     helpfulness      = helpful_count / feedback_count if feedback_count else None
 
-    # ── Task executions log ──────────────────────────────────────────────────
+    # 鈹€鈹€ Task executions log 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     exec_rows = _load_jsonl(EXEC_LOG)
     day_exec  = [r for r in exec_rows
                  if day_start <= datetime.fromtimestamp(
@@ -91,7 +91,7 @@ def compute_day_metrics(date: datetime.date) -> dict:
                         if r.get("result", {}).get("success", False))
     success_rate  = success_tasks / total_tasks if total_tasks else None
 
-    # ── Latency from memory_retrieval_log (actual retrieval latency) ─────────
+    # 鈹€鈹€ Latency from memory_retrieval_log (actual retrieval latency) 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     # Fall back to exec log duration if no memory log entries
     mem_latencies = [
         r.get("latency_ms") for r in day_mem
@@ -109,13 +109,13 @@ def compute_day_metrics(date: datetime.date) -> dict:
                    if len(mem_latencies) >= 2 else
                    (mem_latencies[0] if mem_latencies else None))
 
-    # ── Retrieved / injected counts from feedback log ────────────────────────
+    # 鈹€鈹€ Retrieved / injected counts from feedback log 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     retrieved_counts = [len(r.get("memory_ids", [])) for r in day_mem]
     total_retrieved  = sum(retrieved_counts)
     total_injected   = sum(1 for c in retrieved_counts if c > 0)
     hit_rate         = total_injected / feedback_count if feedback_count else None
 
-    # ── Degraded count (from exec log — tasks with very short duration = degraded) 
+    # 鈹€鈹€ Degraded count (from exec log 鈥?tasks with very short duration = degraded) 
     # We track degraded via memory_retrieval_log entries where helpful is None
     # For now use proxy: tasks with duration < 0.1s as "degraded" (no real work)
     degraded_count = sum(1 for r in day_exec
@@ -148,13 +148,13 @@ def _judge(metric: str, value) -> str:
         return "N/A"
     # lower-is-better metrics
     if metric in ("degraded_rate", "latency_p95_ms"):
-        if value <= t["pass"]:  return "✅ PASS"
-        if value <= t["warn"]:  return "⚠️ WARN"
-        return "❌ FAIL"
+        if value <= t["pass"]:  return "鉁?PASS"
+        if value <= t["warn"]:  return "鈿狅笍 WARN"
+        return "鉂?FAIL"
     # higher-is-better
-    if value >= t["pass"]:  return "✅ PASS"
-    if value >= t["warn"]:  return "⚠️ WARN"
-    return "❌ FAIL"
+    if value >= t["pass"]:  return "鉁?PASS"
+    if value >= t["warn"]:  return "鈿狅笍 WARN"
+    return "鉂?FAIL"
 
 
 def _fmt(value, fmt=".1f", suffix="") -> str:
@@ -190,8 +190,8 @@ def check_phase_gate(days_metrics: list[dict]) -> tuple[str, list[str]]:
         reasons.append(f"degraded_rate={dr:.1%} > {PHASE_GATE['degraded_rate_max']:.1%}")
 
     if not reasons:
-        return "🚀 GO_TASK_GENERATION", []
-    return "🔒 HOLD", reasons
+        return "馃殌 GO_TASK_GENERATION", []
+    return "馃敀 HOLD", reasons
 
 
 def generate_report(days: int = 7, target_date: datetime.date = None) -> str:
@@ -207,31 +207,31 @@ def generate_report(days: int = 7, target_date: datetime.date = None) -> str:
     lines = []
     lines.append(f"# Memory Retrieval Evaluation Report")
     lines.append(f"**Generated:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}  ")
-    lines.append(f"**Period:** {dates[0]} → {dates[-1]}  ")
+    lines.append(f"**Period:** {dates[0]} 鈫?{dates[-1]}  ")
     lines.append(f"**Phase Decision:** {phase}")
     if phase_reasons:
         for r in phase_reasons:
             lines.append(f"  - {r}")
     lines.append("")
 
-    # ── Today's summary ───────────────────────────────────────────────────────
+    # 鈹€鈹€ Today's summary 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     lines.append("## Today's Metrics")
     lines.append("")
     lines.append("| Metric | Value | Status |")
     lines.append("|--------|-------|--------|")
 
     lp95 = today_m["latency_p95_ms"]
-    lines.append(f"| latency p50 | {_fmt(today_m['latency_p50_ms'], '.0f', 'ms')} | — |")
+    lines.append(f"| latency p50 | {_fmt(today_m['latency_p50_ms'], '.0f', 'ms')} | 鈥?|")
     lines.append(f"| latency p95 | {_fmt(lp95, '.0f', 'ms')} | {_judge('latency_p95_ms', lp95)} |")
     lines.append(f"| hit rate | {_fmt(today_m['hit_rate'], '.1%')} | {_judge('hit_rate', today_m['hit_rate'])} |")
     lines.append(f"| helpfulness | {_fmt(today_m['helpfulness'], '.1%')} | {_judge('helpfulness', today_m['helpfulness'])} |")
     lines.append(f"| degraded rate | {_fmt(today_m['degraded_rate'], '.1%')} | {_judge('degraded_rate', today_m['degraded_rate'])} |")
     lines.append(f"| feedback count | {today_m['feedback_count']} | {_judge('feedback_count', today_m['feedback_count'])} |")
-    lines.append(f"| task success rate | {_fmt(today_m['success_rate'], '.1%')} | — |")
-    lines.append(f"| total tasks | {today_m['total_tasks']} | — |")
+    lines.append(f"| task success rate | {_fmt(today_m['success_rate'], '.1%')} | 鈥?|")
+    lines.append(f"| total tasks | {today_m['total_tasks']} | 鈥?|")
     lines.append("")
 
-    # ── 7-day trend table ─────────────────────────────────────────────────────
+    # 鈹€鈹€ 7-day trend table 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     lines.append("## 7-Day Trend")
     lines.append("")
     lines.append("| Date | Tasks | Success% | Hit Rate | Helpfulness | p95 Latency | Degraded | Feedback |")
@@ -249,7 +249,7 @@ def generate_report(days: int = 7, target_date: datetime.date = None) -> str:
         )
     lines.append("")
 
-    # ── Threshold summary ─────────────────────────────────────────────────────
+    # 鈹€鈹€ Threshold summary 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     lines.append("## Threshold Summary")
     lines.append("")
     lines.append("| Metric | PASS threshold | WARN threshold | Today |")
@@ -261,7 +261,7 @@ def generate_report(days: int = 7, target_date: datetime.date = None) -> str:
         )
     lines.append("")
 
-    # ── Phase gate detail ─────────────────────────────────────────────────────
+    # 鈹€鈹€ Phase gate detail 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     lines.append("## Phase Gate: Active Task Generation")
     lines.append("")
     total_fb = sum(d["feedback_count"] for d in all_metrics)
@@ -273,13 +273,13 @@ def generate_report(days: int = 7, target_date: datetime.date = None) -> str:
             consec += 1
         else:
             break
-    lines.append(f"- Consecutive days helpfulness ≥ {PHASE_GATE['helpfulness_min']:.0%}: **{consec}** (need {PHASE_GATE['consecutive_days']})")
+    lines.append(f"- Consecutive days helpfulness 鈮?{PHASE_GATE['helpfulness_min']:.0%}: **{consec}** (need {PHASE_GATE['consecutive_days']})")
     lines.append(f"- Latest degraded rate: **{_fmt(today_m['degraded_rate'], '.1%')}** (max {PHASE_GATE['degraded_rate_max']:.0%})")
     lines.append("")
     lines.append(f"**Decision: {phase}**")
     lines.append("")
 
-    # ── Anomaly summary ───────────────────────────────────────────────────────
+    # 鈹€鈹€ Anomaly summary 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
     total_degraded = sum(d["degraded_count"] for d in all_metrics)
     if total_degraded > 0:
         lines.append("## Anomaly Summary")
@@ -317,3 +317,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -1,0 +1,63 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  0.81,
+    "archive_date":  "2026-03-07",
+    "files_count":  9,
+    "total_size_bytes":  175585,
+    "timestamp":  "2026-03-07 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  206
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\data\\legacy\\2026-03-07_pre_paths_migration\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  156
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\data\\legacy\\2026-03-07_pre_paths_migration\\memory_queue.log",
+                      "Type":  "temp",
+                      "Size":  407
+                  },
+                  {
+                      "Path":  "aios\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  125520
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\git_test_runner.py",
+                      "Type":  "old_test",
+                      "Size":  17708,
+                      "LastModified":  "2026-02-28"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test.py",
+                      "Type":  "old_test",
+                      "Size":  5312,
+                      "LastModified":  "2026-02-28"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_real_execution.py",
+                      "Type":  "old_test",
+                      "Size":  475,
+                      "LastModified":  "2026-02-28"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\agents\\ab_test_runner.py",
+                      "Type":  "old_test",
+                      "Size":  8796,
+                      "LastModified":  "2026-02-28"
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Portable\\agent_system\\agents\\ab_test_runner.py",
+                      "Type":  "old_test",
+                      "Size":  8796,
+                      "LastModified":  "2026-02-28"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-07",
+    "total_size_mb":  0.17
+}

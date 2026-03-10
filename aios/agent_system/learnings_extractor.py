@@ -24,7 +24,11 @@ def load_lessons():
     if not LESSONS_FILE.exists():
         return {"lessons": [], "rules_derived": []}
     with open(LESSONS_FILE, encoding="utf-8") as f:
-        return json.load(f)
+        data = json.load(f)
+    # Normalize: if data is a list, wrap it
+    if isinstance(data, list):
+        return {"lessons": data, "rules_derived": []}
+    return data
 
 
 def load_executions():

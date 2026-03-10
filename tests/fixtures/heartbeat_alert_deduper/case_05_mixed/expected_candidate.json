@@ -1,0 +1,12 @@
+{
+  "pattern_type": "repeated_alert_dedup_judgment",
+  "frequency": 2,
+  "source_events_count": 2,
+  "confidence": 0.75,
+  "suggested_skill_name": "heartbeat_alert_deduper",
+  "evidence": [
+    "api-testing-skill v1.0.0 - CRIT (network_error) - old alert (2026-03-06)",
+    "docker-skill v0.9.0 - CRIT (resource_exhausted) - old alert (2026-03-06)"
+  ],
+  "reasoning": "Mixed heartbeat contains: 2 old skill alerts (should dedup), 1 quarantined issue (ignore), 2 system signals (ignore), 2 successful tasks (ignore). Detector should extract only the repeated alert pattern and ignore noise."
+}

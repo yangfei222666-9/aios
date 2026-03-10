@@ -1,8 +1,8 @@
 {
-  "recommend_total": 274,
+  "recommend_total": 292,
   "recommend_hit": 199,
-  "recommend_default": 39,
-  "recommend_skipped_grayscale": 36,
+  "recommend_default": 48,
+  "recommend_skipped_grayscale": 45,
   "recommend_skipped_disabled": 0,
   "regen_total": 0,
   "regen_success": 0,

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Agent 健康探测 - 区分"未上报"和"已死亡"
+修正版：使用 mode + enabled 字段，不再使用已废弃的 status 字段
 """
 import json
 import os
@@ -39,7 +40,7 @@ def check_state_files():
     return state_files
 
 def check_task_executions():
-    """检查 task_executions.jsonl 中的最近活动"""
+    """检查 task_executions_v2.jsonl 中的最近活动"""
     from paths import TASK_EXECUTIONS
     exec_file = TASK_EXECUTIONS
     if not exec_file.exists():
@@ -78,51 +79,72 @@ def probe_agents():
         'dormant': [],    # 有状态文件但无活动
         'missing': [],    # 无状态文件但有活动记录
         'dead': [],       # 无状态文件 + 无活动
-        'unknown': []     # 状态不明
+        'shadow': [],     # mode=shadow（已注册未启用）
+        'disabled': []    # mode=disabled（已禁用）
     }
     
     for agent in agents:
-        agent_id = agent.get('id', '')
-        status = agent.get('status', 'unknown')
+        agent_id = agent.get('id', agent.get('name', ''))  # 兼容：优先用 id，没有则用 name
+        mode = agent.get('mode', 'active')
+        enabled = agent.get('enabled', True)
         
         has_state = agent_id in state_files
         has_activity = agent_id in activity
         
-        if status == 'unknown':
-            if has_state and has_activity:
-                results['alive'].append({
-                    'id': agent_id,
-                    'name': agent.get('name', ''),
-                    'last_seen': max(a['timestamp'] for a in activity[agent_id]).isoformat(),
-                    'state_file': state_files[agent_id]['file']
-                })
-            elif has_state and not has_activity:
-                results['dormant'].append({
-                    'id': agent_id,
-                    'name': agent.get('name', ''),
-                    'state_modified': state_files[agent_id]['last_modified'].isoformat(),
-                    'state_file': state_files[agent_id]['file']
-                })
-            elif not has_state and has_activity:
-                results['missing'].append({
-                    'id': agent_id,
-                    'name': agent.get('name', ''),
-                    'last_activity': max(a['timestamp'] for a in activity[agent_id]).isoformat()
-                })
-            else:
-                results['dead'].append({
-                    'id': agent_id,
-                    'name': agent.get('name', '')
-                })
+        # 先按 mode 分类
+        if mode == 'shadow':
+            results['shadow'].append({
+                'id': agent_id,
+                'name': agent.get('name', ''),
+                'enabled': enabled,
+                'has_state': has_state,
+                'has_activity': has_activity
+            })
+            continue
+        elif mode == 'disabled':
+            results['disabled'].append({
+                'id': agent_id,
+                'name': agent.get('name', ''),
+                'enabled': enabled,
+                'has_state': has_state,
+                'has_activity': has_activity
+            })
+            continue
+        
+        # mode=active 的 agent 才判断 alive/dormant/missing/dead
+        if has_state and has_activity:
+            results['alive'].append({
+                'id': agent_id,
+                'name': agent.get('name', ''),
+                'mode': mode,
+                'enabled': enabled,
+                'last_seen': max(a['timestamp'] for a in activity[agent_id]).isoformat(),
+                'state_file': state_files[agent_id]['file']
+            })
+        elif has_state and not has_activity:
+            results['dormant'].append({
+                'id': agent_id,
+                'name': agent.get('name', ''),
+                'mode': mode,
+                'enabled': enabled,
+                'state_modified': state_files[agent_id]['last_modified'].isoformat(),
+                'state_file': state_files[agent_id]['file']
+            })
+        elif not has_state and has_activity:
+            results['missing'].append({
+                'id': agent_id,
+                'name': agent.get('name', ''),
+                'mode': mode,
+                'enabled': enabled,
+                'last_activity': max(a['timestamp'] for a in activity[agent_id]).isoformat()
+            })
         else:
-            # 状态已知的 agent
-            if has_activity:
-                results['alive'].append({
-                    'id': agent_id,
-                    'name': agent.get('name', ''),
-                    'status': status,
-                    'last_seen': max(a['timestamp'] for a in activity[agent_id]).isoformat()
-                })
+            results['dead'].append({
+                'id': agent_id,
+                'name': agent.get('name', ''),
+                'mode': mode,
+                'enabled': enabled
+            })
     
     return results
 
@@ -153,6 +175,18 @@ def main():
     for agent in results['dead']:
         print(f"   - {agent['name']} ({agent['id']})")
     
+    print(f"\n🌑 Shadow 模式: {len(results['shadow'])} 个（已注册未启用）")
+    for agent in results['shadow'][:5]:
+        print(f"   - {agent['name']} ({agent['id']})")
+    if len(results['shadow']) > 5:
+        print(f"   ... 还有 {len(results['shadow']) - 5} 个")
+    
+    print(f"\n🚫 Disabled 模式: {len(results['disabled'])} 个（已禁用）")
+    for agent in results['disabled'][:5]:
+        print(f"   - {agent['name']} ({agent['id']})")
+    if len(results['disabled']) > 5:
+        print(f"   ... 还有 {len(results['disabled']) - 5} 个")
+    
     # 保存结果
     from paths import AGENT_HEALTH_REPORT
     output_file = AGENT_HEALTH_REPORT
@@ -163,7 +197,9 @@ def main():
                 'alive': len(results['alive']),
                 'dormant': len(results['dormant']),
                 'missing': len(results['missing']),
-                'dead': len(results['dead'])
+                'dead': len(results['dead']),
+                'shadow': len(results['shadow']),
+                'disabled': len(results['disabled'])
             },
             'details': results
         }, f, indent=2, ensure_ascii=False)
@@ -178,7 +214,8 @@ def main():
         print("\n⚠️  发现缺失状态文件的 agent，建议补充上报机制")
         return 1
     else:
-        print("\n✅ 所有 agent 状态正常")
+        print("\n✅ 所有 routable agent 状态正常")
+        print(f"   Shadow: {len(results['shadow'])} | Disabled: {len(results['disabled'])} (符合预期)")
         return 0
 
 if __name__ == '__main__':

@@ -1,0 +1,50 @@
+{
+  "skill_name": "heartbeat_alert_deduper",
+  "version": "0.1.0",
+  "description": "从 heartbeat 文本中抽取候选告警，按去重规则与隔离模块规则自动分类为'新告警/已抑制旧告警/已知隔离问题/非告警'，输出结构化结果与是否需要通知的判断",
+  "type": "analysis",
+  "risk_level": "low",
+  "capabilities": [
+    "parse_heartbeat_text",
+    "extract_candidate_alerts",
+    "classify_alerts",
+    "dedup_alerts",
+    "quarantine_check"
+  ],
+  "inputs": {
+    "required": [
+      "heartbeat_text"
+    ],
+    "optional": [
+      "context_meta"
+    ]
+  },
+  "outputs": {
+    "run_id": "string",
+    "parsed_alerts_count": "int",
+    "results": "list",
+    "summary": "dict"
+  },
+  "dependencies": [],
+  "permissions": {
+    "read": [
+      "memory/known_alerts.json",
+      "memory/quarantined_modules.json",
+      "memory/dedup_rules.json"
+    ],
+    "write": [
+      "memory/deduper_runs.jsonl",
+      "memory/skill_feedback.jsonl"
+    ],
+    "execute": false,
+    "network": false
+  },
+  "taijios_integration": {
+    "reality_ledger": true,
+    "evolution_score": false,
+    "yijing_state_engine": true
+  },
+  "created": "2026-03-09T09:58:00+08:00",
+  "author": "taijios_skill_generator",
+  "status": "draft"
+}

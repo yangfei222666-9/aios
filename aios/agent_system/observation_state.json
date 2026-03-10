@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-03-07T16:19:42.682639",
+  "total_samples": 1,
+  "simulated_samples": 0,
+  "real_samples": 1,
+  "real_counts": {
+    "api_error": 1
+  },
+  "ready_types": [],
+  "pending_types": [
+    "api_error",
+    "network_error",
+    "resource_exhausted",
+    "timeout",
+    "dependency_error"
+  ],
+  "action": "CONTINUE_OBSERVATION"
+}

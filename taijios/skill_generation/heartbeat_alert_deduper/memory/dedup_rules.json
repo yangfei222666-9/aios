@@ -1,0 +1,10 @@
+{
+  "alert_dedup_enabled": true,
+  "notify_again_conditions": [
+    "severity_upgraded",
+    "error_type_changed",
+    "failure_count_increased",
+    "fixed_then_recurred"
+  ],
+  "quarantined_modules_notify": false
+}

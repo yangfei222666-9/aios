@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-Coder-Dispatcher 失败复盘表
-按 timeout/dependency/logic/simulation 分类，对应调参建议
-
-用法：
-    python coder_failure_review.py          # 生成复盘报告
-    python coder_failure_review.py --fix    # 自动应用调参建议
+Coder-Dispatcher 澶辫触澶嶇洏琛?鎸?timeout/dependency/logic/simulation 鍒嗙被锛屽搴旇皟鍙傚缓璁?
+鐢ㄦ硶锛?    python coder_failure_review.py          # 鐢熸垚澶嶇洏鎶ュ憡
+    python coder_failure_review.py --fix    # 鑷姩搴旂敤璋冨弬寤鸿
 """
 
 import json
@@ -15,13 +12,13 @@ from datetime import datetime
 from collections import Counter
 
 AIOS_DIR = Path(__file__).parent
-EXECUTIONS_FILE = AIOS_DIR / "task_executions.jsonl"
+EXECUTIONS_FILE = AIOS_DIR / TASK_EXECUTIONS
 REPORT_FILE = AIOS_DIR / "reports" / "coder_failure_review.md"
 
-# 确保 reports 目录存在
+# 纭繚 reports 鐩綍瀛樺湪
 (AIOS_DIR / "reports").mkdir(parents=True, exist_ok=True)
 
-# 错误分类规则
+# 閿欒鍒嗙被瑙勫垯
 ERROR_CATEGORIES = {
     "timeout": ["timeout", "timed out", "deadline exceeded", "took too long"],
     "dependency": ["import", "module", "dependency", "not found", "no module"],
@@ -30,35 +27,34 @@ ERROR_CATEGORIES = {
     "simulation": ["simulated", "simulation"],
 }
 
-# 每种错误类型的调参建议
-TUNING_ADVICE = {
+# 姣忕閿欒绫诲瀷鐨勮皟鍙傚缓璁?TUNING_ADVICE = {
     "timeout": {
-        "timeout_seconds": 120,  # 从 60 → 120
+        "timeout_seconds": 120,  # 浠?60 鈫?120
         "max_retries": 3,
-        "advice": "增加超时阈值到120s，启用任务拆分（>60s的任务自动拆为子任务）"
+        "advice": "澧炲姞瓒呮椂闃堝€煎埌120s锛屽惎鐢ㄤ换鍔℃媶鍒嗭紙>60s鐨勪换鍔¤嚜鍔ㄦ媶涓哄瓙浠诲姟锛?
     },
     "dependency": {
         "pre_check": True,
         "max_retries": 2,
-        "advice": "任务执行前自动检查依赖，失败时自动安装缺失包"
+        "advice": "浠诲姟鎵ц鍓嶈嚜鍔ㄦ鏌ヤ緷璧栵紝澶辫触鏃惰嚜鍔ㄥ畨瑁呯己澶卞寘"
     },
     "logic": {
         "max_retries": 1,
         "task_slice_size": "small",
-        "advice": "减少重试次数（逻辑错误重试无意义），缩小任务粒度"
+        "advice": "鍑忓皯閲嶈瘯娆℃暟锛堥€昏緫閿欒閲嶈瘯鏃犳剰涔夛級锛岀缉灏忎换鍔＄矑搴?
     },
     "resource": {
         "max_retries": 1,
-        "advice": "检查资源限制，启用流式处理，限制并发任务数"
+        "advice": "妫€鏌ヨ祫婧愰檺鍒讹紝鍚敤娴佸紡澶勭悊锛岄檺鍒跺苟鍙戜换鍔℃暟"
     },
     "simulation": {
-        "advice": "模拟失败，无需调参。切换到真实执行后此类错误消失"
+        "advice": "妯℃嫙澶辫触锛屾棤闇€璋冨弬銆傚垏鎹㈠埌鐪熷疄鎵ц鍚庢绫婚敊璇秷澶?
     },
 }
 
 
 def classify_error(error_msg: str) -> str:
-    """将错误消息分类"""
+    """灏嗛敊璇秷鎭垎绫?""
     error_lower = error_msg.lower()
     for category, keywords in ERROR_CATEGORIES.items():
         if any(kw in error_lower for kw in keywords):
@@ -67,7 +63,7 @@ def classify_error(error_msg: str) -> str:
 
 
 def load_coder_failures() -> list:
-    """加载 coder 相关的失败记录"""
+    """鍔犺浇 coder 鐩稿叧鐨勫け璐ヨ褰?""
     if not EXECUTIONS_FILE.exists():
         return []
     
@@ -87,15 +83,15 @@ def load_coder_failures() -> list:
 
 
 def generate_review_report() -> str:
-    """生成失败复盘报告"""
+    """鐢熸垚澶辫触澶嶇洏鎶ュ憡"""
     failures = load_coder_failures()
     
     if not failures:
-        report = f"# Coder-Dispatcher 失败复盘\n\n**时间:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n无失败记录，一切正常 ✅\n"
+        report = f"# Coder-Dispatcher 澶辫触澶嶇洏\n\n**鏃堕棿:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n鏃犲け璐ヨ褰曪紝涓€鍒囨甯?鉁匼n"
         REPORT_FILE.write_text(report, encoding="utf-8")
         return report
     
-    # 分类统计
+    # 鍒嗙被缁熻
     categories = Counter()
     categorized = {}
     for f in failures:
@@ -104,33 +100,31 @@ def generate_review_report() -> str:
         categories[cat] += 1
         categorized.setdefault(cat, []).append(f)
     
-    # 生成报告
-    report = f"""# Coder-Dispatcher 失败复盘
+    # 鐢熸垚鎶ュ憡
+    report = f"""# Coder-Dispatcher 澶辫触澶嶇洏
 
-**时间:** {datetime.now().strftime('%Y-%m-%d %H:%M')}
-**总失败数:** {len(failures)}
+**鏃堕棿:** {datetime.now().strftime('%Y-%m-%d %H:%M')}
+**鎬诲け璐ユ暟:** {len(failures)}
 
-## 错误分类统计
+## 閿欒鍒嗙被缁熻
 
-| 类型 | 数量 | 占比 | 调参建议 |
+| 绫诲瀷 | 鏁伴噺 | 鍗犳瘮 | 璋冨弬寤鸿 |
 |------|------|------|----------|
 """
     
     for cat, count in categories.most_common():
         pct = count / len(failures) * 100
-        advice = TUNING_ADVICE.get(cat, {}).get("advice", "需要人工分析")
+        advice = TUNING_ADVICE.get(cat, {}).get("advice", "闇€瑕佷汉宸ュ垎鏋?)
         report += f"| {cat} | {count} | {pct:.0f}% | {advice} |\n"
     
-    # 每种类型的详细记录
-    report += "\n## 详细记录\n\n"
+    # 姣忕绫诲瀷鐨勮缁嗚褰?    report += "\n## 璇︾粏璁板綍\n\n"
     for cat, items in categorized.items():
-        report += f"### {cat}（{len(items)} 次）\n\n"
+        report += f"### {cat}锛坽len(items)} 娆★級\n\n"
         tuning = TUNING_ADVICE.get(cat, {})
         if tuning.get("advice"):
-            report += f"**建议:** {tuning['advice']}\n\n"
+            report += f"**寤鸿:** {tuning['advice']}\n\n"
         
-        for item in items[-5:]:  # 最近5条
-            tid = item.get("task_id", "?")
+        for item in items[-5:]:  # 鏈€杩?鏉?            tid = item.get("task_id", "?")
             error = item.get("result", {}).get("error", "?")[:100]
             retries = item.get("retry_count", 0)
             ts = item.get("timestamp", 0)
@@ -150,3 +144,5 @@ def generate_review_report() -> str:
 if __name__ == "__main__":
     import sys
     generate_review_report()
+
+

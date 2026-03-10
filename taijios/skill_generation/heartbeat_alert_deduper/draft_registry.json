@@ -1,0 +1,30 @@
+{
+  "skill_name": "heartbeat_alert_deduper",
+  "version": "0.1.0",
+  "status": "validated",
+  "created": "2026-03-09T09:58:00+08:00",
+  "validated": "2026-03-09T10:05:00+08:00",
+  "validation_results": {
+    "v1_syntax": "passed",
+    "v2_behavior": "passed",
+    "v3_risk": "passed",
+    "total_tests": 11,
+    "passed_tests": 11,
+    "match_rate": 1.0
+  },
+  "risk_level": "low",
+  "capabilities": [
+    "parse_heartbeat_text",
+    "extract_candidate_alerts",
+    "classify_alerts",
+    "dedup_alerts",
+    "quarantine_check"
+  ],
+  "trial_status": "approved_for_trial",
+  "trial_notes": "三层验证全通过，可在隔离环境试运行",
+  "next_steps": [
+    "在真实 heartbeat 输出上试运行",
+    "收集反馈数据",
+    "记录到 skill_feedback.jsonl"
+  ]
+}

@@ -1,0 +1,51 @@
+AIOS Heartbeat v5.0 Started
+
+[SKILL_HEALTH] Checking skill health...
+  ⚠️ api-testing-skill v1.0.0 - CRIT (network_error)
+     Last success: 2026-03-06 10:23:15
+     Consecutive failures: 5
+     Error: Connection timeout after 30s
+  
+  ⚠️ docker-skill v0.9.0 - CRIT (resource_exhausted)
+     Last success: 2026-03-06 09:45:22
+     Consecutive failures: 4
+     Error: Docker daemon not responding
+
+[QUARANTINE] Checking quarantined modules...
+  ⚠️ low_success_regeneration.py - SyntaxError
+     Status: QUARANTINED
+     Reason: Invalid syntax at line 47
+     Quarantined since: 2026-03-05 18:30:12
+
+[SYSTEM] System signals detected:
+  ℹ️ evolution_score expired (last update: 2026-03-07 22:15:30)
+     Current score: 67.2 (stale)
+  
+  ⚠️ memory latency degraded
+     Average query time: 2.8s (baseline: 0.8s)
+
+[QUEUE] Processing 2 pending tasks...
+  [1/2] Executing task: task-abc123
+    Type: code
+    Description: Refactor scheduler.py
+    ✓ Completed in 18.5s
+  [2/2] Executing task: task-def456
+    Type: analysis
+    Description: Analyze error patterns
+    ✓ Completed in 22.1s
+
+[QUEUE] Processed 2 tasks
+  Success: 2
+  Failed: 0
+
+[HEALTH] Checking system health...
+   Health Score: 78.57/100
+   Total Tasks: 14
+   Completed: 11
+   Failed: 3
+   Pending: 0
+   Status: WARNING
+
+HEARTBEAT_OK (processed=2, health=79)
+
+Heartbeat Completed

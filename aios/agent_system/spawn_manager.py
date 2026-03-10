@@ -1,14 +1,13 @@
-"""
-Spawn Manager - LowSuccess Regeneration 全链路追踪
+﻿"""
+Spawn Manager - LowSuccess Regeneration 鍏ㄩ摼璺拷韪?
+Step 3: build_spawn_requests()  - 浠?lessons.json 鐢熸垚閲嶇敓璇锋眰
+Step 4: record_spawn_result()   - 鎵ц缁撴灉鍥炲啓
 
-Step 3: build_spawn_requests()  - 从 lessons.json 生成重生请求
-Step 4: record_spawn_result()   - 执行结果回写
-
-全链路：
-  task_executions.jsonl (failed)
-    → lessons.json (source=real, pending)
-    → spawn_requests.jsonl (queued)
-    → spawn_results.jsonl (success/failed)
+鍏ㄩ摼璺細
+  task_executions_v2.jsonl (failed)
+    鈫?lessons.json (source=real, pending)
+    鈫?spawn_requests.jsonl (queued)
+    鈫?spawn_results.jsonl (success/failed)
 """
 
 import json
@@ -20,12 +19,11 @@ LESSONS_PATH = "lessons.json"
 SPAWN_REQUESTS_PATH = "spawn_requests.jsonl"
 SPAWN_RESULTS_PATH = "spawn_results.jsonl"
 
-# 设置审计上下文
-set_audit_context("spawn-manager", "spawn-session")
+# 璁剧疆瀹¤涓婁笅鏂?set_audit_context("spawn-manager", "spawn-session")
 
 
 def build_spawn_requests():
-    """只从 source=real + status=pending 的 lessons 生成重生请求"""
+    """鍙粠 source=real + status=pending 鐨?lessons 鐢熸垚閲嶇敓璇锋眰"""
     if not os.path.exists(LESSONS_PATH):
         print("[WARN] lessons.json not found")
         return 0
@@ -33,8 +31,7 @@ def build_spawn_requests():
     with open(LESSONS_PATH, "r", encoding="utf-8") as f:
         lessons = json.load(f)
 
-    # 加载已有 spawn_requests，避免重复生成
-    existing_spawn_ids = set()
+    # 鍔犺浇宸叉湁 spawn_requests锛岄伩鍏嶉噸澶嶇敓鎴?    existing_spawn_ids = set()
     if os.path.exists(SPAWN_REQUESTS_PATH):
         with open(SPAWN_REQUESTS_PATH, "r", encoding="utf-8") as f:
             for line in f:
@@ -49,12 +46,12 @@ def build_spawn_requests():
 
     requests = []
     for lesson in lessons:
-        # 双重门禁
+        # 鍙岄噸闂ㄧ
         if lesson.get("source") != "real":
             continue
         if lesson.get("regeneration_status") != "pending":
             continue
-        # 去重
+        # 鍘婚噸
         if lesson.get("lesson_id") in existing_spawn_ids:
             continue
 
@@ -65,7 +62,7 @@ def build_spawn_requests():
             "task_description": lesson["task_description"],
             "error_type": lesson["error_type"],
             "error_context": lesson.get("context", {}),
-            "original_error": lesson["error_message"][:200],  # 截断超长 error
+            "original_error": lesson["error_message"][:200],  # 鎴柇瓒呴暱 error
             "created_at": lesson["harvested_at"],
             "status": "queued"
         }
@@ -75,9 +72,9 @@ def build_spawn_requests():
         with open(SPAWN_REQUESTS_PATH, "a", encoding="utf-8") as f:
             for req in requests:
                 f.write(json.dumps(req, ensure_ascii=False) + "\n")
-        print(f"[OK] build_spawn_requests: {len(requests)} new requests → {SPAWN_REQUESTS_PATH}")
+        print(f"[OK] build_spawn_requests: {len(requests)} new requests 鈫?{SPAWN_REQUESTS_PATH}")
         
-        # 审计日志：spawn.request
+        # 瀹¤鏃ュ織锛歴pawn.request
         audit_event_auto(
             action_type="spawn.request",
             target=SPAWN_REQUESTS_PATH,
@@ -97,7 +94,7 @@ def build_spawn_requests():
 
 
 def record_spawn_result(spawn_id, lesson_id, success, duration_s, error=None, retries=0):
-    """重生结果写入 spawn_results.jsonl + 更新 lessons.json 状态"""
+    """閲嶇敓缁撴灉鍐欏叆 spawn_results.jsonl + 鏇存柊 lessons.json 鐘舵€?""
     result = {
         "spawn_id": spawn_id,
         "lesson_id": lesson_id,
@@ -108,11 +105,11 @@ def record_spawn_result(spawn_id, lesson_id, success, duration_s, error=None, re
         "completed_at": datetime.now(timezone.utc).isoformat()
     }
 
-    # append-only 结果日志
+    # append-only 缁撴灉鏃ュ織
     with open(SPAWN_RESULTS_PATH, "a", encoding="utf-8") as f:
         f.write(json.dumps(result, ensure_ascii=False) + "\n")
 
-    # 审计日志：spawn.result
+    # 瀹¤鏃ュ織锛歴pawn.result
     audit_event_auto(
         action_type="spawn.result",
         target=spawn_id,
@@ -128,8 +125,7 @@ def record_spawn_result(spawn_id, lesson_id, success, duration_s, error=None, re
         spawn_id=spawn_id,
     )
 
-    # 更新 lesson 状态
-    if os.path.exists(LESSONS_PATH):
+    # 鏇存柊 lesson 鐘舵€?    if os.path.exists(LESSONS_PATH):
         with open(LESSONS_PATH, "r", encoding="utf-8") as f:
             lessons = json.load(f)
 
@@ -143,7 +139,7 @@ def record_spawn_result(spawn_id, lesson_id, success, duration_s, error=None, re
         with open(LESSONS_PATH, "w", encoding="utf-8") as f:
             json.dump(lessons, f, indent=2, ensure_ascii=False)
         
-        # 审计日志：file.modify
+        # 瀹¤鏃ュ織锛歠ile.modify
         audit_event_auto(
             action_type="file.modify",
             target=LESSONS_PATH,
@@ -159,12 +155,12 @@ def record_spawn_result(spawn_id, lesson_id, success, duration_s, error=None, re
         )
 
     status = "success" if success else "failed"
-    print(f"[OK] record_spawn_result: {spawn_id} → {status} ({duration_s:.1f}s)")
+    print(f"[OK] record_spawn_result: {spawn_id} 鈫?{status} ({duration_s:.1f}s)")
     return result
 
 
 def get_spawn_stats():
-    """统计 spawn 全链路状态"""
+    """缁熻 spawn 鍏ㄩ摼璺姸鎬?""
     stats = {
         "lessons_total": 0,
         "lessons_pending": 0,
@@ -175,7 +171,7 @@ def get_spawn_stats():
         "spawn_results_failed": 0,
     }
 
-    # lessons 统计
+    # lessons 缁熻
     if os.path.exists(LESSONS_PATH):
         with open(LESSONS_PATH, "r", encoding="utf-8") as f:
             lessons = json.load(f)
@@ -189,14 +185,14 @@ def get_spawn_stats():
             elif s == "failed":
                 stats["lessons_failed"] += 1
 
-    # spawn_requests 统计
+    # spawn_requests 缁熻
     if os.path.exists(SPAWN_REQUESTS_PATH):
         with open(SPAWN_REQUESTS_PATH, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     stats["spawn_queued"] += 1
 
-    # spawn_results 统计
+    # spawn_results 缁熻
     if os.path.exists(SPAWN_RESULTS_PATH):
         with open(SPAWN_RESULTS_PATH, "r", encoding="utf-8") as f:
             for line in f:
@@ -218,11 +214,10 @@ if __name__ == "__main__":
     print("Spawn Manager - Full Chain Verification")
     print("=" * 60)
 
-    # Step 3: 生成 spawn 请求
+    # Step 3: 鐢熸垚 spawn 璇锋眰
     n = build_spawn_requests()
 
-    # 打印全链路统计
-    stats = get_spawn_stats()
+    # 鎵撳嵃鍏ㄩ摼璺粺璁?    stats = get_spawn_stats()
     print("\n[CHAIN STATS]")
     print(f"  lessons total:          {stats['lessons_total']}")
     print(f"  lessons pending:        {stats['lessons_pending']}")
@@ -231,3 +226,4 @@ if __name__ == "__main__":
     print(f"  spawn_requests queued:  {stats['spawn_queued']}")
     print(f"  spawn_results success:  {stats['spawn_results_success']}")
     print(f"  spawn_results failed:   {stats['spawn_results_failed']}")
+

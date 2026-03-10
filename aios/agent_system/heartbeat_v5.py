@@ -123,6 +123,83 @@ from reality_ledger import create_action, transition_action
 from ledger_summary import compute_ledger_summary, format_heartbeat_summary
 
 
+def _print_learning_agents_status():
+    """打印 learning agents 状态（使用统一分类器）"""
+    from paths import AGENTS_STATE
+    from agent_availability_classifier import classify_all_agents, get_active_ratio
+    
+    agents_file = AGENTS_STATE
+    if not agents_file.exists():
+        print("   ⚠️ agents.json not found")
+        return
+    
+    with open(agents_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    
+    agents = data.get("agents", [])
+    learning_agents = [a for a in agents if a.get("group") == "learning"]
+    
+    # ── 使用统一分类器（唯一真源）──
+    classified = classify_all_agents(learning_agents)
+    active_routable = classified["active_routable"]
+    schedulable_idle = classified["schedulable_idle"]
+    shadow = classified["shadow"]
+    disabled = classified["disabled"]
+    
+    # ── 状态一致性校验 ──
+    # mode=active 必须 enabled=true，否则自动修复
+    fixed = 0
+    for a in learning_agents:
+        mode = a.get("mode")
+        enabled = a.get("enabled")
+        if mode == "active" and enabled is not True:
+            a["enabled"] = True
+            fixed += 1
+        elif mode in ("shadow", "disabled") and enabled is True:
+            a["enabled"] = False
+            fixed += 1
+    if fixed > 0:
+        with open(agents_file, "w", encoding="utf-8") as fw:
+            json.dump(data, fw, indent=2, ensure_ascii=False)
+        print(f"   🔧 Fixed {fixed} agent(s) with inconsistent mode/enabled state")
+    
+    # ── 计算活跃率（只基于可调度 Agent）──
+    active_count, routable_count = get_active_ratio(learning_agents)
+    
+    print(f"   Total: {len(learning_agents)} | Active & Routable: {active_count}/{routable_count} | Shadow: {len(shadow)} | Disabled: {len(disabled)}")
+    
+    if active_routable:
+        print(f"\n   [ACTIVE] {len(active_routable)} agents:")
+        for a in active_routable:
+            stats = a.get("stats", {})
+            total = stats.get("tasks_total", 0)
+            completed = stats.get("tasks_completed", 0)
+            if total > 0:
+                success_rate = completed / total * 100
+                print(f"      • {a['name']}: {completed}/{total} ({success_rate:.0f}%)")
+            else:
+                print(f"      • {a['name']}: 0 tasks (未运行)")
+    
+    if schedulable_idle:
+        print(f"\n   [SCHEDULABLE_IDLE] {len(schedulable_idle)} agents (可调度但未触发):")
+        for a in schedulable_idle[:5]:
+            print(f"      • {a['name']}")
+        if len(schedulable_idle) > 5:
+            print(f"      ... and {len(schedulable_idle) - 5} more")
+    
+    if shadow:
+        print(f"\n   [SHADOW] {len(shadow)} agents (保留但不路由):")
+        for a in shadow[:5]:  # 只显示前5个
+            print(f"      • {a['name']}")
+        if len(shadow) > 5:
+            print(f"      ... and {len(shadow) - 5} more")
+    
+    if disabled:
+        print(f"\n   [DISABLED] {len(disabled)} agents (已禁用)")
+    
+    print()
+
+
 def reclaim_zombie_tasks(timeout_seconds: int = 300, max_retries: int = 2) -> dict:
     """
     回收超时的 running 任务：running > timeout_seconds => retry(带上限) or failed
@@ -151,7 +228,7 @@ def reclaim_zombie_tasks(timeout_seconds: int = 300, max_retries: int = 2) -> di
         if age <= timeout_seconds:
             continue
 
-        task_id = task.get("id", "?")
+        task_id = task.get("id") or task.get("task_id") or "?"
         age_hr = age / 3600
         retry_count = task.get("zombie_retries", 0)
 
@@ -237,21 +314,22 @@ def process_task_queue(max_tasks: int = 5) -> dict:
     results = []
     skipped = 0
     for task in tasks[:max_tasks]:
+        task_id = task.get("id") or task.get("task_id") or "unknown"
         # Reality Ledger: create action (proposed)
         action = create_action(
             actor="heartbeat",
             source="heartbeat_v5",
             resource_type="task",
-            resource_id=task.get("id", "unknown"),
+            resource_id=task_id,
             action_type="execute_task",
-            payload={"task_type": task.get("type", task.get("task_type", "")), "task_id": task.get("id")},
-            idempotency_key=f"task:execute:{task.get('id', 'unknown')}",
-            lock_resource=f"task:{task.get('id', 'unknown')}",
+            payload={"task_type": task.get("type", task.get("task_type", "")), "task_id": task_id},
+            idempotency_key=f"task:execute:{task_id}",
+            lock_resource=f"task:{task_id}",
             tags=["task_execution", "heartbeat"],
         )
         # 将 action_id 注入 task，供 executor 使用
         task["action_id"] = action.action_id
-        print(f"  [LEDGER] Created action {action.action_id} for task {task.get('id')}")
+        print(f"  [LEDGER] Created action {action.action_id} for task {task_id}")
 
         token = try_acquire_spawn_lock(task)
         if token is None:
@@ -574,8 +652,8 @@ def main():
                 print(f"   📊 Phase 3 报告已生成: reports/lowsuccess_phase3_report.md\n")
             else:
                 print(f"   [OK] No failed tasks to regenerate\n")
-        except ImportError as e:
-            print(f"   ⚠️ LowSuccess Regeneration disabled (missing dependency: {e})\n")
+        except (ImportError, SyntaxError, Exception) as e:
+            print(f"   ⚠️ LowSuccess Regeneration disabled ({type(e).__name__}: {e})\n")
     
     # 0.5. Experience Learning v4.0 (每小时整点，在regeneration之后)
     if current_minute == 0:
@@ -687,6 +765,43 @@ def main():
             aggregate_all_skills()
         except Exception as e:
             print(f"[WARN] Skill memory aggregation failed: {e}")
+        
+        # Skill Failure Alert (每小时检查连续失败)
+        try:
+            from skill_failure_alert import check_consecutive_failures, format_alert_message
+            print(f"\n[SKILL_ALERT] Checking consecutive failures...")
+            alerts = check_consecutive_failures(window_size=5)
+            if alerts:
+                print(f"   ⚠️ {len(alerts)} skill(s) with consecutive failures:")
+                for alert in alerts[:3]:  # 只显示前 3 个
+                    print(f"\n{format_alert_message(alert)}")
+            else:
+                print("   ✅ All skills running normally")
+            
+            # ── Shadow Mode: Deduper 并行评估（只记录，不控制通知）──
+            if alerts:
+                try:
+                    from heartbeat_alert_deduper import run_shadow_evaluation
+                    print(f"\n[DEDUPER_SHADOW] Running parallel evaluation...")
+                    run_shadow_evaluation(alerts)
+                except Exception as e:
+                    print(f"   [DEDUPER_SHADOW] Failed (non-blocking): {e}")
+        except Exception as e:
+            print(f"[WARN] Skill failure alert failed: {e}")
+        
+        # Skill Analyzer Phase 2 (每周一次，周一0点)
+        if current_hour == 0:
+            from datetime import datetime as _dt
+            if _dt.now().weekday() == 0:  # Monday
+                try:
+                    from skill_analyzer import analyze_skills, print_analysis
+                    print(f"\n[SKILL_ANALYZER] Weekly Skill Analysis:")
+                    result = analyze_skills(days=7)
+                    print_analysis(result)
+                    if result.get("weekly_tip"):
+                        print(f"   💡 {result['weekly_tip']}")
+                except Exception as e:
+                    print(f"[WARN] Skill analysis failed: {e}")
     
     # 2.8. Learnings Extractor (每天0点和12点提炼黄金法则)
     if current_minute == 0 and current_hour in (0, 12):
@@ -712,6 +827,36 @@ def main():
                 print(f"   ℹ️  No conversations to extract today")
         except Exception as e:
             print(f"[WARN] Diary extraction failed: {e}")
+    
+    # 2.9.5. Hexagram Daily Snapshot (每天23:00收敛卦象快照)
+    if current_minute == 0 and current_hour == 23:
+        try:
+            from hexagram_daily_logger import run as run_hexagram_daily_logger
+            print(f"\n[HEXAGRAM_DAILY] Collecting daily hexagram snapshot...")
+            run_hexagram_daily_logger()
+            print(f"   ✅ Snapshot saved: data/hexagram_daily.jsonl")
+        except Exception as e:
+            print(f"[WARN] Hexagram daily snapshot failed: {e}")
+
+    # 2.10. Learning Agent Observer (每天0点自动更新观察表)
+    if current_minute == 0 and current_hour == 0:
+        try:
+            from learning_agent_observer import main as run_observer
+            print(f"\n[OBSERVER] Learning Agent Observer:")
+            run_observer()
+        except Exception as e:
+            print(f"[WARN] Learning agent observer failed: {e}")
+    
+    # 2.11. Learning Agent Triggers (每小时检查触发条件)
+    if current_minute == 0:
+        try:
+            from learning_agent_triggers import run_triggers
+            print(f"\n[TRIGGERS] Learning Agent Triggers:")
+            tasks = run_triggers()
+            if tasks:
+                print(f"   ✓ {len(tasks)} tasks triggered")
+        except Exception as e:
+            print(f"[WARN] Learning agent triggers failed: {e}")
     
     # 3. Token Report (每天0点生成)
     if current_minute == 0 and datetime.now().hour == 0:
@@ -743,6 +888,39 @@ def main():
     ledger_summary = compute_ledger_summary(hours=24.0)
     print(format_heartbeat_summary(ledger_summary))
     
+    # 4.5. Learning Agents Status (每次心跳)
+    print(f"\n[LEARNING_AGENTS] Status:")
+    _print_learning_agents_status()
+    
+    # 4.6. Agent Lifecycle Engine (每小时整点)
+    if current_minute == 0:
+        try:
+            from agent_lifecycle_engine import run_lifecycle_engine
+            print(f"\n[LIFECYCLE] Agent Lifecycle Engine:")
+            result = run_lifecycle_engine()
+            print(f"   ✓ Updated {result['updated_agents']}/{result['total_agents']} agents")
+            print(f"   • 乾卦（active）: {result['state_distribution']['active']}")
+            print(f"   • 坤卦（shadow）: {result['state_distribution']['shadow']}")
+            print(f"   • 坎卦（disabled）: {result['state_distribution']['disabled']}")
+        except Exception as e:
+            print(f"[WARN] Lifecycle engine failed: {e}")
+    
+    # 4.7. Lifecycle Check (每次心跳，只读模式)
+    try:
+        from heartbeat_lifecycle import run_lifecycle_check
+        print(f"\n[LIFECYCLE_CHECK] Agent Lifecycle Status:")
+        lifecycle_report = run_lifecycle_check(write_back=False)
+        # 只输出摘要，不输出完整报告（避免刷屏）
+        lines = lifecycle_report.split('\n')
+        summary_start = next((i for i, line in enumerate(lines) if line.startswith('📊 Summary:')), None)
+        if summary_start:
+            for line in lines[summary_start:]:
+                print(f"   {line}")
+        else:
+            print("   ✓ Lifecycle check completed")
+    except Exception as e:
+        print(f"[WARN] Lifecycle check failed: {e}")
+
     # 5. Output summary
     idem_metrics = get_idempotency_metrics()
     print(f"\n{'=' * 62}")

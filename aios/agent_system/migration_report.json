@@ -1,0 +1,9 @@
+{
+  "migration_time": "2026-03-08T13:34:34.478673",
+  "input_file": "C:\\Users\\A\\.openclaw\\workspace\\aios\\agent_system\\task_executions.jsonl",
+  "output_file": "C:\\Users\\A\\.openclaw\\workspace\\aios\\agent_system\\task_executions_v2.jsonl",
+  "total_old_records": 5,
+  "total_new_records": 5,
+  "failed_records": 0,
+  "success_rate": "100.0%"
+}

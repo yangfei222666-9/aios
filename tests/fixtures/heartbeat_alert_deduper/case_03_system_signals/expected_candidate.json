@@ -1,0 +1,12 @@
+{
+  "pattern_type": "system_signal_vs_alert_boundary",
+  "frequency": 2,
+  "source_events_count": 2,
+  "confidence": 0.50,
+  "suggested_skill_name": null,
+  "evidence": [
+    "evolution_score expired - system signal, not alert",
+    "memory latency degraded - system signal, not alert"
+  ],
+  "reasoning": "These are system signals (informational/warning), not skill failure alerts. Should NOT be treated as alert dedup candidates. Used as boundary test case."
+}

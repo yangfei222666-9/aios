@@ -1,0 +1,21 @@
+﻿{
+    "false_positives":  0,
+    "false_negatives":  0,
+    "trial_run":  true,
+    "verdict":  "可用，已修复关键 bug，建议接通真实 heartbeat 通知链",
+    "hit_rate":  "3/3 旧告警正确抑制",
+    "saved_manual_work":  true,
+    "notes":  "三条旧告警全部正确抑制，low_success_regeneration.py 正确识别为隔离模块，evolution_score 正确识别为系统信号",
+    "timestamp":  "2026-03-09T10:06:30+08:00",
+    "fixes_applied":  [
+                          "_infer_severity() 增加 failure_count 参数，失败\u003e=3次→ERROR，2次→WARN",
+                          "AlertKeyGenerator 拆分为 build_skill_key/build_module_key/build_signal_key 三个静态方法",
+                          "known_alerts.json 增加 source_type/skill_name/module_name 人类可读字段",
+                          "known_alerts.json 补充 pdf-skill WARN 版本记录"
+                      ],
+    "issues_found":  [
+                         "severity 推断不一致：失败次数未传入 _infer_severity()，导致 key 不匹配"
+                     ],
+    "run_id":  "deduper-2026-03-09T10:06:20.039671",
+    "skill":  "heartbeat_alert_deduper"
+}

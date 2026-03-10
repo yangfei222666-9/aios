@@ -1,4 +1,4 @@
-"""Dependency Manager - 任务依赖关系管理和编排"""
+﻿"""Dependency Manager - 浠诲姟渚濊禆鍏崇郴绠＄悊鍜岀紪鎺?""
 import json
 from datetime import datetime
 from pathlib import Path
@@ -8,62 +8,59 @@ class DependencyManager:
     def __init__(self):
         self.queue_file = Path("task_queue.jsonl")
         self.dependency_file = Path("data/dependencies/task_dependencies.json")
-        self.execution_file = Path("task_executions.jsonl")
+        self.execution_file = Path(TASK_EXECUTIONS)
         
     def manage_dependencies(self):
-        """管理任务依赖关系"""
+        """绠＄悊浠诲姟渚濊禆鍏崇郴"""
         print("=" * 80)
-        print("Dependency Manager - 任务依赖管理")
+        print("Dependency Manager - 浠诲姟渚濊禆绠＄悊")
         print("=" * 80)
         
-        # 1. 加载任务和依赖
-        tasks = self._load_tasks()
+        # 1. 鍔犺浇浠诲姟鍜屼緷璧?        tasks = self._load_tasks()
         dependencies = self._load_dependencies()
         
-        print(f"\n📋 任务总数: {len(tasks)}")
-        print(f"🔗 依赖关系: {len(dependencies)} 条")
+        print(f"\n馃搵 浠诲姟鎬绘暟: {len(tasks)}")
+        print(f"馃敆 渚濊禆鍏崇郴: {len(dependencies)} 鏉?)
         
-        # 2. 构建依赖图
-        dep_graph = self._build_dependency_graph(tasks, dependencies)
+        # 2. 鏋勫缓渚濊禆鍥?        dep_graph = self._build_dependency_graph(tasks, dependencies)
         
-        # 3. 拓扑排序（找出可执行顺序）
-        execution_order = self._topological_sort(dep_graph)
+        # 3. 鎷撴墤鎺掑簭锛堟壘鍑哄彲鎵ц椤哄簭锛?        execution_order = self._topological_sort(dep_graph)
         
         if not execution_order:
-            print("\n✗ 检测到循环依赖，无法执行")
+            print("\n鉁?妫€娴嬪埌寰幆渚濊禆锛屾棤娉曟墽琛?)
             return
         
-        print(f"\n✓ 执行顺序已计算 ({len(execution_order)} 个任务)")
+        print(f"\n鉁?鎵ц椤哄簭宸茶绠?({len(execution_order)} 涓换鍔?")
         
-        # 4. 找出可立即执行的任务
+        # 4. 鎵惧嚭鍙珛鍗虫墽琛岀殑浠诲姟
         ready_tasks = self._find_ready_tasks(tasks, dependencies)
         
-        print(f"\n🚀 可立即执行的任务 ({len(ready_tasks)} 个):")
+        print(f"\n馃殌 鍙珛鍗虫墽琛岀殑浠诲姟 ({len(ready_tasks)} 涓?:")
         for task in ready_tasks[:5]:
-            print(f"  • {task['id']}: {task.get('description', '无描述')}")
+            print(f"  鈥?{task['id']}: {task.get('description', '鏃犳弿杩?)}")
         
-        # 5. 找出被阻塞的任务
+        # 5. 鎵惧嚭琚樆濉炵殑浠诲姟
         blocked_tasks = self._find_blocked_tasks(tasks, dependencies)
         
         if blocked_tasks:
-            print(f"\n⏸️  被阻塞的任务 ({len(blocked_tasks)} 个):")
+            print(f"\n鈴革笍  琚樆濉炵殑浠诲姟 ({len(blocked_tasks)} 涓?:")
             for task, blocking in list(blocked_tasks.items())[:5]:
-                print(f"  • {task}: 等待 {', '.join(blocking)}")
+                print(f"  鈥?{task}: 绛夊緟 {', '.join(blocking)}")
         
-        # 6. 生成执行计划
+        # 6. 鐢熸垚鎵ц璁″垝
         plan = self._generate_execution_plan(execution_order, dependencies)
         
-        print(f"\n📊 执行计划:")
+        print(f"\n馃搳 鎵ц璁″垝:")
         for stage, stage_tasks in enumerate(plan, 1):
-            print(f"  阶段 {stage}: {len(stage_tasks)} 个任务（可并行）")
+            print(f"  闃舵 {stage}: {len(stage_tasks)} 涓换鍔★紙鍙苟琛岋級")
         
-        # 7. 保存依赖图和执行计划
+        # 7. 淇濆瓨渚濊禆鍥惧拰鎵ц璁″垝
         self._save_dependency_graph(dep_graph, execution_order, plan)
         
         print(f"\n{'=' * 80}")
     
     def add_dependency(self, task_id, depends_on):
-        """添加任务依赖"""
+        """娣诲姞浠诲姟渚濊禆"""
         dependencies = self._load_dependencies()
         
         if task_id not in dependencies:
@@ -73,10 +70,10 @@ class DependencyManager:
             dependencies[task_id].append(depends_on)
         
         self._save_dependencies(dependencies)
-        print(f"✓ 已添加依赖: {task_id} → {depends_on}")
+        print(f"鉁?宸叉坊鍔犱緷璧? {task_id} 鈫?{depends_on}")
     
     def _load_tasks(self):
-        """加载任务队列"""
+        """鍔犺浇浠诲姟闃熷垪"""
         if not self.queue_file.exists():
             return []
         
@@ -88,7 +85,7 @@ class DependencyManager:
         return tasks
     
     def _load_dependencies(self):
-        """加载依赖关系"""
+        """鍔犺浇渚濊禆鍏崇郴"""
         if not self.dependency_file.exists():
             return {}
         
@@ -96,13 +93,13 @@ class DependencyManager:
             return json.load(f)
     
     def _save_dependencies(self, dependencies):
-        """保存依赖关系"""
+        """淇濆瓨渚濊禆鍏崇郴"""
         self.dependency_file.parent.mkdir(parents=True, exist_ok=True)
         with open(self.dependency_file, "w", encoding="utf-8") as f:
             json.dump(dependencies, f, ensure_ascii=False, indent=2)
     
     def _build_dependency_graph(self, tasks, dependencies):
-        """构建依赖图"""
+        """鏋勫缓渚濊禆鍥?""
         graph = defaultdict(list)
         
         for task in tasks:
@@ -113,8 +110,8 @@ class DependencyManager:
         return dict(graph)
     
     def _topological_sort(self, graph):
-        """拓扑排序（检测循环依赖）"""
-        # 计算入度
+        """鎷撴墤鎺掑簭锛堟娴嬪惊鐜緷璧栵級"""
+        # 璁＄畻鍏ュ害
         in_degree = defaultdict(int)
         for node in graph:
             if node not in in_degree:
@@ -122,8 +119,7 @@ class DependencyManager:
             for dep in graph[node]:
                 in_degree[dep] += 1
         
-        # 找出入度为 0 的节点
-        queue = deque([node for node in graph if in_degree[node] == 0])
+        # 鎵惧嚭鍏ュ害涓?0 鐨勮妭鐐?        queue = deque([node for node in graph if in_degree[node] == 0])
         result = []
         
         while queue:
@@ -135,14 +131,14 @@ class DependencyManager:
                 if in_degree[dep] == 0:
                     queue.append(dep)
         
-        # 如果结果长度不等于节点数，说明有循环依赖
+        # 濡傛灉缁撴灉闀垮害涓嶇瓑浜庤妭鐐规暟锛岃鏄庢湁寰幆渚濊禆
         if len(result) != len(graph):
             return None
         
         return result
     
     def _find_ready_tasks(self, tasks, dependencies):
-        """找出可立即执行的任务（无依赖或依赖已完成）"""
+        """鎵惧嚭鍙珛鍗虫墽琛岀殑浠诲姟锛堟棤渚濊禆鎴栦緷璧栧凡瀹屾垚锛?""
         completed = self._get_completed_tasks()
         ready = []
         
@@ -153,14 +149,14 @@ class DependencyManager:
             task_id = task.get("id")
             deps = dependencies.get(task_id, [])
             
-            # 无依赖或所有依赖已完成
+            # 鏃犱緷璧栨垨鎵€鏈変緷璧栧凡瀹屾垚
             if not deps or all(dep in completed for dep in deps):
                 ready.append(task)
         
         return ready
     
     def _find_blocked_tasks(self, tasks, dependencies):
-        """找出被阻塞的任务"""
+        """鎵惧嚭琚樆濉炵殑浠诲姟"""
         completed = self._get_completed_tasks()
         blocked = {}
         
@@ -171,15 +167,14 @@ class DependencyManager:
             task_id = task.get("id")
             deps = dependencies.get(task_id, [])
             
-            # 有未完成的依赖
-            blocking = [dep for dep in deps if dep not in completed]
+            # 鏈夋湭瀹屾垚鐨勪緷璧?            blocking = [dep for dep in deps if dep not in completed]
             if blocking:
                 blocked[task_id] = blocking
         
         return blocked
     
     def _get_completed_tasks(self):
-        """获取已完成的任务"""
+        """鑾峰彇宸插畬鎴愮殑浠诲姟"""
         if not self.execution_file.exists():
             return set()
         
@@ -194,12 +189,12 @@ class DependencyManager:
         return completed
     
     def _generate_execution_plan(self, execution_order, dependencies):
-        """生成分阶段执行计划（同一阶段的任务可并行）"""
+        """鐢熸垚鍒嗛樁娈垫墽琛岃鍒掞紙鍚屼竴闃舵鐨勪换鍔″彲骞惰锛?""
         completed = set()
         plan = []
         
         while execution_order:
-            # 找出当前可执行的任务
+            # 鎵惧嚭褰撳墠鍙墽琛岀殑浠诲姟
             stage = []
             remaining = []
             
@@ -211,7 +206,7 @@ class DependencyManager:
                     remaining.append(task_id)
             
             if not stage:
-                break  # 无法继续
+                break  # 鏃犳硶缁х画
             
             plan.append(stage)
             completed.update(stage)
@@ -220,7 +215,7 @@ class DependencyManager:
         return plan
     
     def _save_dependency_graph(self, graph, execution_order, plan):
-        """保存依赖图和执行计划"""
+        """淇濆瓨渚濊禆鍥惧拰鎵ц璁″垝"""
         data = {
             "timestamp": datetime.now().isoformat(),
             "dependency_graph": graph,
@@ -234,7 +229,7 @@ class DependencyManager:
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         
-        print(f"\n✓ 依赖分析已保存: {output_file}")
+        print(f"\n鉁?渚濊禆鍒嗘瀽宸蹭繚瀛? {output_file}")
 
 if __name__ == "__main__":
     import sys
@@ -242,11 +237,13 @@ if __name__ == "__main__":
     manager = DependencyManager()
     
     if len(sys.argv) > 1 and sys.argv[1] == "add":
-        # 添加依赖: python dependency_manager.py add task1 task2
+        # 娣诲姞渚濊禆: python dependency_manager.py add task1 task2
         if len(sys.argv) == 4:
             manager.add_dependency(sys.argv[2], sys.argv[3])
         else:
-            print("用法: python dependency_manager.py add <task_id> <depends_on>")
+            print("鐢ㄦ硶: python dependency_manager.py add <task_id> <depends_on>")
     else:
-        # 分析依赖
+        # 鍒嗘瀽渚濊禆
         manager.manage_dependencies()
+
+

@@ -1,0 +1,54 @@
+[
+  {
+    "alert_key": "skill:api-testing-skill:network_error:ERROR",
+    "source_type": "skill_failure",
+    "skill_name": "api-testing-skill",
+    "error_type": "network_error",
+    "severity": "ERROR",
+    "failure_count": 3,
+    "first_seen": "2026-03-06T08:00:00+08:00",
+    "last_seen": "2026-03-08T12:00:00+08:00",
+    "status": "reported",
+    "notify_policy": "dedup",
+    "notes": "reported on 2026-03-06"
+  },
+  {
+    "alert_key": "skill:docker-skill:resource_exhausted:ERROR",
+    "source_type": "skill_failure",
+    "skill_name": "docker-skill",
+    "error_type": "resource_exhausted",
+    "severity": "ERROR",
+    "failure_count": 3,
+    "first_seen": "2026-03-06T08:00:00+08:00",
+    "last_seen": "2026-03-08T12:00:00+08:00",
+    "status": "reported",
+    "notify_policy": "dedup",
+    "notes": "reported on 2026-03-06"
+  },
+  {
+    "alert_key": "skill:pdf-skill:timeout:ERROR",
+    "source_type": "skill_failure",
+    "skill_name": "pdf-skill",
+    "error_type": "timeout",
+    "severity": "ERROR",
+    "failure_count": 3,
+    "first_seen": "2026-03-06T08:00:00+08:00",
+    "last_seen": "2026-03-08T12:00:00+08:00",
+    "status": "reported",
+    "notify_policy": "dedup",
+    "notes": "reported on 2026-03-06 (3 failures)"
+  },
+  {
+    "alert_key": "skill:pdf-skill:timeout:WARN",
+    "source_type": "skill_failure",
+    "skill_name": "pdf-skill",
+    "error_type": "timeout",
+    "severity": "WARN",
+    "failure_count": 2,
+    "first_seen": "2026-03-08T12:00:00+08:00",
+    "last_seen": "2026-03-09T10:06:00+08:00",
+    "status": "reported",
+    "notify_policy": "dedup",
+    "notes": "reported on 2026-03-09 (improved from 3 to 2 failures)"
+  }
+]
