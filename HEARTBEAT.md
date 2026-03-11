@@ -38,7 +38,62 @@ C:\Users\A\.openclaw\workspace\aios\agent_system\data\spawn_pending.jsonl
 1. **读取 spawn_pending.jsonl**
 2. **对每条记录调用 sessions_spawn**（使用记录中的 agent_id, task, label, cleanup, runTimeoutSeconds）
 3. **清空 spawn_pending.jsonl**
-4. **继续执行 heartbeat_v5.py**
+4. **运行自动改进检查**（`run_self_improving.py --dry-run`）
+5. **继续执行 heartbeat_v5.py**
+
+## 🔧 自动改进（Self-Improving Loop）
+
+每次心跳自动检查所有 Agent 的健康状况，并在必要时应用改进。
+
+### 执行命令
+
+```powershell
+cd C:\Users\A\.openclaw\workspace\aios\agent_system
+$env:PYTHONUTF8=1; $env:PYTHONIOENCODING='utf-8'; & "C:\Program Files\Python312\python.exe" -X utf8 run_self_improving.py --dry-run
+```
+
+### 改进触发条件
+
+- 成功率 < 70%
+- 至少有 3 次任务记录
+- 不在冷却期（6 小时）
+
+### 改进机制
+
+1. **自动检测失败模式** - 分析最近 24 小时的任务执行记录
+2. **生成改进建议** - 基于失败模式生成具体改进方案
+3. **自动应用低风险改进** - 只自动应用 `risk=low` 的改进
+4. **自动回滚** - 如果改进后效果变差，自动回滚到改进前状态
+5. **冷却期保护** - 每次改进后 6 小时内不再触发改进
+
+### 输出示例
+
+```
+============================================================
+Self-Improving Loop - 自动改进
+============================================================
+时间: 2026-03-12 00:09:10
+模式: Dry-Run（只分析）
+
+📊 检查 8 个 Agent...
+
+✅ agent_coder_001
+   任务数: 3 | 成功率: 100.0%
+
+⚠️ coder-dispatcher
+   任务数: 3 | 成功率: 0.0%
+   🔧 需要改进
+
+============================================================
+汇总统计
+============================================================
+✅ 健康: 6
+⚠️ 不健康: 2
+🔧 需要改进: 2
+
+📈 总改进次数: 3
+📋 已改进 Agent: 3
+```
 
 ## 🔧 编码配置（重要）
 

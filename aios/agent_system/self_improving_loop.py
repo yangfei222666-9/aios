@@ -39,14 +39,11 @@ from datetime import datetime, timedelta
 # 添加父目录到路径
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from agent_tracer import AgentTracer, TraceAnalyzer
-from analyze_failures import FailureAnalyzer
-from agent_auto_fixer import AgentAutoFixer
-from auto_evolution import AutoEvolution
-from evolution_ab_test import EvolutionABTest
-from auto_rollback import AutoRollback
-from adaptive_threshold import AdaptiveThreshold
-from telegram_notifier import TelegramNotifier  # 新增
+from src.self_improving_loop.tracer import AgentTracer, TraceAnalyzer
+from src.self_improving_loop.core import FailureAnalyzer
+from src.self_improving_loop.rollback import AutoRollback
+from src.self_improving_loop.threshold import AdaptiveThreshold
+from src.self_improving_loop.notifier import Notifier, PrintNotifier
 
 # AgentManager 导入（尝试多种路径）
 try:
