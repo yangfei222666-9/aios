@@ -1,0 +1,191 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AIOS: Run Heartbeat",
+      "type": "shell",
+      "command": "${env:PYTHON_PATH}",
+      "args": [
+        "-X",
+        "utf8",
+        "heartbeat_v5.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/agent_system",
+        "env": {
+          "PYTHONUTF8": "1",
+          "PYTHONIOENCODING": "utf-8"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "AIOS: Start Memory Server",
+      "type": "shell",
+      "command": "${env:PYTHON_PATH}",
+      "args": [
+        "-X",
+        "utf8",
+        "memory_server.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/agent_system",
+        "env": {
+          "PYTHONUTF8": "1",
+          "PYTHONIOENCODING": "utf-8"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "AIOS: Start Dashboard",
+      "type": "shell",
+      "command": "${env:PYTHON_PATH}",
+      "args": [
+        "-X",
+        "utf8",
+        "server.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/dashboard/AIOS-Dashboard-v3.4",
+        "env": {
+          "PYTHONUTF8": "1",
+          "PYTHONIOENCODING": "utf-8"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "AIOS: Verify Dev Env",
+      "type": "shell",
+      "command": "${env:PYTHON_PATH}",
+      "args": [
+        "-X",
+        "utf8",
+        "verify_dev_env.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONUTF8": "1",
+          "PYTHONIOENCODING": "utf-8"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Python: Run Tests",
+      "type": "shell",
+      "command": "${env:PYTHON_PATH}",
+      "args": [
+        "-m",
+        "pytest",
+        "tests/",
+        "-v"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/agent_system",
+        "env": {
+          "PYTHONUTF8": "1",
+          "PYTHONIOENCODING": "utf-8"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Python: Run Tests with Coverage",
+      "type": "shell",
+      "command": "${env:PYTHON_PATH}",
+      "args": [
+        "-m",
+        "pytest",
+        "tests/",
+        "--cov=.",
+        "--cov-report=html",
+        "-v"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/agent_system",
+        "env": {
+          "PYTHONUTF8": "1",
+          "PYTHONIOENCODING": "utf-8"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Python: Format with Black",
+      "type": "shell",
+      "command": "${env:PYTHON_PATH}",
+      "args": [
+        "-m",
+        "black",
+        "."
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/agent_system"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Commit Changes",
+      "type": "shell",
+      "command": "git",
+      "args": [
+        "add",
+        ".",
+        "&&",
+        "git",
+        "commit",
+        "-m",
+        "${input:commitMessage}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "commitMessage",
+      "type": "promptString",
+      "description": "Commit message",
+      "default": "chore: update"
+    }
+  ]
+}

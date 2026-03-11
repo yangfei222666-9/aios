@@ -1,0 +1,82 @@
+{
+  "$schema": "state_index_v1",
+  "version": "1.0",
+  "last_updated": "2026-03-11T14:05:00+08:00",
+  "description": "太极OS 统一状态索引样例 - 先手工映射 4 个对象，验证词表有效性",
+  "agents": {
+    "GitHub_Researcher": {
+      "readiness_status": "production-ready",
+      "run_status": "success",
+      "health_status": "healthy",
+      "enabled": true,
+      "routable": true,
+      "last_run": "2026-03-11T13:30:00+08:00",
+      "validation_report": "aios/agent_system/reports/github_researcher_validation_report.md",
+      "notes": [
+        "首个通过完整治理验收的 Learning Agent",
+        "已验证 6 项验收标准（Trigger/Input/Execution/Output/Writeback/Outcome）"
+      ]
+    },
+    "Code_Reviewer": {
+      "readiness_status": "production-candidate",
+      "run_status": "success",
+      "health_status": "healthy",
+      "enabled": true,
+      "routable": true,
+      "last_run": "2026-03-10T09:15:00+08:00",
+      "notes": [
+        "rule-tuned",
+        "已通过基础验收，进入观察期"
+      ]
+    },
+    "Error_Analyzer": {
+      "readiness_status": "production-ready",
+      "run_status": "success",
+      "health_status": "healthy",
+      "enabled": true,
+      "routable": true,
+      "last_run": "2026-03-09T16:45:00+08:00",
+      "notes": [
+        "multi-source-validated",
+        "已验证多数据源分析能力"
+      ]
+    }
+  },
+  "skills": {
+    "heartbeat_alert_deduper": {
+      "readiness_status": "validated",
+      "run_status": "no-sample",
+      "health_status": "unknown",
+      "enabled": false,
+      "routable": false,
+      "validation_date": "2026-03-11",
+      "validation_status": "passed",
+      "notes": [
+        "首个通过完整 Skill 自动创建流程的样板",
+        "已通过格式验证 + 安全扫描 + 风险评级",
+        "等待补执行入口并试运行"
+      ],
+      "next_steps": [
+        "补执行入口",
+        "进入试运行",
+        "收集反馈",
+        "升级为 production-candidate"
+      ]
+    }
+  },
+  "metadata": {
+    "total_agents": 4,
+    "production_ready_agents": 2,
+    "production_candidate_agents": 1,
+    "registered_agents": 0,
+    "total_skills": 1,
+    "validated_skills": 1,
+    "production_ready_skills": 0
+  },
+  "migration_notes": [
+    "这是统一状态词表 v1 的样例索引",
+    "只包含 4 个已手工映射的对象",
+    "不做全局替换，先验证词表有效性",
+    "下一步：根据验证结果决定是否扩展到 Dashboard/health report/daily report/agents.json"
+  ]
+}

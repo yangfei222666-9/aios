@@ -1,0 +1,111 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    {
+      "name": "AIOS: Main",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/agent_system/aios.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/agent_system",
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    {
+      "name": "AIOS: Heartbeat v5",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/agent_system/heartbeat_v5.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/agent_system",
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    {
+      "name": "AIOS: Memory Server",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/agent_system/memory_server.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/agent_system",
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    {
+      "name": "AIOS: Dashboard",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/dashboard/AIOS-Dashboard-v3.4/server.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/dashboard/AIOS-Dashboard-v3.4",
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    {
+      "name": "AIOS: Verify Dev Env",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/verify_dev_env.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    {
+      "name": "Python: Debug Tests",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "${workspaceFolder}/agent_system/tests",
+        "-v",
+        "-s"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/agent_system",
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    {
+      "name": "Python: Debug Current Test File",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "${file}",
+        "-v",
+        "-s"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  ]
+}

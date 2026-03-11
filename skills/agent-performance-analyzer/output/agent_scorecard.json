@@ -1,0 +1,602 @@
+[
+  {
+    "name": "coder-dispatcher",
+    "role": "代码任务调度器",
+    "group": "dispatcher",
+    "category": "active_routable",
+    "enabled": true,
+    "routable": true,
+    "production_ready": true,
+    "stats": {
+      "total_tasks": 5,
+      "completed": 5,
+      "failed": 0,
+      "success_rate": 100.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续运行",
+    "reason": "活跃，成功率 100.0%"
+  },
+  {
+    "name": "analyst-dispatcher",
+    "role": "分析任务调度器",
+    "group": "dispatcher",
+    "category": "active_routable",
+    "enabled": true,
+    "routable": true,
+    "production_ready": true,
+    "stats": {
+      "total_tasks": 64,
+      "completed": 64,
+      "failed": 0,
+      "success_rate": 100.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续运行",
+    "reason": "活跃，成功率 100.0%"
+  },
+  {
+    "name": "monitor-dispatcher",
+    "role": "监控任务调度器",
+    "group": "dispatcher",
+    "category": "active_routable",
+    "enabled": true,
+    "routable": true,
+    "production_ready": true,
+    "stats": {
+      "total_tasks": 58,
+      "completed": 58,
+      "failed": 0,
+      "success_rate": 100.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续运行",
+    "reason": "活跃，成功率 100.0%"
+  },
+  {
+    "name": "Bug_Hunter",
+    "role": "Bug 猎人",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Error_Analyzer",
+    "role": "错误分析师",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "GitHub_Code_Reader",
+    "role": "GitHub 代码阅读员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "GitHub_Researcher",
+    "role": "GitHub 研究员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Code_Reviewer",
+    "role": "代码审查员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Architecture_Analyst",
+    "role": "架构分析师",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "GitHub_Issue_Tracker",
+    "role": "GitHub Issue 追踪员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "GitHub_Deep_Analyzer",
+    "role": "GitHub 深度分析师",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Competitor_Tracker",
+    "role": "竞争对手追踪员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Documentation_Writer",
+    "role": "文档撰写员",
+    "group": "learning",
+    "category": "active_routable",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 1,
+      "completed": 1,
+      "failed": 0,
+      "success_rate": 100.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": 1772895513.3851845,
+    "action": "继续运行",
+    "reason": "活跃，成功率 100.0%"
+  },
+  {
+    "name": "Idea_Generator",
+    "role": "创意生成器",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Performance_Optimizer",
+    "role": "性能优化师",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Security_Auditor",
+    "role": "安全审计员",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "User_Feedback_Analyzer",
+    "role": "用户反馈分析师",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Demo_Builder",
+    "role": "Demo 构建师",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Architecture_Implementer",
+    "role": "架构实现工程师",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Benchmark_Runner",
+    "role": "性能测试工程师",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Paper_Writer",
+    "role": "学术论文撰写员",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Quick_Win_Hunter",
+    "role": "快速胜利猎人",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Code_Generator",
+    "role": "代码生成器",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Test_Writer",
+    "role": "测试撰写员",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Progress_Tracker",
+    "role": "进度追踪员",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Tutorial_Creator",
+    "role": "教程创作者",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Refactor_Planner",
+    "role": "重构规划师",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Community_Manager",
+    "role": "社区管理员",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Marketing_Writer",
+    "role": "营销内容撰写员",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  },
+  {
+    "name": "Integration_Tester",
+    "role": "集成测试员",
+    "group": "learning",
+    "category": "shadow",
+    "enabled": false,
+    "routable": false,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "保留 shadow",
+    "reason": "已被标记为 shadow/disabled"
+  }
+]

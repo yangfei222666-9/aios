@@ -1,0 +1,99 @@
+{
+  "version": "1.0.0",
+  "rules": [
+    {
+      "name": "auto_execute_low_risk",
+      "description": "低风险 + 系统健康 + 无已知高危失败模式 → 自动执行",
+      "conditions": {
+        "risk_level": ["low"],
+        "system_health": ["healthy"],
+        "no_critical_failures": true
+      },
+      "result": "auto_execute",
+      "fallback": null,
+      "priority": 10
+    },
+    {
+      "name": "auto_execute_monitor",
+      "description": "监控类任务 + 系统健康 → 自动执行",
+      "conditions": {
+        "operation_type": ["monitor", "analysis"],
+        "system_health": ["healthy", "degraded"],
+        "risk_level": ["low", "medium"]
+      },
+      "result": "auto_execute",
+      "fallback": null,
+      "priority": 20
+    },
+    {
+      "name": "require_confirmation_high_risk",
+      "description": "中高风险操作 → 需要确认",
+      "conditions": {
+        "risk_level": ["high", "critical"]
+      },
+      "result": "require_confirmation",
+      "fallback": "require_human",
+      "priority": 30
+    },
+    {
+      "name": "require_confirmation_destructive",
+      "description": "破坏性操作 → 需要确认",
+      "conditions": {
+        "operation_type": ["backup_restore", "code_modify"],
+        "risk_level": ["medium", "high"]
+      },
+      "result": "require_confirmation",
+      "fallback": "require_human",
+      "priority": 40
+    },
+    {
+      "name": "degrade_known_failure",
+      "description": "命中已知失败模式 → 降级执行",
+      "conditions": {
+        "has_known_failures": true,
+        "system_health": ["healthy", "degraded"]
+      },
+      "result": "degrade",
+      "fallback": "use_backup_handler",
+      "priority": 50
+    },
+    {
+      "name": "degrade_system_degraded",
+      "description": "系统降级状态 + 中高风险 → 降级执行",
+      "conditions": {
+        "system_health": ["degraded"],
+        "risk_level": ["medium", "high"]
+      },
+      "result": "degrade",
+      "fallback": "retry_later",
+      "priority": 60
+    },
+    {
+      "name": "reject_critical_system",
+      "description": "系统 critical + 高风险操作 → 拒绝",
+      "conditions": {
+        "system_health": ["critical"],
+        "risk_level": ["high", "critical"]
+      },
+      "result": "reject",
+      "fallback": "require_human",
+      "priority": 70
+    },
+    {
+      "name": "reject_no_fallback",
+      "description": "高风险且无安全 fallback → 拒绝",
+      "conditions": {
+        "risk_level": ["critical"],
+        "no_backup_handler": true
+      },
+      "result": "reject",
+      "fallback": "require_human",
+      "priority": 80
+    }
+  ],
+  "default_policy": {
+    "result": "require_confirmation",
+    "fallback": "require_human",
+    "reason": "未匹配任何规则，默认需要确认"
+  }
+}

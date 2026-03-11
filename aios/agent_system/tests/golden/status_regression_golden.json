@@ -1,0 +1,85 @@
+{
+  "agent_results": [
+    {
+      "name": "registered_not_executable",
+      "expected": "registered",
+      "actual": "registered",
+      "passed": true
+    },
+    {
+      "name": "executable_not_validated",
+      "expected": "executable",
+      "actual": "executable",
+      "passed": true
+    },
+    {
+      "name": "validated",
+      "expected": "validated",
+      "actual": "validated",
+      "passed": true
+    },
+    {
+      "name": "production_ready",
+      "expected": "production-ready",
+      "actual": "production-ready",
+      "passed": true
+    },
+    {
+      "name": "stable",
+      "expected": "stable",
+      "actual": "stable",
+      "passed": true
+    }
+  ],
+  "skill_results": [
+    {
+      "name": "registered_not_executable",
+      "expected": "registered",
+      "actual": "registered",
+      "passed": true
+    },
+    {
+      "name": "executable",
+      "expected": "executable",
+      "actual": "executable",
+      "passed": true
+    },
+    {
+      "name": "stable",
+      "expected": "stable",
+      "actual": "stable",
+      "passed": true
+    }
+  ],
+  "task_results": [
+    {
+      "name": "pending",
+      "expected": "pending",
+      "actual": "pending",
+      "passed": true
+    },
+    {
+      "name": "running",
+      "expected": "running",
+      "actual": "running",
+      "passed": true
+    },
+    {
+      "name": "completed",
+      "expected": "completed",
+      "actual": "completed",
+      "passed": true
+    },
+    {
+      "name": "failed",
+      "expected": "failed",
+      "actual": "failed",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0
+  }
+}

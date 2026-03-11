@@ -1,0 +1,111 @@
+[
+  {
+    "pattern_id": "pat-resource_exhausted-001",
+    "pattern_type": "resource_exhausted",
+    "affected_agents": [
+      "analyst",
+      "coder",
+      "monitor"
+    ],
+    "affected_skills": [
+      "analysis",
+      "code",
+      "monitor",
+      "stress",
+      "tool"
+    ],
+    "frequency": 63,
+    "first_seen": "2026-03-03T05:07:58.909483+00:00",
+    "last_seen": "2026-03-07T01:31:21.843458+00:00",
+    "evidence": [
+      "task=task-1772432675004-77f0560c, agent=monitor, status=completed",
+      "task=task-1772436675081-89f03360, agent=monitor, status=completed",
+      "task=task-1772436942140-5c231e6e, agent=monitor, status=completed",
+      "task=task-1772436962706-2231f8a5, agent=monitor, status=completed",
+      "task=task-1772436984349-0637ac56, agent=monitor, status=completed"
+    ],
+    "impact_level": "critical",
+    "candidate_fix_direction": "清理磁盘空间、增加内存限制、优化资源使用"
+  },
+  {
+    "pattern_id": "pat-timeout-002",
+    "pattern_type": "timeout",
+    "affected_agents": [
+      "analyst",
+      "coder"
+    ],
+    "affected_skills": [
+      "analysis",
+      "code",
+      "tool"
+    ],
+    "frequency": 16,
+    "first_seen": "2026-03-05T12:13:53.753578+00:00",
+    "last_seen": "2026-03-06T04:36:13.387802+00:00",
+    "evidence": [
+      "task=gen-20260305180810-2022, agent=coder, status=completed",
+      "task=gen-20260305180810-1391, agent=coder, status=completed",
+      "task=gen-20260305180810-2351, agent=coder, status=completed",
+      "task=gen-20260305180810-1727, agent=coder, status=completed",
+      "task=gen-20260305180810-5159, agent=coder, status=completed"
+    ],
+    "impact_level": "critical",
+    "candidate_fix_direction": "增加超时时间、拆分大任务、检查外部依赖响应速度"
+  },
+  {
+    "pattern_id": "pat-network_error-003",
+    "pattern_type": "network_error",
+    "affected_agents": [
+      "analyst",
+      "coder",
+      "monitor"
+    ],
+    "affected_skills": [
+      "analysis",
+      "code",
+      "monitor",
+      "stress",
+      "tool"
+    ],
+    "frequency": 9,
+    "first_seen": "2026-03-05T12:20:08.544385+00:00",
+    "last_seen": "2026-03-05T23:27:17.730233+00:00",
+    "evidence": [
+      "task=gen-20260305180810-6597, agent=coder, status=completed",
+      "task=gen-20260305180810-5743, agent=coder, status=completed",
+      "task=gen-20260305180810-9481, agent=coder, status=completed",
+      "task=gen-20260305180810-1235, agent=analyst, status=completed",
+      "task=gen-20260305180810-4317, agent=analyst, status=completed"
+    ],
+    "impact_level": "high",
+    "candidate_fix_direction": "检查网络连接、验证 API endpoint、添加重试机制"
+  },
+  {
+    "pattern_id": "pat-agent_idle-004",
+    "pattern_type": "agent_idle",
+    "affected_agents": [
+      "Architecture_Analyst",
+      "Bug_Hunter",
+      "Code_Reviewer",
+      "Competitor_Tracker",
+      "Error_Analyzer",
+      "GitHub_Code_Reader",
+      "GitHub_Issue_Tracker",
+      "GitHub_Researcher",
+      "Quick_Win_Hunter"
+    ],
+    "affected_skills": [],
+    "frequency": 9,
+    "first_seen": null,
+    "last_seen": null,
+    "evidence": [
+      "agent=Bug_Hunter (Bug 猎人), routable=True",
+      "agent=Error_Analyzer (错误分析师), routable=True",
+      "agent=GitHub_Code_Reader (GitHub 代码阅读员), routable=True",
+      "agent=GitHub_Researcher (GitHub 研究员), routable=True",
+      "agent=Code_Reviewer (代码审查员), routable=True"
+    ],
+    "impact_level": "medium",
+    "candidate_fix_direction": "检查触发条件是否正确、验证路由配置、考虑是否需要保留"
+  }
+]

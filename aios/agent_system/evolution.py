@@ -141,19 +141,19 @@ class AgentEvolution:
         # 鐗瑰畾浠诲姟绫诲瀷澶辫触澶?鈫?寤鸿娣诲姞鎶€鑳芥垨璋冩暣宸ュ叿鏉冮檺
         for task_type, data in failure_patterns.items():
             if data["count"] >= 3:
-                suggestions.append(f"{task_type} 浠诲姟澶辫触 {data['count']} 娆★紝寤鸿锛?)
+                suggestions.append(f"{task_type} 任务失败 {data['count']} 次，建议：")
                 
                 if task_type == "code":
-                    suggestions.append("  - 娣诲姞 'coding-agent' 鎶€鑳?)
-                    suggestions.append("  - 纭繚 'exec', 'read', 'write', 'edit' 宸ュ叿鏉冮檺")
+                    suggestions.append("  - 添加 'coding-agent' 技能")
+                    suggestions.append("  - 确保 'exec', 'read', 'write', 'edit' 工具权限")
                 
                 elif task_type == "analysis":
-                    suggestions.append("  - 娣诲姞鏁版嵁鍒嗘瀽鐩稿叧鎶€鑳?)
-                    suggestions.append("  - 纭繚 'web_search', 'web_fetch' 宸ュ叿鏉冮檺")
+                    suggestions.append("  - 添加数据分析相关技能")
+                    suggestions.append("  - 确保 'web_search', 'web_fetch' 工具权限")
                 
                 elif task_type == "monitor":
-                    suggestions.append("  - 娣诲姞 'system-resource-monitor' 鎶€鑳?)
-                    suggestions.append("  - 纭繚 'exec' 宸ュ叿鏉冮檺")
+                    suggestions.append("  - 添加 'system-resource-monitor' 技能")
+                    suggestions.append("  - 确保 'exec' 工具权限")
 
         # 甯歌閿欒妯″紡鍒嗘瀽
         all_errors = []
@@ -161,13 +161,13 @@ class AgentEvolution:
             all_errors.extend(data["errors"])
         
         if any("timeout" in err.lower() for err in all_errors):
-            suggestions.append("妫€娴嬪埌瓒呮椂閿欒锛屽缓璁鍔犱换鍔¤秴鏃舵椂闂?)
+            suggestions.append("检测到超时错误，建议增加任务超时时间")
         
         if any("permission" in err.lower() for err in all_errors):
-            suggestions.append("妫€娴嬪埌鏉冮檺閿欒锛屽缓璁鏌ュ伐鍏锋潈闄愰厤缃?)
+            suggestions.append("检测到权限错误，建议检查工具权限配置")
         
         if any("502" in err or "rate limit" in err.lower() for err in all_errors):
-            suggestions.append("妫€娴嬪埌 API 闄愭祦锛屽缓璁坊鍔犻噸璇曟満鍒舵垨闄嶄綆璇锋眰棰戠巼")
+            suggestions.append("检测到 API 限流，建议添加重试机制或降低请求频率")
 
         return suggestions
 
@@ -245,7 +245,7 @@ class AgentEvolution:
         return True
 
     def get_evolution_history(self, agent_id: str, limit: int = 10) -> List[Dict]:
-        """鑾峰彇 Agent 鐨勮繘鍖栧巻鍙?""
+        """获取 Agent 的进化历史"""
         if not self.evolution_log_file.exists():
             return []
 

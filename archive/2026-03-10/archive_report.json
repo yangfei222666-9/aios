@@ -1,0 +1,168 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  2.25,
+    "archive_date":  "2026-03-10",
+    "files_count":  28,
+    "total_size_bytes":  289144,
+    "timestamp":  "2026-03-10 23:00:03",
+    "files":  [
+                  {
+                      "Path":  "test_error.log",
+                      "Type":  "temp",
+                      "Size":  821
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  449
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\lifecycle_check.log",
+                      "Type":  "temp",
+                      "Size":  55112
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  5806
+                  },
+                  {
+                      "Path":  "aios\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  26459
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\agent_system\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  449
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\agent_system\\agent_system\\lifecycle_check.log",
+                      "Type":  "temp",
+                      "Size":  55112
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\agent_system\\agent_system\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  5806
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\agent_system\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  5806
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\agent_system\\dispatcher.log",
+                      "Type":  "temp",
+                      "Size":  449
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\agent_system\\lifecycle_check.log",
+                      "Type":  "temp",
+                      "Size":  55112
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\agent_system\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  5806
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  26459
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_web_monitor.py",
+                      "Type":  "old_test",
+                      "Size":  1365,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "aios\\config\\test_api_connection.py",
+                      "Type":  "old_test",
+                      "Size":  3032,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "aios\\pattern_recognition\\test_64_hexagrams.py",
+                      "Type":  "old_test",
+                      "Size":  2360,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "aios\\pattern_recognition\\test_data.py",
+                      "Type":  "old_test",
+                      "Size":  1064,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "aios\\pattern_recognition\\test_load.py",
+                      "Type":  "old_test",
+                      "Size":  2144,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "aios\\pattern_recognition\\test_pattern_recognition.py",
+                      "Type":  "old_test",
+                      "Size":  5562,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "aios\\pattern_recognition\\test_with_real_data.py",
+                      "Type":  "old_test",
+                      "Size":  2435,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\agent_system\\agent_system\\test_web_monitor.py",
+                      "Type":  "old_test",
+                      "Size":  1365,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\agent_system\\test_web_monitor.py",
+                      "Type":  "old_test",
+                      "Size":  1365,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\config\\test_api_connection.py",
+                      "Type":  "old_test",
+                      "Size":  3032,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\pattern_recognition\\test_64_hexagrams.py",
+                      "Type":  "old_test",
+                      "Size":  2360,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\pattern_recognition\\test_data.py",
+                      "Type":  "old_test",
+                      "Size":  1064,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\pattern_recognition\\test_load.py",
+                      "Type":  "old_test",
+                      "Size":  2144,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\pattern_recognition\\test_pattern_recognition.py",
+                      "Type":  "old_test",
+                      "Size":  5562,
+                      "LastModified":  "2026-03-03"
+                  },
+                  {
+                      "Path":  "backup_2026-03-10\\aios\\aios\\pattern_recognition\\test_with_real_data.py",
+                      "Type":  "old_test",
+                      "Size":  2435,
+                      "LastModified":  "2026-03-03"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-10",
+    "total_size_mb":  0.28
+}

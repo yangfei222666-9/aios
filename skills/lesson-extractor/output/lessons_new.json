@@ -1,0 +1,70 @@
+[
+  {
+    "lesson_id": "les-20260311-pat-001",
+    "event_type": "resource_exhausted",
+    "trigger": "resource_exhausted 模式出现 63 次，影响 Agent: analyst, coder, monitor",
+    "false_assumption": "系统资源充足，无需监控",
+    "correct_model": "资源有限，需要主动监控和预警",
+    "action_taken": "清理磁盘空间、增加内存限制、优化资源使用",
+    "preventive_rule": "定期检查磁盘/内存使用率，超过 80% 告警",
+    "confidence": "high",
+    "source": "pattern-detector",
+    "evidence": [
+      "task=task-1772432675004-77f0560c, agent=monitor, status=completed",
+      "task=task-1772436675081-89f03360, agent=monitor, status=completed",
+      "task=task-1772436942140-5c231e6e, agent=monitor, status=completed"
+    ],
+    "extracted_at": "2026-03-11T07:52:41.384642"
+  },
+  {
+    "lesson_id": "les-20260311-pat-002",
+    "event_type": "timeout",
+    "trigger": "timeout 模式出现 16 次，影响 Agent: analyst, coder",
+    "false_assumption": "默认超时时间足够处理所有任务",
+    "correct_model": "复杂任务需要更长超时或任务拆分",
+    "action_taken": "增加超时时间、拆分大任务、检查外部依赖响应速度",
+    "preventive_rule": "根据任务复杂度动态调整超时时间",
+    "confidence": "high",
+    "source": "pattern-detector",
+    "evidence": [
+      "task=gen-20260305180810-2022, agent=coder, status=completed",
+      "task=gen-20260305180810-1391, agent=coder, status=completed",
+      "task=gen-20260305180810-2351, agent=coder, status=completed"
+    ],
+    "extracted_at": "2026-03-11T07:52:41.384642"
+  },
+  {
+    "lesson_id": "les-20260311-pat-003",
+    "event_type": "network_error",
+    "trigger": "network_error 模式出现 9 次，影响 Agent: analyst, coder, monitor",
+    "false_assumption": "外部服务始终可用",
+    "correct_model": "外部依赖可能不可用，需要重试和降级机制",
+    "action_taken": "检查网络连接、验证 API endpoint、添加重试机制",
+    "preventive_rule": "所有外部调用添加重试（3次）和超时（30s）",
+    "confidence": "high",
+    "source": "pattern-detector",
+    "evidence": [
+      "task=gen-20260305180810-6597, agent=coder, status=completed",
+      "task=gen-20260305180810-5743, agent=coder, status=completed",
+      "task=gen-20260305180810-9481, agent=coder, status=completed"
+    ],
+    "extracted_at": "2026-03-11T07:52:41.384642"
+  },
+  {
+    "lesson_id": "les-20260311-pat-004",
+    "event_type": "agent_idle",
+    "trigger": "agent_idle 模式出现 9 次，影响 Agent: Architecture_Analyst, Bug_Hunter, Code_Reviewer",
+    "false_assumption": "注册的 Agent 都会被触发",
+    "correct_model": "部分 Agent 可能因触发条件不满足而长期 idle",
+    "action_taken": "检查触发条件是否正确、验证路由配置、考虑是否需要保留",
+    "preventive_rule": "定期审查 idle Agent，评估保留/降级/移除",
+    "confidence": "high",
+    "source": "pattern-detector",
+    "evidence": [
+      "agent=Bug_Hunter (Bug 猎人), routable=True",
+      "agent=Error_Analyzer (错误分析师), routable=True",
+      "agent=GitHub_Code_Reader (GitHub 代码阅读员), routable=True"
+    ],
+    "extracted_at": "2026-03-11T07:52:41.384642"
+  }
+]

@@ -12,7 +12,7 @@ from datetime import datetime
 
 from .core.agent_manager import AgentManager
 from .unified_router_v1 import UnifiedRouter, TaskContext, TaskType, RiskLevel, Decision, ExecutionMode
-from .evolution import AgentEvolution
+# from .evolution import AgentEvolution  # 临时注释，evolution.py 有语法错误
 
 
 class AgentSystem:
@@ -21,7 +21,7 @@ class AgentSystem:
     def __init__(self, data_dir: str = None, config_dir: str = None):
         self.manager = AgentManager(data_dir)
         self.router = UnifiedRouter(enable_guardrails=True)  # 使用统一路由 v1.0（解释性 + 防抖滞回）
-        self.evolution = AgentEvolution(data_dir)
+        # self.evolution = AgentEvolution(data_dir)  # 临时注释，evolution.py 有语法错误
 
         self.log_file = self.manager.data_dir / "system.log"
         
@@ -166,43 +166,43 @@ class AgentSystem:
         # 更新 Agent 统计
         self.manager.update_stats(agent_id, success, duration_sec)
         
-        # 记录到进化系统
-        if task_type:
-            self.evolution.log_task_execution(
-                agent_id=agent_id,
-                task_type=task_type,
-                success=success,
-                duration_sec=duration_sec,
-                error_msg=error_msg,
-                context=context
-            )
+        # 记录到进化系统（临时注释）
+        # if task_type:
+        #     self.evolution.log_task_execution(
+        #         agent_id=agent_id,
+        #         task_type=task_type,
+        #         success=success,
+        #         duration_sec=duration_sec,
+        #         error_msg=error_msg,
+        #         context=context
+        #     )
         
         self._log(
             f"Task result: agent={agent_id}, success={success}, duration={duration_sec:.2f}s"
         )
         
-        # 如果失败，检查是否需要生成改进建议
-        if not success:
-            analysis = self.evolution.analyze_failures(agent_id, lookback_hours=24)
-            
-            # 失败率过高，自动生成建议
-            if analysis['failure_rate'] > 0.3:
-                self._log(
-                    f"High failure rate detected for {agent_id}: {analysis['failure_rate']:.1%}",
-                    level="WARN"
-                )
-                
-                # 保存改进建议
-                for suggestion in analysis['suggestions']:
-                    self.evolution.save_suggestion(
-                        agent_id=agent_id,
-                        suggestion={
-                            "type": "auto_generated",
-                            "description": suggestion,
-                            "changes": {},
-                            "status": "pending"
-                        }
-                    )
+        # 如果失败，检查是否需要生成改进建议（临时注释）
+        # if not success:
+        #     analysis = self.evolution.analyze_failures(agent_id, lookback_hours=24)
+        #     
+        #     # 失败率过高，自动生成建议
+        #     if analysis['failure_rate'] > 0.3:
+        #         self._log(
+        #             f"High failure rate detected for {agent_id}: {analysis['failure_rate']:.1%}",
+        #             level="WARN"
+        #         )
+        #         
+        #         # 保存改进建议
+        #         for suggestion in analysis['suggestions']:
+        #             self.evolution.save_suggestion(
+        #                 agent_id=agent_id,
+        #                 suggestion={
+        #                     "type": "auto_generated",
+        #                     "description": suggestion,
+        #                     "changes": {},
+        #                     "status": "pending"
+        #                 }
+        #             )
 
     def cleanup_idle_agents(self, idle_hours: int = 24) -> List[str]:
         """

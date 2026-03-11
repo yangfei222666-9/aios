@@ -1,0 +1,62 @@
+[
+  {
+    "layer": "perception",
+    "pattern": "perception 层有 10 个相关模块",
+    "modules": [
+      "AIOS-Friend-Edition\\agent_system\\EVENT_SCHEMA.md",
+      "AIOS-Friend-Edition\\agent_system\\HEARTBEAT_MODES.md",
+      "AIOS-Friend-Edition\\agent_system\\HEARTBEAT_V4_REPORT.md",
+      "AIOS-Friend-Edition\\agent_system\\PROCESS_MONITOR_GUIDE.md",
+      "AIOS-Friend-Edition\\agent_system\\_deprecated\\core_task_router.py"
+    ],
+    "worth_learning": true
+  },
+  {
+    "layer": "decision",
+    "pattern": "decision 层有 10 个相关模块",
+    "modules": [
+      "AIOS-Friend-Edition\\agent_system\\OPTIMIZATION_PLAN.md",
+      "AIOS-Friend-Edition\\agent_system\\PRIORITY_AGENTS_SETUP.md",
+      "AIOS-Friend-Edition\\agent_system\\TASK_ROUTER.md",
+      "AIOS-Friend-Edition\\agent_system\\UNIFIED_ROUTER_GUIDE.md",
+      "AIOS-Friend-Edition\\agent_system\\__init__.py"
+    ],
+    "worth_learning": true
+  },
+  {
+    "layer": "execution",
+    "pattern": "execution 层有 10 个相关模块",
+    "modules": [
+      ".vscode\\tasks.json",
+      "AIOS-Friend-Edition\\agent_system",
+      "AIOS-Friend-Edition\\agent_system\\.coverage",
+      "AIOS-Friend-Edition\\agent_system\\.github",
+      "AIOS-Friend-Edition\\agent_system\\.gitignore"
+    ],
+    "worth_learning": true
+  },
+  {
+    "layer": "memory",
+    "pattern": "memory 层有 10 个相关模块",
+    "modules": [
+      ".pytest_cache",
+      ".pytest_cache\\.gitignore",
+      ".pytest_cache\\CACHEDIR.TAG",
+      ".pytest_cache\\README.md",
+      ".pytest_cache\\v"
+    ],
+    "worth_learning": true
+  },
+  {
+    "layer": "evolution",
+    "pattern": "evolution 层有 10 个相关模块",
+    "modules": [
+      "AIOS-Friend-Edition\\agent_system\\scan_all_encoding.py",
+      "AIOS-Friend-Edition\\agent_system\\scan_fstring_issues.py",
+      "AIOS-Friend-Edition\\core\\feedback_loop.py",
+      "AIOS-Friend-Edition\\core\\learning_workflow.py",
+      "AIOS-Friend-Edition\\core\\registry.py"
+    ],
+    "worth_learning": true
+  }
+]

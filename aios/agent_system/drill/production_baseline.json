@@ -1,0 +1,112 @@
+{
+  "timestamp": "2026-03-11T06:47+08:00",
+  "version": "v1.1",
+  "agent": {
+    "total": 30,
+    "groups": {
+      "dispatcher": 3,
+      "learning": 27
+    },
+    "routable_count": 13,
+    "routable_names": [
+      "Architecture_Analyst",
+      "Bug_Hunter",
+      "Code_Reviewer",
+      "Competitor_Tracker",
+      "Documentation_Writer",
+      "Error_Analyzer",
+      "GitHub_Code_Reader",
+      "GitHub_Issue_Tracker",
+      "GitHub_Researcher",
+      "Quick_Win_Hunter",
+      "analyst-dispatcher",
+      "coder-dispatcher",
+      "monitor-dispatcher"
+    ],
+    "enabled_count": 13,
+    "metadata": {
+      "version": "1.0.0",
+      "last_updated": "2026-03-07T19:40:00+08:00",
+      "total_agents": 30,
+      "active_agents": 6,
+      "shadow_agents": 21,
+      "disabled_agents": 3,
+      "dispatcher_agents": 3,
+      "learning_agents": 27
+    }
+  },
+  "memory": {
+    "memory_md_exists": true,
+    "memory_md_size": 20192,
+    "daily_logs_count": 29,
+    "daily_log_names": [
+      "2026-03-04.md",
+      "2026-03-05-observation-guide.md",
+      "2026-03-05.md",
+      "2026-03-06.md",
+      "2026-03-07-learning.md",
+      "2026-03-07-project-analysis.md",
+      "2026-03-07.md",
+      "2026-03-08-github-learning.md",
+      "2026-03-08.md",
+      "2026-03-09-github-learning.md",
+      "2026-03-09-hermes-skill-research.md",
+      "2026-03-09-learn-claude-code-analysis.md",
+      "2026-03-09-skill-autocreation-decision.md",
+      "2026-03-09-skill-lifecycle-comparison.md",
+      "2026-03-09.md",
+      "2026-03-10-memory-research.md",
+      "2026-03-10-open-interpreter-research.md",
+      "2026-03-10-rabbit-os-research.md",
+      "2026-03-10.md",
+      "2026-03-11.md",
+      "CLEANUP_REPORT.md",
+      "INDEX.md",
+      "agent-collab-design.md",
+      "ai-learning.md",
+      "aios-observations.md",
+      "day3-analysis-template.md",
+      "diary_template.md",
+      "observation_log.md",
+      "opensource-prep.md"
+    ],
+    "state_files": [
+      "agent_dispatch_state.json",
+      "alerts_active.json",
+      "alerts_cache.json",
+      "alerts_converge.json",
+      "alerts_history.jsonl",
+      "alerts_log.jsonl",
+      "alerts_state.json",
+      "auto_model_log.jsonl",
+      "auto_model_state.json",
+      "changes_log.jsonl",
+      "corrections.json",
+      "governance_scores.jsonl",
+      "heartbeat-state.json",
+      "lessons.json",
+      "long_term.json",
+      "ops_metrics.jsonl",
+      "patrol_state.json",
+      "selflearn-state.json",
+      "voice_daemon_health.json",
+      "voice_inbox.jsonl",
+      "voice_processed.json",
+      "voice_results.jsonl"
+    ],
+    "selflearn_exists": true,
+    "selflearn_loadable": true
+  },
+  "config": {
+    "files_exist": {
+      "learning_agents.py": true,
+      "heartbeat_v5.py": true,
+      "heartbeat_demo.py": true,
+      "heartbeat_full.py": true,
+      "task_executor.py": true,
+      "aios.py": true
+    },
+    "learning_agents_loadable": true,
+    "learning_agents_count": 27
+  }
+}

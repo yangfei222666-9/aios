@@ -1,0 +1,635 @@
+{
+  "agents": [
+    {
+      "name": "coder-dispatcher",
+      "role": "代码任务调度器",
+      "group": "dispatcher",
+      "priority": "critical",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "task_executor.py",
+      "heartbeat_track": true,
+      "production_ready": true,
+      "stats": {
+        "tasks_total": 12,
+        "tasks_completed": 9,
+        "tasks_failed": 3,
+        "success_rate": 0.75
+      },
+      "agent_type": "degraded"
+    },
+    {
+      "name": "analyst-dispatcher",
+      "role": "分析任务调度器",
+      "group": "dispatcher",
+      "priority": "critical",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "task_executor.py",
+      "heartbeat_track": true,
+      "production_ready": true,
+      "stats": {
+        "tasks_total": 28,
+        "tasks_completed": 26,
+        "tasks_failed": 2,
+        "success_rate": 0.929
+      },
+      "agent_type": "active_routable"
+    },
+    {
+      "name": "monitor-dispatcher",
+      "role": "监控任务调度器",
+      "group": "dispatcher",
+      "priority": "critical",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "task_executor.py",
+      "heartbeat_track": true,
+      "production_ready": true,
+      "stats": {
+        "tasks_total": 49,
+        "tasks_completed": 49,
+        "tasks_failed": 0,
+        "success_rate": 1.0
+      },
+      "agent_type": "active_routable"
+    },
+    {
+      "name": "Bug_Hunter",
+      "role": "Bug 猎人",
+      "group": "learning",
+      "priority": "high",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "主动发现和修复 Bug，提升系统稳定性",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "standby_emergency"
+    },
+    {
+      "name": "Error_Analyzer",
+      "role": "错误分析师",
+      "group": "learning",
+      "priority": "high",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "分析错误日志，找出根因并生成修复建议",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "standby_emergency"
+    },
+    {
+      "name": "GitHub_Code_Reader",
+      "role": "GitHub 代码阅读员",
+      "group": "learning",
+      "priority": "high",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "深入阅读 GitHub 项目的核心代码，理解实现细节",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "degraded"
+    },
+    {
+      "name": "GitHub_Researcher",
+      "role": "GitHub 研究员",
+      "group": "learning",
+      "priority": "high",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "每天搜索和分析 GitHub 上的 AIOS/Agent/Skill 相关项目",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "degraded"
+    },
+    {
+      "name": "Code_Reviewer",
+      "role": "代码审查员",
+      "group": "learning",
+      "priority": "normal",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "frequent",
+      "interval_hours": 24,
+      "goal": "审查我们的 AIOS 代码，发现问题和改进点",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "degraded"
+    },
+    {
+      "name": "Architecture_Analyst",
+      "role": "架构分析师",
+      "group": "learning",
+      "priority": "normal",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "frequent",
+      "interval_hours": 24,
+      "goal": "分析优秀项目的架构设计，提取可借鉴的模式",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "degraded"
+    },
+    {
+      "name": "GitHub_Issue_Tracker",
+      "role": "GitHub Issue 追踪员",
+      "group": "learning",
+      "priority": "high",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "追踪热门项目的 Issue 和 Discussion，了解用户痛点",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "degraded"
+    },
+    {
+      "name": "GitHub_Deep_Analyzer",
+      "role": "GitHub 深度分析师",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "weekly",
+      "interval_hours": 72,
+      "goal": "深度分析单个高价值项目（Star >10K）的实现细节",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Competitor_Tracker",
+      "role": "竞争对手追踪员",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "frequent",
+      "interval_hours": 72,
+      "goal": "追踪竞争对手的动态，评估对我们的影响",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Documentation_Writer",
+      "role": "文档撰写员",
+      "group": "learning",
+      "priority": "high",
+      "enabled": true,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "frequent",
+      "interval_hours": 24,
+      "goal": "撰写和维护 AIOS 文档，让别人能看懂、能用",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "degraded"
+    },
+    {
+      "name": "Idea_Generator",
+      "role": "创意生成器",
+      "group": "learning",
+      "priority": "normal",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "frequent",
+      "interval_hours": 72,
+      "goal": "从学习中生成新想法，推动 AIOS 进化",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Performance_Optimizer",
+      "role": "性能优化师",
+      "group": "learning",
+      "priority": "normal",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "frequent",
+      "interval_hours": 24,
+      "goal": "持续优化 AIOS 性能，提升用户体验",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Security_Auditor",
+      "role": "安全审计员",
+      "group": "learning",
+      "priority": "normal",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "weekly",
+      "interval_hours": 168,
+      "goal": "审查安全风险，保护用户数据",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "User_Feedback_Analyzer",
+      "role": "用户反馈分析师",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "分析用户反馈，识别真实痛点",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Demo_Builder",
+      "role": "Demo 构建师",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "weekly",
+      "interval_hours": 72,
+      "goal": "创建'杀手级场景'demo，让别人看到价值",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Architecture_Implementer",
+      "role": "架构实现工程师",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "frequent",
+      "interval_hours": 72,
+      "goal": "把学到的架构思路转化为可运行的代码",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Benchmark_Runner",
+      "role": "性能测试工程师",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "weekly",
+      "interval_hours": 72,
+      "goal": "对比我们和竞争对手的性能，找出优势和差距",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Paper_Writer",
+      "role": "学术论文撰写员",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "weekly",
+      "interval_hours": 72,
+      "goal": "撰写学术论文，建立 AIOS 的学术影响力",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Quick_Win_Hunter",
+      "role": "快速胜利猎人",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "active",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "寻找 1-2 天能完成的小任务，保持开发动力",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Code_Generator",
+      "role": "代码生成器",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "根据设计直接生成可运行的代码，加速开发",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Test_Writer",
+      "role": "测试撰写员",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "为现有代码编写测试，提高测试覆盖率",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Progress_Tracker",
+      "role": "进度追踪员",
+      "group": "learning",
+      "priority": "high",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "追踪 ROADMAP 进度，确保按计划推进",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Tutorial_Creator",
+      "role": "教程创作者",
+      "group": "learning",
+      "priority": "normal",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "weekly",
+      "interval_hours": 168,
+      "goal": "创建教程和视频，降低 AIOS 的学习门槛",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Refactor_Planner",
+      "role": "重构规划师",
+      "group": "learning",
+      "priority": "normal",
+      "enabled": false,
+      "mode": "shadow",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": true,
+      "production_ready": false,
+      "schedule": "weekly",
+      "interval_hours": 168,
+      "goal": "规划代码重构，降低系统复杂度",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Community_Manager",
+      "role": "社区管理员",
+      "group": "learning",
+      "priority": "disabled",
+      "enabled": false,
+      "mode": "disabled",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": false,
+      "production_ready": false,
+      "schedule": "daily",
+      "interval_hours": 24,
+      "goal": "管理开源社区，建立开发者生态",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Marketing_Writer",
+      "role": "营销内容撰写员",
+      "group": "learning",
+      "priority": "low",
+      "enabled": false,
+      "mode": "disabled",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": false,
+      "production_ready": false,
+      "schedule": "weekly",
+      "interval_hours": 72,
+      "goal": "撰写营销内容，扩大 AIOS 影响力",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    },
+    {
+      "name": "Integration_Tester",
+      "role": "集成测试员",
+      "group": "learning",
+      "priority": "disabled",
+      "enabled": false,
+      "mode": "disabled",
+      "owner_module": "learning_agents.py",
+      "heartbeat_track": false,
+      "production_ready": false,
+      "schedule": "weekly",
+      "interval_hours": 168,
+      "goal": "测试与其他工具的集成，确保兼容性",
+      "stats": {
+        "tasks_total": 0,
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "success_rate": 0.0
+      },
+      "agent_type": "disabled"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-03-07T19:40:00+08:00",
+    "total_agents": 30,
+    "active_agents": 6,
+    "shadow_agents": 21,
+    "disabled_agents": 3,
+    "dispatcher_agents": 3,
+    "learning_agents": 27
+  }
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "pattern_id": "pat-resource_exhausted-001",
+    "pattern_type": "resource_exhausted",
+    "frequency": 63,
+    "candidate_cause": "清理磁盘空间、增加内存限制、优化资源使用",
+    "confidence": "high",
+    "needs_investigation": true
+  },
+  {
+    "pattern_id": "pat-timeout-002",
+    "pattern_type": "timeout",
+    "frequency": 16,
+    "candidate_cause": "增加超时时间、拆分大任务、检查外部依赖响应速度",
+    "confidence": "high",
+    "needs_investigation": true
+  },
+  {
+    "pattern_id": "pat-network_error-003",
+    "pattern_type": "network_error",
+    "frequency": 9,
+    "candidate_cause": "检查网络连接、验证 API endpoint、添加重试机制",
+    "confidence": "high",
+    "needs_investigation": true
+  },
+  {
+    "pattern_id": "pat-agent_idle-004",
+    "pattern_type": "agent_idle",
+    "frequency": 9,
+    "candidate_cause": "检查触发条件是否正确、验证路由配置、考虑是否需要保留",
+    "confidence": "high",
+    "needs_investigation": false
+  }
+]

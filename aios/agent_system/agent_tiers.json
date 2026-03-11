@@ -1,0 +1,194 @@
+{
+  "real_chain": [
+    {
+      "agent_name": "coder-dispatcher",
+      "tier": "real_chain",
+      "evidence": "5 execution records",
+      "notes": "production_ready=True, mode=active"
+    },
+    {
+      "agent_name": "analyst-dispatcher",
+      "tier": "real_chain",
+      "evidence": "64 execution records",
+      "notes": "production_ready=True, mode=active"
+    },
+    {
+      "agent_name": "monitor-dispatcher",
+      "tier": "real_chain",
+      "evidence": "58 execution records",
+      "notes": "production_ready=True, mode=active"
+    },
+    {
+      "agent_name": "Error_Analyzer",
+      "tier": "real_chain",
+      "evidence": "7 execution records, validated",
+      "notes": "production_ready=True, mode=active"
+    },
+    {
+      "agent_name": "GitHub_Researcher",
+      "tier": "real_chain",
+      "evidence": "8 execution records, validated",
+      "notes": "production_ready=True, mode=active"
+    },
+    {
+      "agent_name": "Code_Reviewer",
+      "tier": "real_chain",
+      "evidence": "8 execution records",
+      "notes": "production_ready=False, mode=active"
+    },
+    {
+      "agent_name": "Documentation_Writer",
+      "tier": "real_chain",
+      "evidence": "1 execution records",
+      "notes": "production_ready=False, mode=active"
+    }
+  ],
+  "candidate": [
+    {
+      "agent_name": "Bug_Hunter",
+      "tier": "candidate",
+      "evidence": "registered, enabled, routable, never executed",
+      "notes": "production_ready=False, needs execution script"
+    },
+    {
+      "agent_name": "GitHub_Code_Reader",
+      "tier": "candidate",
+      "evidence": "registered, enabled, routable, never executed",
+      "notes": "production_ready=False, needs execution script"
+    },
+    {
+      "agent_name": "Architecture_Analyst",
+      "tier": "candidate",
+      "evidence": "registered, enabled, routable, never executed",
+      "notes": "production_ready=False, needs execution script"
+    },
+    {
+      "agent_name": "GitHub_Issue_Tracker",
+      "tier": "candidate",
+      "evidence": "registered, enabled, routable, never executed",
+      "notes": "production_ready=False, needs execution script"
+    },
+    {
+      "agent_name": "Competitor_Tracker",
+      "tier": "candidate",
+      "evidence": "registered, enabled, routable, never executed",
+      "notes": "production_ready=False, needs execution script"
+    },
+    {
+      "agent_name": "Quick_Win_Hunter",
+      "tier": "candidate",
+      "evidence": "registered, enabled, routable, never executed",
+      "notes": "production_ready=False, needs execution script"
+    }
+  ],
+  "dormant": [
+    {
+      "agent_name": "GitHub_Deep_Analyzer",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Idea_Generator",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Performance_Optimizer",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Security_Auditor",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "User_Feedback_Analyzer",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Demo_Builder",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Architecture_Implementer",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Benchmark_Runner",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Paper_Writer",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Code_Generator",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Test_Writer",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Progress_Tracker",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Tutorial_Creator",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Refactor_Planner",
+      "tier": "dormant",
+      "evidence": "mode=shadow, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Community_Manager",
+      "tier": "dormant",
+      "evidence": "mode=disabled, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Marketing_Writer",
+      "tier": "dormant",
+      "evidence": "mode=disabled, enabled=False",
+      "notes": "no execution plan"
+    },
+    {
+      "agent_name": "Integration_Tester",
+      "tier": "dormant",
+      "evidence": "mode=disabled, enabled=False",
+      "notes": "no execution plan"
+    }
+  ],
+  "summary": {
+    "real_chain_count": 7,
+    "candidate_count": 6,
+    "dormant_count": 17,
+    "total": 30
+  }
+}

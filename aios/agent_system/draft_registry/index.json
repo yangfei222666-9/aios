@@ -1,0 +1,15 @@
+{
+  "skills": [
+    {
+      "skill_id": "skill-heartbeat-alert-deduper-20260311",
+      "name": "heartbeat-alert-deduper",
+      "version": "1.0.0",
+      "status": "validated",
+      "risk_level": "low",
+      "confidence": 0.95,
+      "created_at": "2026-03-11T10:39:02.009235",
+      "validated_at": "2026-03-11T10:39:52.686525"
+    }
+  ],
+  "last_updated": "2026-03-11T10:39:52.687024"
+}

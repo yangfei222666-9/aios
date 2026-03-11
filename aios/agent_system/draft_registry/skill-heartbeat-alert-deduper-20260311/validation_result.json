@@ -1,0 +1,26 @@
+{
+  "skill_id": "skill-heartbeat-alert-deduper-20260311",
+  "validated_at": "2026-03-11T10:39:35.156483",
+  "layers": {
+    "format": {
+      "passed": true,
+      "checks": [
+        "frontmatter",
+        "required_fields",
+        "meta_json"
+      ]
+    },
+    "security": {
+      "passed": true,
+      "checks": [
+        "dangerous_commands",
+        "external_writes"
+      ]
+    },
+    "risk": {
+      "passed": true,
+      "risk_level": "low"
+    }
+  },
+  "passed": true
+}

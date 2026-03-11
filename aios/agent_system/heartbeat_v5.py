@@ -105,6 +105,9 @@ def activate_bigua_resource_sharing():
         print("   ⚠️  agents/ 目录不存在，跳过 Agent 加载")
 
 
+# ── P2.5-1: Heartbeat → DecideAndDispatch 桥接 ──────────────────────────────
+from heartbeat_dispatcher_bridge import HeartbeatDispatcherBridge
+
 from spawn_lock import (
     startup_cleanup, 
     try_acquire_spawn_lock, 
@@ -601,6 +604,9 @@ def main():
     print(f"║  AIOS Heartbeat v5.0 - {timestamp}  ║")
     print(f"╚══════════════════════════════════════════════════════════════╝\n")
     
+    # P2.5-1: 初始化中枢桥接器
+    dispatch_bridge = HeartbeatDispatcherBridge()
+    
     # 0. Startup: cleanup expired spawn locks
     startup_cleanup()
     
@@ -618,6 +624,9 @@ def main():
     if alert:
         print(f"   ⚠️ {alert['level'].upper()}: {alert['title']}")
         print(f"   {alert['body']}")
+        
+        # P2.5-1: 收集 Token 告警事件
+        dispatch_bridge.collect_token_alert(alert)
         
         # 自动优化
         strategies = auto_optimize()
@@ -702,6 +711,9 @@ def main():
     else:
         print("   No zombie tasks found")
     
+    # P2.5-1: 收集僵尸回收事件
+    dispatch_bridge.collect_zombie_reclaim(zombie_result)
+    
     # 2. Process task queue
     queue_result = process_task_queue(max_tasks=5)
     
@@ -720,6 +732,9 @@ def main():
     print(f"   Score: {guard_result['evolution_score']:.1f}")
     print(f"   Age: {guard_result['age_hours']:.1f}h")
     print(f"   Freshness: {guard_result['freshness']}")
+    
+    # P2.5-1: 收集演化分数过期事件
+    dispatch_bridge.collect_evolution_stale(guard_result)
     
     # 4. Check system health (with freshness context)
     print(f"\n[HEALTH] System Health Check:")
@@ -740,6 +755,9 @@ def main():
     print(f"   Failed: {health['failed']}")
     print(f"   Pending: {health['pending']}")
     print(f"   Evolution Freshness: {health['evolution_data_freshness']}")
+    
+    # P2.5-1: 收集健康检查事件
+    dispatch_bridge.collect_health_check(health)
     
     # 2.5. Sync agent statistics (every hour at :00)
     if current_minute == 0:
@@ -775,6 +793,9 @@ def main():
                 print(f"   ⚠️ {len(alerts)} skill(s) with consecutive failures:")
                 for alert in alerts[:3]:  # 只显示前 3 个
                     print(f"\n{format_alert_message(alert)}")
+                
+                # P2.5-1: 收集技能失败告警事件
+                dispatch_bridge.collect_skill_failure(alerts)
             else:
                 print("   ✅ All skills running normally")
             
@@ -921,6 +942,15 @@ def main():
     except Exception as e:
         print(f"[WARN] Lifecycle check failed: {e}")
 
+    # ── P2.5-1: 中枢统一派发 ──────────────────────────────────────────────────
+    event_count = dispatch_bridge.get_event_count()
+    if event_count > 0:
+        print(f"\n[DISPATCH] 中枢处理 ({event_count} events):")
+        dispatch_bridge.dispatch_all()
+        print(dispatch_bridge.get_summary())
+    else:
+        print(f"\n[DISPATCH] 中枢: 无异常事件")
+    
     # 5. Output summary
     idem_metrics = get_idempotency_metrics()
     print(f"\n{'=' * 62}")

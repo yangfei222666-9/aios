@@ -1,0 +1,177 @@
+{
+  "test_cases": [
+    {
+      "name": "单候选清晰命中 - 健康检查",
+      "input": {
+        "source": "heartbeat",
+        "task_type": "monitor",
+        "content": "检查系统健康状态",
+        "priority": "normal",
+        "risk_level": "safe",
+        "system_state": {
+          "health_score": 85
+        },
+        "recent_history": [],
+        "available_handlers": [
+          "aios-health-monitor"
+        ]
+      },
+      "expected": {
+        "chosen_handler": "aios-health-monitor",
+        "min_confidence": 80.0
+      }
+    },
+    {
+      "name": "多候选冲突 - 分析任务",
+      "input": {
+        "source": "user",
+        "task_type": "analysis",
+        "content": "分析最近的失败模式",
+        "priority": "high",
+        "risk_level": "safe",
+        "system_state": {
+          "health_score": 75
+        },
+        "recent_history": [],
+        "available_handlers": [
+          "pattern-detector",
+          "agent-performance-analyzer",
+          "lesson-extractor"
+        ]
+      },
+      "expected": {
+        "min_candidates": 2,
+        "min_confidence": 60.0
+      }
+    },
+    {
+      "name": "高风险但仍可路由 - 紧急备份",
+      "input": {
+        "source": "system",
+        "task_type": "backup",
+        "content": "执行紧急备份",
+        "priority": "critical",
+        "risk_level": "medium",
+        "system_state": {
+          "health_score": 60
+        },
+        "recent_history": [],
+        "available_handlers": [
+          "backup-restore-manager"
+        ]
+      },
+      "expected": {
+        "chosen_handler": "backup-restore-manager",
+        "min_confidence": 70.0
+      }
+    },
+    {
+      "name": "无候选命中 - 未知任务类型",
+      "input": {
+        "source": "user",
+        "task_type": "unknown",
+        "content": "执行未知任务",
+        "priority": "normal",
+        "risk_level": "high",
+        "system_state": {},
+        "recent_history": [],
+        "available_handlers": [
+          "github-repo-analyzer",
+          "pattern-detector"
+        ]
+      },
+      "expected": {
+        "chosen_handler": null,
+        "min_confidence": 0.0
+      }
+    },
+    {
+      "name": "学习任务 - GitHub 项目分析",
+      "input": {
+        "source": "cron",
+        "task_type": "learning",
+        "content": "分析 GitHub 项目架构",
+        "priority": "normal",
+        "risk_level": "safe",
+        "system_state": {
+          "health_score": 90
+        },
+        "recent_history": [],
+        "available_handlers": [
+          "github-repo-analyzer",
+          "lesson-extractor"
+        ]
+      },
+      "expected": {
+        "chosen_handler": "github-repo-analyzer",
+        "min_confidence": 70.0
+      }
+    },
+    {
+      "name": "告警处理 - 系统健康告警",
+      "input": {
+        "source": "alert",
+        "task_type": "alert",
+        "content": "系统健康分数低于阈值",
+        "priority": "high",
+        "risk_level": "safe",
+        "system_state": {
+          "health_score": 55
+        },
+        "recent_history": [],
+        "available_handlers": [
+          "aios-health-monitor",
+          "agent-performance-analyzer"
+        ]
+      },
+      "expected": {
+        "chosen_handler": "aios-health-monitor",
+        "min_confidence": 70.0
+      }
+    },
+    {
+      "name": "性能分析 - Agent 表现评估",
+      "input": {
+        "source": "heartbeat",
+        "task_type": "analysis",
+        "content": "评估 Agent 性能表现",
+        "priority": "normal",
+        "risk_level": "safe",
+        "system_state": {
+          "health_score": 80
+        },
+        "recent_history": [],
+        "available_handlers": [
+          "agent-performance-analyzer",
+          "pattern-detector"
+        ]
+      },
+      "expected": {
+        "chosen_handler": "agent-performance-analyzer",
+        "min_confidence": 70.0
+      }
+    },
+    {
+      "name": "模式检测 - 重复失败识别",
+      "input": {
+        "source": "system",
+        "task_type": "analysis",
+        "content": "检测重复失败模式",
+        "priority": "high",
+        "risk_level": "safe",
+        "system_state": {
+          "health_score": 70
+        },
+        "recent_history": [],
+        "available_handlers": [
+          "pattern-detector",
+          "aios-health-monitor"
+        ]
+      },
+      "expected": {
+        "chosen_handler": "pattern-detector",
+        "min_confidence": 70.0
+      }
+    }
+  ]
+}

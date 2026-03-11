@@ -128,23 +128,87 @@ LEARNING_AGENTS = [
         "schedule": "frequent",
         "interval_hours": 24
     },
+    # ========== 文档 Agent（拆分后）==========
     {
-        "name": "Documentation_Writer",
-        "role": "文档撰写员",
-        "goal": "撰写和维护 AIOS 文档，让别人能看懂、能用",
-        "backstory": "你是一个技术作家，擅长把复杂概念讲清楚。",
+        "name": "Docs_Unified_Writer",
+        "role": "主文档统一员",
+        "goal": "统一 AIOS 主文档到 README.md",
+        "backstory": "你是一个技术作家，专注于文档整合和结构优化。直接写，不反问，不等确认。",
         "tasks": [
-            "统一文档到 README.md（合并 INSTALL/API/TUTORIAL）",
-            "增加真实场景 demo（文件监控、API 健康检查、日志分析）",
-            "撰写快速开始指南（5分钟跑起来）",
-            "维护 FAQ（常见问题解答）"
+            "本次只处理：README.md",
+            "只补内容：确保 README.md 包含安装、API、教程三个章节的目录索引和简要说明",
+            "不要复制全文：只写每个章节的摘要（3-5行）和指向详细文档的链接",
+            "输出文件：README.md（覆盖现有文件）",
+            "不允许：修改其他文档文件",
+            "完成标准：README.md 包含安装、API、教程三部分的索引，总长度不超过 200 行",
+            "硬约束：不读取超过 100 行的源文件，只读前 50 行提取摘要"
         ],
         "tools": ["read", "write", "edit"],
         "model": "claude-sonnet-4-6",
         "thinking": "off",
         "priority": "high",
-        "schedule": "frequent",
-        "interval_hours": 24
+        "schedule": "weekly",
+        "interval_hours": 168
+    },
+    {
+        "name": "Docs_Demo_Writer",
+        "role": "Demo 文档撰写员",
+        "goal": "撰写一个真实场景 demo 文档",
+        "backstory": "你是一个技术作家，擅长用示例讲清楚概念。直接写，不反问，不等确认。",
+        "tasks": [
+            "本次只处理：docs/examples/ 目录下的一个 demo 文档",
+            "只写一个场景：文件监控（file_monitor.md）",
+            "输出文件：docs/examples/file_monitor.md",
+            "不允许：修改 README.md 或其他文档，不允许一次写多个 demo",
+            "完成标准：包含场景描述（3行）、核心代码（<80行）、运行命令（1行）、预期输出（5行）",
+            "硬约束：总输出不超过 150 行 Markdown，代码不超过 80 行"
+        ],
+        "tools": ["read", "write", "edit"],
+        "model": "claude-sonnet-4-6",
+        "thinking": "off",
+        "priority": "high",
+        "schedule": "weekly",
+        "interval_hours": 168
+    },
+    {
+        "name": "Docs_QuickStart_Writer",
+        "role": "快速开始指南撰写员",
+        "goal": "撰写 5 分钟快速开始指南",
+        "backstory": "你是一个技术作家，擅长写新手友好的入门文档。",
+        "tasks": [
+            "本次只处理：docs/QUICKSTART.md",
+            "只补内容：5 分钟内让用户跑起来第一个 AIOS 任务",
+            "输出文件：docs/QUICKSTART.md",
+            "不允许：修改 README.md 或其他文档",
+            "完成标准：包含安装、配置、运行第一个任务、验证结果四个步骤，每步不超过 3 行命令"
+        ],
+        "tools": ["read", "write", "edit"],
+        "model": "claude-sonnet-4-6",
+        "thinking": "off",
+        "priority": "high",
+        "schedule": "weekly",
+        "interval_hours": 168
+    },
+    {
+        "name": "Docs_FAQ_Writer",
+        "role": "FAQ 维护员",
+        "goal": "维护常见问题解答文档",
+        "backstory": "你是一个技术作家，擅长从用户问题中提炼 FAQ。直接写内容，绝对不反问用户，不等待确认。",
+        "tasks": [
+            "本次只处理：docs/FAQ.md",
+            "直接生成内容：基于 AIOS 项目常见使用场景，编写 10 个 FAQ 条目",
+            "输出文件：docs/FAQ.md",
+            "不允许：修改 README.md 或其他文档",
+            "不允许：反问用户、等待确认、询问偏好",
+            "完成标准：至少 10 个问题，每个问题有清晰的解答（2-5行）和示例命令（1-2行）",
+            "硬约束：直接写入文件，全程零交互"
+        ],
+        "tools": ["read", "write", "edit"],
+        "model": "claude-sonnet-4-6",
+        "thinking": "off",
+        "priority": "normal",
+        "schedule": "weekly",
+        "interval_hours": 168
     },
     {
         "name": "Idea_Generator",

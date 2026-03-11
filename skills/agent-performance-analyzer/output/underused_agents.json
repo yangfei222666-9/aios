@@ -1,0 +1,182 @@
+[
+  {
+    "name": "Bug_Hunter",
+    "role": "Bug 猎人",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Error_Analyzer",
+    "role": "错误分析师",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "GitHub_Code_Reader",
+    "role": "GitHub 代码阅读员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "GitHub_Researcher",
+    "role": "GitHub 研究员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Code_Reviewer",
+    "role": "代码审查员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Architecture_Analyst",
+    "role": "架构分析师",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "GitHub_Issue_Tracker",
+    "role": "GitHub Issue 追踪员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Competitor_Tracker",
+    "role": "竞争对手追踪员",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  },
+  {
+    "name": "Quick_Win_Hunter",
+    "role": "快速胜利猎人",
+    "group": "learning",
+    "category": "schedulable_idle",
+    "enabled": true,
+    "routable": true,
+    "production_ready": false,
+    "stats": {
+      "total_tasks": 0,
+      "completed": 0,
+      "failed": 0,
+      "success_rate": 0.0,
+      "recent_7d": 0,
+      "consecutive_failures": 0
+    },
+    "last_active": null,
+    "action": "继续观察",
+    "reason": "从未触发，评估是否需要保留"
+  }
+]

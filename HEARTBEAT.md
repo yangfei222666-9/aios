@@ -1,6 +1,6 @@
 # AIOS 心跳机制 - 自动任务处理 v5.1
 
-**触发：** 每 30 秒执行一次（OpenClaw 主会话心跳）
+**触发：** 每 6 小时执行一次（OpenClaw 主会话心跳）
 
 **最新版本：** v5.1 - 真实 sessions_spawn 执行
 
@@ -26,12 +26,19 @@ Skill 连续失败告警默认去重，**已发过的告警不重复通知**。
 每次心跳，在运行 heartbeat_v5.py 之前，先检查：
 
 ```
-C:\Users\A\.openclaw\workspace\aios\agent_system\spawn_pending.jsonl
+C:\Users\A\.openclaw\workspace\aios\agent_system\data\spawn_pending.jsonl
 ```
 
 如果文件非空，读取每一行，对每条记录调用真实的 sessions_spawn 工具，然后清空文件。
 
 **这是生产级闭环的关键步骤，不可跳过。**
+
+### 执行步骤
+
+1. **读取 spawn_pending.jsonl**
+2. **对每条记录调用 sessions_spawn**（使用记录中的 agent_id, task, label, cleanup, runTimeoutSeconds）
+3. **清空 spawn_pending.jsonl**
+4. **继续执行 heartbeat_v5.py**
 
 ## 🔧 编码配置（重要）
 
@@ -177,7 +184,7 @@ Heartbeat Completed
 2. 任务进入队列
    task_queue.jsonl
 
-3. Heartbeat 自动检测（每 30 秒）
+3. Heartbeat 自动检测（每 6 小时）
    heartbeat_v5.py
 
 4. 执行任务
