@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AIOS 健康检查脚本 v3.0
+AIOS 健康检查脚本 v3.1
 
 新增功能：
 1. Memory Server 状态自动检测（端口 7788）
 2. 成本追踪系统集成（Token 使用和成本估算）
 3. 自我改进能力集成（自动记录问题到改进队列）
+4. 主动监控体系集成（存活性检测 + 退化检测）
 
 基于 v2.0 的状态词表迁移成果
 """
@@ -246,6 +247,55 @@ def main():
     memory_server = check_memory_server()
     
     # ========================================================================
+    # 主动监控体系（v3.1 新增）
+    # ========================================================================
+    # 存活性检测
+    liveness_results = []
+    try:
+        from detectors.memory_server_health import MemoryServerHealthDetector
+        ms_detector = MemoryServerHealthDetector()
+        ms_result = ms_detector.check()
+        liveness_results.append({
+            'name': 'memory_server_health',
+            'category': 'liveness',
+            'result': ms_result
+        })
+    except Exception as e:
+        liveness_results.append({
+            'name': 'memory_server_health',
+            'category': 'liveness',
+            'result': {'status': 'error', 'severity': 'warning', 'error': str(e)}
+        })
+    
+    # 退化检测
+    degradation_results = []
+    try:
+        from detectors.exec_latency_detector import ExecLatencyDetector
+        latency_detector = ExecLatencyDetector()
+        # 从执行记录加载基线
+        exec_records = base_path / 'data' / 'agent_execution_record.jsonl'
+        if not exec_records.exists():
+            exec_records = base_path / 'agent_execution_record.jsonl'
+        latency_detector.load_baselines(exec_records)
+        summary = latency_detector.get_summary()
+        degradation_results.append({
+            'name': 'exec_latency_anomaly',
+            'category': 'degradation',
+            'result': summary
+        })
+    except Exception as e:
+        degradation_results.append({
+            'name': 'exec_latency_anomaly',
+            'category': 'degradation',
+            'result': {'status': 'error', 'error': str(e)}
+        })
+    
+    detector_results = {
+        'liveness': liveness_results,
+        'degradation': degradation_results
+    }
+    
+    # ========================================================================
     # 成本追踪（新增）
     # ========================================================================
     cost_tracking = check_cost_tracking(base_path)
@@ -432,6 +482,34 @@ def main():
     print(f'- **MEMORY.md:** {"Present and updated" if memory_md.exists() else "Missing"}')
     print(f'- **Daily Logs:** {today}.md {"exists" if daily_log.exists() else "missing"}')
     print(f'- **selflearn-state.json:** {"Present" if selflearn_state.exists() else "Missing"}')
+    print()
+    
+    print('### Proactive Monitoring')
+    print()
+    print('**Liveness Detectors (存活性):**')
+    for det in detector_results['liveness']:
+        r = det['result']
+        status = r.get('status', 'unknown')
+        severity = r.get('severity', 'info')
+        emoji = '✅' if status == 'healthy' else '⚠️' if status == 'degraded' else '🚨' if status in ('down', 'error') else 'ℹ️'
+        rt = r.get('response_time_ms')
+        rt_str = f' ({rt:.0f}ms)' if rt else ''
+        print(f'- {emoji} **{det["name"]}:** {status}{rt_str}')
+    
+    print()
+    print('**Degradation Detectors (退化):**')
+    for det in detector_results['degradation']:
+        r = det['result']
+        if 'error' in r and r.get('status') == 'error':
+            print(f'- ⚠️ **{det["name"]}:** error - {r["error"]}')
+        elif 'total_entities' in r:
+            monitored = r.get('total_entities', 0)
+            with_baseline = r.get('entities_with_baseline', 0)
+            degraded = r.get('entities_degraded', 0)
+            emoji = '✅' if degraded == 0 else '⚠️'
+            print(f'- {emoji} **{det["name"]}:** {monitored} entities tracked, {with_baseline} with baseline, {degraded} degraded')
+        else:
+            print(f'- ℹ️ **{det["name"]}:** no data yet')
     print()
     
     print('### Learning System')
