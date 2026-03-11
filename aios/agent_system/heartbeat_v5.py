@@ -879,6 +879,116 @@ def main():
         except Exception as e:
             print(f"[WARN] Learning agent triggers failed: {e}")
     
+    # 2.12. Memory Server Health Check (每次心跳)
+    try:
+        from detectors.memory_server_health import MemoryServerHealthDetector
+        print(f"\n[MEMORY_SERVER] Health Check:")
+        detector = MemoryServerHealthDetector()
+        check_result = detector.check()
+        
+        status = check_result["status"]
+        severity = check_result["severity"]
+        response_time = check_result["response_time_ms"]
+        
+        # 输出状态
+        status_emoji = {
+            "healthy": "✅",
+            "degraded": "⚠️",
+            "down": "❌"
+        }
+        print(f"   {status_emoji.get(status, '❓')} Status: {status} | Response: {response_time}ms | Severity: {severity}")
+        
+        # 如果不健康，生成事件
+        if status != "healthy":
+            event = detector.generate_event(check_result)
+            print(f"   📋 Event: {event['summary']}")
+            print(f"   🔧 Suggested: {event['suggested_action']}")
+            
+            # 写入事件日志
+            events_file = Path(__file__).parent / "data" / "events.jsonl"
+            events_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(events_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except Exception as e:
+        print(f"[WARN] Memory Server health check failed: {e}")
+    
+    # 2.13. Execution Latency Anomaly Detection (每次心跳)
+    try:
+        from detectors.exec_latency_detector import ExecLatencyDetector
+        print(f"\n[EXEC_LATENCY] Anomaly Detection:")
+        
+        # 初始化检测器
+        latency_detector = ExecLatencyDetector()
+        
+        # 加载基线
+        records_path = Path(__file__).parent / "data" / "agent_execution_record.jsonl"
+        latency_detector.load_baselines(records_path)
+        
+        # 显示摘要
+        summary = latency_detector.get_summary()
+        print(f"   📊 Baseline: {summary['entities_with_baseline']}/{summary['total_entities']} entities")
+        
+        if summary['entities_degraded'] > 0:
+            print(f"   ⚠️  Degraded: {summary['entities_degraded']} entities")
+        
+        # 检查最近的执行记录（最后 5 条）
+        if records_path.exists():
+            recent_records = []
+            with open(records_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+                for line in lines[-5:]:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        record = json.loads(line)
+                        if "duration_sec" in record and record.get("outcome") == "success":
+                            recent_records.append(record)
+                    except json.JSONDecodeError:
+                        continue
+            
+            # 检查每条记录
+            anomalies = []
+            for record in recent_records:
+                entity_id = record.get("agent_name") or record.get("task_id", "unknown")
+                duration_ms = record["duration_sec"] * 1000
+                
+                check_result = latency_detector.check(entity_id, duration_ms)
+                
+                if check_result["status"] not in ("normal", "cold_start"):
+                    anomalies.append((entity_id, check_result))
+                    
+                    # 生成事件
+                    event = latency_detector.generate_event(
+                        entity_id,
+                        "agent",
+                        check_result
+                    )
+                    
+                    if event:
+                        # 写入事件日志
+                        events_file = Path(__file__).parent / "data" / "events.jsonl"
+                        events_file.parent.mkdir(parents=True, exist_ok=True)
+                        with open(events_file, "a", encoding="utf-8") as f:
+                            f.write(json.dumps(event, ensure_ascii=False) + "\n")
+            
+            # 输出异常
+            if anomalies:
+                print(f"   ⚠️  Anomalies detected:")
+                for entity_id, result in anomalies:
+                    status_emoji = {
+                        "warn": "⚠️",
+                        "critical": "❌",
+                        "degraded": "🔻"
+                    }
+                    emoji = status_emoji.get(result["status"], "❓")
+                    print(f"      {emoji} {entity_id}: {result['current_duration_ms']}ms ({result['deviation_ratio']}x median)")
+            else:
+                print(f"   ✅ All executions within normal range")
+        
+    except Exception as e:
+        print(f"[WARN] Execution latency detection failed: {e}")
+    
     # 3. Token Report (每天0点生成)
     if current_minute == 0 and datetime.now().hour == 0:
         print(f"\n[REPORT] Daily Token Report:")
