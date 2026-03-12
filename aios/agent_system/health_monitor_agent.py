@@ -291,7 +291,7 @@ class AIOSHealthMonitorAgent:
         with open(report_file, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2)
         
-        print(f"\n📄 报告已保存: {report_file}")
+        print(f"\n[Report saved]: {report_file}", flush=True)
 
 
 def main():

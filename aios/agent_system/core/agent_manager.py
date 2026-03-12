@@ -8,6 +8,7 @@ import json
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
+from core.status_adapter import get_agent_status
 from datetime import datetime, timedelta
 
 
@@ -210,7 +211,7 @@ class AgentManager:
         idle_agents = []
 
         for agent_id, agent in self.agents.items():
-            if agent["status"] != "active":
+            if get_agent_status(agent) != "active":
                 continue
 
             last_active = agent["stats"].get("last_active")
@@ -228,12 +229,12 @@ class AgentManager:
 
     def get_agent_summary(self) -> Dict:
         """获取 Agent 系统摘要"""
-        active = len([a for a in self.agents.values() if a["status"] == "active"])
-        archived = len([a for a in self.agents.values() if a["status"] == "archived"])
+        active = len([a for a in self.agents.values() if get_agent_status(a) == "active"])
+        archived = len([a for a in self.agents.values() if get_agent_status(a) == "archived"])
 
         by_template = {}
         for agent in self.agents.values():
-            if agent["status"] == "active":
+            if get_agent_status(agent) == "active":
                 template = agent["template"]
                 by_template[template] = by_template.get(template, 0) + 1
 

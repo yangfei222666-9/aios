@@ -20,6 +20,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
+from core.status_adapter import get_agent_status
 
 BASE_DIR = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE_DIR / "unified_registry.json"
@@ -262,7 +263,7 @@ class TaskRouter:
         """找到支持该 task_type 的 Agent"""
         result = []
         for agent in self.agents.values():
-            if agent.get("status") == "standby":
+            if get_agent_status(agent) == "standby":
                 continue
             if task_type in agent.get("task_types", []):
                 agent_copy = dict(agent)
@@ -279,7 +280,7 @@ class TaskRouter:
         best_agents = []
 
         for agent in self.agents.values():
-            if agent.get("status") == "standby":
+            if get_agent_status(agent) == "standby":
                 continue
             role_words = set(agent.get("role", "").lower().split())
             name_words = set(agent.get("name", "").lower().split())

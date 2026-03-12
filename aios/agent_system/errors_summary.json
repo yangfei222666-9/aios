@@ -1,7 +1,29 @@
 {
-  "timestamp": "2026-03-10T12:00:36.392913",
-  "total_tasks": 8,
-  "success_rate": 1.0,
-  "error_distribution": {},
-  "error_details": {}
+  "timestamp": "2026-03-13T00:00:02.305740",
+  "total_tasks": 21,
+  "success_rate": 0.9048,
+  "error_distribution": {
+    "timeout": 1,
+    "network_error": 1
+  },
+  "error_details": {
+    "timeout": [
+      {
+        "task_id": "learning-Documentation_Writer-20260311010015",
+        "agent": "coder",
+        "task_type": "learning",
+        "description": "更新 AIOS 文档，补充新功能说明和使用示例",
+        "error": "Request timeout (60s)"
+      }
+    ],
+    "network_error": [
+      {
+        "task_id": "learning-GitHub_Issue_Tracker-20260312040024",
+        "agent": "coder",
+        "task_type": "learning",
+        "description": "追踪 AIOS 相关项目的 GitHub Issues，识别常见问题和解决方案",
+        "error": "API error: 502 - <!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>   "
+      }
+    ]
+  }
 }

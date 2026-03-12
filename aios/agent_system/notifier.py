@@ -31,10 +31,11 @@ def write_alert(level: str, title: str, body: str):
 
 
 def get_unsent() -> list:
-    """Read all unsent alerts."""
+    """Read all unsent alerts, with deduplication."""
     if not ALERTS_FILE.exists():
         return []
     alerts = []
+    seen = set()  # Track (title, body) to deduplicate
     with open(ALERTS_FILE, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -43,7 +44,11 @@ def get_unsent() -> list:
             try:
                 a = json.loads(line)
                 if not a.get("sent", False):
-                    alerts.append(a)
+                    # Deduplicate by title + body
+                    key = (a.get("title", ""), a.get("body", ""))
+                    if key not in seen:
+                        alerts.append(a)
+                        seen.add(key)
             except json.JSONDecodeError:
                 continue
     return alerts

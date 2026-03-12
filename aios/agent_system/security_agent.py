@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 AIOS Security Agent - 安全守护
 
@@ -300,13 +300,13 @@ class AIOSSecurityAgent:
         for risk in high_risks:
             if risk["type"] == "frequent_failures":
                 agent_id = risk["agent_id"]
-                print(f"  🔴 熔断 Agent: {agent_id}")
+                print(f"  [ALERT] 熔断 Agent: {agent_id}")
                 # 这里实际应该调用 Agent 管理器暂停该 Agent
                 # 目前只是记录
                 
             elif risk["type"] == "permission_issue":
                 agent_id = risk["agent_id"]
-                print(f"  🔴 限制 Agent 权限: {agent_id}")
+                print(f"  [ALERT] 限制 Agent 权限: {agent_id}")
                 # 这里实际应该调整 Agent 权限
                 # 目前只是记录
 
@@ -318,7 +318,7 @@ class AIOSSecurityAgent:
         with open(report_file, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2)
         
-        print(f"\n📄 报告已保存: {report_file}")
+        print(f"\n[REPORT] 报告已保存: {report_file}")
 
 
 def main():
@@ -336,3 +336,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

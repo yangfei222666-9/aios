@@ -131,6 +131,10 @@ class PredictiveEngine:
         # 添加到历史
         self.task_history.append(task_record)
         
+        # 限制内存中的历史长度（保持最近100条）
+        if len(self.task_history) > 100:
+            self.task_history = self.task_history[-100:]
+        
         # 保存到文件
         with open(self.task_history_file, 'a', encoding='utf-8') as f:
             f.write(json.dumps(task_record, ensure_ascii=False) + '\n')

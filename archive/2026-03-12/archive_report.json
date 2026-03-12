@@ -1,0 +1,411 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  0,
+    "duration_sec":  1.51,
+    "archive_date":  "2026-03-12",
+    "files_count":  67,
+    "total_size_bytes":  481951,
+    "timestamp":  "2026-03-12 23:00:02",
+    "files":  [
+                  {
+                      "Path":  "aios\\agent_system\\lifecycle_check.log",
+                      "Type":  "temp",
+                      "Size":  158046
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\data\\loop.log",
+                      "Type":  "temp",
+                      "Size":  1603
+                  },
+                  {
+                      "Path":  "aios\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  10846
+                  },
+                  {
+                      "Path":  "logs\\voice_wakeword.log",
+                      "Type":  "temp",
+                      "Size":  8209
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_memory_integration.py",
+                      "Type":  "old_test",
+                      "Size":  2080,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Friend-Edition\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Portable\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\AIOS-Portable\\core\\test_enhanced.py",
+                      "Type":  "old_test",
+                      "Size":  1853,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\core\\test_enhanced.py",
+                      "Type":  "old_test",
+                      "Size":  1853,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\dashboard\\quick_test.py",
+                      "Type":  "old_test",
+                      "Size":  6871,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\dist_exe\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\dist_exe\\dashboard\\quick_test.py",
+                      "Type":  "old_test",
+                      "Size":  6871,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\dist_exe\\observability\\monitor_test.py",
+                      "Type":  "old_test",
+                      "Size":  4084,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\dist_exe\\observability\\stress_test.py",
+                      "Type":  "old_test",
+                      "Size":  6179,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\dist_full\\AIOS-Full-20260307\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\dist_full\\AIOS-Full-20260307\\dashboard\\quick_test.py",
+                      "Type":  "old_test",
+                      "Size":  6871,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\dist_full\\AIOS-Full-20260307\\observability\\monitor_test.py",
+                      "Type":  "old_test",
+                      "Size":  4084,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\dist_full\\AIOS-Full-20260307\\observability\\stress_test.py",
+                      "Type":  "old_test",
+                      "Size":  6179,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\observability\\monitor_test.py",
+                      "Type":  "old_test",
+                      "Size":  4084,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\observability\\stress_test.py",
+                      "Type":  "old_test",
+                      "Size":  6179,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\runtime_v2\\test_failure_path.py",
+                      "Type":  "old_test",
+                      "Size":  12075,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\runtime_v2\\test_phase2.py",
+                      "Type":  "old_test",
+                      "Size":  3607,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\runtime_v2\\test_runtime_v2.py",
+                      "Type":  "old_test",
+                      "Size":  3103,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\regression_test_e2e.py",
+                      "Type":  "old_test",
+                      "Size":  7929,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_agent_router.py",
+                      "Type":  "old_test",
+                      "Size":  1619,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_circuit_breaker.py",
+                      "Type":  "old_test",
+                      "Size":  6967,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_core_modules.py",
+                      "Type":  "old_test",
+                      "Size":  9990,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_data_collector.py",
+                      "Type":  "old_test",
+                      "Size":  9663,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_evaluator.py",
+                      "Type":  "old_test",
+                      "Size":  9031,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_event_bus.py",
+                      "Type":  "old_test",
+                      "Size":  7224,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_kernel_managers.py",
+                      "Type":  "old_test",
+                      "Size":  8979,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_quality_gates.py",
+                      "Type":  "old_test",
+                      "Size":  7383,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_superpowers.py",
+                      "Type":  "old_test",
+                      "Size":  2601,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "skills\\camera-control\\test_camera.py",
+                      "Type":  "old_test",
+                      "Size":  2911,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_memory_integration.py",
+                      "Type":  "old_test",
+                      "Size":  2080,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\AIOS-Friend-Edition\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\AIOS-Portable\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\AIOS-Portable\\core\\test_enhanced.py",
+                      "Type":  "old_test",
+                      "Size":  1853,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\core\\test_enhanced.py",
+                      "Type":  "old_test",
+                      "Size":  1853,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dashboard\\quick_test.py",
+                      "Type":  "old_test",
+                      "Size":  6871,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_exe\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_exe\\dashboard\\quick_test.py",
+                      "Type":  "old_test",
+                      "Size":  6871,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_exe\\observability\\monitor_test.py",
+                      "Type":  "old_test",
+                      "Size":  4084,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_exe\\observability\\stress_test.py",
+                      "Type":  "old_test",
+                      "Size":  6179,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_full\\AIOS-Full-20260307\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_full\\AIOS-Full-20260307\\dashboard\\quick_test.py",
+                      "Type":  "old_test",
+                      "Size":  6871,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_full\\AIOS-Full-20260307\\observability\\monitor_test.py",
+                      "Type":  "old_test",
+                      "Size":  4084,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_full\\AIOS-Full-20260307\\observability\\stress_test.py",
+                      "Type":  "old_test",
+                      "Size":  6179,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\observability\\monitor_test.py",
+                      "Type":  "old_test",
+                      "Size":  4084,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\observability\\stress_test.py",
+                      "Type":  "old_test",
+                      "Size":  6179,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\runtime_v2\\test_failure_path.py",
+                      "Type":  "old_test",
+                      "Size":  12075,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\runtime_v2\\test_phase2.py",
+                      "Type":  "old_test",
+                      "Size":  3607,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\runtime_v2\\test_runtime_v2.py",
+                      "Type":  "old_test",
+                      "Size":  3103,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\regression_test_e2e.py",
+                      "Type":  "old_test",
+                      "Size":  7929,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_agent_router.py",
+                      "Type":  "old_test",
+                      "Size":  1619,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_circuit_breaker.py",
+                      "Type":  "old_test",
+                      "Size":  6967,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_core_modules.py",
+                      "Type":  "old_test",
+                      "Size":  9990,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_data_collector.py",
+                      "Type":  "old_test",
+                      "Size":  9663,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_evaluator.py",
+                      "Type":  "old_test",
+                      "Size":  9031,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_event_bus.py",
+                      "Type":  "old_test",
+                      "Size":  7224,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_kernel_managers.py",
+                      "Type":  "old_test",
+                      "Size":  8979,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_quality_gates.py",
+                      "Type":  "old_test",
+                      "Size":  7383,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_superpowers.py",
+                      "Type":  "old_test",
+                      "Size":  2601,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "aios\\debug_list.py",
+                      "Type":  "old_test",
+                      "Size":  489,
+                      "LastModified":  "2026-03-05"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\debug_list.py",
+                      "Type":  "old_test",
+                      "Size":  489,
+                      "LastModified":  "2026-03-05"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-12",
+    "total_size_mb":  0.46
+}

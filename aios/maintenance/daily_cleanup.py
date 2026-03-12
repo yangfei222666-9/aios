@@ -5,9 +5,15 @@
 """
 
 import os
+import sys
 import shutil
 from pathlib import Path
 from datetime import datetime
+
+# Windows GBK 终端不支持 emoji，强制 UTF-8 输出
+if sys.platform == "win32" and sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 def cleanup_pycache(root_dir):
     """清理 __pycache__ 目录"""

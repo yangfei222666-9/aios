@@ -1,10 +1,16 @@
 {
-  "lastChecks": {
-    "alerts": "2026-03-11T20:17",
-    "baseline": "2026-03-11T20:17",
-    "lol_version": "2026-03-11",
-    "memory_review": "2026-03-11",
-    "lessons": "2026-03-11T20:17",
-    "observation_period": "2026-03-11T20:17"
-  }
+    "processBaseline":  {
+                            "pythonw_33112":  {
+                                                  "time":  "2026-03-12T15:45:00",
+                                                  "cpu":  609.75,
+                                                  "mem":  183.21
+                                              },
+                            "python_15068":  {
+                                                 "time":  "2026-03-12T15:45:00",
+                                                 "mem":  272.46
+                                             }
+                        },
+    "lastChecks":  {
+
+                   }
 }

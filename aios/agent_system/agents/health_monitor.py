@@ -5,8 +5,8 @@ from pathlib import Path
 
 class HealthMonitor:
     def __init__(self):
-        self.agents_file = Path("agents.json")
-        self.queue_file = Path("task_queue.jsonl")
+        self.agents_file = Path("data/agents.json")
+        self.queue_file = Path("data/task_queue.jsonl")
         self.alert_file = Path("alerts.jsonl")
         
     def check_health(self):

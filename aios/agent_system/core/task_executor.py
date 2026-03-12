@@ -176,7 +176,8 @@ def _record_execution(task_id: str, task_type: str, description: str,
             "metadata": side_effects or {},
         }
         
-        # 璁板綍瀹屾垚鎴栧け璐?        if success:
+        # 记录完成或失败
+        if success:
             logger.complete_task(
                 task_id=task_id,
                 output_summary=output[:500] if output else "",
@@ -438,7 +439,7 @@ def execute_batch(tasks: list, max_tasks: int = 5,
             "memory_latency_ms": mem_ctx["latency_ms"],
         })
 
-        tag = "鉁? if success else "鉁?
+        tag = "OK" if success else "FAIL"
         print(
             f"  [{tag}] {task_id[:20]} | {agent_id} | "
             f"mem={mem_ctx['used_count']} hints | {round(duration_s*1000)}ms",

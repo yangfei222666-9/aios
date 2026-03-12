@@ -8,6 +8,7 @@ import hashlib
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, Optional, List
+from core.status_adapter import get_task_status
 
 
 class TaskQueueManager:
@@ -126,7 +127,7 @@ class TaskQueueManager:
                 
                 # 检查 1：相同 task_id 且状态未终结
                 if existing_task.get("id") == task_id:
-                    status = existing_task.get("status", "")
+                    status = get_task_status(existing_task)
                     if status not in ["completed", "failed", "cancelled"]:
                         return {
                             "action": "skipped_pending",
@@ -165,7 +166,7 @@ class TaskQueueManager:
                     continue
                 try:
                     task = json.loads(line)
-                    if task.get("status") in ["queued", "pending", None]:
+                    if get_task_status(task) in ["queued", "pending", None]:
                         tasks.append(task)
                         if limit and len(tasks) >= limit:
                             break

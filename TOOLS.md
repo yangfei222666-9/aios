@@ -23,11 +23,18 @@ Things like:
 - **注意：** 每次重启电脑后需要手动启动，或加入开机自启
 
 
-- **版本：** v3.4（默认使用）
+### Dashboard v3.4（Tailwind CSS）
 - **路径：** C:\Users\A\.openclaw\workspace\aios\dashboard\AIOS-Dashboard-v3.4\
 - **启动命令：** `cd C:\Users\A\.openclaw\workspace\aios\dashboard\AIOS-Dashboard-v3.4; & "C:\Program Files\Python312\python.exe" server.py`
 - **访问地址：** http://127.0.0.1:8888
 - **端口：** 8888
+
+### Dashboard v4.0（AdminLTE 风格）✨ 新版
+- **路径：** C:\Users\A\.openclaw\workspace\aios\dashboard\AIOS-Dashboard-v4.0\
+- **启动命令：** `cd C:\Users\A\.openclaw\workspace\aios\dashboard\AIOS-Dashboard-v4.0; & "C:\Program Files\Python312\python.exe" server.py`
+- **访问地址：** http://127.0.0.1:8889
+- **端口：** 8889
+- **特性：** Bootstrap 5 + AdminLTE v4 设计系统，暗色主题，响应式布局
 
 ## Examples
 

@@ -17,6 +17,7 @@ from datetime import datetime
 from collections import defaultdict
 
 from paths import TASK_QUEUE as _TASK_QUEUE
+from core.status_adapter import get_task_status
 
 QUEUE_FILE = _TASK_QUEUE
 
@@ -72,7 +73,7 @@ def list_tasks(status_filter=None):
         for task in tasks_in_priority:
             task_id = task.get('task_id') or task.get('id', 'unknown')
             task_type = task.get('type', 'unknown')
-            status = task.get('status', 'unknown')
+            status = get_task_status(task)
             desc = task.get('description', 'No description')
             
             # 状态图标
@@ -99,7 +100,7 @@ def cancel_task(task_id):
     for task in tasks:
         tid = task.get('task_id') or task.get('id')
         if tid == task_id:
-            if task.get('status') == 'completed':
+            if get_task_status(task) == 'completed':
                 print(f"[ERROR] Task {task_id} is already completed, cannot cancel")
                 return
             
@@ -123,7 +124,7 @@ def retry_task(task_id):
     for task in tasks:
         tid = task.get('task_id') or task.get('id')
         if tid == task_id:
-            if task.get('status') not in ['failed', 'cancelled']:
+            if get_task_status(task) not in ['failed', 'cancelled']:
                 print(f"[ERROR] Task {task_id} is not failed/cancelled, cannot retry")
                 return
             
@@ -174,7 +175,7 @@ def show_stats():
     by_priority = defaultdict(int)
     
     for task in tasks:
-        by_status[task.get('status', 'unknown')] += 1
+        by_status[get_task_status(task)] += 1
         by_type[task.get('type', 'unknown')] += 1
         by_priority[task.get('priority', 'normal')] += 1
     

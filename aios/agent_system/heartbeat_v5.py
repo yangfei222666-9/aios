@@ -22,10 +22,12 @@ if sys.platform == 'win32':
     except Exception:
         pass  # Already UTF-8 or not reconfigurable
 
-# Add AIOS to path
-AIOS_ROOT = Path(__file__).resolve().parent.parent
-if str(AIOS_ROOT) not in sys.path:
-    sys.path.insert(0, str(AIOS_ROOT))
+# Add agent_system to path
+AGENT_SYSTEM_ROOT = Path(__file__).resolve().parent
+if str(AGENT_SYSTEM_ROOT) not in sys.path:
+    sys.path.insert(0, str(AGENT_SYSTEM_ROOT))
+
+AIOS_ROOT = AGENT_SYSTEM_ROOT.parent
 
 # Setup logging (file + console)
 HEARTBEAT_LOG = AIOS_ROOT / "data" / "heartbeat.log"
@@ -42,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 from core.task_submitter import list_tasks, queue_stats
 from core.task_executor import execute_batch
+from core.status_adapter import get_task_status
 # from low_success_regeneration import run_low_success_regeneration  # Temporarily disabled for service
 from experience_learner_v4 import learner_v4
 from token_monitor import check_and_alert, auto_optimize, generate_report
@@ -223,7 +226,7 @@ def reclaim_zombie_tasks(timeout_seconds: int = 300, max_retries: int = 2) -> di
 
     modified = False
     for task in tasks:
-        if task.get("status") != "running":
+        if get_task_status(task) != "running":
             continue
 
         updated_at = task.get("updated_at", task.get("created_at", 0))
@@ -880,6 +883,7 @@ def main():
             print(f"[WARN] Learning agent triggers failed: {e}")
     
     # 2.12. Memory Server Health Check (每次心跳)
+    # 🔧 FIX: 添加状态缓存，只在状态变化时生成事件
     try:
         from detectors.memory_server_health import MemoryServerHealthDetector
         print(f"\n[MEMORY_SERVER] Health Check:")
@@ -898,8 +902,19 @@ def main():
         }
         print(f"   {status_emoji.get(status, '❓')} Status: {status} | Response: {response_time}ms | Severity: {severity}")
         
-        # 如果不健康，生成事件
-        if status != "healthy":
+        # 检查上次状态（从状态文件读取）
+        state_file = Path(__file__).parent / "data" / "memory_server_state.json"
+        last_status = None
+        if state_file.exists():
+            try:
+                with open(state_file, "r", encoding="utf-8") as f:
+                    state = json.load(f)
+                    last_status = state.get("last_status")
+            except:
+                pass
+        
+        # 只在状态变化时生成事件
+        if status != "healthy" and status != last_status:
             event = detector.generate_event(check_result)
             print(f"   📋 Event: {event['summary']}")
             print(f"   🔧 Suggested: {event['suggested_action']}")
@@ -909,6 +924,16 @@ def main():
             events_file.parent.mkdir(parents=True, exist_ok=True)
             with open(events_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(event, ensure_ascii=False) + "\n")
+        
+        # 更新状态文件
+        state_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(state_file, "w", encoding="utf-8") as f:
+            json.dump({
+                "last_status": status,
+                "last_check": datetime.now().isoformat(),
+                "response_time_ms": response_time
+            }, f, ensure_ascii=False, indent=2)
+            
     except Exception as e:
         print(f"[WARN] Memory Server health check failed: {e}")
     
@@ -932,8 +957,31 @@ def main():
             print(f"   ⚠️  Degraded: {summary['entities_degraded']} entities")
         
         # 检查最近的执行记录（最后 5 条）
+        # 🔧 FIX: 添加去重机制，避免对同一条记录重复生成事件
         if records_path.exists():
             recent_records = []
+            checked_tasks = set()  # 记录已检查的 task_id，避免重复
+            
+            # 加载已检查过的 task_id（从最近的事件中提取）
+            events_file = Path(__file__).parent / "data" / "events.jsonl"
+            if events_file.exists():
+                with open(events_file, "r", encoding="utf-8") as f:
+                    # 只读最近 100 条事件
+                    lines = f.readlines()
+                    for line in lines[-100:]:
+                        try:
+                            event = json.loads(line.strip())
+                            # 从 trace_id 中提取 entity_id（格式：trace-exec-latency-{entity_id}-{timestamp}）
+                            if event.get("source") == "exec_latency_detector":
+                                trace_id = event.get("trace_id", "")
+                                if trace_id.startswith("trace-exec-latency-"):
+                                    parts = trace_id.split("-")
+                                    if len(parts) >= 4:
+                                        entity_id = "-".join(parts[3:-1])  # 提取 entity_id
+                                        checked_tasks.add(entity_id)
+                        except:
+                            continue
+            
             with open(records_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
                 for line in lines[-5:]:
@@ -943,7 +991,10 @@ def main():
                     try:
                         record = json.loads(line)
                         if "duration_sec" in record and record.get("outcome") == "success":
-                            recent_records.append(record)
+                            task_id = record.get("task_id", "unknown")
+                            # 跳过已检查过的记录
+                            if task_id not in checked_tasks:
+                                recent_records.append(record)
                     except json.JSONDecodeError:
                         continue
             
@@ -951,6 +1002,7 @@ def main():
             anomalies = []
             for record in recent_records:
                 entity_id = record.get("agent_name") or record.get("task_id", "unknown")
+                task_id = record.get("task_id", "unknown")
                 duration_ms = record["duration_sec"] * 1000
                 
                 check_result = latency_detector.check(entity_id, duration_ms)
@@ -966,6 +1018,9 @@ def main():
                     )
                     
                     if event:
+                        # 标记为已检查
+                        checked_tasks.add(task_id)
+                        
                         # 写入事件日志
                         events_file = Path(__file__).parent / "data" / "events.jsonl"
                         events_file.parent.mkdir(parents=True, exist_ok=True)

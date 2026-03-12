@@ -8,6 +8,7 @@ Spawn Queue Processor - 处理 AIOS 的 spawn 请求
 import json
 import time
 from pathlib import Path
+from core.status_adapter import get_task_status
 
 from paths import SPAWN_RESULTS as _SPAWN_RESULTS
 
@@ -26,7 +27,7 @@ def process_spawn_queue():
         for line in f:
             if line.strip():
                 task = json.loads(line)
-                if task.get('status') == 'pending':
+                if get_task_status(task) == 'pending':
                     pending_tasks.append(task)
     
     if not pending_tasks:
@@ -76,7 +77,7 @@ def process_spawn_queue():
         for line in f:
             if line.strip():
                 task = json.loads(line)
-                if task.get('status') == 'pending':
+                if get_task_status(task) == 'pending':
                     task['status'] = 'processed'
                 processed_tasks.append(task)
     
