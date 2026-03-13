@@ -116,7 +116,7 @@
 
 ### ⏳ 进行中
 1. **Heartbeat 定时执行** - 恢复调度机制（2026-03-12）
-2. **观察期 Day 1** - 状态词表制度化观察（2026-03-11 - 2026-03-18）
+2. **观察期 Day 1** - 状态词表制度化观察（2026-03-11 - 2026-03-14，已缩短至 3 天）
 
 ---
 
@@ -146,16 +146,37 @@
 
 ---
 
-## 11. 详细记录索引
+## 11. 行业动态时间线
+
+### 2026-03
+- **[2026-03-13 08:09] 监控系统 Phase 4/5 验证通过**  
+  xiaojiu 推送管理报告：GitHub_Researcher 20+ 延迟告警已聚合静默，Evolution Score 0.4，Dashboard 验证通过。  
+  运行债问题进入可视化阶段，监控闭环已成型（发现→诊断→聚合→汇报）。  
+  （详见技术观察清单「太极OS 内部 - 监控系统 Phase 4/5」条目）
+
+- **[2026-03-13] 内部诊断：GitHub_Researcher 运行债暴露**  
+  用户质问"为什么 GitHub 更新了你没发现"，自查发现 GitHub_Researcher 从未真正运行（selflearn-state.json 显示"从未运行"）。  
+  典型的"定义存在、调度缺失"问题，与 Macrohard 的执行层挑战高度呼应。  
+  （详见技术观察清单「太极OS 内部 - GitHub_Researcher 运行债」条目）
+
+- **[2026-03-11] Tesla + xAI 官宣 MACROHARD (Digital Optimus)**  
+  核心：Grok 做 planner/navigator (System 2)，Tesla Agent 负责 real-time screen + kbm 执行 (System 1)，目标模拟完整软件公司。  
+  与太极OS 高度相似（屏幕理解 → 任务规划 → 执行分离），重点观察中。  
+  （详见技术观察清单「Tesla/xAI - Macrohard」条目）
+
+---
+
+## 12. 详细记录索引
 
 - **每日记录：** `memory/YYYY-MM-DD.md`
 - **设计文档：** `docs/`
 - **观察期记录：** `memory/observation-period-*.md`
 - **已知问题：** `memory/observation-period-known-issues.md`
 - **学习报告：** `memory/YYYY-MM-DD-*-research.md`
+- **技术观察清单：** `memory/tech-watch-list.md`
 
 ---
 
 **版本：** v3（启动友好型）  
-**最后更新：** 2026-03-12  
-**字符数：** ~5,500（压缩至原来的 27%）
+**最后更新：** 2026-03-13  
+**字符数：** ~5,800

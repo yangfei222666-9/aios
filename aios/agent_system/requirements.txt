@@ -1,7 +1,38 @@
-# Minimal dependencies for AIOS demo
-requests
-portalocker
+# 太极OS 核心依赖
+# Python 3.12+
 
-# Optional: full runtime dependencies
-# lancedb
-# sentence-transformers
+# Web 框架
+flask==3.0.0
+flask-cors==4.0.0
+
+# 数据处理
+pandas==2.1.4
+numpy==1.26.2
+
+# 向量检索
+sentence-transformers==2.2.2
+torch==2.1.2
+faiss-cpu==1.7.4
+
+# HTTP 客户端
+requests==2.31.0
+httpx==0.25.2
+
+# 日志
+loguru==0.7.2
+
+# 配置管理
+python-dotenv==1.0.0
+
+# 时间处理
+python-dateutil==2.8.2
+
+# JSON 处理
+orjson==3.9.10
+
+# 进程管理
+psutil==5.9.6
+
+# 异步支持
+aiohttp==3.9.1
+asyncio==3.4.3

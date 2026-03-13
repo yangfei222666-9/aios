@@ -1,0 +1,46 @@
+{
+  "date": "2026-03-13",
+  "timestamp": "2026-03-13T09:30:00+08:00",
+  "analysis": {
+    "evolution_score": {
+      "current": 0.4,
+      "grade": "healthy",
+      "change": null,
+      "note": "首次基线记录"
+    },
+    "metrics_24h": {
+      "event_count": 0,
+      "tsr": 1.0,
+      "retry_rate": 0.0,
+      "avg_latency_ms": 0,
+      "p95_latency_ms": 0
+    },
+    "metrics_7d": {
+      "daily_avg_events": 0.0,
+      "tsr": 1.0,
+      "retry_rate": 0.0
+    },
+    "layer_distribution": {
+      "KERNEL": 0,
+      "COMMS": 0,
+      "TOOL": 0,
+      "MEM": 0,
+      "SEC": 0
+    },
+    "anomalies": [],
+    "trends": [
+      "系统处于静默期，无事件数据"
+    ],
+    "insights": [
+      "Evolution Score 0.4 (healthy) - 工具成功率 100%",
+      "无活跃事件，系统稳定但缺乏活动数据"
+    ],
+    "recommendations": [
+      "建立活动基线：需要更多事件数据来建立有效的趋势分析",
+      "考虑触发测试事件以验证监控系统"
+    ],
+    "actions_triggered": []
+  },
+  "baseline_established": true,
+  "next_analysis": "2026-03-14T09:30:00+08:00"
+}

@@ -1,13 +1,18 @@
 """Health Monitor - AIOS 健康度监控"""
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
 
+# 确保能 import paths
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ALERTS, AGENTS_STATE, TASK_QUEUE
+
 class HealthMonitor:
     def __init__(self):
-        self.agents_file = Path("data/agents.json")
-        self.queue_file = Path("data/task_queue.jsonl")
-        self.alert_file = Path("alerts.jsonl")
+        self.agents_file = AGENTS_STATE
+        self.queue_file = TASK_QUEUE
+        self.alert_file = ALERTS
         
     def check_health(self):
         """检查 AIOS 健康度"""

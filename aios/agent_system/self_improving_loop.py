@@ -69,10 +69,10 @@ LOOP_LOG_FILE = AIOS_ROOT / "agent_system" / "data" / "loop.log"
 class SelfImprovingLoop:
     """统一的 Agent 自我改进闭环"""
 
-    # 配置常量
+    # 配置常量（已缩短验证时间）
     MIN_FAILURES_FOR_ANALYSIS = 3      # 最少失败次数才触发分析
-    ANALYSIS_WINDOW_HOURS = 24         # 分析窗口（小时）
-    IMPROVEMENT_COOLDOWN_HOURS = 6     # 改进冷却期（小时）
+    ANALYSIS_WINDOW_HOURS = 6          # 分析窗口（24 → 6 小时）
+    IMPROVEMENT_COOLDOWN_HOURS = 1     # 改进冷却期（6 → 1 小时）
     AUTO_APPLY_RISK_LEVEL = "low"      # 自动应用的风险等级
 
     def __init__(self, data_dir: str = None):

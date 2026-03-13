@@ -1,16 +1,7 @@
 {
-    "processBaseline":  {
-                            "pythonw_33112":  {
-                                                  "time":  "2026-03-12T15:45:00",
-                                                  "cpu":  609.75,
-                                                  "mem":  183.21
-                                              },
-                            "python_15068":  {
-                                                 "time":  "2026-03-12T15:45:00",
-                                                 "mem":  272.46
-                                             }
-                        },
     "lastChecks":  {
-
-                   }
+                       "selfHealing":  1773369131
+                   },
+    "lastDiskFreeGB":  60.7,
+    "lastMemPct":  41
 }

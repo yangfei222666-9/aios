@@ -33,10 +33,10 @@ THRESHOLD_CONFIG_FILE = AIOS_ROOT / "agent_system" / "data" / "adaptive_threshol
 class AdaptiveThreshold:
     """自适应阈值管理器"""
 
-    # 默认阈值（中频 Agent）
+    # 默认阈值（中频 Agent）— 已缩短验证时间
     DEFAULT_FAILURE_THRESHOLD = 3
-    DEFAULT_ANALYSIS_WINDOW_HOURS = 24
-    DEFAULT_COOLDOWN_HOURS = 6
+    DEFAULT_ANALYSIS_WINDOW_HOURS = 6  # 24 → 6
+    DEFAULT_COOLDOWN_HOURS = 1  # 6 → 1
 
     # 任务频率分类（次/天）
     HIGH_FREQUENCY_THRESHOLD = 10  # >10 次/天
@@ -70,16 +70,16 @@ class AdaptiveThreshold:
         is_critical = self._is_critical_agent(agent_id)
 
         if is_critical:
-            # 关键任务：低阈值，快速响应
-            return (1, 24, 6)
+            # 关键任务：低阈值，快速响应（已缩短）
+            return (1, 6, 1)  # 24→6, 6→1
 
         elif frequency == "high":
-            # 高频任务：高阈值，避免误触发
-            return (5, 48, 3)
+            # 高频任务：高阈值，避免误触发（已缩短）
+            return (5, 12, 0.5)  # 48→12, 3→0.5
 
         elif frequency == "low":
-            # 低频任务：低阈值，长窗口
-            return (2, 72, 12)
+            # 低频任务：低阈值，长窗口（已缩短）
+            return (2, 24, 3)  # 72→24, 12→3
 
         else:
             # 中频任务：默认值
