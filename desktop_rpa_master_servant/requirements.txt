@@ -1,0 +1,21 @@
+# 桌面观察器依赖
+
+# 核心
+openai>=1.0.0          # 豆包 API（兼容 OpenAI 格式）
+requests>=2.28.0       # HTTP 请求
+
+# 输入监听
+pynput>=1.7.6          # 鼠标/键盘监听（跨平台）
+
+# 截图
+mss>=9.0.0             # 快速截图（Windows/Linux）
+Pillow>=10.0.0         # 图像处理
+
+# OCR 兜底（可选）
+# pytesseract>=0.3.10  # 需要先安装 Tesseract-OCR
+
+# macOS 专用（可选）
+# pyobjc-framework-Quartz>=10.0  # macOS 窗口截图
+
+# Windows 专用（可选）
+# psutil>=5.9.0        # 进程信息

@@ -1,0 +1,36 @@
+{
+  "vision": {
+    "servant_model": "doubao-1.6-flash",
+    "master_model": "doubao-2.0-lite",
+    "api_base": "https://ark.cn-beijing.volces.com/api/v3",
+    "api_key": "YOUR_ARK_API_KEY",
+    "ocr_fallback": true
+  },
+  "collectors": {
+    "poll_interval_sec": 5,
+    "mouse_history_size": 100,
+    "keyboard_history_size": 100
+  },
+  "triggers": {
+    "reading_report": {
+      "enabled": true,
+      "mouse_idle_threshold": 5,
+      "keyboard_idle_threshold": 10,
+      "keywords": ["report", "报告", "分析", "dashboard", "summary", "error", "traceback"]
+    },
+    "terminal_error": {
+      "enabled": true,
+      "terminal_apps": ["WindowsTerminal", "cmd", "powershell", "Code", "PyCharm"]
+    },
+    "stuck": {
+      "enabled": true,
+      "stuck_duration_sec": 60
+    }
+  },
+  "notifier": {
+    "telegram": {
+      "bot_token": "YOUR_BOT_TOKEN",
+      "chat_id": "YOUR_CHAT_ID"
+    }
+  }
+}
