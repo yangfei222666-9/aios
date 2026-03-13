@@ -99,7 +99,7 @@ class DurableRecovery:
             success = self.task_queue.transition_status(
                 task_id=task.task_id,
                 from_status="running",
-                to_status="queued",
+                to_status="pending",
                 patch={
                     "retry_count": new_retry_count,
                     "worker_id": None,

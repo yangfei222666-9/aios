@@ -1,12 +1,12 @@
-﻿"""
+"""
 AIOS Agent Evolution System - Phase 1
-Agent 鑷富杩涘寲绯荤粺
+Agent 自主进化系统
 
-鏍稿績鍔熻兘锛?
-1. 浠诲姟鎵ц杩借釜
-2. 澶辫触鍒嗘瀽鍜屾敼杩涘缓璁?
-3. Prompt 鑷姩浼樺寲
-4. 杩涘寲鍘嗗彶璁板綍
+核心功能：
+1. 任务执行追踪
+2. 失败分析和改进建议
+3. Prompt 自动优化
+4. 进化历史记录
 """
 
 import json
@@ -18,7 +18,7 @@ from collections import defaultdict
 
 
 class AgentEvolution:
-    """Agent 杩涘寲寮曟搸"""
+    """Agent 进化引擎"""
 
     def __init__(self, data_dir: str = None):
         if data_dir is None:
@@ -28,8 +28,8 @@ class AgentEvolution:
         self.evolution_dir = self.data_dir / "evolution"
         self.evolution_dir.mkdir(parents=True, exist_ok=True)
 
-        # 鏁版嵁鏂囦欢
-        self.task_log_file = self.evolution_dir / "task_executions_v2.jsonl"
+        # 数据文件
+        self.task_log_file = self.data_dir / "task_executions.jsonl"  # 读取真实数据
         self.evolution_log_file = self.evolution_dir / "evolution_history.jsonl"
         self.suggestions_file = self.evolution_dir / "improvement_suggestions.jsonl"
 
@@ -43,15 +43,15 @@ class AgentEvolution:
         context: Dict = None
     ):
         """
-        璁板綍浠诲姟鎵ц缁撴灉
+        记录任务执行结果
 
         Args:
             agent_id: Agent ID
-            task_type: 浠诲姟绫诲瀷锛坈ode/analysis/monitor/research锛?
-            success: 鏄惁鎴愬姛
-            duration_sec: 鎵ц鏃堕暱
-            error_msg: 閿欒淇℃伅锛堝鏋滃け璐ワ級
-            context: 棰濆涓婁笅鏂囷紙宸ュ叿浣跨敤銆佹ā鍨嬭皟鐢ㄧ瓑锛?
+            task_type: 任务类型（code/analysis/monitor/research）
+            success: 是否成功
+            duration_sec: 执行时长
+            error_msg: 错误信息（如果失败）
+            context: 额外上下文（工具使用、模型调用等）
         """
         record = {
             "timestamp": int(time.time()),
@@ -68,11 +68,11 @@ class AgentEvolution:
 
     def analyze_failures(self, agent_id: str, lookback_hours: int = 24) -> Dict:
         """
-        鍒嗘瀽 Agent 鐨勫け璐ユā寮?
+        分析 Agent 的失败模式
 
         Args:
             agent_id: Agent ID
-            lookback_hours: 鍥炴函鏃堕棿锛堝皬鏃讹級
+            lookback_hours: 回溯时间（小时）
 
         Returns:
             {
@@ -100,26 +100,48 @@ class AgentEvolution:
                 if not line.strip():
                     continue
                 
-                record = json.loads(line)
-                
-                if record["agent_id"] != agent_id:
+                try:
+                    record = json.loads(line)
+                except:
                     continue
                 
-                if record["timestamp"] < cutoff_time:
+                if record.get("agent_id") != agent_id:
+                    continue
+                
+                # 兼容不同的时间戳格式
+                ts = record.get("timestamp") or record.get("started_at") or record.get("start_time")
+                if isinstance(ts, str):
+                    try:
+                        ts = datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
+                    except:
+                        continue
+                elif isinstance(ts, (int, float)):
+                    pass
+                else:
+                    continue
+                
+                if ts < cutoff_time:
                     continue
                 
                 total_tasks += 1
                 
-                if not record["success"]:
+                # 兼容不同的状态字段
+                success = record.get("success")
+                if success is None:
+                    status = record.get("status", "")
+                    success = (status == "completed")
+                
+                if not success:
                     failed_tasks += 1
-                    task_type = record["task_type"]
+                    task_type = record.get("task_type", record.get("type", "unknown"))
                     failure_patterns[task_type]["count"] += 1
-                    if record.get("error_msg"):
-                        failure_patterns[task_type]["errors"].append(record["error_msg"])
+                    error_msg = record.get("error_msg") or record.get("error")
+                    if error_msg:
+                        failure_patterns[task_type]["errors"].append(str(error_msg))
 
         failure_rate = failed_tasks / total_tasks if total_tasks > 0 else 0.0
 
-        # 鐢熸垚鏀硅繘寤鸿
+        # 生成改进建议
         suggestions = self._generate_suggestions(failure_patterns, failure_rate)
 
         return {
@@ -131,14 +153,14 @@ class AgentEvolution:
         }
 
     def _generate_suggestions(self, failure_patterns: Dict, failure_rate: float) -> List[str]:
-        """鐢熸垚鏀硅繘寤鸿"""
+        """生成改进建议"""
         suggestions = []
 
-        # 楂樺け璐ョ巼 鈫?寤鸿璋冩暣 thinking level
+        # 高失败率 → 建议调整 thinking level
         if failure_rate > 0.3:
-            suggestions.append("澶辫触鐜囪繃楂橈紙>30%锛夛紝寤鸿鎻愬崌 thinking level 鍒?'medium' 鎴?'high'")
+            suggestions.append("失败率过高（>30%），建议提升 thinking level 到 'medium' 或 'high'")
 
-        # 鐗瑰畾浠诲姟绫诲瀷澶辫触澶?鈫?寤鸿娣诲姞鎶€鑳芥垨璋冩暣宸ュ叿鏉冮檺
+        # 特定任务类型失败多 → 建议添加技能或调整工具权限
         for task_type, data in failure_patterns.items():
             if data["count"] >= 3:
                 suggestions.append(f"{task_type} 任务失败 {data['count']} 次，建议：")
@@ -155,25 +177,25 @@ class AgentEvolution:
                     suggestions.append("  - 添加 'system-resource-monitor' 技能")
                     suggestions.append("  - 确保 'exec' 工具权限")
 
-        # 甯歌閿欒妯″紡鍒嗘瀽
+        # 常见错误模式分析
         all_errors = []
         for data in failure_patterns.values():
             all_errors.extend(data["errors"])
         
-        if any("timeout" in err.lower() for err in all_errors):
+        if any("timeout" in str(err).lower() for err in all_errors):
             suggestions.append("检测到超时错误，建议增加任务超时时间")
         
-        if any("permission" in err.lower() for err in all_errors):
+        if any("permission" in str(err).lower() for err in all_errors):
             suggestions.append("检测到权限错误，建议检查工具权限配置")
         
-        if any("502" in err or "rate limit" in err.lower() for err in all_errors):
+        if any("502" in str(err) or "rate limit" in str(err).lower() for err in all_errors):
             suggestions.append("检测到 API 限流，建议添加重试机制或降低请求频率")
 
         return suggestions
 
     def save_suggestion(self, agent_id: str, suggestion: Dict):
         """
-        淇濆瓨鏀硅繘寤鸿
+        保存改进建议
 
         Args:
             agent_id: Agent ID
@@ -194,7 +216,7 @@ class AgentEvolution:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     def get_pending_suggestions(self, agent_id: str = None) -> List[Dict]:
-        """鑾峰彇寰呭鏍哥殑鏀硅繘寤鸿"""
+        """获取待审核的改进建议"""
         if not self.suggestions_file.exists():
             return []
 
@@ -216,7 +238,7 @@ class AgentEvolution:
 
     def apply_evolution(self, agent_id: str, evolution: Dict) -> bool:
         """
-        搴旂敤杩涘寲鏀硅繘
+        应用进化改进
 
         Args:
             agent_id: Agent ID
@@ -227,9 +249,9 @@ class AgentEvolution:
             }
 
         Returns:
-            鏄惁鎴愬姛
+            是否成功
         """
-        # 璁板綍杩涘寲鍘嗗彶
+        # 记录进化历史
         record = {
             "timestamp": int(time.time()),
             "agent_id": agent_id,
@@ -260,69 +282,81 @@ class AgentEvolution:
                 if record["agent_id"] == agent_id:
                     history.append(record)
 
-        # 鎸夋椂闂村€掑簭
+        # 按时间倒序
         history.sort(key=lambda x: x["timestamp"], reverse=True)
         return history[:limit]
 
     def generate_evolution_report(self, agent_id: str) -> str:
-        """鐢熸垚 Agent 杩涘寲鎶ュ憡"""
+        """生成 Agent 进化报告"""
         analysis = self.analyze_failures(agent_id, lookback_hours=24)
         history = self.get_evolution_history(agent_id, limit=5)
         pending = self.get_pending_suggestions(agent_id)
 
-        report = f"# Agent {agent_id} 杩涘寲鎶ュ憡\n\n"
-        report += f"**鐢熸垚鏃堕棿锛?* {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        total = analysis.get("total_tasks", 0)
+        failed = analysis.get("failed_tasks", 0)
+        rate = analysis.get("failure_rate", 0.0)
+        
+        report = f"# Agent {agent_id} 进化报告\n\n"
+        report += f"**生成时间：** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
 
-        # 鎬ц兘鍒嗘瀽
-        report += "## [REPORT] 鎬ц兘鍒嗘瀽锛堟渶杩?4灏忔椂锛塡n\n"
-        report += f"- 鎬讳换鍔℃暟锛歿analysis['total_tasks']}\n"
-        report += f"- 澶辫触浠诲姟鏁帮細{analysis['failed_tasks']}\n"
-        report += f"- 澶辫触鐜囷細{analysis['failure_rate']:.1%}\n\n"
+        # 性能分析
+        report += "## 性能分析（最近24小时）\n\n"
+        report += f"- 总任务数：{total}\n"
+        report += f"- 失败任务数：{failed}\n"
+        report += f"- 失败率：{rate:.1%}\n\n"
 
-        # 澶辫触妯″紡
-        if analysis['failure_patterns']:
-            report += "## [WARN] 澶辫触妯″紡\n\n"
-            for task_type, data in analysis['failure_patterns'].items():
-                report += f"- **{task_type}**锛氬け璐?{data['count']} 娆n"
+        # 失败模式
+        patterns = analysis.get("failure_patterns", {})
+        if patterns:
+            report += "## 失败模式\n\n"
+            for task_type, data in patterns.items():
+                count = data.get("count", 0)
+                report += f"- **{task_type}**：失败 {count} 次\n"
             report += "\n"
 
-        # 鏀硅繘寤鸿
-        if analysis['suggestions']:
-            report += "## [IDEA] 鏀硅繘寤鸿\n\n"
-            for i, suggestion in enumerate(analysis['suggestions'], 1):
+        # 改进建议
+        suggestions = analysis.get("suggestions", [])
+        if suggestions:
+            report += "## 改进建议\n\n"
+            for i, suggestion in enumerate(suggestions, 1):
                 report += f"{i}. {suggestion}\n"
             report += "\n"
 
-        # 寰呭鏍稿缓璁?
+        # 待审核建议
         if pending:
-            report += "## 馃搵 寰呭鏍稿缓璁甛n\n"
+            report += "## 待审核建议\n\n"
             for suggestion in pending:
-                report += f"- **{suggestion['type']}**锛歿suggestion['description']}\n"
+                stype = suggestion.get("type", "unknown")
+                desc = suggestion.get("description", "")
+                report += f"- **{stype}**：{desc}\n"
             report += "\n"
 
-        # 杩涘寲鍘嗗彶
+        # 进化历史
         if history:
-            report += "## 馃摐 杩涘寲鍘嗗彶锛堟渶杩?娆★級\n\n"
+            report += "## 进化历史（最近5次）\n\n"
             for record in history:
-                time_str = datetime.fromtimestamp(record['timestamp']).strftime('%Y-%m-%d %H:%M')
-                report += f"- **{time_str}** - {record['evolution_type']}\n"
-                report += f"  鍘熷洜锛歿record['reason']}\n"
+                ts = record.get("timestamp", 0)
+                time_str = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
+                etype = record.get("evolution_type", "unknown")
+                reason = record.get("reason", "")
+                report += f"- **{time_str}** - {etype}\n"
+                report += f"  原因：{reason}\n"
             report += "\n"
 
         return report
 
 
-# CLI 鎺ュ彛
+# CLI 接口
 def main():
     import sys
     
     if len(sys.argv) < 2:
-        print("鐢ㄦ硶锛歱ython -m aios.agent_system.evolution <command> [args]")
-        print("\n鍛戒护锛?)
-        print("  analyze <agent_id>     - 鍒嗘瀽 Agent 澶辫触妯″紡")
-        print("  report <agent_id>      - 鐢熸垚杩涘寲鎶ュ憡")
-        print("  suggestions [agent_id] - 鏌ョ湅寰呭鏍稿缓璁?)
-        print("  history <agent_id>     - 鏌ョ湅杩涘寲鍘嗗彶")
+        print("用法：python -m aios.agent_system.evolution <command> [args]")
+        print("\n命令：")
+        print("  analyze <agent_id>     - 分析 Agent 失败模式")
+        print("  report <agent_id>      - 生成进化报告")
+        print("  suggestions [agent_id] - 查看待审核建议")
+        print("  history <agent_id>     - 查看进化历史")
         return
 
     evolution = AgentEvolution()
@@ -330,7 +364,7 @@ def main():
 
     if command == "analyze":
         if len(sys.argv) < 3:
-            print("閿欒锛氶渶瑕佹彁渚?agent_id")
+            print("错误：需要提供 agent_id")
             return
         
         agent_id = sys.argv[2]
@@ -339,7 +373,7 @@ def main():
 
     elif command == "report":
         if len(sys.argv) < 3:
-            print("閿欒锛氶渶瑕佹彁渚?agent_id")
+            print("错误：需要提供 agent_id")
             return
         
         agent_id = sys.argv[2]
@@ -353,7 +387,7 @@ def main():
 
     elif command == "history":
         if len(sys.argv) < 3:
-            print("閿欒锛氶渶瑕佹彁渚?agent_id")
+            print("错误：需要提供 agent_id")
             return
         
         agent_id = sys.argv[2]
@@ -361,9 +395,8 @@ def main():
         print(json.dumps(history, ensure_ascii=False, indent=2))
 
     else:
-        print(f"鏈煡鍛戒护锛歿command}")
+        print(f"未知命令：{command}")
 
 
 if __name__ == "__main__":
     main()
-

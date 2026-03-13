@@ -3,6 +3,13 @@
 AIOS Task Router v2.0 - 智能任务路由系统 + Planning 集成
 接收任务 → 自动拆解 → 匹配 Agent → 分发执行
 
+Architecture:
+  1. Task Type Identification (keyword + fuzzy matching)
+  2. Agent Matching (task_types + status filtering)
+  3. Candidate Ranking (priority + success_rate + experience)
+  4. Queue Management (priority-based FIFO)
+  5. Planning Integration (complex task decomposition)
+
 用法:
   python task_router.py route "写一个排序算法"
   python task_router.py route "检查系统健康度" --dry-run
@@ -10,17 +17,29 @@ AIOS Task Router v2.0 - 智能任务路由系统 + Planning 集成
   python task_router.py plan "搜索GitHub项目，然后分析架构，最后写报告"
   python task_router.py queue                    # 查看队列
   python task_router.py stats                    # 查看统计
+
+Author: AIOS Team
+License: MIT
 """
 
 import json
 import sys
 import time
 import re
+import logging
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 from core.status_adapter import get_agent_status
+
+# ========== Logging Configuration ==========
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger("TaskRouter")
 
 BASE_DIR = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE_DIR / "unified_registry.json"
@@ -150,18 +169,28 @@ class TaskRouter:
     def plan_and_submit(self, description: str, priority: str = "normal") -> List[Task]:
         """
         复杂任务：先拆解再逐个提交
-        返回所有子任务
+        
+        Args:
+            description: 任务描述
+            priority: 默认优先级
+            
+        Returns:
+            List[Task]: 所有子任务列表
         """
         if not self.planner:
             # Planner 不可用，直接提交
+            logger.debug("Planner unavailable, submitting as single task")
             return [self.submit(description, priority)]
 
+        logger.info(f"Planning task: {description[:100]}")
         plan = self.planner.plan(description)
 
         if len(plan.subtasks) <= 1:
             # 简单任务，不拆解
+            logger.debug("Task is simple, no decomposition needed")
             return [self.submit(description, priority)]
 
+        logger.info(f"Task decomposed into {len(plan.subtasks)} subtasks (strategy={plan.strategy})")
         tasks = []
         for st in plan.subtasks:
             task = self.submit(
@@ -192,19 +221,30 @@ class TaskRouter:
         1. 精确匹配 task_type
         2. 关键词匹配
         3. 模糊匹配（Jaccard 相似度）
+        
+        Args:
+            description: 任务描述
+            
+        Returns:
+            RouteResult: 路由结果（包含 agent_id, confidence, reason）
         """
+        logger.debug(f"Routing task: {description[:100]}")
+        
         # Step 1: 识别 task_type
         task_type, kw_confidence = self._identify_task_type(description)
+        logger.debug(f"Identified task_type={task_type} (confidence={kw_confidence:.2f})")
 
         # Step 2: 找到匹配的 Agent
         candidates = self._find_agents_for_type(task_type)
 
         if not candidates:
             # 降级：尝试模糊匹配
+            logger.debug("No exact match, trying fuzzy matching")
             task_type, candidates, kw_confidence = self._fuzzy_match(description)
 
         if not candidates:
             # 最终降级：用 coder（万能选手）
+            logger.warning(f"No candidates found, falling back to coder")
             fallback = self.agents.get("coder", {})
             return RouteResult(
                 agent_id="coder",
@@ -225,6 +265,8 @@ class TaskRouter:
         ][:3]
 
         confidence = min(kw_confidence * best.get("_score", 0.5) * 2, 1.0)
+        
+        logger.info(f"Routed to {best['id']} (confidence={confidence:.2f})")
 
         return RouteResult(
             agent_id=best["id"],
@@ -236,7 +278,15 @@ class TaskRouter:
         )
 
     def _identify_task_type(self, description: str) -> Tuple[str, float]:
-        """识别任务类型"""
+        """
+        识别任务类型
+        
+        Args:
+            description: 任务描述
+            
+        Returns:
+            Tuple[str, float]: (task_type, confidence)
+        """
         desc_lower = description.lower().strip()
 
         # 1. 精确中文关键词匹配
@@ -248,15 +298,18 @@ class TaskRouter:
                 best_len = len(keyword)
 
         if best_type:
+            logger.debug(f"Keyword match: '{desc_lower[:50]}' -> {best_type}")
             return best_type, 0.9
 
         # 2. 英文关键词匹配
         words = set(re.findall(r'[a-zA-Z]+', desc_lower))
         for word, task_type in KEYWORD_MAP_EN.items():
             if word in words:
+                logger.debug(f"English keyword match: '{word}' -> {task_type}")
                 return task_type, 0.8
 
         # 3. 默认 code
+        logger.debug(f"No keyword match, defaulting to 'code'")
         return "code", 0.3
 
     def _find_agents_for_type(self, task_type: str) -> List[Dict]:
@@ -328,7 +381,19 @@ class TaskRouter:
     # ========== 任务队列 ==========
 
     def submit(self, description: str, priority: str = "normal") -> Task:
-        """提交任务到队列"""
+        """
+        提交任务到队列
+        
+        Args:
+            description: 任务描述
+            priority: 优先级 (critical/high/normal/low)
+            
+        Returns:
+            Task: 创建的任务对象
+            
+        Raises:
+            IOError: 队列写入失败
+        """
         route = self.route(description)
 
         task = Task(
@@ -343,8 +408,17 @@ class TaskRouter:
         )
 
         # 写入队列
-        with open(QUEUE_PATH, "a", encoding="utf-8") as f:
-            f.write(json.dumps(asdict(task), ensure_ascii=False) + "\n")
+        try:
+            QUEUE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with open(QUEUE_PATH, "a", encoding="utf-8") as f:
+                f.write(json.dumps(asdict(task), ensure_ascii=False) + "\n")
+            logger.info(f"Task submitted: {task.id} -> {route.agent_id} (priority={priority})")
+        except IOError as e:
+            logger.error(f"Failed to write task to queue: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error submitting task: {e}")
+            raise
 
         # 记录路由日志
         self._log_route(description, route)
@@ -358,20 +432,37 @@ class TaskRouter:
         return task
 
     def get_queue(self) -> List[Dict]:
-        """获取待处理队列"""
+        """
+        获取待处理队列
+        
+        Returns:
+            List[Dict]: 按优先级排序的待处理任务列表
+        """
         if not QUEUE_PATH.exists():
+            logger.debug("Queue file not found")
             return []
+        
         tasks = []
-        for line in QUEUE_PATH.read_text(encoding="utf-8").strip().split("\n"):
-            if line.strip():
+        try:
+            content = QUEUE_PATH.read_text(encoding="utf-8").strip()
+            for line_num, line in enumerate(content.split("\n"), 1):
+                if not line.strip():
+                    continue
                 try:
                     tasks.append(json.loads(line))
-                except json.JSONDecodeError:
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Skipping invalid JSON at line {line_num}: {e}")
                     continue
+        except IOError as e:
+            logger.error(f"Failed to read queue file: {e}")
+            return []
+        
         # 按优先级排序
         priority_order = {"critical": 0, "high": 1, "normal": 2, "low": 3}
         tasks.sort(key=lambda t: priority_order.get(t.get("priority", "normal"), 2))
-        return [t for t in tasks if t.get("status") == "pending"]
+        pending = [t for t in tasks if t.get("status") == "pending"]
+        logger.debug(f"Queue loaded: {len(pending)} pending tasks")
+        return pending
 
     def get_stats(self) -> Dict:
         """获取路由统计"""
@@ -384,25 +475,53 @@ class TaskRouter:
     # ========== 内部方法 ==========
 
     def _load_registry(self) -> Dict:
+        """加载 Agent 注册表"""
         if not REGISTRY_PATH.exists():
+            logger.warning(f"Registry not found: {REGISTRY_PATH}")
             return {"agents": [], "skills": {}}
-        return json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
+        try:
+            content = REGISTRY_PATH.read_text(encoding="utf-8")
+            registry = json.loads(content)
+            logger.info(f"Loaded {len(registry.get('agents', []))} agents from registry")
+            return registry
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse registry JSON: {e}")
+            return {"agents": [], "skills": {}}
+        except IOError as e:
+            logger.error(f"Failed to read registry file: {e}")
+            return {"agents": [], "skills": {}}
 
     def _load_stats(self) -> Dict:
+        """加载路由统计"""
         if not STATS_PATH.exists():
+            logger.debug("Stats file not found, initializing empty stats")
             return {"total_routed": 0, "by_agent": {}, "by_type": {}}
         try:
-            return json.loads(STATS_PATH.read_text(encoding="utf-8"))
-        except Exception:
+            content = STATS_PATH.read_text(encoding="utf-8")
+            stats = json.loads(content)
+            logger.debug(f"Loaded stats: {stats.get('total_routed', 0)} total routes")
+            return stats
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse stats JSON: {e}, resetting stats")
+            return {"total_routed": 0, "by_agent": {}, "by_type": {}}
+        except IOError as e:
+            logger.error(f"Failed to read stats file: {e}")
             return {"total_routed": 0, "by_agent": {}, "by_type": {}}
 
     def _save_stats(self):
-        STATS_PATH.write_text(
-            json.dumps(self.stats, ensure_ascii=False, indent=2),
-            encoding="utf-8"
-        )
+        """保存路由统计"""
+        try:
+            STATS_PATH.parent.mkdir(parents=True, exist_ok=True)
+            content = json.dumps(self.stats, ensure_ascii=False, indent=2)
+            STATS_PATH.write_text(content, encoding="utf-8")
+            logger.debug(f"Stats saved: {self.stats.get('total_routed', 0)} total routes")
+        except IOError as e:
+            logger.error(f"Failed to save stats: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error saving stats: {e}")
 
     def _log_route(self, description: str, route: RouteResult):
+        """记录路由决策到日志文件"""
         entry = {
             "ts": datetime.now(timezone.utc).isoformat(),
             "input": description,
@@ -411,8 +530,15 @@ class TaskRouter:
             "confidence": route.confidence,
             "reason": route.reason
         }
-        with open(ROUTE_LOG_PATH, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        try:
+            ROUTE_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with open(ROUTE_LOG_PATH, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            logger.debug(f"Route logged: {description[:50]} -> {route.agent_id}")
+        except IOError as e:
+            logger.error(f"Failed to write route log: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error logging route: {e}")
 
 
 # ========== CLI ==========

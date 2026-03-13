@@ -1,0 +1,22 @@
+{
+  "timestamp": 1773381738.1875057,
+  "event_loading": {
+    "engine_load_events": {
+      "count": 299,
+      "time_ms": 3.01
+    },
+    "event_store_load": {
+      "count": 30,
+      "time_ms": 5.68
+    }
+  },
+  "memory": {
+    "rss_mb": 20.92,
+    "vms_mb": 13.2
+  },
+  "large_files": {
+    "aios.db": 4.73,
+    "archive\\router_calls-2026-02.jsonl": 1.07
+  },
+  "bottlenecks": []
+}

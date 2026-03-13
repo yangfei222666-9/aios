@@ -1,0 +1,18 @@
+{
+  "task_id": "task-20260313-001",
+  "from": "router",
+  "to": "openclaw",
+  "type": "need_confirm",
+  "title": "需要用户确认：修改生产配置",
+  "body": "检测到消息类型 prod_modify，触发安全闸门。需要珊瑚海确认后才能继续执行。",
+  "original_message": {
+    "type": "prod_modify",
+    "description": "修改 voice_wakeword.py 生产配置"
+  },
+  "context": {
+    "gate": "NEED_CONFIRM",
+    "reason": "prod_modify 属于受限操作",
+    "action_required": "珊瑚海确认后，手动将消息重新放入 outbox/ 并修改 type 为 AUTO_OK 类型"
+  },
+  "created_at": "2026-03-13T19:15:00+08:00"
+}

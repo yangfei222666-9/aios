@@ -230,21 +230,51 @@ def _record_execution(task_id: str, task_type: str, description: str,
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
-def _simulate_execute(task: dict) -> dict:
+def _real_execute(task: dict) -> dict:
     """
-    Simulate task execution (placeholder until real sessions_spawn is wired).
-    Returns {success, output, duration_s}.
+    Real execution: write to spawn_pending.jsonl for heartbeat to call sessions_spawn.
+    Returns {success, output, duration_s, spawn_requested}.
     """
     t0 = time.time()
-    desc = task.get("description", "")
+    
+    task_id = task.get("id") or task.get("task_id", "unknown")
     agent_id = task.get("agent_id", "unknown")
-    # Simulate work
-    time.sleep(0.05)
-    return {
-        "success": True,
-        "output": f"Task completed by {agent_id} agent",
-        "duration_s": round(time.time() - t0, 3),
+    desc = task.get("description", "")
+    
+    # Construct spawn request
+    spawn_request = {
+        "task_id": task_id,
+        "agent_id": agent_id,
+        "task": desc,
+        "label": f"{agent_id}-{task_id[:8]}",
+        "cleanup": "delete",
+        "runTimeoutSeconds": 300,
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
+    
+    # Write to spawn_pending.jsonl
+    spawn_pending = BASE_DIR / "data" / "spawn_pending.jsonl"
+    try:
+        spawn_pending.parent.mkdir(parents=True, exist_ok=True)
+        with spawn_pending.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(spawn_request, ensure_ascii=False) + "\n")
+        
+        duration_s = round(time.time() - t0, 3)
+        return {
+            "success": True,
+            "output": f"Spawn request created for {agent_id} (task: {desc[:50]}...)",
+            "duration_s": duration_s,
+            "spawn_requested": True,
+        }
+    except Exception as e:
+        duration_s = round(time.time() - t0, 3)
+        return {
+            "success": False,
+            "output": f"Failed to create spawn request: {e}",
+            "duration_s": duration_s,
+            "spawn_requested": False,
+            "error": str(e),
+        }
 
 
 def execute_batch(tasks: list, max_tasks: int = 5,
@@ -320,7 +350,7 @@ def execute_batch(tasks: list, max_tasks: int = 5,
             except Exception as e:
                 print(f"  [LEDGER] executing transition failed: {e}", flush=True)
 
-        exec_result = _simulate_execute(task)
+        exec_result = _real_execute(task)
         duration_s = round(time.time() - t0, 3)
         success = exec_result["success"]
         output = exec_result.get("output", "")

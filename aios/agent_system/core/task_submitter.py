@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-core/task_submitter.py - Unified task queue interface
+core/task_submitter.py - Canonical task queue interface (SOURCE OF TRUTH)
 
+All task submission MUST go through this module.
 All reads/writes go through paths.TASK_QUEUE (data/task_queue.jsonl).
+
 Provides: submit_task, list_tasks, queue_stats
+
+NOTE: task_queue.py (TaskQueue class) provides durable locking and recovery
+for the CONSUMER side. Do NOT use TaskQueue.enqueue_task() to submit tasks.
+Use submit_task() from this module instead.
 """
 import json
 import time

@@ -1,0 +1,16 @@
+{
+  "task_id": "demo-task-001",
+  "from": "openclaw",
+  "to": "user",
+  "type": "review",
+  "title": "审查：修复 voice_wakeword 内存泄漏",
+  "body": "修复方向正确，audio_frames 清理和临时文件处理符合预期。建议补充异常路径测试。",
+  "context": {
+    "needs_confirm": false,
+    "verdict": "approved",
+    "risks": [
+      "异常路径未覆盖测试"
+    ]
+  },
+  "created_at": "2026-03-13T20:10:00+08:00"
+}

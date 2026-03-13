@@ -1,0 +1,15 @@
+{
+  "task_id": "task-20260313-001",
+  "from": "router",
+  "to": "openclaw",
+  "type": "error",
+  "title": "路由失败：task-20260313-001",
+  "body": "处理消息时发生异常，任务已标记为 failed。",
+  "context": {
+    "error": "非法状态迁移: reviewing -> dispatched",
+    "stage_at_failure": "reviewing",
+    "retry_count": 0,
+    "action_required": "人工检查状态后，将任务状态重置为合法阶段再重试"
+  },
+  "created_at": "2026-03-13T19:20:00+08:00"
+}

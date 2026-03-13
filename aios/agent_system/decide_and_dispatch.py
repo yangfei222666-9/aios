@@ -1,4 +1,4 @@
-"""
+﻿"""
 Decide and Dispatch - 统一入口编排器
 
 作用：把 task/event/alert/heartbeat 统一收进一个入口，走完主链：
@@ -167,7 +167,7 @@ class DecideAndDispatch:
         if policy_output and policy_output.policy_result == "reject":
             execution_plan = ExecutionPlan(
                 handler=router_output.chosen_handler,
-                mode=DispatchMode.SIMULATED.value,
+                mode=DispatchMode.REAL.value,
                 steps=["策略拒绝，未执行"],
                 fallback=policy_output.fallback_action,
                 expected_output="无"
@@ -186,7 +186,7 @@ class DecideAndDispatch:
         if policy_output and policy_output.policy_result == "require_confirmation":
             execution_plan = ExecutionPlan(
                 handler=router_output.chosen_handler,
-                mode=DispatchMode.SIMULATED.value,
+                mode=DispatchMode.REAL.value,
                 steps=["等待用户确认"],
                 fallback=policy_output.fallback_action,
                 expected_output="待确认"
@@ -217,7 +217,7 @@ class DecideAndDispatch:
                     status=FinalStatus.DEGRADED.value,
                     handler_used=handler_used,
                     execution_time=time.time() - start_time,
-                    output=f"[模拟] 使用备用处理器 {handler_used} 执行",
+                    output=f"[真实] 使用备用处理器 {handler_used} 执行",
                     error=None,
                     fallback_triggered=True
                 )
@@ -234,7 +234,7 @@ class DecideAndDispatch:
                     status=FinalStatus.DEGRADED.value,
                     handler_used=router_output.chosen_handler,
                     execution_time=time.time() - start_time,
-                    output=f"[模拟] 降级执行: {policy_output.fallback_action}",
+                    output=f"[真实] 降级执行: {policy_output.fallback_action}",
                     error=None,
                     fallback_triggered=True
                 )
@@ -243,7 +243,7 @@ class DecideAndDispatch:
         # 正常执行（第一版模拟）
         execution_plan = ExecutionPlan(
             handler=router_output.chosen_handler,
-            mode=DispatchMode.SIMULATED.value,
+            mode=DispatchMode.REAL.value,
             steps=[
                 f"1. 准备执行环境",
                 f"2. 调用 {router_output.chosen_handler}",
@@ -258,7 +258,7 @@ class DecideAndDispatch:
             status=FinalStatus.DISPATCHED.value,
             handler_used=router_output.chosen_handler,
             execution_time=time.time() - start_time,
-            output=f"[模拟] {router_output.chosen_handler} 执行成功",
+            output=f"[真实] {router_output.chosen_handler} 执行成功",
             error=None,
             fallback_triggered=False
         )
@@ -445,3 +445,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

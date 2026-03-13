@@ -383,8 +383,8 @@ def transition_status(
             else:
                 task[k] = v
     
-    # running → queued 时自动清空 worker 字段
-    if from_status == "running" and to_status == "queued":
+    # running → pending 时自动清空 worker 字段
+    if from_status == "running" and to_status == "pending":
         task.pop("worker_id", None)
         task.pop("started_at", None)
         task.pop("last_heartbeat_at", None)
@@ -436,7 +436,7 @@ def recover_stale_locks(
             ok = transition_status(
                 task,
                 from_status="running",
-                to_status="queued",
+                to_status="pending",
                 extra={
                     "zombie_retries": retry_count + 1,
                     "zombie_note": f"recovered after {age_hr:.1f}h, retry #{retry_count + 1}",

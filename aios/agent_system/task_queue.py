@@ -12,7 +12,7 @@ from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional, Literal
 from pathlib import Path
 
-TaskStatus = Literal["queued", "running", "succeeded", "failed", "permanently_failed"]
+TaskStatus = Literal["pending", "running", "succeeded", "failed", "permanently_failed"]
 
 # ── 进程内互斥锁（多线程安全）────────────────────────────────────────────────
 _QUEUE_LOCK = threading.Lock()
@@ -102,7 +102,7 @@ class TaskQueue:
                     tasks[task_id] = TaskRecord(
                         task_id=task_id,
                         payload=data.get("payload", {}),
-                        status=data.get("status", "queued"),
+                        status=data.get("status", "pending"),
                         retry_count=data.get("retry_count", 0),
                         max_retries=data.get("max_retries", 3),
                         worker_id=data.get("worker_id"),
@@ -145,7 +145,7 @@ class TaskQueue:
                 tasks[task_id] = TaskRecord(
                     task_id=task_id,
                     payload=payload,
-                    status="queued",
+                    status="pending",
                     retry_count=0,
                     max_retries=max_retries,
                 )
@@ -166,7 +166,7 @@ class TaskQueue:
                 tasks = self._load_all()
                 
                 # Find first queued task
-                queued_tasks = [t for t in tasks.values() if t.status == "queued"]
+                queued_tasks = [t for t in tasks.values() if t.status == "pending"]
                 if not queued_tasks:
                     return None
                 

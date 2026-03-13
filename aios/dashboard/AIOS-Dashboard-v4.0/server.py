@@ -86,24 +86,25 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         except Exception:
             return {}
 
-    def _get_evolution_score(self):
-        """读取真实 evolution score"""
-        data = self._read_json(DATA_DIR / "evolution_score.json")
-        return data.get("score", 0)
-
     def _get_task_stats(self):
-        """从 task_executions_v2.jsonl 计算真实统计"""
-        execs = self._read_jsonl(DATA_DIR / "task_executions_v2.jsonl", 500)
+        """从 task_executions.jsonl 计算真实统计"""
+        # 优先读取真实数据文件
+        execs = self._read_jsonl(DATA_DIR / "task_executions.jsonl", 500)
         if not execs:
-            # fallback: 尝试旧格式
-            execs = self._read_jsonl(DATA_DIR / "task_executions.jsonl", 500)
+            # fallback: 尝试 v2 格式
+            execs = self._read_jsonl(DATA_DIR / "task_executions_v2.jsonl", 500)
 
         total = len(execs)
         if total == 0:
             return {"total": 0, "completed": 0, "failed": 0, "success_rate": 0, "today": 0}
 
-        completed = sum(1 for e in execs if e.get("status") in ("completed", "success"))
-        failed = sum(1 for e in execs if e.get("status") in ("failed", "error"))
+        # 兼容多种状态字段
+        completed = sum(1 for e in execs 
+                       if e.get("status") in ("completed", "success") 
+                       or e.get("success") is True)
+        failed = sum(1 for e in execs 
+                    if e.get("status") in ("failed", "error") 
+                    or e.get("success") is False)
         success_rate = round(completed / max(total, 1) * 100, 1)
 
         # 今日改进数
@@ -111,7 +112,8 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         today_str = datetime.now().strftime("%Y-%m-%d")
         today_count = sum(1 for e in execs
                          if e.get("timestamp", "").startswith(today_str)
-                         or e.get("completed_at", "").startswith(today_str))
+                         or e.get("completed_at", "").startswith(today_str)
+                         or e.get("started_at", "").startswith(today_str))
 
         return {
             "total": total,
@@ -156,10 +158,17 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         """获取系统指标 - 全部真实数据"""
         agents = self.load_agents()
         task_stats = self._get_task_stats()
-        evolution_score = self._get_evolution_score()
+        
+        # Evolution score = 成功率（真实数据驱动）
+        evolution_score = task_stats["success_rate"]
+        print(f"[DEBUG] task_stats={task_stats}, evolution_score={evolution_score}")
+        
         labels, trend_evo, trend_success = self._get_trend_data()
 
-        active_agents = len([a for a in agents if a.get('status') == 'active'])
+        active_agents = len([a for a in agents 
+                            if a.get('lifecycle_state') == 'active' 
+                            or a.get('mode') == 'active'
+                            or a.get('status') == 'active'])
 
         # 系统资源 - 真实数据
         cpu = mem = disk = gpu = 0

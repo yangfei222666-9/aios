@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Review Feedback",
+  "description": "审查意见消息格式",
+  "type": "object",
+  "required": ["id", "result_id", "from", "to", "timestamp", "payload", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^review_[0-9]{8}_[0-9]{3}$",
+      "description": "审查 ID，格式：review_YYYYMMDD_NNN"
+    },
+    "result_id": {
+      "type": "string",
+      "pattern": "^result_[0-9]{8}_[0-9]{3}$",
+      "description": "对应的结果 ID"
+    },
+    "from": {
+      "type": "string",
+      "enum": ["hanzo", "xiaojiu"],
+      "description": "发送者"
+    },
+    "to": {
+      "type": "string",
+      "enum": ["hanzo", "xiaojiu"],
+      "description": "接收者"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "时间戳（ISO 8601 格式）"
+    },
+    "payload": {
+      "type": "object",
+      "required": ["verdict"],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": ["approved", "needs_revision", "rejected"],
+          "description": "审查结论"
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "发现的问题列表"
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "改进建议列表"
+        },
+        "comments": {
+          "type": "string",
+          "description": "额外评论（可选）"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "acknowledged"],
+      "description": "审查状态"
+    }
+  }
+}

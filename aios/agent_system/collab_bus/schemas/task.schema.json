@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Task Request",
+  "description": "任务请求消息格式",
+  "type": "object",
+  "required": ["id", "type", "from", "to", "timestamp", "payload", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^task_[0-9]{8}_[0-9]{3}$",
+      "description": "任务 ID，格式：task_YYYYMMDD_NNN"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["code_review", "implementation", "testing", "documentation", "analysis"],
+      "description": "任务类型"
+    },
+    "from": {
+      "type": "string",
+      "enum": ["hanzo", "xiaojiu"],
+      "description": "发送者"
+    },
+    "to": {
+      "type": "string",
+      "enum": ["hanzo", "xiaojiu"],
+      "description": "接收者"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "时间戳（ISO 8601 格式）"
+    },
+    "payload": {
+      "type": "object",
+      "description": "任务内容（根据 type 不同而不同）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "in_progress", "ready_for_review", "needs_revision", "approved", "archived"],
+      "description": "任务状态"
+    }
+  }
+}

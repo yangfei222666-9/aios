@@ -139,6 +139,9 @@ def check_wake_word():
     if WAKE_WORD in text:
         print(f"[{ts()}] 🔔 唤醒词检测到: \"{text}\"")
         return True
+    
+    # 未检测到唤醒词，清空缓冲区避免碎片累积
+    S.wake_buffer.clear()
     return False
 
 def wake_record_loop():
@@ -196,10 +199,12 @@ def wake_record_loop():
     
     if not text:
         print(f"[{ts()}] ⚠️ 未识别到有效内容")
+        S.audio_frames = []  # 清空缓冲区
         return
     
     print(f"[{ts()}] 💬 识别结果 ({elapsed:.1f}s): {text}")
     send_to_telegram(text)
+    S.audio_frames = []  # 清空缓冲区
 
 # ---- PTT (F2) ----
 def ptt_start():
@@ -218,6 +223,7 @@ def ptt_stop():
         return
     
     frames_copy = list(S.audio_frames)
+    S.audio_frames = []  # 清空缓冲区
     t = threading.Thread(target=_ptt_transcribe, args=(frames_copy,), daemon=True)
     t.start()
 

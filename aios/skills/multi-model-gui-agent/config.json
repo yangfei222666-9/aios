@@ -1,0 +1,30 @@
+{
+  "teacher_key": "your-doubao-2.0-lite-key-here",
+  "executor_key": "your-doubao-1.6-flash-key-here",
+  "fallback_key": "your-doubao-1.6-lite-key-here",
+  
+  "timeout": {
+    "teacher": 10,
+    "executor": 3,
+    "fallback": 5
+  },
+  
+  "retry": {
+    "max_attempts": 3,
+    "backoff": 2
+  },
+  
+  "modes": {
+    "douyin": {
+      "default_coordinates": {
+        "input": [800, 600],
+        "publish": [900, 650]
+      }
+    },
+    "customer-service": {
+      "default_coordinates": {
+        "action_button": [850, 700]
+      }
+    }
+  }
+}

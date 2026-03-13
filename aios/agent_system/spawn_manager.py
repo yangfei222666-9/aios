@@ -64,7 +64,7 @@ def build_spawn_requests():
             "error_context": lesson.get("context", {}),
             "original_error": lesson["error_message"][:200],  # 鎴柇瓒呴暱 error
             "created_at": lesson["harvested_at"],
-            "status": "queued"
+            "status": "pending"
         }
         requests.append(req)
 

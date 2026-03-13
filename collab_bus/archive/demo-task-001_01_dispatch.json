@@ -1,0 +1,14 @@
+{
+  "task_id": "demo-task-001",
+  "from": "openclaw",
+  "to": "xiaojiu",
+  "type": "task_dispatch",
+  "title": "修复 voice_wakeword 内存泄漏",
+  "body": "请修复 voice_wakeword.py 的内存泄漏问题，重点检查 audio_frames 和临时文件处理。",
+  "context": {
+    "priority": "high",
+    "needs_confirm": false,
+    "project": "taijiOS"
+  },
+  "created_at": "2026-03-13T20:00:00+08:00"
+}

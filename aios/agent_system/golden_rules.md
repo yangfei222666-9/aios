@@ -1,7 +1,7 @@
 # 黄金法则 (Golden Rules)
 
 > 自动提炼自 lessons.json + task_executions.jsonl
-> 最后更新: 2026-03-13 12:00
+> 最后更新: 2026-03-14 00:00
 > 总任务: 21 | 成功率: 90.5%
 
 ---

@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Task Result",
+  "description": "任务结果消息格式",
+  "type": "object",
+  "required": ["id", "task_id", "from", "to", "timestamp", "payload", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^result_[0-9]{8}_[0-9]{3}$",
+      "description": "结果 ID，格式：result_YYYYMMDD_NNN"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^task_[0-9]{8}_[0-9]{3}$",
+      "description": "对应的任务 ID"
+    },
+    "from": {
+      "type": "string",
+      "enum": ["hanzo", "xiaojiu"],
+      "description": "发送者"
+    },
+    "to": {
+      "type": "string",
+      "enum": ["hanzo", "xiaojiu"],
+      "description": "接收者"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "时间戳（ISO 8601 格式）"
+    },
+    "payload": {
+      "type": "object",
+      "required": ["status", "summary"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["completed", "failed", "partial"],
+          "description": "执行状态"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "交付的文件列表"
+        },
+        "summary": {
+          "type": "string",
+          "description": "执行摘要"
+        },
+        "logs": {
+          "type": "string",
+          "description": "执行日志（可选）"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ready_for_review", "needs_revision", "approved"],
+      "description": "结果状态"
+    }
+  }
+}

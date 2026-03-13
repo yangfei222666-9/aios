@@ -1,0 +1,17 @@
+{
+  "task_id": "task-20260313-001",
+  "from": "openclaw",
+  "to": "user",
+  "type": "summary",
+  "title": "✅ 任务完成汇报：修复 voice_wakeword 内存泄漏",
+  "body": "任务已完成，所有审查通过。",
+  "context": {
+    "summary": "修复了 voice_wakeword.py 的内存泄漏问题",
+    "result": "audio_frames 清理、临时文件处理、录音超时限制均已修复",
+    "risks": ["异常路径测试尚未补充"],
+    "next_steps": ["补充异常路径测试用例", "观察 24h 内存使用情况"],
+    "needs_confirm": false,
+    "duration": "约 30 分钟"
+  },
+  "created_at": "2026-03-13T19:30:00+08:00"
+}

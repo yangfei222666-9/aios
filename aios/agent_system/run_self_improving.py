@@ -62,7 +62,7 @@ def run_self_improving(agent_id: str = None, dry_run: bool = False):
     
     # 初始化
     loop = SelfImprovingLoop()
-    trace_analyzer = TraceAnalyzer()
+    trace_analyzer = TraceAnalyzer(AIOS_ROOT / "data" / "traces")
     
     # 获取所有 Agent
     if agent_id:

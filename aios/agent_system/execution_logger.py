@@ -117,7 +117,7 @@ class ExecutionLogger:
             "status": "completed",
             "description": task_info["description"],
             "started_at": started_at,
-            "finished_at": finished_at,
+            "updated_at": finished_at,
             "duration_ms": duration_ms,
             "success": True,
             "error_type": None,
@@ -138,13 +138,25 @@ class ExecutionLogger:
     def fail_task(
         self,
         task_id: str,
-        error_type: Literal["timeout", "network_error", "model_error", "validation_error", "resource_exhausted", "unknown"],
+        error_type: Literal["timeout", "network_error", "gateway_error", "transient_network_failure", "client_error", "model_error", "validation_error", "resource_exhausted", "unknown"],
         error_message: str,
         output_full: Optional[str] = None,
         retry_count: int = 0,
+        status: Literal["failed", "pending", "blocked"] = "failed",
+        endpoint: Optional[str] = None,
+        pending_since: Optional[str] = None,
+        pending_retry_count: int = 0,
+        blocked_at: Optional[str] = None,
     ) -> None:
         """
-        标记任务失败
+        标记任务失败 / pending / blocked
+
+        新增字段（向后兼容，旧调用方不传也能工作）:
+          status        - "failed"(默认) / "pending" / "blocked"
+          endpoint      - 出错的 host/base endpoint，拿不到写 "unknown"
+          pending_since - 首次进入 pending 的 ISO 时间戳（只在首次写入）
+          pending_retry_count - pending 状态下的重试次数
+          blocked_at    - 进入 blocked 的 ISO 时间戳
         """
         if task_id not in self._active_tasks:
             raise ValueError(f"Task {task_id} not found in active tasks")
@@ -159,14 +171,15 @@ class ExecutionLogger:
             "task_id": task_id,
             "agent_id": task_info["agent_id"],
             "task_type": task_info["task_type"],
-            "status": "failed",
+            "status": status,
             "description": task_info["description"],
             "started_at": started_at,
-            "finished_at": finished_at,
+            "updated_at": finished_at,
             "duration_ms": duration_ms,
             "success": False,
             "error_type": error_type,
             "error_message": error_message[:1000] if error_message else None,
+            "endpoint": endpoint or "unknown",
             "output_summary": None,
             "output_full": output_full,
             "source": task_info["source"],
@@ -176,6 +189,13 @@ class ExecutionLogger:
             "tokens": None,
             "metadata": task_info["metadata"],
         }
+
+        # pending / blocked 专属字段
+        if status in ("pending", "blocked"):
+            record["pending_since"] = pending_since
+            record["pending_retry_count"] = pending_retry_count
+        if status == "blocked":
+            record["blocked_at"] = blocked_at or datetime.now().isoformat()
         
         # 写入文件
         self._write_record(record)
@@ -238,25 +258,29 @@ class ExecutionLogger:
                     except json.JSONDecodeError:
                         continue
         
-        # 按 finished_at 倒序排序
-        records.sort(key=lambda x: x.get("finished_at", 0), reverse=True)
+        # 按 updated_at 倒序排序（兼容旧记录的 finished_at）
+        records.sort(key=lambda x: x.get("updated_at", x.get("finished_at", 0)), reverse=True)
         return records[:limit]
     
     def get_stats(self) -> Dict[str, Any]:
         """
-        获取执行统计
+        获取执行统计（含 pending / blocked）
         """
         if not self.log_file.exists():
             return {
                 "total": 0,
                 "completed": 0,
                 "failed": 0,
+                "pending": 0,
+                "blocked": 0,
                 "success_rate": 0.0,
             }
         
         total = 0
         completed = 0
         failed = 0
+        pending = 0
+        blocked = 0
         
         with open(self.log_file, "r", encoding="utf-8") as f:
             for line in f:
@@ -265,10 +289,15 @@ class ExecutionLogger:
                     try:
                         record = json.loads(line)
                         total += 1
-                        if record.get("status") == "completed":
+                        s = record.get("status")
+                        if s == "completed":
                             completed += 1
-                        elif record.get("status") == "failed":
+                        elif s == "failed":
                             failed += 1
+                        elif s == "pending":
+                            pending += 1
+                        elif s == "blocked":
+                            blocked += 1
                     except json.JSONDecodeError:
                         continue
         
@@ -278,6 +307,8 @@ class ExecutionLogger:
             "total": total,
             "completed": completed,
             "failed": failed,
+            "pending": pending,
+            "blocked": blocked,
             "success_rate": success_rate,
         }
 

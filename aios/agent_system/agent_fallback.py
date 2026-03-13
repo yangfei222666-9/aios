@@ -35,28 +35,68 @@ class AgentFallback:
         self.current_config = current_config
         self.fallback_history = []
 
+    # 用于从错误字符串中提取 HTTP 状态码
+    import re
+    _STATUS_CODE_RE = re.compile(r'\b([1-5]\d{2})\b')
+
     def detect_error_type(self, error: str) -> str:
-        """检测错误类型"""
+        """
+        检测错误类型（细分版）
+
+        优先级：精确匹配 > 模糊匹配 > 兜底
+        返回值：gateway_error | transient_network_failure | rate_limit |
+                auth_error | client_error | timeout | memory_error |
+                network_error | unknown_error
+        """
         error_lower = error.lower()
 
-        if "502" in error or "bad gateway" in error_lower:
-            return "network_error"
-        elif "429" in error or "rate limit" in error_lower:
+        # --- Gateway 错误（502/503/504）---
+        if any(code in error for code in ("502", "503", "504")) or "bad gateway" in error_lower or "service unavailable" in error_lower:
+            return "gateway_error"
+
+        # --- 瞬态网络故障（连接级别）---
+        if any(kw in error_lower for kw in ("connectionreset", "connection reset", "econnrefused", "econnreset", "enetunreach", "temporary failure")):
+            return "transient_network_failure"
+
+        # --- 429 限流 ---
+        if "429" in error or "rate limit" in error_lower:
             return "rate_limit"
-        elif "timeout" in error_lower or "超时" in error:
-            return "timeout"
-        elif "401" in error or "403" in error or "unauthorized" in error_lower:
+
+        # --- 401/403 认证错误（独立保留，不合并进 client_error）---
+        if any(code in error for code in ("401", "403")) or "unauthorized" in error_lower or "forbidden" in error_lower:
             return "auth_error"
-        elif "out of memory" in error_lower or "memory" in error_lower:
+
+        # --- 4xx 客户端错误（非 429、非 401/403）---
+        # 用正则提取状态码，覆盖所有 4xx 而不是枚举
+        codes = self._STATUS_CODE_RE.findall(error)
+        for code in codes:
+            c = int(code)
+            if 400 <= c < 500 and c not in (401, 403, 429):
+                return "client_error"
+
+        # --- 超时 ---
+        if "timeout" in error_lower or "超时" in error:
+            return "timeout"
+
+        # --- 内存 ---
+        if "out of memory" in error_lower or "memory" in error_lower:
             return "memory_error"
-        else:
-            return "unknown_error"
+
+        # --- 兜底：仍保留 network_error 作为未分类网络问题 ---
+        if any(kw in error_lower for kw in ("network", "socket", "dns", "resolve")):
+            return "network_error"
+
+        return "unknown_error"
 
     def get_fallback_strategy(
         self, error_type: str, retry_count: int
     ) -> Optional[Dict]:
         """
         根据错误类型和重试次数返回降级策略
+
+        action 可能值:
+          retry / retry_with_backoff / downgrade_model / reduce_thinking /
+          reduce_resources / mark_pending / manual_intervention / give_up
         """
         current_model = self.current_config.get("model", "claude-sonnet-4-5")
         current_thinking = self.current_config.get("thinking", "medium")
@@ -70,15 +110,34 @@ class AgentFallback:
             "action": "retry",
         }
 
-        # 根据错误类型调整策略
+        # ── gateway_error (502/503/504) ──
+        # 首次：15s 延时重试；再失败：mark_pending
+        if error_type == "gateway_error":
+            if retry_count == 0:
+                strategy["wait_seconds"] = 15
+                strategy["action"] = "retry_with_backoff"
+            else:
+                strategy["action"] = "mark_pending"
+            return strategy
+
+        # ── transient_network_failure (连接重置等) ──
+        # 同 gateway_error 策略
+        if error_type == "transient_network_failure":
+            if retry_count == 0:
+                strategy["wait_seconds"] = 15
+                strategy["action"] = "retry_with_backoff"
+            else:
+                strategy["action"] = "mark_pending"
+            return strategy
+
+        # ── network_error (兜底网络问题) ──
         if error_type == "network_error":
-            # 网络错误：增加超时，等待后重试
             strategy["timeout"] = min(current_timeout * 1.5, 180)
             strategy["wait_seconds"] = min(retry_count * 5, 30)
             strategy["action"] = "retry_with_backoff"
 
+        # ── rate_limit (429) ──
         elif error_type == "rate_limit":
-            # 限流：等待更长时间，降级模型减少负载
             strategy["wait_seconds"] = min(retry_count * 15, 60)
             if retry_count >= 2:
                 next_model = self.MODEL_FALLBACK_CHAIN.get(current_model)
@@ -86,16 +145,16 @@ class AgentFallback:
                     strategy["model"] = next_model
                     strategy["action"] = "downgrade_model"
 
+        # ── timeout ──
         elif error_type == "timeout":
-            # 超时：降低 thinking 级别，增加超时时间
             next_thinking = self.THINKING_FALLBACK_CHAIN.get(current_thinking)
             if next_thinking:
                 strategy["thinking"] = next_thinking
                 strategy["action"] = "reduce_thinking"
             strategy["timeout"] = min(current_timeout * 2, 300)
 
+        # ── memory_error ──
         elif error_type == "memory_error":
-            # 内存错误：降级模型和 thinking
             next_model = self.MODEL_FALLBACK_CHAIN.get(current_model)
             next_thinking = self.THINKING_FALLBACK_CHAIN.get(current_thinking)
             if next_model:
@@ -104,8 +163,16 @@ class AgentFallback:
                 strategy["thinking"] = next_thinking
             strategy["action"] = "reduce_resources"
 
+        # ── client_error (4xx 非 429/401/403) ──
+        # 客户端错误无法自动修复，直接失败
+        elif error_type == "client_error":
+            strategy["action"] = "give_up"
+            return None
+
+        # ── auth_error (401/403) ──
+        # 认证错误：独立保留，不重试，需要人工介入
+        # 保持独立分类以便未来接入 token 刷新逻辑
         elif error_type == "auth_error":
-            # 认证错误：无法自动修复，需要人工介入
             strategy["action"] = "manual_intervention"
             return None
 
@@ -167,10 +234,13 @@ if __name__ == "__main__":
 
     # 测试不同错误类型
     test_errors = [
-        ("Network error: 502 Bad Gateway", "网络错误"),
+        ("Network error: 502 Bad Gateway", "Gateway 错误"),
+        ("503 Service Unavailable", "Gateway 错误 (503)"),
+        ("ConnectionResetError: peer closed", "瞬态网络故障"),
         ("API rate limit exceeded: 429", "限流错误"),
         ("Request timeout after 60s", "超时错误"),
         ("Out of memory", "内存错误"),
+        ("400 Bad Request: invalid param", "客户端错误"),
     ]
 
     for error, desc in test_errors:

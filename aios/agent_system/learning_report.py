@@ -29,7 +29,7 @@ if os.path.exists(exec_path):
 queue_path = TASK_QUEUE
 if os.path.exists(queue_path):
     lines = open(queue_path, encoding='utf-8').readlines()
-    queued = [json.loads(l) for l in lines if '"status": "queued"' in l]
+    queued = [json.loads(l) for l in lines if '"status": "pending"' in l]
     print(f"\nQueued tasks: {len(queued)}")
 
 # Evolution score

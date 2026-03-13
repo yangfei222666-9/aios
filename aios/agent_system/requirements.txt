@@ -1,38 +1,14 @@
-# 太极OS 核心依赖
-# Python 3.12+
+# 太极OS (AIOS) - 核心依赖
 
-# Web 框架
-flask==3.0.0
-flask-cors==4.0.0
+# === 必需 ===
+requests>=2.31.0           # HTTP 请求（Agent 通信、API 调用）
+Flask>=3.0.0               # Dashboard 后端
+flask-cors>=4.0.0          # CORS 支持
 
-# 数据处理
-pandas==2.1.4
-numpy==1.26.2
+# === 推荐（功能增强）===
+# sentence-transformers    # Memory Server embedding 模型
+# aiosqlite>=0.20.0        # 异步 SQLite（events DB）
 
-# 向量检索
-sentence-transformers==2.2.2
-torch==2.1.2
-faiss-cpu==1.7.4
-
-# HTTP 客户端
-requests==2.31.0
-httpx==0.25.2
-
-# 日志
-loguru==0.7.2
-
-# 配置管理
-python-dotenv==1.0.0
-
-# 时间处理
-python-dateutil==2.8.2
-
-# JSON 处理
-orjson==3.9.10
-
-# 进程管理
-psutil==5.9.6
-
-# 异步支持
-aiohttp==3.9.1
-asyncio==3.4.3
+# === 可选（特定功能）===
+# Flask-Login>=0.6.3       # Dashboard 用户认证（当前未启用）
+# numpy                    # 数值计算（embedding 相关）

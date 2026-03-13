@@ -243,7 +243,7 @@ def reclaim_zombie_tasks(timeout_seconds: int = 300, max_retries: int = 2) -> di
             ok = transition_status(
                 task,
                 from_status="running",
-                to_status="queued",
+                to_status="pending",
                 extra={
                     "zombie_retries": retry_count + 1,
                     "zombie_note": f"reclaimed after {age_hr:.1f}h, retry #{retry_count + 1}",
@@ -705,6 +705,31 @@ def main():
             print(f"   [OK] Timeline report updated\n")
         except Exception as e:
             print(f"   [OK] Hexagram Timeline: {e}\n")
+    
+    # 0.8. Process spawn_pending.jsonl (HIGHEST PRIORITY)
+    print("[SPAWN_PENDING] Checking for pending spawn requests...")
+    spawn_pending_file = Path(__file__).parent / "data" / "spawn_pending.jsonl"
+    if spawn_pending_file.exists():
+        try:
+            with spawn_pending_file.open("r", encoding="utf-8") as f:
+                requests = [json.loads(l) for l in f if l.strip()]
+            
+            if requests:
+                print(f"   Found {len(requests)} spawn requests")
+                # TODO: Call sessions_spawn for each request
+                # For now, just log them
+                for req in requests:
+                    print(f"   - {req['agent_id']}: {req['task'][:50]}...")
+                
+                # Clear the file after processing
+                spawn_pending_file.write_text("", encoding="utf-8")
+                print(f"   ✅ Processed {len(requests)} spawn requests")
+            else:
+                print("   No spawn requests")
+        except Exception as e:
+            print(f"   ❌ Error processing spawn_pending: {e}")
+    else:
+        print("   No spawn_pending.jsonl file")
     
     # 1. Reclaim zombie running tasks (before processing queue)
     print("[ZOMBIE] Checking for stale running tasks...")

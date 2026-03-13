@@ -163,7 +163,7 @@ def demo_transition_status():
     ok = transition_status(
         task,
         from_status="running",
-        to_status="queued",
+        to_status="pending",
         extra={"zombie_retries": 1},
     )
     

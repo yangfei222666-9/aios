@@ -1,0 +1,349 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  0,
+    "duration_sec":  1.98,
+    "archive_date":  "2026-03-13",
+    "files_count":  57,
+    "total_size_bytes":  632286,
+    "timestamp":  "2026-03-13 23:00:03",
+    "files":  [
+                  {
+                      "Path":  "voice_wake.log",
+                      "Type":  "temp",
+                      "Size":  95403
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\lifecycle_check.log",
+                      "Type":  "temp",
+                      "Size":  175938
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\data\\loop.log",
+                      "Type":  "temp",
+                      "Size":  994
+                  },
+                  {
+                      "Path":  "aios\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  66280
+                  },
+                  {
+                      "Path":  "logs\\voice_command_results.log",
+                      "Type":  "temp",
+                      "Size":  63
+                  },
+                  {
+                      "Path":  "logs\\voice_wakeword.log",
+                      "Type":  "temp",
+                      "Size":  0
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\adversarial_test.py",
+                      "Type":  "old_test",
+                      "Size":  15424,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_day3_integration.py",
+                      "Type":  "old_test",
+                      "Size":  10339,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_extreme_scenarios.py",
+                      "Type":  "old_test",
+                      "Size":  2366,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_phase3_exceptions.py",
+                      "Type":  "old_test",
+                      "Size":  6073,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_pipeline_timings.py",
+                      "Type":  "old_test",
+                      "Size":  5462,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_recovery_integration.py",
+                      "Type":  "old_test",
+                      "Size":  9119,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_retry_strategy.py",
+                      "Type":  "old_test",
+                      "Size":  6353,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\legacy_scripts\\test_phase3_v4_e2e.py",
+                      "Type":  "old_test",
+                      "Size":  7206,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\legacy_scripts\\test_v4_1_0_simulation.py",
+                      "Type":  "old_test",
+                      "Size":  4451,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\tests\\test_concurrent_safety.py",
+                      "Type":  "old_test",
+                      "Size":  8154,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\tests\\test_dlq.py",
+                      "Type":  "old_test",
+                      "Size":  3783,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\tests\\test_dlq_operator.py",
+                      "Type":  "old_test",
+                      "Size":  3844,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\tests\\test_executor_fallback.py",
+                      "Type":  "old_test",
+                      "Size":  5608,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\tests\\test_force_release.py",
+                      "Type":  "old_test",
+                      "Size":  2738,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\tests\\test_manifest_compat.py",
+                      "Type":  "old_test",
+                      "Size":  5359,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\tests\\test_phase3_exceptions.py",
+                      "Type":  "old_test",
+                      "Size":  2986,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\tests\\conftest.py",
+                      "Type":  "old_test",
+                      "Size":  3869,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_evolution_score.py",
+                      "Type":  "old_test",
+                      "Size":  4297,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_hexagram.py",
+                      "Type":  "old_test",
+                      "Size":  4543,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_platform_adapter.py",
+                      "Type":  "old_test",
+                      "Size":  8134,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\tests\\test_router.py",
+                      "Type":  "old_test",
+                      "Size":  6068,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\tests\\e2e\\test_full_workflow.py",
+                      "Type":  "old_test",
+                      "Size":  4378,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\tests\\integration\\test_agent_spawn.py",
+                      "Type":  "old_test",
+                      "Size":  3514,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\tests\\integration\\test_fault_injection.py",
+                      "Type":  "old_test",
+                      "Size":  4466,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\tests\\integration\\test_heartbeat.py",
+                      "Type":  "old_test",
+                      "Size":  4684,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\adversarial_test.py",
+                      "Type":  "old_test",
+                      "Size":  15424,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_day3_integration.py",
+                      "Type":  "old_test",
+                      "Size":  10339,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_extreme_scenarios.py",
+                      "Type":  "old_test",
+                      "Size":  2366,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_phase3_exceptions.py",
+                      "Type":  "old_test",
+                      "Size":  6073,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_pipeline_timings.py",
+                      "Type":  "old_test",
+                      "Size":  5462,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_recovery_integration.py",
+                      "Type":  "old_test",
+                      "Size":  9119,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_retry_strategy.py",
+                      "Type":  "old_test",
+                      "Size":  6353,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\legacy_scripts\\test_phase3_v4_e2e.py",
+                      "Type":  "old_test",
+                      "Size":  7206,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\legacy_scripts\\test_v4_1_0_simulation.py",
+                      "Type":  "old_test",
+                      "Size":  4451,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\tests\\test_concurrent_safety.py",
+                      "Type":  "old_test",
+                      "Size":  8154,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\tests\\test_dlq.py",
+                      "Type":  "old_test",
+                      "Size":  3783,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\tests\\test_dlq_operator.py",
+                      "Type":  "old_test",
+                      "Size":  3844,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\tests\\test_executor_fallback.py",
+                      "Type":  "old_test",
+                      "Size":  5608,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\tests\\test_force_release.py",
+                      "Type":  "old_test",
+                      "Size":  2738,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\tests\\test_manifest_compat.py",
+                      "Type":  "old_test",
+                      "Size":  5359,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\tests\\test_phase3_exceptions.py",
+                      "Type":  "old_test",
+                      "Size":  2986,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\conftest.py",
+                      "Type":  "old_test",
+                      "Size":  3869,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_evolution_score.py",
+                      "Type":  "old_test",
+                      "Size":  4297,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_hexagram.py",
+                      "Type":  "old_test",
+                      "Size":  4543,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_platform_adapter.py",
+                      "Type":  "old_test",
+                      "Size":  8134,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\test_router.py",
+                      "Type":  "old_test",
+                      "Size":  6068,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\e2e\\test_full_workflow.py",
+                      "Type":  "old_test",
+                      "Size":  4378,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\integration\\test_agent_spawn.py",
+                      "Type":  "old_test",
+                      "Size":  3514,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\integration\\test_fault_injection.py",
+                      "Type":  "old_test",
+                      "Size":  4466,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\tests\\integration\\test_heartbeat.py",
+                      "Type":  "old_test",
+                      "Size":  4684,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "tests\\test_durable_recovery.py",
+                      "Type":  "old_test",
+                      "Size":  7172,
+                      "LastModified":  "2026-03-06"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-13",
+    "total_size_mb":  0.6
+}
