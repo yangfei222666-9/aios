@@ -7,17 +7,17 @@
     "error_distribution": {}
   },
   "7d": {
-    "total": 130,
-    "completed": 130,
+    "total": 0,
+    "completed": 0,
     "failed": 0,
-    "success_rate": 100.0,
+    "success_rate": 0,
     "error_distribution": {}
   },
   "30d": {
-    "total": 210,
-    "completed": 209,
+    "total": 149,
+    "completed": 148,
     "failed": 1,
-    "success_rate": 99.5,
+    "success_rate": 99.3,
     "error_distribution": {
       "other": 1
     }

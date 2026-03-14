@@ -130,6 +130,25 @@ class AgentFallback:
                 strategy["action"] = "mark_pending"
             return strategy
 
+        # ── client_error (4xx 非 429/401/403) ──
+        # 客户端错误无法自动修复，直接失败
+        if error_type == "client_error":
+            return None
+
+        # ── auth_error (401/403) ──
+        # 认证错误：需要人工介入，不重试
+        # 保持独立分类以便未来接入 token 刷新逻辑
+        if error_type == "auth_error":
+            return None
+
+        # ── 全局重试上限 guardrail ──
+        # 通用错误（network/rate_limit/timeout/memory）的统一退出上限。
+        # gateway_error / transient_network_failure 是特例，走 pending 路径，
+        # 已在上面 early return，不受此 guardrail 覆盖。
+        if retry_count >= 3:
+            strategy["action"] = "give_up"
+            return None
+
         # ── network_error (兜底网络问题) ──
         if error_type == "network_error":
             strategy["timeout"] = min(current_timeout * 1.5, 180)
@@ -162,24 +181,6 @@ class AgentFallback:
             if next_thinking:
                 strategy["thinking"] = next_thinking
             strategy["action"] = "reduce_resources"
-
-        # ── client_error (4xx 非 429/401/403) ──
-        # 客户端错误无法自动修复，直接失败
-        elif error_type == "client_error":
-            strategy["action"] = "give_up"
-            return None
-
-        # ── auth_error (401/403) ──
-        # 认证错误：独立保留，不重试，需要人工介入
-        # 保持独立分类以便未来接入 token 刷新逻辑
-        elif error_type == "auth_error":
-            strategy["action"] = "manual_intervention"
-            return None
-
-        # 如果重试次数过多，放弃
-        if retry_count >= 3:
-            strategy["action"] = "give_up"
-            return None
 
         return strategy
 

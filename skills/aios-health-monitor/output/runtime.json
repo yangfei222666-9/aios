@@ -1,16 +1,17 @@
 {
   "total_agents": 30,
   "schedulable_agents": 13,
-  "active_routable": 4,
-  "active_pct": 30.8,
+  "active_routable": 5,
+  "active_pct": 38.5,
   "shadow": 14,
   "disabled": 3,
-  "idle_never_triggered": 9,
+  "idle_never_triggered": 8,
   "buckets": {
     "active_routable": [
       "coder-dispatcher",
       "analyst-dispatcher",
       "monitor-dispatcher",
+      "GitHub_Researcher",
       "Documentation_Writer"
     ],
     "active_non_routable": [],
@@ -39,7 +40,6 @@
       "Bug_Hunter",
       "Error_Analyzer",
       "GitHub_Code_Reader",
-      "GitHub_Researcher",
       "Code_Reviewer",
       "Architecture_Analyst",
       "GitHub_Issue_Tracker",
@@ -48,10 +48,12 @@
     ]
   },
   "queue": {
-    "completed": 3,
-    "failed": 1
+    "completed": 14,
+    "failed": 2,
+    "succeeded": 1,
+    "pending_recovery": 2
   },
-  "queue_total": 4,
+  "queue_total": 19,
   "heartbeat_last": "unknown",
   "heartbeat_status": "unknown"
 }

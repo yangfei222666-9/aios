@@ -1,6 +1,6 @@
 # 太极OS 健康报告
 
-**生成时间：** 2026-03-11 07:39
+**生成时间：** 2026-03-14 22:30
 **健康分数：** 100/100 (GOOD)
 
 ---
@@ -11,19 +11,20 @@
 |------|-----|
 | Agent 总数 | 30 |
 | 可调度 Agent | 13 |
-| 活跃可路由 | 4 (30.8%) |
+| 活跃可路由 | 5 (38.5%) |
 | Shadow | 14 |
 | Disabled | 3 |
-| 从未触发 | 9 |
-| 队列总数 | 4 |
+| 从未触发 | 8 |
+| 队列总数 | 19 |
 | 最近心跳 | unknown |
 
 ### Agent 分桶
 
-**active_routable** (4):
+**active_routable** (5):
 - coder-dispatcher
 - analyst-dispatcher
 - monitor-dispatcher
+- GitHub_Researcher
 - Documentation_Writer
 
 **shadow** (14):
@@ -44,11 +45,10 @@
 - Marketing_Writer
 - Integration_Tester
 
-**idle_never_triggered** (9):
+**idle_never_triggered** (8):
 - Bug_Hunter
 - Error_Analyzer
 - GitHub_Code_Reader
-- GitHub_Researcher
 - Code_Reviewer
 - Architecture_Analyst
 - GitHub_Issue_Tracker
@@ -58,7 +58,7 @@
 ## L2 Incident — 事件记录
 
 **总失败数：** 1
-**总告警数：** 167
+**总告警数：** 289
 
 ### 最近失败
 
@@ -69,8 +69,8 @@
 | 窗口 | 总数 | 成功 | 失败 | 成功率 |
 |------|------|------|------|--------|
 | 24h | 0 | 0 | 0 | 0% |
-| 7d | 130 | 130 | 0 | 100.0% |
-| 30d | 210 | 209 | 1 | 99.5% |
+| 7d | 0 | 0 | 0 | 0% |
+| 30d | 149 | 148 | 1 | 99.3% |
 
 ## L4 Diagnosis — 诊断结论
 

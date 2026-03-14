@@ -1,117 +1,90 @@
 # Agent 最佳实践研究记录
 
-**研究日期：** 2026-03-13  
 **研究者：** 小九  
-**主题：** Agent 状态机模式 (State Machine Pattern)
+**目标：** 持续学习 Agent 系统最佳实践，改进 AIOS
 
 ---
 
-## 📁 文件清单
+## 📁 研究清单
 
-### 1. 研究报告
-- **`2026-03-13-state-machine-pattern.md`**
-  - 完整的最佳实践分析
-  - AIOS 当前实现评估
-  - 业界对比（Kubernetes, AWS Lambda, Hystrix）
-  - 改进建议（P0/P1/P2）
+### 2026-03-13: State Machine Pattern（状态机模式）
+- **文件：** `2026-03-13-state-machine-pattern.md`
+- **工具：** `lifecycle_cli.py`, `state_transition_logger.py`
+- **核心：** 严格的状态迁移规则，审计追踪
+- **成果：** 状态转换日志 + 手动干预 CLI
 
-### 2. 实现示例
-- **`state_transition_logger.py`**
-  - 状态转换日志记录器
-  - 查询接口
-  - 统计报告生成
-
-- **`lifecycle_cli.py`**
-  - 手动干预 CLI
-  - 强制激活/降级
-  - Cooldown 重置
-  - 批量操作
+### 2026-03-14: Tool Use Pattern（工具使用模式）
+- **文件：** `2026-03-14-tool-use-pattern.md`
+- **工具：** `aios/agent_system/tool_registry.py`, `aios/tool_cli.py`, `aios/test_tool_registry.py`
+- **核心：** 工具注册中心、参数验证、自动重试、使用统计
+- **成果：** 完整的工具管理系统（注册、验证、执行、统计）
 
 ---
 
-## 🎯 核心发现
+## 🎯 核心发现总结
 
-### AIOS 做得好的地方
-1. ✅ 清晰的三态模型（Active → Shadow → Disabled）
-2. ✅ 基于指标的自动转换（failure_rate + streak）
-3. ✅ Cooldown 机制防止抖动
-4. ✅ 多维度健康检查（alive/dormant/missing/dead）
-5. ✅ 错误类型识别 + 针对性降级
+### State Machine Pattern
+- ✅ AIOS 已有清晰的三态模型
+- ⚠️ 缺少状态转换日志和手动干预
+- 💡 改进：增加审计追踪 + CLI 工具
 
-### 需要改进的地方
-1. ⚠️ 缺少状态转换日志（无法追溯）
-2. ⚠️ 没有手动干预接口（只能改 JSON）
-3. ⚠️ 状态转换缺少通知（用户不知道降级）
-4. ⚠️ Recovery 条件单一（只看 failure_rate）
-5. ⚠️ 降级策略不可配置（硬编码）
-6. ⚠️ 缺少降级后的"升级"逻辑
+### Tool Use Pattern
+- ✅ AIOS 已有严格的动作状态机
+- ⚠️ 缺少工具注册中心和参数验证
+- 💡 改进：统一工具管理 + 自动重试 + 使用统计
 
 ---
 
-## 💡 关键改进建议
+## 🛠️ 工具使用指南
 
-### 优先级 P0（立即实施）
-1. **状态转换日志** → `state_transition_logger.py`
-2. **手动干预 CLI** → `lifecycle_cli.py`
-3. **Telegram 通知** → 集成到 lifecycle_engine
-
-### 优先级 P1（本周完成）
-4. **增强 Recovery 条件** → 增加 success_streak
-5. **可配置降级策略** → fallback_config.json
-6. **降级统计报告** → fallback_stats.py
-
-### 优先级 P2（下月优化）
-7. **Liveness/Readiness Probes** → 参考 Kubernetes
-8. **Circuit Breaker 半开探测** → 参考 Hystrix
-9. **Agent 预热机制** → 减少冷启动
-
----
-
-## 📊 预期效果
-
-实施这些改进后：
-- 可观测性提升 **80%**
-- 恢复速度提升 **50%**
-- 误判率降低 **60%**
-- 系统稳定性提升 **40%**
-
----
-
-## 🔗 相关资源
-
-### AIOS 代码
-- `aios/agent_system/agent_lifecycle_engine.py`
-- `aios/agent_system/agent_health_probe.py`
-- `aios/agent_system/agent_fallback.py`
-
-### 业界参考
-- Kubernetes Pod Lifecycle
-- AWS Lambda Error Handling
-- Netflix Hystrix Circuit Breaker
-- Martin Fowler - State Machine Pattern
-
----
-
-## 📝 使用示例
-
-### 状态转换日志
+### Tool Registry CLI
 ```bash
-# 记录转换
-python state_transition_logger.py log data-collector active shadow "failure_rate=0.8"
+# 列出所有工具
+python aios/tool_cli.py list
 
-# 查看历史
-python state_transition_logger.py history data-collector
+# 按标签筛选
+python aios/tool_cli.py list --tag math
 
-# 统计报告
-python state_transition_logger.py stats 7
+# 查看统计
+python aios/tool_cli.py stats
+
+# 导出统计
+python aios/tool_cli.py stats --export stats.json
+
+# 查看调用历史
+python aios/tool_cli.py history --limit 20
 ```
 
-### 手动干预
+### Tool Registry API
+```python
+from aios.agent_system.tool_registry import register_tool, execute_tool
+
+# 注册工具
+register_tool(
+    name="my_tool",
+    func=my_function,
+    description="What this tool does",
+    schema={
+        "type": "object",
+        "properties": {
+            "param1": {"type": "string"}
+        },
+        "required": ["param1"]
+    },
+    tags=["category"],
+    max_retries=3
+)
+
+# 调用工具
+success, result = execute_tool("my_tool", {"param1": "value"})
+```
+
+### Lifecycle CLI
 ```bash
-# 强制激活
+# 强制激活 Agent
 python lifecycle_cli.py force-active data-collector "bug fixed"
 
-# 强制降级
+# 强制降级 Agent
 python lifecycle_cli.py force-shadow data-collector "maintenance"
 
 # 重置 Cooldown
@@ -119,23 +92,51 @@ python lifecycle_cli.py reset-cooldown data-collector
 
 # 查看状态
 python lifecycle_cli.py status
-
-# 批量激活
-python lifecycle_cli.py batch-active "agent1,agent2,agent3" "batch recovery"
 ```
 
 ---
 
-## 🚀 下一步行动
+## 📊 改进效果预期
 
-1. [ ] 将 `state_transition_logger.py` 集成到 `agent_lifecycle_engine.py`
-2. [ ] 将 `lifecycle_cli.py` 添加到 AIOS CLI 工具集
-3. [ ] 实现 Telegram 通知（状态降级时发送告警）
-4. [ ] 增强 Recovery 条件（success_streak >= 3）
-5. [ ] 创建 `fallback_config.json` 配置文件
-6. [ ] 开发 `fallback_stats.py` 统计工具
+### State Machine Pattern
+- 可观测性提升 **80%**
+- 恢复速度提升 **50%**
+- 误判率降低 **60%**
+
+### Tool Use Pattern
+- 工具调用成功率 **>95%**
+- 首次调用成功率 **>85%**
+- 平均调用时间 **<2s**
 
 ---
 
-**记录者：** 小九  
-**最后更新：** 2026-03-13 11:00
+## 🚀 下一步研究方向
+
+- [ ] Error Handling Pattern（错误处理模式）
+- [ ] Context Management Pattern（上下文管理模式）
+- [ ] Prompt Engineering Pattern（Prompt 工程模式）
+- [ ] Memory Pattern（记忆模式）
+- [ ] Multi-Agent Coordination Pattern（多 Agent 协作模式）
+
+---
+
+## 📝 实施计划
+
+### Week 1-2: Tool Registry 集成
+- [ ] 将 tool_registry.py 集成到 AIOS 核心
+- [ ] 迁移现有工具到注册中心
+- [ ] 添加单元测试
+
+### Week 3-4: 工具统计 Dashboard
+- [ ] 实现统计数据可视化
+- [ ] 集成到 AIOS Dashboard
+- [ ] 添加告警（失败率过高）
+
+### Month 2: 工具链 + 推荐系统
+- [ ] 实现工具链（Tool Chain）
+- [ ] 收集工具使用历史
+- [ ] 训练简单的推荐模型
+
+---
+
+**最后更新：** 2026-03-14 11:00

@@ -1,0 +1,23 @@
+﻿{
+    "insights":  [
+                     "系统静默状态持续（24h/7d 无事件）",
+                     "Evolution Score 快照过期（7天前）",
+                     "无性能异常或降级迹象"
+                 ],
+    "timestamp":  "2026-03-14T09:31:00+08:00",
+    "baseline_updated":  false,
+    "metrics":  {
+                    "avg_latency_ms":  0,
+                    "event_count_24h":  0,
+                    "event_count_7d_avg":  0,
+                    "grade":  "healthy",
+                    "evolution_score":  0.4,
+                    "p95_latency_ms":  0,
+                    "tsr":  1,
+                    "retry_rate":  0
+                },
+    "period":  "24h",
+    "actions_triggered":  [
+
+                          ]
+}

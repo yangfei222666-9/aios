@@ -1,0 +1,196 @@
+﻿{
+    "workspace":  "C:\\Users\\A\\.openclaw\\workspace",
+    "error_count":  1,
+    "duration_sec":  1.18,
+    "archive_date":  "2026-03-14",
+    "files_count":  31,
+    "total_size_bytes":  216672,
+    "timestamp":  "2026-03-14 23:00:03",
+    "files":  [
+                  {
+                      "Path":  "aios\\agent_system\\lifecycle_check.log",
+                      "Type":  "temp",
+                      "Size":  23856
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\data\\loop.log",
+                      "Type":  "temp",
+                      "Size":  250
+                  },
+                  {
+                      "Path":  "aios\\data\\heartbeat.log",
+                      "Type":  "temp",
+                      "Size":  28312
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\chaos_test.py",
+                      "Type":  "old_test",
+                      "Size":  13852,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_audit_system.py",
+                      "Type":  "old_test",
+                      "Size":  3974,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_exec.py",
+                      "Type":  "old_test",
+                      "Size":  200,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_heartbeat_hexagram_full.py",
+                      "Type":  "old_test",
+                      "Size":  6678,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_idempotent_guard.py",
+                      "Type":  "old_test",
+                      "Size":  7008,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_memory_v2.py",
+                      "Type":  "old_test",
+                      "Size":  1606,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_recommendation_quality.py",
+                      "Type":  "old_test",
+                      "Size":  14724,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_skill_failure_alert.py",
+                      "Type":  "old_test",
+                      "Size":  2603,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_skill_memory.py",
+                      "Type":  "old_test",
+                      "Size":  5463,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_skill_recommender.py",
+                      "Type":  "old_test",
+                      "Size":  8312,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\test_skill_version_comparison.py",
+                      "Type":  "old_test",
+                      "Size":  2705,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\agent_system\\memory_v2\\test_10_samples.py",
+                      "Type":  "old_test",
+                      "Size":  12685,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\dist_full\\AIOS-Full-20260307\\_internal\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "aios\\dist_full\\AIOS-Full-20260307\\_internal\\core\\test_enhanced.py",
+                      "Type":  "old_test",
+                      "Size":  1853,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\chaos_test.py",
+                      "Type":  "old_test",
+                      "Size":  13852,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_audit_system.py",
+                      "Type":  "old_test",
+                      "Size":  3974,
+                      "LastModified":  "2026-03-06"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_exec.py",
+                      "Type":  "old_test",
+                      "Size":  200,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_heartbeat_hexagram_full.py",
+                      "Type":  "old_test",
+                      "Size":  6678,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_idempotent_guard.py",
+                      "Type":  "old_test",
+                      "Size":  7008,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_memory_v2.py",
+                      "Type":  "old_test",
+                      "Size":  1606,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_recommendation_quality.py",
+                      "Type":  "old_test",
+                      "Size":  14724,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_skill_failure_alert.py",
+                      "Type":  "old_test",
+                      "Size":  2603,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_skill_memory.py",
+                      "Type":  "old_test",
+                      "Size":  5463,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_skill_recommender.py",
+                      "Type":  "old_test",
+                      "Size":  8312,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\test_skill_version_comparison.py",
+                      "Type":  "old_test",
+                      "Size":  2705,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\agent_system\\memory_v2\\test_10_samples.py",
+                      "Type":  "old_test",
+                      "Size":  12685,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_full\\AIOS-Full-20260307\\_internal\\core\\test1.py",
+                      "Type":  "old_test",
+                      "Size":  464,
+                      "LastModified":  "2026-03-07"
+                  },
+                  {
+                      "Path":  "taijios_share_20260311_172634\\dist_full\\AIOS-Full-20260307\\_internal\\core\\test_enhanced.py",
+                      "Type":  "old_test",
+                      "Size":  1853,
+                      "LastModified":  "2026-03-07"
+                  }
+              ],
+    "archive_dir":  "C:\\Users\\A\\.openclaw\\workspace\\archive\\2026-03-14",
+    "total_size_mb":  0.21
+}

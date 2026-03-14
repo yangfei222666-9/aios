@@ -1,18 +1,18 @@
 {
-  "timestamp": 1773381738.1875057,
+  "timestamp": 1773468014.9266796,
   "event_loading": {
     "engine_load_events": {
       "count": 299,
-      "time_ms": 3.01
+      "time_ms": 5.04
     },
     "event_store_load": {
-      "count": 30,
-      "time_ms": 5.68
+      "count": 0,
+      "time_ms": 0.5
     }
   },
   "memory": {
-    "rss_mb": 20.92,
-    "vms_mb": 13.2
+    "rss_mb": 21.44,
+    "vms_mb": 13.87
   },
   "large_files": {
     "aios.db": 4.73,

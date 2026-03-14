@@ -76,6 +76,8 @@ CIRCUIT_BREAKER_STATE = DATA_DIR / "circuit_breaker_state.json"
 
 # Lessons & Feedback
 LESSONS = DATA_DIR / "lessons.json"
+LESSONS_FILE = DATA_DIR / "lessons.json"  # Alias for compatibility
+RULES_FILE = DATA_DIR / "learning_rules.json"  # Learning rules extracted from patterns
 EXPERIENCE_LIBRARY = DATA_DIR / "experience_library.jsonl"
 EXPERIENCE_DB_V4 = DATA_DIR / "experience_db_v4.jsonl"
 FEEDBACK_LOG = DATA_DIR / "feedback_log.jsonl"
