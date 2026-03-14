@@ -49,7 +49,8 @@ class ExecutionLogger:
             log_file: 日志文件路径，默认为 task_executions_v2.jsonl
         """
         if log_file is None:
-            log_file = Path(__file__).parent / "task_executions_v2.jsonl"
+            from paths import TASK_EXECUTIONS
+            log_file = TASK_EXECUTIONS
         
         self.log_file = log_file
         self.log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -109,6 +110,11 @@ class ExecutionLogger:
         started_at = task_info["started_at"]
         duration_ms = int((finished_at - started_at) * 1000)
         
+        # 统一时间口径：全部使用 ISO 8601 带时区
+        from datetime import timezone as tz
+        started_at_iso = datetime.fromtimestamp(started_at, tz=tz.utc).isoformat()
+        updated_at_iso = datetime.fromtimestamp(finished_at, tz=tz.utc).isoformat()
+        
         # 构建完整记录
         record = {
             "task_id": task_id,
@@ -116,8 +122,8 @@ class ExecutionLogger:
             "task_type": task_info["task_type"],
             "status": "completed",
             "description": task_info["description"],
-            "started_at": started_at,
-            "updated_at": finished_at,
+            "started_at": started_at_iso,
+            "updated_at": updated_at_iso,
             "duration_ms": duration_ms,
             "success": True,
             "error_type": None,
@@ -138,7 +144,12 @@ class ExecutionLogger:
     def fail_task(
         self,
         task_id: str,
-        error_type: Literal["timeout", "network_error", "gateway_error", "transient_network_failure", "client_error", "model_error", "validation_error", "resource_exhausted", "unknown"],
+        error_type: Literal[
+            "timeout", "network_error", "gateway_error",
+            "transient_network_failure", "client_error", "auth_error",
+            "rate_limit", "memory_error", "model_error",
+            "validation_error", "resource_exhausted", "unknown_error",
+        ],
         error_message: str,
         output_full: Optional[str] = None,
         retry_count: int = 0,
@@ -166,6 +177,11 @@ class ExecutionLogger:
         started_at = task_info["started_at"]
         duration_ms = int((finished_at - started_at) * 1000)
         
+        # 统一时间口径：全部使用 ISO 8601 带时区
+        from datetime import timezone as tz
+        started_at_iso = datetime.fromtimestamp(started_at, tz=tz.utc).isoformat()
+        updated_at_iso = datetime.fromtimestamp(finished_at, tz=tz.utc).isoformat()
+        
         # 构建完整记录
         record = {
             "task_id": task_id,
@@ -173,8 +189,8 @@ class ExecutionLogger:
             "task_type": task_info["task_type"],
             "status": status,
             "description": task_info["description"],
-            "started_at": started_at,
-            "updated_at": finished_at,
+            "started_at": started_at_iso,
+            "updated_at": updated_at_iso,
             "duration_ms": duration_ms,
             "success": False,
             "error_type": error_type,
@@ -190,12 +206,16 @@ class ExecutionLogger:
             "metadata": task_info["metadata"],
         }
 
-        # pending / blocked 专属字段
-        if status in ("pending", "blocked"):
-            record["pending_since"] = pending_since
-            record["pending_retry_count"] = pending_retry_count
+        # pending 专属字段：有值才写
+        if status == "pending":
+            if pending_since:
+                record["pending_since"] = pending_since
+            if pending_retry_count > 0:
+                record["pending_retry_count"] = pending_retry_count
+
+        # blocked 专属字段
         if status == "blocked":
-            record["blocked_at"] = blocked_at or datetime.now().isoformat()
+            record["blocked_at"] = blocked_at or datetime.now(tz=tz.utc).isoformat()
         
         # 写入文件
         self._write_record(record)

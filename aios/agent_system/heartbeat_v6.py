@@ -42,7 +42,7 @@ def process_task_queue(max_tasks=5):
     except Exception as e:
         print(f"  [QUEUE:ERROR] {e}")
         return {"processed": 0, "success": 0, "failed": 0}
-from paths import HEARTBEAT_STATE, TASK_QUEUE as _TASK_QUEUE_PATH, TASK_EXECUTIONS, ALERTS
+from paths import HEARTBEAT_STATE, TASK_QUEUE, TASK_EXECUTIONS, ALERTS
 
 
 def process_pending_tasks(max_scan=5):
@@ -56,12 +56,15 @@ def process_pending_tasks(max_scan=5):
       由调度器在下一轮 pick up 并真正重试
     
     超阈值定义：pending_retry_count >= 3 或 pending_since > 24h
+    账本语义：append-only，同 task_id 以最后一条记录为准。
 
-    返回 {"enqueued": int, "blocked": int, "errors": int}
+    返回 {"enqueued": int, "blocked": int}
     """
+    from datetime import timezone as tz
+
     ledger = TASK_EXECUTIONS
     if not ledger.exists():
-        return {"enqueued": 0, "blocked": 0, "errors": 0}
+        return {"enqueued": 0, "blocked": 0}
 
     # ── 读取所有记录 ──
     all_records = []
@@ -74,17 +77,25 @@ def process_pending_tasks(max_scan=5):
                 except json.JSONDecodeError:
                     continue
 
-    # ── 找出最新的 pending 记录（按 task_id 去重，取最后一条）──
-    pending_by_task = {}
+    # ── 按 task_id 取最新记录（最后一条覆盖前面的）──
+    latest_by_task = {}
     for rec in all_records:
-        if rec.get("status") == "pending":
-            pending_by_task[rec["task_id"]] = rec
+        tid = rec.get("task_id")
+        if tid:
+            latest_by_task[tid] = rec
+
+    # ── 只处理最终状态仍为 pending 的任务 ──
+    pending_tasks = {
+        tid: rec for tid, rec in latest_by_task.items()
+        if rec.get("status") == "pending"
+    }
 
     enqueued = 0
     blocked = 0
-    errors = 0
 
-    for task_id, rec in list(pending_by_task.items())[:max_scan]:
+    now_utc = datetime.now(tz=tz.utc)
+
+    for task_id, rec in list(pending_tasks.items())[:max_scan]:
         retry_count = rec.get("pending_retry_count", 0)
         pending_since_str = rec.get("pending_since")
 
@@ -95,25 +106,27 @@ def process_pending_tasks(max_scan=5):
         elif pending_since_str:
             try:
                 pending_since_dt = datetime.fromisoformat(pending_since_str)
-                age_hours = (datetime.now() - pending_since_dt).total_seconds() / 3600
+                # 如果 pending_since 是 naive，当作 UTC 处理
+                if pending_since_dt.tzinfo is None:
+                    pending_since_dt = pending_since_dt.replace(tzinfo=tz.utc)
+                age_hours = (now_utc - pending_since_dt).total_seconds() / 3600
                 if age_hours > 24:
                     should_block = True
             except (ValueError, TypeError):
-                # 时间解析失败不能让 heartbeat 崩掉，跳过时间判断
                 pass
 
         if should_block:
             # ── 写 blocked 记录到主账本 ──
             blocked_record = dict(rec)
             blocked_record["status"] = "blocked"
-            blocked_record["blocked_at"] = datetime.now().isoformat()
-            blocked_record["updated_at"] = datetime.now().timestamp()
+            blocked_record["blocked_at"] = now_utc.isoformat()
+            blocked_record["updated_at"] = now_utc.isoformat()
             with open(ledger, "a", encoding="utf-8") as f:
                 f.write(json.dumps(blocked_record, ensure_ascii=False) + "\n")
 
-            # ── 写 alert 到 alerts.jsonl（当前系统的统一告警落点）──
+            # ── 写 alert ──
             alert = {
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": now_utc.isoformat(),
                 "level": "error",
                 "title": f"Task blocked: {task_id}",
                 "body": (
@@ -131,8 +144,7 @@ def process_pending_tasks(max_scan=5):
             blocked += 1
             continue
 
-        # ── 未超阈值：写恢复信号到 task_queue，由调度器真正重试 ──
-        from paths import TASK_QUEUE
+        # ── 未超阈值：写恢复信号到 task_queue ──
         recovery_entry = {
             "task_id": task_id,
             "agent_id": rec.get("agent_id", "unknown"),
@@ -142,21 +154,21 @@ def process_pending_tasks(max_scan=5):
             "source": "heartbeat_pending_scan",
             "pending_retry_count": retry_count + 1,
             "pending_since": pending_since_str,
-            "enqueued_at": datetime.now().isoformat(),
+            "enqueued_at": now_utc.isoformat(),
         }
         with open(TASK_QUEUE, "a", encoding="utf-8") as f:
             f.write(json.dumps(recovery_entry, ensure_ascii=False) + "\n")
 
-        # ── 同时更新主账本的 pending_retry_count ──
+        # ── 更新主账本的 pending_retry_count ──
         updated_record = dict(rec)
         updated_record["pending_retry_count"] = retry_count + 1
-        updated_record["updated_at"] = datetime.now().timestamp()
+        updated_record["updated_at"] = now_utc.isoformat()
         with open(ledger, "a", encoding="utf-8") as f:
             f.write(json.dumps(updated_record, ensure_ascii=False) + "\n")
 
         enqueued += 1
 
-    return {"enqueued": enqueued, "blocked": blocked, "errors": errors}
+    return {"enqueued": enqueued, "blocked": blocked}
 
 def run_error_pattern_learner():
     """运行错误模式学习器（每天一次）"""
@@ -258,7 +270,7 @@ def generate_visualization():
 
 def calculate_health_score():
     """计算系统健康度（基于已完成任务的成功率）"""
-    queue_file = _TASK_QUEUE_PATH
+    queue_file = TASK_QUEUE
     if not queue_file.exists():
         return 100.0  # 文件不存在 = 没任务 = 健康
     
@@ -342,7 +354,7 @@ def main():
             print(f"   ⚠️  {pending_result['blocked']} task(s) moved to BLOCKED — check alerts.jsonl")
     except Exception as e:
         print(f"   [PENDING:ERROR] {e}")
-        pending_result = {"enqueued": 0, "blocked": 0, "errors": 1}
+        pending_result = {"enqueued": 0, "blocked": 0}
     print()
     
     print("──────────────────────────────────────────────────────────────")
